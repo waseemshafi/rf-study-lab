@@ -1,0 +1,4 @@
+# Normalize text files to LF; leave binary assets untouched.
+* text=auto eol=lf
+*.png binary
+*.ico binary

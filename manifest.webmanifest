@@ -1,0 +1,17 @@
+{
+  "name": "RF & Comms Study Lab",
+  "short_name": "RF Study Lab",
+  "description": "Interactive RF, DSP & communications study lab — flashcards, MCQs, derivations, interactive figures, and MATLAB/Python code.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e1116",
+  "theme_color": "#0e1116",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

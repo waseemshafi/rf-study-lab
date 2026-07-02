@@ -1,0 +1,16 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Local tooling / preview config (not needed for the hosted app)
+.claude/
+
+# Node (if ever added)
+node_modules/

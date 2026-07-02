@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>RF &amp; Comms Study Lab</title>
+
+<!-- PWA / installable app -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e1116">
+<meta name="description" content="Interactive RF, DSP &amp; communications study lab — flashcards, MCQs, derivations, interactive figures, and MATLAB/Python code.">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RF Study Lab">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- Math rendering (bundled locally so it works fully offline) -->
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { enableMenu: false },
+    startup: { typeset: false }
+  };
+</script>
+<script src="vendor/mathjax/tex-svg.js" id="MathJax-script" async></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="logo">📡</div>
+      <div>
+        <h1>RF &amp; Comms Study Lab</h1>
+        <span class="tagline">Interactive tutorial</span>
+      </div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="search" placeholder="Search topics…" autocomplete="off">
+    </div>
+    <nav id="nav"></nav>
+    <div class="sidebar-footer">
+      <div class="progress-mini">
+        <div class="progress-mini-label">Overall mastery</div>
+        <div class="bar"><div class="bar-fill" id="overall-bar"></div></div>
+        <div class="progress-mini-val" id="overall-val">0%</div>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <header id="topbar">
+      <button id="menu-toggle" title="Toggle menu">☰</button>
+      <div id="breadcrumb"></div>
+      <div class="topbar-actions">
+        <button class="btn ghost" data-view="dashboard">📊 Dashboard</button>
+        <button class="btn ghost" data-view="topiclist">📚 Topic List</button>
+        <button class="btn ghost" id="reset-btn" title="Reset progress">↺</button>
+      </div>
+    </header>
+    <div id="content"></div>
+  </main>
+  <div id="sidebar-backdrop"></div>
+</div>
+
+<script src="content.js"></script>
+<!-- Topic content, one file per category -->
+<script src="topics/fundamentals.js"></script>
+<script src="topics/modulation.js"></script>
+<script src="topics/synchronization.js"></script>
+<script src="topics/spread-spectrum.js"></script>
+<script src="topics/sdr.js"></script>
+<script src="topics/rf-link.js"></script>
+<script src="topics/antennas.js"></script>
+<!-- Interactive computed figures -->
+<script src="figures.js"></script>
+<!-- MATLAB + Python code per topic -->
+<script src="code/fundamentals.js"></script>
+<script src="code/modulation.js"></script>
+<script src="code/synchronization.js"></script>
+<script src="code/spread-spectrum.js"></script>
+<script src="code/sdr.js"></script>
+<script src="code/rf-link.js"></script>
+<script src="code/antennas.js"></script>
+<script src="app.js"></script>
+<script>
+  // Register the service worker for offline use (relative path → works under any GitHub Pages subpath).
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function (e) { console.warn('SW registration failed', e); });
+    });
+  }
+</script>
+</body>
+</html>
