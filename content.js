@@ -27,6 +27,7 @@
 const CONTENT = {
   categories: [
     'Fundamentals',
+    'Signals & Systems',
     'Modulation & Detection',
     'Synchronization',
     'Spread Spectrum & Coding',
@@ -37,11 +38,12 @@ const CONTENT = {
   // Canonical display order (nav sorts by this within each category).
   topicOrder: [
     'comm-basics', 'noise', 'psd', 'noise-floor', 'noise-figure', 'phase-noise',
-    'bpsk', 'dbpsk', 'matched-filter', 'evm',
+    'fourier-transform', 'laplace-transform', 'z-transform', 'convolution', 'correlation', 'nyquist-sampling', 'aliasing',
+    'bpsk', 'dbpsk', 'pulse-shaping', 'eye-diagram', 'matched-filter', 'ber', 'eb-no', 'evm',
     'pll', 'fll', 'costas-loop',
-    'dsss', 'frequency-hopping', 'pn-codes', 'gold-code', 'fec', 'viterbi',
+    'dsss', 'frequency-hopping', 'processing-gain', 'jamming-margin', 'pn-codes', 'gold-code', 'fec', 'viterbi',
     'sdr', 'adc', 'dac', 'ad9361', 'rfsoc',
-    'rssi', 'path-loss', 'link-budget',
+    'rssi', 'path-loss', 'link-budget', 'sensitivity',
     'antenna', 'antenna-gain', 'antenna-beamwidth', 'antenna-types', 'maxwell'
   ],
   topics: []

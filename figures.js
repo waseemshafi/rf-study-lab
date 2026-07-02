@@ -918,9 +918,254 @@ const FIG = (function () {
     chooser(card.controls, Object.keys(types).map(k => ({ v: k, l: types[k].l })), cur, v => { cur = v; draw(); });
   };
 
+  // Fourier synthesis: build a square wave from odd harmonics
+  T.fourierTransform = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    function draw(N) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 1], yr: [-1.5, 1.5], xlabel: 'time', ylabel: 'amplitude' });
+      const sq = []; for (let t = 0; t <= 1; t += 0.002) sq.push([t, t < 0.5 ? 1 : -1]); line(ctx, ax, sq, C.grid, 1.4);
+      const ps = []; for (let t = 0; t <= 1; t += 0.002) { let s = 0; for (let k = 1; k <= N; k++) { const m = 2 * k - 1; s += Math.sin(TAU * m * t) / m; } ps.push([t, s * 4 / Math.PI]); }
+      line(ctx, ax, ps, C.blue, 2.3);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(N + ' sine harmonic' + (N > 1 ? 's' : '') + ' added → a square wave emerges', ax.x + 8, ax.y + 16);
+    }
+    draw(3);
+    slider(card.controls, { label: 'harmonics', min: 1, max: 20, step: 1, value: 3 }, v => draw(Math.round(v)));
+  };
+
+  // Laplace: s-plane poles + the time response they produce
+  T.laplacePoleZero = function (host, spec) {
+    const card = makeCard(host, spec, 540, 300);
+    let re = -0.6, im = 1.5;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const L = { x: 40, y: 18, w: 200, h: h - 58 };
+      ctx.fillStyle = C.box; ctx.fillRect(L.x, L.y, L.w, L.h); ctx.strokeStyle = C.dim; ctx.strokeRect(L.x, L.y, L.w, L.h);
+      const scx = L.x + L.w * 0.62, scy = L.y + L.h / 2, sSc = 42;
+      ctx.fillStyle = 'rgba(99,230,190,0.08)'; ctx.fillRect(L.x, L.y, scx - L.x, L.h);
+      ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(L.x, scy); ctx.lineTo(L.x + L.w, scy); ctx.moveTo(scx, L.y); ctx.lineTo(scx, L.y + L.h); ctx.stroke();
+      [im, -im].forEach(q => { const px = scx + re * sSc, py = scy - q * sSc; ctx.strokeStyle = C.orange; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px - 5, py - 5); ctx.lineTo(px + 5, py + 5); ctx.moveTo(px - 5, py + 5); ctx.lineTo(px + 5, py - 5); ctx.stroke(); });
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('σ', L.x + L.w - 12, scy - 5); ctx.fillText('jω', scx + 4, L.y + 10);
+      ctx.fillStyle = C.teal; ctx.fillText('stable half', L.x + 5, L.y + L.h - 6);
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.fillText('s-plane', L.x + 5, L.y + 12);
+      const R = { x: 300, y: 18, w: 210, h: h - 58 };
+      const ax = drawAxes(ctx, R, { xr: [0, 8], yr: [-1.6, 1.6], xlabel: 't', ylabel: '' });
+      const pts = []; for (let t = 0; t <= 8; t += 0.04) pts.push([t, Math.exp(re * t) * Math.cos(im * t)]); line(ctx, ax, pts, re < 0 ? C.blue : C.red, 2.2);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(re < 0 ? 'left-half poles → decays (stable)' : (re > 0 ? 'right-half poles → grows (UNSTABLE)' : 'on jω axis → pure oscillation'), 40, h - 6);
+    }
+    draw();
+    slider(card.controls, { label: 'pole real σ', min: -1.5, max: 1, step: 0.05, value: -0.6, fmt: v => v.toFixed(2) }, v => { re = v; draw(); });
+    slider(card.controls, { label: 'pole freq ω', min: 0, max: 3, step: 0.1, value: 1.5, fmt: v => v.toFixed(1) }, v => { im = v; draw(); });
+  };
+
+  // Z-transform: z-plane pole vs unit circle + discrete impulse response
+  T.zPlane = function (host, spec) {
+    const card = makeCard(host, spec, 540, 300);
+    let r = 0.8, th = 0.6;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const L = { x: 40, y: 18, w: 200, h: h - 58 }; const cx = L.x + L.w / 2, cy = L.y + L.h / 2, U = Math.min(L.w, L.h) / 2 - 14;
+      ctx.fillStyle = C.box; ctx.fillRect(L.x, L.y, L.w, L.h); ctx.strokeStyle = C.dim; ctx.strokeRect(L.x, L.y, L.w, L.h);
+      ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(L.x, cy); ctx.lineTo(L.x + L.w, cy); ctx.moveTo(cx, L.y); ctx.lineTo(cx, L.y + L.h); ctx.stroke();
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, U, 0, TAU); ctx.stroke();
+      [th, -th].forEach(a => { const px = cx + r * U * Math.cos(a), py = cy - r * U * Math.sin(a); ctx.strokeStyle = C.orange; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px - 5, py - 5); ctx.lineTo(px + 5, py + 5); ctx.moveTo(px - 5, py + 5); ctx.lineTo(px + 5, py - 5); ctx.stroke(); });
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('z-plane', L.x + 5, L.y + 12);
+      ctx.fillStyle = C.teal; ctx.fillText('|z|=1', cx + U - 26, cy - 5);
+      const R = { x: 300, y: 18, w: 210, h: h - 58 };
+      const ax = drawAxes(ctx, R, { xr: [0, 20], yr: [-1.6, 1.6], xlabel: 'n (samples)', ylabel: '' });
+      for (let n = 0; n <= 20; n++) { const y = Math.pow(r, n) * Math.cos(n * th); const X = ax.fx(n); ctx.strokeStyle = r < 1 ? C.blue : C.red; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X, ax.fy(0)); ctx.lineTo(X, ax.fy(y)); ctx.stroke(); ctx.fillStyle = r < 1 ? C.blue : C.red; ctx.beginPath(); ctx.arc(X, ax.fy(y), 2.5, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(r < 1 ? 'pole inside circle → decays (stable)' : 'pole outside → grows (UNSTABLE)', 40, h - 6);
+    }
+    draw();
+    slider(card.controls, { label: 'pole radius r', min: 0.2, max: 1.25, step: 0.05, value: 0.8, fmt: v => v.toFixed(2) }, v => { r = v; draw(); });
+    slider(card.controls, { label: 'pole angle θ', min: 0, max: 3, step: 0.1, value: 0.6, fmt: v => v.toFixed(1) }, v => { th = v; draw(); });
+  };
+
+  // Convolution: flip-and-slide
+  T.convolutionDemo = function (host, spec) {
+    const card = makeCard(host, spec, 520, 340);
+    const x = t => (t >= 0 && t < 2) ? 1 : 0, hh = t => (t >= 0 && t < 2) ? 1 : 0;
+    function conv(tt) { let s = 0; for (let tau = -1; tau <= 5; tau += 0.02) s += x(tau) * hh(tt - tau) * 0.02; return s; }
+    function draw(tt) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 74) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [-1, 5], yr: [-0.2, 1.4], xlabel: '', ylabel: 'x, h' });
+      const xp = []; for (let t = -1; t <= 5; t += 0.02) xp.push([t, x(t)]); line(ctx, a1, xp, C.teal, 2);
+      const hp = []; for (let t = -1; t <= 5; t += 0.02) hp.push([t, hh(tt - t)]); line(ctx, a1, hp, C.orange, 2);
+      ctx.save(); ctx.beginPath(); ctx.rect(a1.x, a1.y, a1.w, a1.h); ctx.clip(); ctx.fillStyle = 'rgba(255,169,77,0.25)';
+      for (let t = -1; t <= 5; t += 0.02) if (x(t) > 0 && hh(tt - t) > 0) ctx.fillRect(a1.fx(t), a1.fy(1), a1.fx(t + 0.02) - a1.fx(t) + 1, a1.fy(0) - a1.fy(1)); ctx.restore();
+      legend(ctx, b1, [{ label: 'x(τ)', color: C.teal }, { label: 'h(t−τ)', color: C.orange }]);
+      const b2 = { x: 52, y: 20 + b1.h + 34, w: w - 72, h: (h - 74) / 2 };
+      const a2 = drawAxes(ctx, b2, { xr: [-1, 5], yr: [-0.2, 2.4], xlabel: 't', ylabel: 'y = x∗h' });
+      const yp = []; for (let t = -1; t <= tt; t += 0.05) yp.push([t, conv(t)]); line(ctx, a2, yp, C.blue, 2.5);
+      const yc = conv(tt); ctx.fillStyle = C.blue; ctx.beginPath(); ctx.arc(a2.fx(tt), a2.fy(yc), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('flip h, slide to t, multiply, sum the shaded overlap → y(t)', b1.x + 4, b1.y + 12);
+    }
+    draw(2);
+    slider(card.controls, { label: 'slide t', min: -1, max: 4, step: 0.1, value: 2, fmt: v => v.toFixed(1) }, v => draw(v));
+  };
+
+  // Correlation: slide a template to find a hidden pattern
+  T.correlationDemo = function (host, spec) {
+    const card = makeCard(host, spec, 520, 340);
+    const Ln = 40, delay = 15, patt = []; for (let i = 0; i < 8; i++) patt.push(Math.sin(i * 1.3));
+    const sig = []; for (let i = 0; i < Ln; i++) sig.push(((i - delay) >= 0 && (i - delay) < 8 ? patt[i - delay] : 0) + 0.35 * gauss());
+    function corr(lag) { let s = 0; for (let i = 0; i < 8; i++) { const j = i + lag; if (j >= 0 && j < Ln) s += patt[i] * sig[j]; } return s; }
+    function draw(lag) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 74) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [0, Ln], yr: [-2.5, 2.5], xlabel: '', ylabel: 'signal' });
+      line(ctx, a1, sig.map((v, i) => [i, v]), C.dim, 1.5);
+      const tp = []; for (let i = 0; i < 8; i++) tp.push([i + lag, patt[i]]); line(ctx, a1, tp, C.orange, 2.5);
+      const b2 = { x: 52, y: 20 + b1.h + 34, w: w - 72, h: (h - 74) / 2 };
+      const cc = []; let peak = -1e9, pl = 0; for (let l = 0; l < Ln - 4; l++) { const c = corr(l); cc.push([l, c]); if (c > peak) { peak = c; pl = l; } }
+      const a2 = drawAxes(ctx, b2, { xr: [0, Ln], yr: [-4, 6], xlabel: 'lag', ylabel: 'correlation' });
+      line(ctx, a2, cc, C.blue, 2);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(a2.fx(lag), a2.y); ctx.lineTo(a2.fx(lag), a2.y + a2.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('slide the orange template; correlation peaks at the hidden delay (lag ' + pl + ')', b1.x + 4, b1.y + 12);
+    }
+    draw(delay);
+    slider(card.controls, { label: 'lag', min: 0, max: Ln - 5, step: 1, value: delay }, v => draw(Math.round(v)));
+  };
+
+  // Nyquist sampling: is fs fast enough?
+  T.samplingDemo = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300); const f = 3;
+    function draw(fs) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 1], yr: [-1.4, 1.4], xlabel: 'time (s)', ylabel: 'amplitude' });
+      const orig = []; for (let t = 0; t <= 1; t += 0.002) orig.push([t, Math.cos(TAU * f * t)]); line(ctx, ax, orig, C.grid, 1.5);
+      const Ns = Math.round(fs);
+      for (let k = 0; k <= Ns; k++) { const t = k / Ns, y = Math.cos(TAU * f * t); ctx.strokeStyle = C.orange; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(ax.fx(t), ax.fy(0)); ctx.lineTo(ax.fx(t), ax.fy(y)); ctx.stroke(); ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(t), ax.fy(y), 3, 0, TAU); ctx.fill(); }
+      const ok = fs >= 2 * f;
+      ctx.fillStyle = ok ? C.teal : C.red; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('signal ' + f + ' Hz, sampling ' + Ns + ' Hz → ' + (ok ? 'OK: fs ≥ 2f, fully recoverable' : 'TOO SLOW: fs < 2f → aliasing!'), ax.x + 8, ax.y + 16);
+    }
+    draw(8);
+    slider(card.controls, { label: 'sampling rate', min: 2, max: 20, step: 1, value: 8, fmt: v => v + ' Hz' }, v => draw(v));
+  };
+
+  // Aliasing: a fast tone masquerading as a slow one
+  T.aliasingDemo = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300); const fs = 10;
+    function draw(f) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 1], yr: [-1.4, 1.4], xlabel: 'time (s)', ylabel: 'amplitude' });
+      const orig = []; for (let t = 0; t <= 1; t += 0.002) orig.push([t, Math.cos(TAU * f * t)]); line(ctx, ax, orig, C.grid, 1.2);
+      const k = Math.round(f / fs), fa = Math.abs(f - k * fs);
+      const al = []; for (let t = 0; t <= 1; t += 0.002) al.push([t, Math.cos(TAU * fa * t)]); line(ctx, ax, al, C.blue, 2.3);
+      for (let n = 0; n <= fs; n++) { const t = n / fs, y = Math.cos(TAU * f * t); ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(t), ax.fy(y), 3.5, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('true ' + f + ' Hz sampled at ' + fs + ' Hz → looks like ' + fa.toFixed(1) + ' Hz (the alias, blue)', ax.x + 8, ax.y + 16);
+    }
+    draw(13);
+    slider(card.controls, { label: 'true frequency', min: 1, max: 29, step: 1, value: 13, fmt: v => v + ' Hz' }, v => draw(v));
+  };
+
+  // Pulse shaping: raised-cosine pulse and its ISI-free zero crossings
+  T.raisedCosine = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function rc(t, b) { if (Math.abs(t) < 1e-6) return 1; const d = 1 - Math.pow(2 * b * t, 2); const s = Math.sin(Math.PI * t) / (Math.PI * t) * Math.cos(Math.PI * b * t); return Math.abs(d) < 1e-4 ? 0.5 : s / d; }
+    function draw(b) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [-4, 4], yr: [-0.35, 1.15], xlabel: 'time (in symbols)', ylabel: 'amplitude' });
+      const pts = []; for (let t = -4; t <= 4; t += 0.02) pts.push([t, rc(t, b)]); line(ctx, ax, pts, C.blue, 2.5);
+      for (let k = -4; k <= 4; k++) { ctx.fillStyle = k === 0 ? C.orange : C.teal; ctx.beginPath(); ctx.arc(ax.fx(k), ax.fy(rc(k, b)), 3, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('β = ' + b.toFixed(2) + ' → zero at every neighbouring symbol (no ISI); bandwidth ≈ ' + ((1 + b) / 2).toFixed(2) + '/T', ax.x + 8, ax.y + 16);
+    }
+    draw(0.35);
+    slider(card.controls, { label: 'roll-off β', min: 0, max: 1, step: 0.05, value: 0.35, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
+  // Eye diagram: overlaid symbol transitions
+  T.eyeDiagram = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const Nsym = 60, syms = []; for (let i = 0; i < Nsym; i++) syms.push(Math.random() < 0.5 ? -1 : 1);
+    function rc(t, b) { if (Math.abs(t) < 1e-6) return 1; const d = 1 - Math.pow(2 * b * t, 2); const s = Math.sin(Math.PI * t) / (Math.PI * t) * Math.cos(Math.PI * b * t); return Math.abs(d) < 1e-4 ? 0.5 : s / d; }
+    function draw(noise, b) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [-1, 1], yr: [-1.9, 1.9], xlabel: 'time within symbol', ylabel: 'amplitude' });
+      ctx.save(); ctx.beginPath(); ctx.rect(ax.x, ax.y, ax.w, ax.h); ctx.clip();
+      ctx.strokeStyle = 'rgba(77,171,247,0.45)'; ctx.lineWidth = 1;
+      for (let c = 3; c < Nsym - 3; c++) {
+        ctx.beginPath();
+        for (let s = 0; s <= 40; s++) { const tt = s / 20 - 1; let v = 0; for (let k = -3; k <= 3; k++) v += syms[c + k] * rc(tt - k, b); v += noise * gauss(); const X = ax.fx(tt), Y = ax.fy(v); s ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(0), ax.y); ctx.lineTo(ax.fx(0), ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('a wide-open "eye" = easy, error-free decisions; noise/ISI close it', ax.x + 6, ax.y + 14);
+    }
+    let n = 0.06, bb = 0.5; draw(n, bb);
+    slider(card.controls, { label: 'noise', min: 0, max: 0.4, step: 0.02, value: 0.06, fmt: v => v.toFixed(2) }, v => { n = v; draw(n, bb); });
+    slider(card.controls, { label: 'roll-off β', min: 0.05, max: 1, step: 0.05, value: 0.5, fmt: v => v.toFixed(2) }, v => { bb = v; draw(n, bb); });
+  };
+
+  // Receiver sensitivity: stack the pieces
+  T.sensitivityStack = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    let Bexp = 6, nf = 6, snr = 10;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const B = Math.pow(10, Bexp), floor = -174 + 10 * Math.log10(B), withNF = floor + nf, sens = withNF + snr;
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 4], yr: [-178, -50], xlabel: '', ylabel: 'power (dBm)', xticks: [] });
+      const bar = (i, base, top, col, lbl) => { const bx = ax.fx(i + 0.5) - 40; ctx.fillStyle = col; ctx.fillRect(bx, ax.fy(top), 80, ax.fy(base) - ax.fy(top)); ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(lbl, ax.fx(i + 0.5), ax.y + ax.h + 12); };
+      bar(0, -174, floor, 'rgba(77,171,247,0.6)', 'kTB floor');
+      bar(1, floor, withNF, 'rgba(255,169,77,0.6)', '+ NF');
+      bar(2, withNF, sens, 'rgba(177,151,252,0.6)', '+ SNR req');
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(sens)); ctx.lineTo(ax.x + ax.w, ax.fy(sens)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.teal; ctx.font = '13px sans-serif'; ctx.textAlign = 'right'; ctx.fillText('sensitivity = ' + sens.toFixed(1) + ' dBm', ax.x + ax.w - 6, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('B=' + (B >= 1e6 ? (B / 1e6) + ' MHz' : (B / 1e3) + ' kHz') + ' · NF=' + nf + ' dB · SNR=' + snr + ' dB', ax.x + 6, ax.y + 16);
+    }
+    draw();
+    slider(card.controls, { label: 'bandwidth', min: 3, max: 8, step: 0.25, value: 6, fmt: v => { const B = Math.pow(10, v); return B >= 1e6 ? (B / 1e6).toFixed(1) + ' MHz' : (B / 1e3).toFixed(0) + ' kHz'; } }, v => { Bexp = v; draw(); });
+    slider(card.controls, { label: 'noise figure', min: 0, max: 12, step: 0.5, value: 6, fmt: v => v + ' dB' }, v => { nf = v; draw(); });
+    slider(card.controls, { label: 'required SNR', min: 0, max: 25, step: 1, value: 10, fmt: v => v + ' dB' }, v => { snr = v; draw(); });
+  };
+
+  // Jamming margin: processing gain minus what you spend
+  T.jammingMargin = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    let gp = 30, snr = 10, loss = 3;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const mj = gp - snr - loss;
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 4], yr: [0, Math.max(40, gp + 5)], xlabel: '', ylabel: 'dB', xticks: [] });
+      const bar = (i, base, top, col, lbl) => { const bx = ax.fx(i + 0.5) - 40; ctx.fillStyle = col; ctx.fillRect(bx, ax.fy(top), 80, ax.fy(base) - ax.fy(top)); ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(lbl, ax.fx(i + 0.5), ax.y + ax.h + 12); };
+      bar(0, 0, gp, 'rgba(99,230,190,0.6)', 'processing gain');
+      bar(1, gp - snr, gp, 'rgba(255,107,107,0.55)', '− SNR req');
+      bar(2, gp - snr - loss, gp - snr, 'rgba(255,169,77,0.55)', '− losses');
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(mj)); ctx.lineTo(ax.x + ax.w, ax.fy(mj)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.teal; ctx.font = '13px sans-serif'; ctx.textAlign = 'right'; ctx.fillText('jamming margin = ' + mj.toFixed(0) + ' dB', ax.x + ax.w - 6, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('survives a jammer up to ' + mj.toFixed(0) + ' dB stronger than the signal', ax.x + 6, ax.y + 16);
+    }
+    draw();
+    slider(card.controls, { label: 'processing gain', min: 10, max: 50, step: 1, value: 30, fmt: v => v + ' dB' }, v => { gp = v; draw(); });
+    slider(card.controls, { label: 'required SNR', min: 0, max: 20, step: 1, value: 10, fmt: v => v + ' dB' }, v => { snr = v; draw(); });
+    slider(card.controls, { label: 'losses', min: 0, max: 10, step: 0.5, value: 3, fmt: v => v + ' dB' }, v => { loss = v; draw(); });
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {
+    'fourier-transform': [{ type: 'fourierTransform', title: 'Building a square wave from pure tones', caption: 'Add harmonics one at a time and watch a square wave appear.', explain: EX('<b>What it shows:</b> any signal is a sum of simple sine waves — the Fourier idea. <b>Try:</b> add more harmonics and the wobbly sum snaps toward a crisp square wave (the little overshoot at the edges is the famous "Gibbs ripple"). Seeing a signal as its recipe of tones is what lets us filter and analyse it.') }],
+    'laplace-transform': [{ type: 'laplacePoleZero', title: 's-plane poles ↔ time response', caption: 'Drag the pole across the imaginary axis to flip stable ↔ unstable.', explain: EX('<b>What it shows:</b> a system’s "poles" on the s-plane decide how it behaves in time. <b>Try:</b> keep the pole in the shaded left half → the response decays and settles (stable); push it to the right half → it blows up (unstable). This is exactly how engineers check that cruise control or a feedback loop won’t run away.') }],
+    'z-transform': [{ type: 'zPlane', title: 'z-plane poles ↔ digital response', caption: 'Move the pole in/out of the unit circle to see stable vs unstable.', explain: EX('<b>What it shows:</b> the Z-transform is the Laplace idea for step-by-step digital signals; the "danger line" is the unit circle. <b>Try:</b> pole inside the circle → the impulse response fades (stable filter); pole outside → it grows without bound. Every digital filter lives or dies by this rule.') }],
+    'convolution': [{ type: 'convolutionDemo', title: 'Convolution: flip and slide', caption: 'Slide t and watch the overlap build the output.', explain: EX('<b>What it shows:</b> convolution is how a system’s response smears an input. <b>Try:</b> as you slide, the moving flipped copy (orange) overlaps the fixed signal (teal); the shaded overlap area is the output value at that instant, tracing out the triangle below. Two boxes convolved make a triangle — that’s an echo/blur in action.') }],
+    'correlation': [{ type: 'correlationDemo', title: 'Correlation: find the hidden pattern', caption: 'Slide the template — correlation spikes at the true delay.', explain: EX('<b>What it shows:</b> correlation measures how much two signals look alike at each shift. <b>Try:</b> a known pattern is buried in noise at a secret delay; slide the orange template and the correlation curve peaks exactly where they line up. This is how radar, GPS, and sync words locate a signal in noise.') }],
+    'nyquist-sampling': [{ type: 'samplingDemo', title: 'Sampling: is it fast enough?', caption: 'Lower the sample rate below 2×frequency and it breaks.', explain: EX('<b>What it shows:</b> to capture a wave you must sample faster than twice its frequency (the Nyquist rate). <b>Try:</b> above 2f the dots pin the wave down perfectly; drop below and the samples no longer describe the true signal — it can’t be rebuilt. It’s like needing enough film frames to catch a fast motion.') }],
+    'aliasing': [{ type: 'aliasingDemo', title: 'Aliasing: a fast tone in disguise', caption: 'Raise the true frequency past the sample rate — see the fake slow wave.', explain: EX('<b>What it shows:</b> sample a fast wave too slowly and the same dots also fit a totally different slow wave — the "alias." <b>Try:</b> crank the true frequency up; the orange dots start tracing a low blue wave that was never really there. It’s the wagon-wheel effect (spokes spinning backwards on film) and why we filter before sampling.') }],
+    'pulse-shaping': [{ type: 'raisedCosine', title: 'Raised-cosine pulse & zero-ISI', caption: 'Change the roll-off β to trade bandwidth for smoother tails.', explain: EX('<b>What it shows:</b> a raised-cosine pulse is shaped so it’s exactly zero at every neighbouring symbol time (the teal dots) — so symbols don’t smear into each other (no inter-symbol interference). <b>Try:</b> a bigger β gives gentler tails but uses more bandwidth; smaller β is tighter in frequency but rings more. That trade is at the heart of every modem.') }],
+    'eye-diagram': [{ type: 'eyeDiagram', title: 'Eye diagram', caption: 'Add noise or change roll-off and watch the "eye" open or close.', explain: EX('<b>What it shows:</b> overlay every symbol transition and you get an "eye." A wide-open eye means the 1s and 0s are easy to tell apart; a closing eye means trouble. <b>Try:</b> raise the noise and the eye shuts — the height left is your noise margin, and you sample at the widest opening (dashed line).') }],
+    'ber': [{ type: 'berCurve', series: [{ name: 'bpsk' }], title: 'The BER "waterfall" curve', caption: 'Drag Eb/N0 and read the error rate.', explain: EX('<b>What it shows:</b> Bit Error Rate is simply the fraction of bits that arrive wrong — your link’s report card. <b>Try:</b> the curve plunges steeply, so just a couple more dB of signal quality can take you from 1 error in 100 to 1 in 100,000. That cliff-like shape is why engineers fight for every last dB.') }],
+    'eb-no': [{ type: 'berCurve', series: [{ name: 'bpsk' }], title: 'BER vs Eb/N0', caption: 'Eb/N0 is the fair x-axis for comparing any scheme.', explain: EX('<b>What it shows:</b> Eb/N0 is "energy per bit versus noise" — the fair yardstick that lets you compare any two modulation schemes apples-to-apples. <b>Try:</b> read off how much Eb/N0 a target error rate needs; that number, not raw power, is what link budgets and textbooks quote.') }],
+    'processing-gain': [{ type: 'spread', title: 'Processing gain = spread then squeeze', caption: 'Raise the gain and push the signal under the noise floor.', explain: EX('<b>What it shows:</b> processing gain is the boost you get by spreading a signal wide and then correlating it back together. <b>Try:</b> as the gain grows, the signal’s power spreads so thin it drops below the noise floor — yet despreading at the receiver lifts it back out. That’s how GPS is heard from below the noise.') }],
+    'jamming-margin': [{ type: 'jammingMargin', title: 'Jamming margin', caption: 'Set processing gain and costs — see how strong a jammer you survive.', explain: EX('<b>What it shows:</b> jamming margin = processing gain minus the SNR you need minus your losses. <b>Try:</b> it tells you how much <i>stronger</i> than your own signal a hostile jammer can be before your link finally breaks. More processing gain buys more anti-jam headroom.') }],
+    'sensitivity': [{ type: 'sensitivityStack', title: 'Receiver sensitivity, stacked up', caption: 'Slide bandwidth, NF and required SNR to build the sensitivity number.', explain: EX('<b>What it shows:</b> sensitivity is the faintest signal a receiver can still understand, built from three pieces: the thermal floor (−174 + 10·log₁₀B), plus the receiver’s noise figure, plus the SNR the demodulator needs. <b>Try:</b> narrower bandwidth, lower NF, or a more robust scheme (less required SNR) all push sensitivity lower — meaning you can hear fainter signals and reach farther.') }],
     'comm-basics': [{ type: 'capacity', title: 'Shannon capacity vs SNR', caption: 'Drag the SNR to read the maximum error-free bit-rate per hertz.', explain: EX('<b>What it shows:</b> the hard ceiling C = B·log₂(1+SNR). <b>Try:</b> notice it climbs steeply at low SNR but flattens — past ~20 dB, each extra 3 dB of power buys only ~1 more bit/s/Hz. That diminishing return is why we add <i>bandwidth</i> or <i>antennas</i> (MIMO), not just power, to go faster.') }],
     'noise': [{ type: 'gaussianNoise', title: 'AWGN: samples vs the Gaussian pdf', caption: 'Drag σ (noise power) and watch the histogram track the bell curve.', explain: EX('<b>What it shows:</b> thermal noise really is Gaussian — the random samples (blue) fill the theoretical pdf (orange). <b>Try:</b> increasing σ widens the bell; since noise power ∝ σ² ∝ kTB, this is exactly what a wider bandwidth or hotter receiver does to your noise.') }],
     'psd': [{ type: 'psd', title: 'Power spectral density (periodogram)', caption: 'Lower the SNR until the carrier spike sinks into the noise floor.', explain: EX('<b>What it shows:</b> a single carrier as a spike standing on a flat white-noise floor. <b>Try:</b> drop the SNR — when the spike reaches the floor it becomes undetectable, which is precisely the sensitivity limit of a receiver.') }],

@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v5';
+const CACHE = 'rfstudy-v6';
 
 const ASSETS = [
   './',
@@ -12,14 +12,19 @@ const ASSETS = [
   'figures.js',
   'manifest.webmanifest',
   'topics/fundamentals.js',
+  'topics/signals.js',
   'topics/modulation.js',
+  'topics/mod-extra.js',
   'topics/synchronization.js',
   'topics/spread-spectrum.js',
+  'topics/metrics-extra.js',
   'topics/sdr.js',
   'topics/rf-link.js',
   'topics/antennas.js',
   'code/fundamentals.js',
+  'code/signals.js',
   'code/modulation.js',
+  'code/comms-extra.js',
   'code/synchronization.js',
   'code/spread-spectrum.js',
   'code/sdr.js',
