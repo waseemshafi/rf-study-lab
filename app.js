@@ -223,6 +223,14 @@ function renderTabBody(t, key, body) {
 }
 
 function renderExplanation(t, body) {
+  // "For dummies" plain-English intro (shown first)
+  if (typeof CONTENT_DUMMIES !== 'undefined' && CONTENT_DUMMIES[t.id]) {
+    const d = el('div', 'panel dummies-panel');
+    d.innerHTML = '<h3>🧸 In plain English <span class="dummies-tag">for dummies</span></h3>' +
+      '<div class="dummies-body">' + CONTENT_DUMMIES[t.id] + '</div>';
+    body.appendChild(d);
+  }
+
   // Prerequisites
   if (t.prerequisites && t.prerequisites.length) {
     const pr = el('div', 'panel prereq-panel');

@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v4';
+const CACHE = 'rfstudy-v5';
 
 const ASSETS = [
   './',
@@ -8,6 +8,7 @@ const ASSETS = [
   'styles.css',
   'app.js',
   'content.js',
+  'dummies.js',
   'figures.js',
   'manifest.webmanifest',
   'topics/fundamentals.js',

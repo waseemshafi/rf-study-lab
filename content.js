@@ -50,5 +50,8 @@ const CONTENT = {
 /* Code snippets per topic id: { matlab, python, note? }. Populated by /code files. */
 const CONTENT_CODE = {};
 
+/* Plain-English "For dummies" explanations per topic id. Populated by dummies.js. */
+const CONTENT_DUMMIES = {};
+
 /* Computed/interactive figure specs per topic id. Populated by figures.js (FIG.map). */
 const CONTENT_FIG = {};
