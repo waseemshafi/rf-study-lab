@@ -64,6 +64,7 @@ const FIG = (function () {
     c.appendChild(cv);
     const controls = el('div', 'fig-controls'); c.appendChild(controls);
     if (spec.caption) c.appendChild(el('div', 'fig-caption', spec.caption));
+    if (spec.explain) c.appendChild(el('div', 'fig-explain', spec.explain));
     host.appendChild(c);
     return { ctx, w, h, controls, card: c };
   }
@@ -126,21 +127,48 @@ const FIG = (function () {
     wrap.append(lab, r); controls.appendChild(wrap);
     return r;
   }
+  function chooser(controls, opts, initial, cb) {
+    const wrap = el('div', 'fig-chooser');
+    opts.forEach(o => {
+      const b = el('button', 'fig-choice' + (o.v === initial ? ' active' : ''), o.l);
+      b.onclick = () => { wrap.querySelectorAll('.fig-choice').forEach(x => x.classList.remove('active')); b.classList.add('active'); cb(o.v); };
+      wrap.appendChild(b);
+    });
+    controls.appendChild(wrap);
+  }
+  function toggle(controls, label, initial, cb) {
+    const wrap = el('label', 'fig-slider');
+    const box = document.createElement('input'); box.type = 'checkbox'; box.checked = initial;
+    box.onchange = () => cb(box.checked);
+    wrap.append(box, el('span', 'fig-slider-lab', ' ' + label));
+    controls.appendChild(wrap);
+  }
   const M = { left: 52, right: 18, top: 16, bottom: 42 };
   const plotBox = (w, h) => ({ x: M.left, y: M.top, w: w - M.left - M.right, h: h - M.top - M.bottom });
 
   /* ================= FIGURE GENERATORS ================= */
   const T = {};
 
-  // Shannon capacity C/B vs SNR(dB)
+  // Shannon capacity C/B vs SNR(dB) — draggable operating point
   T.capacity = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
-    const ax = drawAxes(ctx, plotBox(w, h), { xr: [-10, 40], yr: [0, 14], xlabel: 'SNR (dB)', ylabel: 'Capacity  C/B  (bit/s/Hz)' });
-    const pts = []; for (let d = -10; d <= 40; d += 0.5) pts.push([d, Math.log2(1 + lin(d))]);
-    line(ctx, ax, pts, C.blue, 2.5);
-    // low-SNR linear approx marker
-    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('≈ +1 bit/s/Hz per 3 dB (high SNR)', ax.x + 60, ax.y + 30);
+    const card = makeCard(host, spec, 520, 300);
+    function draw(snr) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [-10, 40], yr: [0, 14], xlabel: 'SNR (dB)', ylabel: 'Capacity  C/B  (bit/s/Hz)' });
+      const pts = []; for (let d = -10; d <= 40; d += 0.5) pts.push([d, Math.log2(1 + lin(d))]);
+      line(ctx, ax, pts, C.blue, 2.5);
+      const cap = Math.log2(1 + lin(snr));
+      const mx = ax.fx(snr), my = ax.fy(cap);
+      ctx.strokeStyle = C.dim; ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(mx, ax.y + ax.h); ctx.lineTo(mx, my); ctx.lineTo(ax.x, my); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(mx, my, 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('SNR ' + snr + ' dB → ' + cap.toFixed(2) + ' bit/s/Hz', ax.x + 60, ax.y + 26);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('≈ +1 bit/s/Hz per 3 dB in the high-SNR region', ax.x + 60, ax.y + 44);
+    }
+    draw(15);
+    slider(card.controls, { label: 'SNR', min: -10, max: 40, step: 1, value: 15, fmt: v => v + ' dB' }, draw);
   };
 
   // AWGN: time trace + histogram vs Gaussian pdf
@@ -240,28 +268,49 @@ const FIG = (function () {
     slider(card.controls, { label: 'LNA NF', min: 0.5, max: 6, step: 0.1, value: 2, fmt: v => v.toFixed(1) + ' dB' }, draw);
   };
 
-  // Phase noise L(f) log-log with Leeson slopes
+  // Phase noise L(f) log-log with Leeson slopes — marker + integrated jitter
   T.phaseNoise = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
-    const box = plotBox(w, h);
-    const ax = drawAxes(ctx, box, {
-      xr: [10, 1e7], yr: [-160, -20], logx: true, xlabel: 'offset from carrier (Hz)', ylabel: 'ℒ(f)  (dBc/Hz)',
-      xtickfmt: t => { const e = Math.log10(t); return e >= 6 ? (t / 1e6) + 'M' : e >= 3 ? (t / 1e3) + 'k' : t; }
-    });
-    // piecewise Leeson: -30 dB/dec (1/f^3) then -20 (1/f^2) then flat floor
-    const pts = [];
-    for (let e = 1; e <= 7; e += 0.05) {
-      const f = Math.pow(10, e); let L;
-      if (f < 1e3) L = -60 - 30 * (Math.log10(f) - 1);         // 1/f^3
-      else if (f < 1e5) L = -120 - 20 * (Math.log10(f) - 3);   // 1/f^2
-      else L = -160;                                           // floor
-      pts.push([f, Math.max(L, -160)]);
+    const card = makeCard(host, spec, 520, 300);
+    const Lf = f => { // piecewise Leeson model, dBc/Hz
+      let L;
+      if (f < 1e3) L = -60 - 30 * (Math.log10(f) - 1);
+      else if (f < 1e5) L = -120 - 20 * (Math.log10(f) - 3);
+      else L = -160;
+      return Math.max(L, -160);
+    };
+    function draw(markLog) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, {
+        xr: [10, 1e7], yr: [-160, -20], logx: true, xlabel: 'offset from carrier (Hz)', ylabel: 'ℒ(f)  (dBc/Hz)',
+        xtickfmt: t => { const e = Math.log10(t); return e >= 6 ? (t / 1e6) + 'M' : e >= 3 ? (t / 1e3) + 'k' : t; }
+      });
+      const pts = []; for (let e = 1; e <= 7; e += 0.05) { const f = Math.pow(10, e); pts.push([f, Lf(f)]); }
+      line(ctx, ax, pts, C.blue, 2.5);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('−30 dB/dec', ax.fx(60), ax.fy(-70));
+      ctx.fillText('−20 dB/dec', ax.fx(6e3), ax.fy(-135));
+      ctx.fillText('floor', ax.fx(2e6), ax.fy(-150));
+      // integrate jitter from marker offset out to 10 MHz (2 sidebands)
+      const fLo = Math.pow(10, markLog);
+      let acc = 0; const N = 400;
+      for (let i = 0; i < N; i++) {
+        const a = Math.log10(fLo) + (7 - Math.log10(fLo)) * i / N;
+        const b = Math.log10(fLo) + (7 - Math.log10(fLo)) * (i + 1) / N;
+        const fa = Math.pow(10, a), fbb = Math.pow(10, b);
+        acc += 0.5 * (Math.pow(10, Lf(fa) / 10) + Math.pow(10, Lf(fbb) / 10)) * (fbb - fa);
+      }
+      const jitterRad = Math.sqrt(2 * acc), jitterDeg = jitterRad * 180 / Math.PI;
+      // marker line + point
+      const mx = ax.fx(fLo), my = ax.fy(Lf(fLo));
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(mx, ax.y); ctx.lineTo(mx, ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(mx, my, 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('ℒ(' + (fLo >= 1e6 ? (fLo / 1e6) + ' MHz' : fLo >= 1e3 ? (fLo / 1e3) + ' kHz' : fLo + ' Hz') + ') = ' + Lf(fLo).toFixed(0) + ' dBc/Hz', ax.x + 70, ax.y + 22);
+      ctx.fillText('integrated RMS jitter → 10 MHz ≈ ' + jitterDeg.toFixed(2) + '°', ax.x + 70, ax.y + 40);
     }
-    line(ctx, ax, pts, C.blue, 2.5);
-    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('−30 dB/dec', ax.fx(60), ax.fy(-70));
-    ctx.fillText('−20 dB/dec', ax.fx(6e3), ax.fy(-135));
-    ctx.fillText('noise floor', ax.fx(1.5e6), ax.fy(-150));
+    draw(4); // 10 kHz
+    slider(card.controls, { label: 'offset', min: 1.3, max: 6, step: 0.1, value: 4, fmt: v => { const f = Math.pow(10, v); return f >= 1e6 ? (f / 1e6).toFixed(1) + ' MHz' : f >= 1e3 ? (f / 1e3).toFixed(0) + ' kHz' : f.toFixed(0) + ' Hz'; } }, draw);
   };
 
   // Constellation with live noise cloud (order: 2 BPSK, 4 QPSK, 16 QAM)
@@ -393,18 +442,31 @@ const FIG = (function () {
     slider(card.controls, { label: 'initial offset', min: 20, max: 200, step: 10, value: 90, fmt: v => v + ' kHz' }, draw);
   };
 
-  // Costas loop S-curve: error = sin(2·Δφ)
+  // Costas loop S-curve: error = sin(2·Δφ) — draggable phase error shows correction
   T.costasScurve = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
-    const box = plotBox(w, h);
-    const ax = drawAxes(ctx, box, { xr: [-180, 180], yr: [-1.2, 1.2], xlabel: 'phase error Δφ (degrees)', ylabel: 'loop error  I·Q' });
-    const pts = []; for (let d = -180; d <= 180; d += 1) pts.push([d, Math.sin(2 * d * Math.PI / 180)]);
-    line(ctx, ax, pts, C.blue, 2.5);
-    const y0 = ax.fy(0); ctx.strokeStyle = C.grid; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(ax.x, y0); ctx.lineTo(ax.x + ax.w, y0); ctx.stroke(); ctx.setLineDash([]);
-    // stable lock points at 0 and 180 (zero crossing, negative slope)
-    [0, 180, -180].forEach(d => { ctx.fillStyle = C.teal; ctx.beginPath(); ctx.arc(ax.fx(d), ax.fy(0), 4, 0, TAU); ctx.fill(); });
-    ctx.fillStyle = C.teal; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('stable lock', ax.fx(0), ax.fy(0) + 18); ctx.fillText('180° ambiguity', ax.fx(180), ax.fy(0) - 12);
+    const card = makeCard(host, spec, 520, 300);
+    function draw(dphi) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [-180, 180], yr: [-1.2, 1.2], xlabel: 'phase error Δφ (degrees)', ylabel: 'loop error  I·Q' });
+      const pts = []; for (let d = -180; d <= 180; d += 1) pts.push([d, Math.sin(2 * d * Math.PI / 180)]);
+      line(ctx, ax, pts, C.blue, 2.5);
+      const y0 = ax.fy(0); ctx.strokeStyle = C.grid; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(ax.x, y0); ctx.lineTo(ax.x + ax.w, y0); ctx.stroke(); ctx.setLineDash([]);
+      [0, 180, -180].forEach(d => { ctx.fillStyle = C.teal; ctx.beginPath(); ctx.arc(ax.fx(d), ax.fy(0), 4, 0, TAU); ctx.fill(); });
+      ctx.fillStyle = C.teal; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('stable lock', ax.fx(0), ax.fy(0) + 18); ctx.fillText('±180° ambiguity', ax.fx(180), ax.fy(0) - 10);
+      // current operating point + correction arrow (loop drives toward nearest stable zero)
+      const err = Math.sin(2 * dphi * Math.PI / 180);
+      const px = ax.fx(dphi), py = ax.fy(err);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(px, py, 5, 0, TAU); ctx.fill();
+      const dir = err > 0 ? -1 : 1; // correction reduces |Δφ| toward 0/±180
+      ctx.strokeStyle = C.orange; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + dir * 26, py); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px + dir * 26, py); ctx.lineTo(px + dir * 18, py - 4); ctx.lineTo(px + dir * 18, py + 4); ctx.closePath(); ctx.fillStyle = C.orange; ctx.fill();
+      ctx.fillStyle = C.text; ctx.textAlign = 'left'; ctx.font = '12px sans-serif';
+      ctx.fillText('Δφ = ' + dphi + '° → error ' + err.toFixed(2) + ', VCO nudged ' + (dir < 0 ? 'left' : 'right'), ax.x + 8, ax.y + ax.h - 12);
+    }
+    draw(60);
+    slider(card.controls, { label: 'phase error Δφ', min: -170, max: 170, step: 5, value: 60, fmt: v => v + '°' }, draw);
   };
 
   // Spread spectrum: PSD before/after spreading
@@ -430,68 +492,105 @@ const FIG = (function () {
     slider(card.controls, { label: 'processing gain', min: 6, max: 30, step: 1, value: 15, fmt: v => v + ' dB' }, draw);
   };
 
-  // Frequency hopping time-frequency pattern
+  // Frequency hopping time-frequency pattern — channel count adjustable
   T.hopping = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
-    const box = plotBox(w, h), Nhop = 24, Nch = 10;
-    const ax = drawAxes(ctx, box, { xr: [0, Nhop], yr: [0, Nch], xlabel: 'time (hop slots)', ylabel: 'channel' });
-    // deterministic pseudo pattern (no RNG so it is stable): LCG
-    let x = 7;
-    for (let t = 0; t < Nhop; t++) { x = (x * 5 + 3) % Nch; const jam = (x === 4); ctx.fillStyle = jam ? C.red : C.blue; ctx.fillRect(ax.fx(t) + 1, ax.fy(x + 0.9), (ax.fx(1) - ax.fx(0)) - 2, ax.fy(0) - ax.fy(0.9)); }
-    // jammed channel band
-    ctx.save(); ctx.globalAlpha = 0.12; ctx.fillStyle = C.red; ctx.fillRect(ax.x, ax.fy(5), ax.w, ax.fy(4) - ax.fy(5)); ctx.restore();
-    ctx.fillStyle = C.red; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('jammed channel — only brief dwells hit', ax.x + 8, ax.fy(5) - 4);
+    const card = makeCard(host, spec, 520, 300);
+    function draw(Nch) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h), Nhop = 26, jamCh = Math.floor(Nch / 2);
+      const ax = drawAxes(ctx, box, { xr: [0, Nhop], yr: [0, Nch], xlabel: 'time (hop slots)', ylabel: 'channel' });
+      let x = 7, hits = 0;
+      for (let t = 0; t < Nhop; t++) {
+        x = (x * 5 + 3) % Nch; const jam = (x === jamCh); if (jam) hits++;
+        ctx.fillStyle = jam ? C.red : C.blue;
+        ctx.fillRect(ax.fx(t) + 1, ax.fy(x + 0.9), (ax.fx(1) - ax.fx(0)) - 2, ax.fy(0) - ax.fy(0.9));
+      }
+      ctx.save(); ctx.globalAlpha = 0.12; ctx.fillStyle = C.red; ctx.fillRect(ax.x, ax.fy(jamCh + 1), ax.w, ax.fy(jamCh) - ax.fy(jamCh + 1)); ctx.restore();
+      ctx.fillStyle = C.red; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('jammer hits only ' + hits + '/' + Nhop + ' dwells (~' + Math.round(100 * hits / Nhop) + '%) — FEC repairs them', ax.x + 8, ax.y + 14);
+    }
+    draw(10);
+    slider(card.controls, { label: 'channels', min: 5, max: 40, step: 1, value: 10 }, v => draw(Math.round(v)));
   };
 
-  // m-sequence autocorrelation (LFSR)
+  // m-sequence autocorrelation (LFSR) — adjustable register length
+  const MSEQ_TAPS = { 3: [3, 2], 4: [4, 3], 5: [5, 3], 6: [6, 5], 7: [7, 6] };
+  function mSequence(n) {
+    const L = (1 << n) - 1, taps = MSEQ_TAPS[n], seq = []; let reg = 1;
+    for (let i = 0; i < L; i++) { seq.push((reg & 1) ? 1 : -1); let fb = 0; taps.forEach(s => fb ^= (reg >> (s - 1)) & 1); reg = (reg >> 1) | (fb << (n - 1)); }
+    return seq;
+  }
   T.autocorr = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
-    const n = 5, L = (1 << n) - 1; // length 31, taps x^5+x^2+1
-    let reg = 1, seq = [];
-    for (let i = 0; i < L; i++) { const b = reg & 1; seq.push(b ? 1 : -1); const fb = ((reg) ^ (reg >> 3)) & 1; reg = (reg >> 1) | (fb << (n - 1)); }
-    const R = []; for (let s = 0; s < L; s++) { let acc = 0; for (let i = 0; i < L; i++) acc += seq[i] * seq[(i + s) % L]; R.push([s, acc]); }
-    const box = plotBox(w, h);
-    const ax = drawAxes(ctx, box, { xr: [0, L], yr: [-5, L + 3], xlabel: 'shift', ylabel: 'autocorrelation' });
-    R.forEach(p => { ctx.strokeStyle = C.blue; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(ax.fx(p[0]), ax.fy(0)); ctx.lineTo(ax.fx(p[0]), ax.fy(p[1])); ctx.stroke(); });
-    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('two-valued: peak = ' + L + ' at zero shift, −1 elsewhere', ax.x + 10, ax.y + 14);
+    const card = makeCard(host, spec, 520, 300);
+    function draw(n) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const L = (1 << n) - 1, seq = mSequence(n);
+      const R = []; for (let s = 0; s < L; s++) { let acc = 0; for (let i = 0; i < L; i++) acc += seq[i] * seq[(i + s) % L]; R.push([s, acc]); }
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, L], yr: [-5, L + 5], xlabel: 'shift (chips)', ylabel: 'autocorrelation' });
+      R.forEach(p => { ctx.strokeStyle = C.blue; ctx.lineWidth = Math.max(1.5, (ax.fx(1) - ax.fx(0)) * 0.5); ctx.beginPath(); ctx.moveTo(ax.fx(p[0]), ax.fy(0)); ctx.lineTo(ax.fx(p[0]), ax.fy(p[1])); ctx.stroke(); });
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(n + '-stage LFSR → length ' + L + ' = 2^' + n + '−1', ax.x + 10, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('two-valued: peak = ' + L + ' at zero shift, −1 at all others', ax.x + 10, ax.y + 34);
+    }
+    draw(5);
+    slider(card.controls, { label: 'LFSR stages n', min: 3, max: 7, step: 1, value: 5, fmt: v => v + ' (len ' + ((1 << v) - 1) + ')' }, v => draw(Math.round(v)));
   };
 
-  // Gold code cross-correlation (three-valued)
+  // Gold code cross-correlation (three-valued) — draggable shift marker
   T.crosscorr = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
+    const card = makeCard(host, spec, 520, 300);
     const n = 5, L = (1 << n) - 1;
     function mseq(taps, seed) { let reg = seed, s = []; for (let i = 0; i < L; i++) { s.push(reg & 1); let fb = 0; taps.forEach(t => fb ^= (reg >> (t - 1)) & 1); reg = ((reg >> 1) | (fb << (n - 1))) & L; } return s; }
     const a = mseq([5, 3], 1), b = mseq([5, 4, 3, 2], 1);
     const g1 = a.map((v, i) => v ^ b[i]).map(v => v ? 1 : -1);
     const g2 = a.map((v, i) => v ^ b[(i + 5) % L]).map(v => v ? 1 : -1);
     const R = []; for (let s = 0; s < L; s++) { let acc = 0; for (let i = 0; i < L; i++) acc += g1[i] * g2[(i + s) % L]; R.push([s, acc]); }
-    const box = plotBox(w, h);
-    const ax = drawAxes(ctx, box, { xr: [0, L], yr: [-Math.max(12, ...R.map(r => Math.abs(r[1]))) - 2, Math.max(12, ...R.map(r => Math.abs(r[1]))) + 2], xlabel: 'shift', ylabel: 'cross-correlation' });
-    const y0 = ax.fy(0); ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(ax.x, y0); ctx.lineTo(ax.x + ax.w, y0); ctx.stroke();
-    R.forEach(p => { ctx.strokeStyle = C.purple; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(ax.fx(p[0]), y0); ctx.lineTo(ax.fx(p[0]), ax.fy(p[1])); ctx.stroke(); });
-    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('bounded to 3 values {−1, −t(n), t(n)−2}, t(5)=9 — low mutual interference', ax.x + 8, ax.y + 14);
+    const lim = Math.max(12, ...R.map(r => Math.abs(r[1]))) + 2;
+    function draw(mark) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, L], yr: [-lim, lim], xlabel: 'shift (chips)', ylabel: 'cross-correlation' });
+      const y0 = ax.fy(0); ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(ax.x, y0); ctx.lineTo(ax.x + ax.w, y0); ctx.stroke();
+      R.forEach(p => { const on = (p[0] === mark); ctx.strokeStyle = on ? C.orange : C.purple; ctx.lineWidth = on ? 3 : 2; ctx.beginPath(); ctx.moveTo(ax.fx(p[0]), y0); ctx.lineTo(ax.fx(p[0]), ax.fy(p[1])); ctx.stroke(); });
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('shift ' + mark + ' → cross-corr = ' + R[mark][1] + '  (one of {−1, −9, 7})', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('bounded 3-valued vs peak 31 → satellites separate cleanly', ax.x + 8, ax.y + 34);
+    }
+    draw(0);
+    slider(card.controls, { label: 'shift', min: 0, max: L - 1, step: 1, value: 0 }, v => draw(Math.round(v)));
   };
 
-  // Viterbi trellis with a survivor path
+  // Viterbi trellis with a survivor path — reveal stage-by-stage
   T.trellis = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
+    const card = makeCard(host, spec, 520, 300);
     const stages = 6, states = 4, mL = 60, mT = 30;
-    const gx = i => mL + i * (w - mL - 30) / (stages - 1);
-    const gy = s => mT + s * (h - mT - 50) / (states - 1);
-    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
-    for (let i = 0; i < stages - 1; i++) for (let s = 0; s < states; s++) {
-      [(s >> 1), ((s >> 1) | 2)].forEach(ns => { if (ns < states) { ctx.beginPath(); ctx.moveTo(gx(i), gy(s)); ctx.lineTo(gx(i + 1), gy(ns)); ctx.stroke(); } });
-    }
-    // survivor path (illustrative)
     const path = [0, 2, 1, 0, 2, 1];
-    ctx.strokeStyle = C.teal; ctx.lineWidth = 3; ctx.beginPath();
-    path.forEach((s, i) => { const X = gx(i), Y = gy(s); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }); ctx.stroke();
-    for (let i = 0; i < stages; i++) for (let s = 0; s < states; s++) { ctx.fillStyle = (path[i] === s) ? C.teal : C.blue; ctx.beginPath(); ctx.arc(gx(i), gy(s), 5, 0, TAU); ctx.fill(); }
-    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
-    ['00', '01', '10', '11'].forEach((lbl, s) => ctx.fillText(lbl, 8, gy(s) + 4));
-    ctx.fillStyle = C.teal; ctx.textAlign = 'center'; ctx.fillText('surviving maximum-likelihood path (add–compare–select)', w / 2, h - 16);
+    function draw(upto) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const gx = i => mL + i * (w - mL - 30) / (stages - 1);
+      const gy = s => mT + s * (h - mT - 50) / (states - 1);
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let i = 0; i < stages - 1; i++) for (let s = 0; s < states; s++) {
+        [(s >> 1), ((s >> 1) | 2)].forEach(ns => { if (ns < states) { ctx.beginPath(); ctx.moveTo(gx(i), gy(s)); ctx.lineTo(gx(i + 1), gy(ns)); ctx.stroke(); } });
+      }
+      // survivor path revealed up to current stage
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 3; ctx.beginPath();
+      for (let i = 0; i <= upto && i < stages; i++) { const X = gx(i), Y = gy(path[i]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); } ctx.stroke();
+      for (let i = 0; i < stages; i++) for (let s = 0; s < states; s++) {
+        const onPath = (path[i] === s && i <= upto);
+        ctx.fillStyle = onPath ? C.teal : (i === upto + 1 ? C.orange : C.blue);
+        ctx.beginPath(); ctx.arc(gx(i), gy(s), onPath ? 6 : 5, 0, TAU); ctx.fill();
+      }
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+      ['00', '01', '10', '11'].forEach((lbl, s) => ctx.fillText(lbl, 8, gy(s) + 4));
+      ctx.fillStyle = C.teal; ctx.textAlign = 'center'; ctx.font = '12px sans-serif';
+      ctx.fillText('stage ' + (upto + 1) + '/' + stages + ' — add–compare–select keeps one survivor per state', w / 2, h - 14);
+    }
+    draw(stages - 1);
+    slider(card.controls, { label: 'decode step', min: 0, max: stages - 1, step: 1, value: stages - 1 }, v => draw(Math.round(v)));
   };
 
   // ADC quantization staircase + SNR readout
@@ -517,22 +616,37 @@ const FIG = (function () {
     slider(card.controls, { label: 'resolution', min: 1, max: 8, step: 1, value: 3, fmt: v => v + ' bits' }, draw);
   };
 
-  // DAC sinc envelope + images
+  // DAC sinc envelope + images — signal-frequency marker + pre-emphasis toggle
   T.sincImages = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
-    const box = plotBox(w, h);
-    const ax = drawAxes(ctx, box, { xr: [0, 3], yr: [-30, 3], xlabel: 'frequency / fs', ylabel: 'response (dB)', xticks: [0, 0.5, 1, 1.5, 2, 2.5, 3] });
+    const card = makeCard(host, spec, 520, 300);
     const sinc = x => x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x);
-    const env = []; for (let f = 0; f <= 3; f += 0.01) env.push([f, dB(Math.pow(Math.abs(sinc(f)), 2) + 1e-4)]);
-    line(ctx, ax, env, C.dim, 1.5);
-    // baseband + image lobes (triangles centered at 0, fs, 2fs within |sinc|)
-    [0, 1, 2, 3].forEach(c => {
-      const pts = []; for (let f = c - 0.4; f <= c + 0.4; f += 0.01) { if (f < 0 || f > 3) continue; const shape = Math.max(0, 1 - Math.abs(f - c) / 0.4); pts.push([f, dB(shape * shape * Math.pow(Math.abs(sinc(f)), 2) + 1e-4)]); }
-      line(ctx, ax, pts, c === 0 ? C.teal : C.red, 2.2);
-    });
-    ctx.fillStyle = C.teal; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('wanted', ax.fx(0.1), ax.fy(-2));
-    ctx.fillStyle = C.red; ctx.fillText('images (removed by reconstruction filter)', ax.fx(1.1), ax.fy(-2));
-    ctx.fillStyle = C.dim; ctx.fillText('sinc envelope', ax.fx(1.9), ax.fy(dB(Math.pow(sinc(1.9), 2)) + 3));
+    let preemph = false;
+    function draw(fsig) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, 3], yr: [-30, 5], xlabel: 'frequency / fs', ylabel: 'response (dB)', xticks: [0, 0.5, 1, 1.5, 2, 2.5, 3] });
+      const env = []; for (let f = 0; f <= 3; f += 0.01) env.push([f, dB(Math.pow(Math.abs(sinc(f)), 2) + 1e-4)]);
+      line(ctx, ax, env, C.dim, 1.5);
+      if (preemph) { // inverse-sinc flattens the baseband
+        const flat = []; for (let f = 0; f <= 0.5; f += 0.01) flat.push([f, 0]); line(ctx, ax, flat, C.purple, 2);
+      }
+      [0, 1, 2, 3].forEach(c => {
+        const pts = []; for (let f = c - 0.4; f <= c + 0.4; f += 0.01) { if (f < 0 || f > 3) continue; const shape = Math.max(0, 1 - Math.abs(f - c) / 0.4); pts.push([f, dB(shape * shape * Math.pow(Math.abs(sinc(f)), 2) + 1e-4)]); }
+        line(ctx, ax, pts, c === 0 ? C.teal : C.red, 2.2);
+      });
+      // droop marker at the chosen signal frequency
+      const droop = 20 * Math.log10(Math.abs(sinc(fsig)) || 1e-4);
+      const mx = ax.fx(fsig), my = ax.fy(droop);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(mx, ax.y + ax.h); ctx.lineTo(mx, my); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(mx, my, 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('at f = ' + fsig.toFixed(2) + '·fs, sinc droop = ' + droop.toFixed(2) + ' dB' + (preemph ? ' (pre-corrected)' : ''), ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.red; ctx.font = '11px sans-serif'; ctx.fillText('images', ax.fx(1.05), ax.fy(-2));
+    }
+    let cur = 0.4;
+    draw(cur);
+    slider(card.controls, { label: 'signal freq', min: 0.05, max: 0.5, step: 0.01, value: 0.4, fmt: v => v.toFixed(2) + '·fs' }, v => { cur = v; draw(v); });
+    toggle(card.controls, 'inverse-sinc pre-emphasis', false, v => { preemph = v; draw(cur); });
   };
 
   // Free-space path loss vs distance for several frequencies
@@ -561,29 +675,41 @@ const FIG = (function () {
     slider(card.controls, { label: 'path-loss exponent n', min: 2, max: 4, step: 0.1, value: 3, fmt: v => v.toFixed(1) }, draw);
   };
 
-  // Link budget waterfall
+  // Link budget waterfall — live calculator (Tx power, distance, antenna gain)
   T.linkWaterfall = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 320);
-    const steps = [
-      { l: 'Tx power', v: 20, add: true }, { l: 'Tx antenna', v: 6, add: true },
-      { l: 'path loss', v: -100, add: false }, { l: 'misc loss', v: -3, add: false }, { l: 'Rx antenna', v: 6, add: true }
-    ];
-    const box = plotBox(w, h);
-    let cum = 0; const levels = [cum]; steps.forEach(s => { cum += s.v; levels.push(cum); });
-    const prx = cum, sens = -95;
-    const ax = drawAxes(ctx, box, { xr: [0, steps.length + 1], yr: [-110, 40], xlabel: '', ylabel: 'power (dBm)', xticks: [] });
-    for (let i = 0; i < steps.length; i++) {
-      const s = steps[i], y1 = ax.fy(levels[i]), y2 = ax.fy(levels[i + 1]);
-      ctx.fillStyle = s.add ? 'rgba(99,230,190,0.6)' : 'rgba(255,107,107,0.6)';
-      const bx = ax.fx(i + 0.5) - 22; ctx.fillRect(bx, Math.min(y1, y2), 44, Math.abs(y2 - y1));
-      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.save(); ctx.translate(ax.fx(i + 0.5), ax.y + ax.h + 10); ctx.fillText(s.l, 0, 0); ctx.restore();
+    const card = makeCard(host, spec, 520, 330);
+    const sens = -95;
+    let ptx = 20, distKm = 5, gant = 6;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const fspl = 20 * Math.log10(distKm) + 20 * Math.log10(2400) + 32.44; // 2.4 GHz
+      const steps = [
+        { l: 'Tx power', v: ptx, add: true }, { l: 'Tx ant', v: gant, add: true },
+        { l: 'path loss', v: -fspl, add: false }, { l: 'misc', v: -3, add: false }, { l: 'Rx ant', v: gant, add: true }
+      ];
+      const box = plotBox(w, h);
+      let cum = 0; const levels = [cum]; steps.forEach(s => { cum += s.v; levels.push(cum); });
+      const prx = cum, margin = prx - sens;
+      const lo = Math.min(-120, prx - 15), hi = Math.max(40, ptx + 10);
+      const ax = drawAxes(ctx, box, { xr: [0, steps.length + 1], yr: [lo, hi], xlabel: '', ylabel: 'power (dBm)', xticks: [] });
+      for (let i = 0; i < steps.length; i++) {
+        const s = steps[i], y1 = ax.fy(levels[i]), y2 = ax.fy(levels[i + 1]);
+        ctx.fillStyle = s.add ? 'rgba(99,230,190,0.6)' : 'rgba(255,107,107,0.6)';
+        const bx = ax.fx(i + 0.5) - 22; ctx.fillRect(bx, Math.min(y1, y2), 44, Math.abs(y2 - y1));
+        ctx.strokeStyle = C.grid; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.moveTo(ax.fx(i + 0.5) + 22, ax.fy(levels[i + 1])); ctx.lineTo(ax.fx(i + 1.5) - 22, ax.fy(levels[i + 1])); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(s.l, ax.fx(i + 0.5), ax.y + ax.h + 12);
+      }
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(prx)); ctx.lineTo(ax.x + ax.w, ax.fy(prx)); ctx.stroke();
+      ctx.strokeStyle = C.orange; ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(sens)); ctx.lineTo(ax.x + ax.w, ax.fy(sens)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.blue; ctx.textAlign = 'left'; ctx.font = '11px sans-serif'; ctx.fillText('Prx = ' + prx.toFixed(0) + ' dBm', ax.x + 6, ax.fy(prx) - 6);
+      ctx.fillStyle = C.orange; ctx.fillText('sensitivity = ' + sens + ' dBm', ax.x + 6, ax.fy(sens) + 12);
+      ctx.fillStyle = margin >= 0 ? C.teal : C.red; ctx.font = '13px sans-serif'; ctx.textAlign = 'right';
+      ctx.fillText((margin >= 0 ? 'margin = +' : 'LINK FAILS: ') + margin.toFixed(0) + ' dB', ax.x + ax.w - 6, ax.y + 16);
     }
-    // Prx and sensitivity lines
-    ctx.strokeStyle = C.blue; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(prx)); ctx.lineTo(ax.x + ax.w, ax.fy(prx)); ctx.stroke();
-    ctx.strokeStyle = C.orange; ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(sens)); ctx.lineTo(ax.x + ax.w, ax.fy(sens)); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = C.blue; ctx.textAlign = 'left'; ctx.font = '11px sans-serif'; ctx.fillText('Prx = ' + prx + ' dBm', ax.x + 6, ax.fy(prx) - 6);
-    ctx.fillStyle = C.orange; ctx.fillText('sensitivity = ' + sens + ' dBm', ax.x + 6, ax.fy(sens) + 12);
-    ctx.fillStyle = C.text; ctx.fillText('margin = ' + (prx - sens) + ' dB', ax.x + ax.w - 110, ax.fy((prx + sens) / 2));
+    draw();
+    slider(card.controls, { label: 'Tx power', min: 0, max: 33, step: 1, value: 20, fmt: v => v + ' dBm' }, v => { ptx = v; draw(); });
+    slider(card.controls, { label: 'distance', min: 0.5, max: 40, step: 0.5, value: 5, fmt: v => v + ' km' }, v => { distKm = v; draw(); });
+    slider(card.controls, { label: 'antenna gain', min: 0, max: 20, step: 1, value: 6, fmt: v => v + ' dBi' }, v => { gant = v; draw(); });
   };
 
   // Antenna radiation pattern (N-element ULA) polar, with steering
@@ -615,15 +741,31 @@ const FIG = (function () {
     slider(card.controls, { label: 'steer angle', min: -60, max: 60, step: 5, value: 0, fmt: v => v + '°' }, v => { steer = v * Math.PI / 180; draw(); });
   };
 
-  // Antenna gain vs frequency for several apertures
+  // Antenna gain vs frequency — adjustable dish diameter + frequency marker
   T.gainFreq = function (host, spec) {
-    const { ctx, w, h } = makeCard(host, spec, 520, 300);
-    const box = plotBox(w, h), eta = 0.55, cc = 3e8;
-    const ds = [{ d: 0.3, c: C.teal, l: '0.3 m' }, { d: 1, c: C.blue, l: '1 m' }, { d: 3, c: C.orange, l: '3 m' }];
-    const ax = drawAxes(ctx, box, { xr: [1e8, 4e10], yr: [0, 60], logx: true, xlabel: 'frequency', ylabel: 'gain (dBi)', xtickfmt: t => t >= 1e9 ? (t / 1e9) + 'G' : (t / 1e6) + 'M' });
-    ds.forEach(o => { const A = Math.PI * (o.d / 2) ** 2, pts = []; for (let e = 8; e <= 10.6; e += 0.05) { const f = Math.pow(10, e), lam = cc / f; pts.push([f, dB(eta * 4 * Math.PI * A / (lam * lam))]); } line(ctx, ax, pts, o.c, 2.2); });
-    legend(ctx, box, ds.map(o => ({ label: o.l, color: o.c })));
-    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('G = η·4πA/λ²  →  +6 dB per octave of frequency', ax.x + 8, ax.y + 12);
+    const card = makeCard(host, spec, 520, 320);
+    const eta = 0.55, cc = 3e8;
+    const gainDbi = (d, f) => { const A = Math.PI * (d / 2) ** 2, lam = cc / f; return dB(eta * 4 * Math.PI * A / (lam * lam)); };
+    let diam = 1, fMark = 1e10;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [1e8, 4e10], yr: [0, 60], logx: true, xlabel: 'frequency', ylabel: 'gain (dBi)', xtickfmt: t => t >= 1e9 ? (t / 1e9) + 'G' : (t / 1e6) + 'M' });
+      // faint reference curves
+      [0.3, 3].forEach(d => { const pts = []; for (let e = 8; e <= 10.6; e += 0.05) { const f = Math.pow(10, e); pts.push([f, gainDbi(d, f)]); } line(ctx, ax, pts, C.grid, 1.5); });
+      // active dish curve
+      const pts = []; for (let e = 8; e <= 10.6; e += 0.05) { const f = Math.pow(10, e); pts.push([f, gainDbi(diam, f)]); } line(ctx, ax, pts, C.blue, 2.5);
+      // marker
+      const g = gainDbi(diam, fMark), mx = ax.fx(fMark), my = ax.fy(g);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(mx, ax.y + ax.h); ctx.lineTo(mx, my); ctx.lineTo(ax.x, my); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(mx, my, 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(diam.toFixed(1) + ' m dish @ ' + (fMark / 1e9).toFixed(1) + ' GHz → ' + g.toFixed(1) + ' dBi', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.fillText('G = η·4πA/λ² → +6 dB per octave of frequency (grey = 0.3 m & 3 m)', ax.x + 8, ax.y + 34);
+    }
+    draw();
+    slider(card.controls, { label: 'dish diameter', min: 0.2, max: 5, step: 0.1, value: 1, fmt: v => v.toFixed(1) + ' m' }, v => { diam = v; draw(); });
+    slider(card.controls, { label: 'frequency', min: 8, max: 10.6, step: 0.05, value: 10, fmt: v => (Math.pow(10, v) / 1e9).toFixed(1) + ' GHz' }, v => { fMark = Math.pow(10, v); draw(); });
   };
 
   // Animated EM plane wave (E vertical, B horizontal, orthogonal)
@@ -652,39 +794,168 @@ const FIG = (function () {
     frame();
   };
 
+  // SDR: I/Q phasor — how a complex sample carries amplitude AND phase
+  T.iqDemod = function (host, spec) {
+    const card = makeCard(host, spec, 400, 380);
+    let phase = 35, amp = 0.8;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 - 34;
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+      ctx.fillStyle = C.dim; ctx.font = '12px sans-serif'; ctx.textAlign = 'right'; ctx.fillText('I', cx + R - 2, cy + 14); ctx.textAlign = 'left'; ctx.fillText('Q', cx + 6, cy - R + 12);
+      const ph = phase * Math.PI / 180, I = amp * Math.cos(ph), Qv = amp * Math.sin(ph);
+      const px = cx + I * R, py = cy - Qv * R;
+      // projections
+      ctx.strokeStyle = C.grid; ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, cy); ctx.moveTo(px, py); ctx.lineTo(cx, py); ctx.stroke(); ctx.setLineDash([]);
+      // I and Q components
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, cy); ctx.stroke();
+      ctx.strokeStyle = C.orange; ctx.beginPath(); ctx.moveTo(px, cy); ctx.lineTo(px, py); ctx.stroke();
+      // phasor
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, py); ctx.stroke();
+      ctx.fillStyle = C.blue; ctx.beginPath(); ctx.arc(px, py, 5, 0, TAU); ctx.fill();
+      // phase arc
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, 26, 0, -ph, ph < 0); ctx.stroke();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('I = A·cosφ = ' + I.toFixed(2), 12, 20);
+      ctx.fillText('Q = A·sinφ = ' + Qv.toFixed(2), 12, 38);
+      ctx.fillText('|A| = ' + amp.toFixed(2) + '   φ = ' + phase + '°', 12, 56);
+      ctx.fillStyle = C.teal; ctx.fillText('I', (cx + px) / 2 - 4, cy + 16);
+      ctx.fillStyle = C.orange; ctx.textAlign = 'left'; ctx.fillText('Q', px + 6, (cy + py) / 2);
+    }
+    draw();
+    slider(card.controls, { label: 'phase φ', min: -180, max: 180, step: 5, value: 35, fmt: v => v + '°' }, v => { phase = v; draw(); });
+    slider(card.controls, { label: 'amplitude', min: 0.1, max: 1, step: 0.05, value: 0.8, fmt: v => v.toFixed(2) }, v => { amp = v; draw(); });
+  };
+
+  // AD9361: agile tuning — a movable narrow capture window over a wide band
+  T.tunableRx = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const signals = [{ f: 100, l: 'FM' }, { f: 900, l: 'GSM' }, { f: 1575, l: 'GPS' }, { f: 2440, l: 'WiFi' }, { f: 3500, l: '5G' }, { f: 5800, l: 'ISM' }];
+    let lo = 2440, bw = 20;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [70, 6000], yr: [0, 1], xlabel: 'frequency (MHz)', ylabel: '', yticks: [], xtickfmt: t => t >= 1000 ? (t / 1000) + 'G' : t });
+      // capture window
+      const half = Math.max(bw / 2, 15); // min visual width
+      ctx.fillStyle = 'rgba(99,230,190,0.18)'; ctx.fillRect(ax.fx(lo - half), ax.y, ax.fx(lo + half) - ax.fx(lo - half), ax.h);
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 1.5; ctx.strokeRect(ax.fx(lo - half), ax.y, ax.fx(lo + half) - ax.fx(lo - half), ax.h);
+      // signals
+      signals.forEach(s => {
+        const inside = Math.abs(s.f - lo) <= bw / 2;
+        ctx.strokeStyle = inside ? C.teal : C.blue; ctx.lineWidth = inside ? 3 : 2;
+        ctx.beginPath(); ctx.moveTo(ax.fx(s.f), ax.fy(0)); ctx.lineTo(ax.fx(s.f), ax.fy(inside ? 0.85 : 0.55)); ctx.stroke();
+        ctx.fillStyle = inside ? C.teal : C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(s.l, ax.fx(s.f), ax.fy(inside ? 0.9 : 0.6) - 4);
+      });
+      const captured = signals.filter(s => Math.abs(s.f - lo) <= bw / 2).map(s => s.l);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('LO ' + lo + ' MHz · BW ' + bw + ' MHz → capturing: ' + (captured.length ? captured.join(', ') : 'noise only'), ax.x + 6, ax.y + 16);
+    }
+    draw();
+    slider(card.controls, { label: 'LO (tune)', min: 100, max: 5900, step: 10, value: 2440, fmt: v => v >= 1000 ? (v / 1000).toFixed(2) + ' GHz' : v + ' MHz' }, v => { lo = v; draw(); });
+    slider(card.controls, { label: 'bandwidth', min: 1, max: 56, step: 1, value: 20, fmt: v => v + ' MHz' }, v => { bw = v; draw(); });
+  };
+
+  // RFSoC: direct RF sampling — how a high-frequency input folds into Nyquist zone 1
+  T.nyquistZones = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const fs = 500; // MS/s
+    let fin = 700;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, 3 * fs], yr: [0, 1], xlabel: 'frequency (MHz)', ylabel: '', yticks: [] });
+      // shade Nyquist zones
+      for (let z = 0; z < 6; z++) {
+        const a = z * fs / 2, b = (z + 1) * fs / 2;
+        ctx.fillStyle = (z % 2 === 0) ? 'rgba(77,171,247,0.07)' : 'rgba(177,151,252,0.09)';
+        ctx.fillRect(ax.fx(a), ax.y, ax.fx(b) - ax.fx(a), ax.h);
+        ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('zone ' + (z + 1), ax.fx((a + b) / 2), ax.y + 12);
+      }
+      // input tone
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ax.fx(fin), ax.fy(0)); ctx.lineTo(ax.fx(fin), ax.fy(0.8)); ctx.stroke();
+      ctx.fillStyle = C.blue; ctx.textAlign = 'center'; ctx.font = '11px sans-serif'; ctx.fillText('input ' + fin, ax.fx(fin), ax.fy(0.85) - 3);
+      // alias into zone 1
+      const k = Math.round(fin / fs); const alias = Math.abs(fin - k * fs);
+      ctx.strokeStyle = C.orange; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ax.fx(alias), ax.fy(0)); ctx.lineTo(ax.fx(alias), ax.fy(0.6)); ctx.stroke();
+      ctx.fillStyle = C.orange; ctx.fillText('alias ' + alias.toFixed(0), ax.fx(alias), ax.fy(0.65) - 3);
+      const zone = Math.floor(fin / (fs / 2)) + 1;
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('fs = ' + fs + ' MS/s · input in Nyquist zone ' + zone + ' → samples as ' + alias.toFixed(0) + ' MHz baseband', ax.x + 6, ax.y + ax.h - 10);
+    }
+    draw();
+    slider(card.controls, { label: 'input frequency', min: 10, max: 1490, step: 10, value: 700, fmt: v => v + ' MHz' }, v => { fin = v; draw(); });
+  };
+
+  // Antenna types: pick a type and see its radiation pattern
+  T.antennaZoo = function (host, spec) {
+    const card = makeCard(host, spec, 440, 380);
+    const types = {
+      iso: { l: 'Isotropic', gain: '0 dBi', pat: () => 1 },
+      dipole: { l: 'λ/2 dipole', gain: '2.15 dBi', pat: th => { const s = Math.cos(th); const d = Math.sqrt(1 - s * s); return d < 1e-3 ? 1e-3 : Math.cos(Math.PI / 2 * s) / d; } },
+      arr4: { l: '4-elem array', gain: '~9 dBi', pat: th => AFn(4, th) },
+      arr8: { l: '8-elem array', gain: '~12 dBi', pat: th => AFn(8, th) }
+    };
+    function AFn(N, th) { const psi = Math.PI * Math.sin(th); return Math.abs(psi) < 1e-6 ? 1 : Math.abs(Math.sin(N * psi / 2) / (N * Math.sin(psi / 2))); }
+    let cur = 'dipole';
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const cx = w / 2, cy = h - 46, R = Math.min(w / 2, h - 80) - 10;
+      ctx.strokeStyle = C.grid; ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      [-30, -20, -10, 0].forEach(dbv => { const r = R * (1 + dbv / 40); ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, TAU); ctx.stroke(); ctx.fillText(dbv + 'dB', cx, cy - r - 2); });
+      for (let a = -90; a <= 90; a += 30) { const rad = a * Math.PI / 180; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + R * Math.sin(rad), cy - R * Math.cos(rad)); ctx.stroke(); }
+      const t = types[cur];
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2.5; ctx.beginPath(); let started = false;
+      for (let a = -90; a <= 90; a += 0.5) { const th = a * Math.PI / 180; const g = Math.max(-40, dB(Math.pow(t.pat(th), 2) + 1e-5)); const r = R * (1 + g / 40); const X = cx + r * Math.sin(th), Y = cy - r * Math.cos(th); if (!started) { ctx.moveTo(X, Y); started = true; } else ctx.lineTo(X, Y); }
+      ctx.stroke();
+      ctx.fillStyle = C.text; ctx.textAlign = 'left'; ctx.font = '13px sans-serif'; ctx.fillText(t.l + ' — typical gain ' + t.gain, 12, 20);
+    }
+    draw();
+    chooser(card.controls, Object.keys(types).map(k => ({ v: k, l: types[k].l })), cur, v => { cur = v; draw(); });
+  };
+
   /* ---- topic → figure specs map ---- */
+  const EX = s => s; // helper for readability
   const map = {
-    'comm-basics': [{ type: 'capacity', title: 'Shannon capacity vs SNR', caption: 'Capacity rises only logarithmically with SNR — each 3 dB buys ~1 bit/s/Hz.' }],
-    'noise': [{ type: 'gaussianNoise', title: 'AWGN: samples vs Gaussian pdf', caption: 'Thermal noise is Gaussian. Drag σ to change noise power (kTB).' }],
-    'psd': [{ type: 'psd', title: 'Power spectral density (periodogram)', caption: 'A carrier sitting above a flat white-noise floor. Change SNR to see it emerge.' }],
-    'noise-floor': [{ type: 'noiseFloorBw', title: 'Noise floor vs bandwidth', caption: 'Floor = −174 + 10·log₁₀(B) + NF. Wider bandwidth = higher floor.' }],
-    'noise-figure': [{ type: 'friisNF', title: 'Friis: why the first stage dominates', caption: 'With enough LNA gain, total NF collapses to the LNA’s own NF.' }],
-    'phase-noise': [{ type: 'phaseNoise', title: 'Phase-noise skirt (Leeson)', caption: 'ℒ(f) falls in characteristic −30 / −20 dB/decade slopes down to a floor.' }],
+    'comm-basics': [{ type: 'capacity', title: 'Shannon capacity vs SNR', caption: 'Drag the SNR to read the maximum error-free bit-rate per hertz.', explain: EX('<b>What it shows:</b> the hard ceiling C = B·log₂(1+SNR). <b>Try:</b> notice it climbs steeply at low SNR but flattens — past ~20 dB, each extra 3 dB of power buys only ~1 more bit/s/Hz. That diminishing return is why we add <i>bandwidth</i> or <i>antennas</i> (MIMO), not just power, to go faster.') }],
+    'noise': [{ type: 'gaussianNoise', title: 'AWGN: samples vs the Gaussian pdf', caption: 'Drag σ (noise power) and watch the histogram track the bell curve.', explain: EX('<b>What it shows:</b> thermal noise really is Gaussian — the random samples (blue) fill the theoretical pdf (orange). <b>Try:</b> increasing σ widens the bell; since noise power ∝ σ² ∝ kTB, this is exactly what a wider bandwidth or hotter receiver does to your noise.') }],
+    'psd': [{ type: 'psd', title: 'Power spectral density (periodogram)', caption: 'Lower the SNR until the carrier spike sinks into the noise floor.', explain: EX('<b>What it shows:</b> a single carrier as a spike standing on a flat white-noise floor. <b>Try:</b> drop the SNR — when the spike reaches the floor it becomes undetectable, which is precisely the sensitivity limit of a receiver.') }],
+    'noise-floor': [{ type: 'noiseFloorBw', title: 'Noise floor vs bandwidth', caption: 'Slide the noise figure; the whole floor shifts up dB-for-dB.', explain: EX('<b>What it shows:</b> floor = −174 dBm/Hz + 10·log₁₀(B) + NF. <b>Try:</b> the curve rises 3 dB every time bandwidth doubles, and NF lifts the entire line — so a quieter front end or a narrower channel directly improves how weak a signal you can hear.') }],
+    'noise-figure': [{ type: 'friisNF', title: 'Friis: why the first stage dominates', caption: 'Increase the LNA gain and watch total NF collapse onto the LNA’s own NF.', explain: EX('<b>What it shows:</b> Friis’ formula F_tot = F₁ + (F₂−1)/G₁. <b>Try:</b> with only a few dB of LNA gain the second stage still hurts, but past ~15 dB the total NF flattens to the LNA alone — the reason the low-noise amp goes <i>first</i>, right at the antenna.') }],
+    'phase-noise': [{ type: 'phaseNoise', title: 'Phase-noise skirt (Leeson) & jitter', caption: 'Drag the offset marker to read ℒ(f) and the integrated RMS jitter.', explain: EX('<b>What it shows:</b> an oscillator’s noise skirt falling in −30 then −20 dB/decade slopes to a floor. <b>Try:</b> move the marker outward — the integrated jitter (in degrees) shrinks, showing why close-in phase noise dominates and why it wrecks dense QAM constellations.') }],
     'bpsk': [
-      { type: 'constellation', order: 2, snr: 12, title: 'BPSK constellation with noise', caption: 'Two antipodal points. Lower the SNR until the noise clouds cross zero → errors.' },
-      { type: 'berCurve', series: [{ name: 'bpsk' }], title: 'BPSK BER vs Eb/N0', caption: 'The benchmark curve Pb = Q(√(2Eb/N0)). Drag to read any operating point.' }
+      { type: 'constellation', order: 2, snr: 12, title: 'BPSK constellation with live noise', caption: 'Lower the SNR until the two clouds bleed across zero → bit errors.', explain: EX('<b>What it shows:</b> the two antipodal points ±√Eb with a real Gaussian noise cloud. <b>Try:</b> reduce SNR — once a cloud crosses the vertical decision line, the detector flips that bit. That overlap area <i>is</i> the bit-error rate.') },
+      { type: 'berCurve', series: [{ name: 'bpsk' }], title: 'BPSK BER vs Eb/N0', caption: 'Drag the marker to read the error rate at any operating point.', explain: EX('<b>What it shows:</b> the benchmark curve Pb = Q(√(2Eb/N0)) on a log axis. <b>Try:</b> the “waterfall” steepness means a couple of extra dB takes you from 1-in-100 to 1-in-10⁵ errors — every dB of link margin counts.') }
     ],
-    'dbpsk': [{ type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'DBPSK vs coherent BPSK', caption: 'Differential detection costs about 1 dB — the gap between the curves.' }],
-    'matched-filter': [{ type: 'matchedFilter', title: 'Matched filter output', caption: 'The correlator squeezes a noisy input into a clean peak at t=T. Lower SNR to see it work.' }],
-    'evm': [{ type: 'constellation', order: 16, snr: 22, title: '16-QAM constellation & EVM', caption: 'EVM is the RMS spread from ideal points. Note dense constellations need high SNR.' }],
-    'pll': [{ type: 'pllStep', title: 'PLL phase-step response vs damping', caption: 'ζ≈0.707 settles fast with little overshoot; low ζ rings, high ζ crawls.' }],
-    'fll': [{ type: 'fllPull', title: 'FLL frequency pull-in', caption: 'An FLL captures large offsets a PLL never could — ideal for acquisition.' }],
-    'costas-loop': [{ type: 'costasScurve', title: 'Costas loop S-curve', caption: 'Error = I·Q ∝ sin(2Δφ): data-independent, with a stable lock every 180° (the ambiguity).' }],
-    'dsss': [{ type: 'spread', title: 'Spreading lowers the PSD', caption: 'Same power spread over N× the band drops the PSD by the processing gain — below the floor.' }],
-    'frequency-hopping': [{ type: 'hopping', title: 'Frequency-hop pattern', caption: 'The carrier hops pseudo-randomly; a fixed jammer only spoils the few dwells on its channel.' }],
-    'pn-codes': [{ type: 'autocorr', title: 'm-sequence autocorrelation', caption: 'Sharp two-valued autocorrelation (peak L, −1 elsewhere) — perfect for timing/despreading.' }],
-    'gold-code': [{ type: 'crosscorr', title: 'Gold-code cross-correlation', caption: 'Bounded to three small values, so many users (satellites) share a band with low interference.' }],
-    'fec': [{ type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Coding gain', caption: 'FEC shifts the BER curve left — the horizontal gap is the coding gain (dB).' }],
-    'viterbi': [{ type: 'trellis', title: 'Viterbi trellis & survivor path', caption: 'Add–compare–select keeps one survivor per state; the green path is the ML sequence.' }],
-    'adc': [{ type: 'quantize', title: 'Quantization & SNR', caption: 'Each added bit is ~6 dB more SNR (6.02N+1.76). Watch the staircase refine.' }],
-    'dac': [{ type: 'sincImages', title: 'DAC sinc roll-off & images', caption: 'Zero-order hold imposes a sinc envelope and images at every multiple of fs.' }],
-    'rssi': [{ type: 'pathLoss', title: 'Received power vs distance', caption: 'RSSI tracks path loss; the exponent n controls how fast it falls in real environments.' }],
-    'path-loss': [{ type: 'pathLoss', title: 'Path loss vs distance & frequency', caption: 'Free space: +6 dB per octave of distance AND of frequency. Drag n for cluttered channels.' }],
-    'link-budget': [{ type: 'linkWaterfall', title: 'Link-budget waterfall', caption: 'Gains add, losses subtract; the gap between received power and sensitivity is your margin.' }],
-    'antenna': [{ type: 'polarPattern', N: 4, title: 'Radiation pattern (steerable)', caption: 'More elements → narrower main beam and more side lobes. Try steering the beam.' }],
-    'antenna-gain': [{ type: 'gainFreq', title: 'Aperture gain vs frequency', caption: 'G = η·4πA/λ²: bigger dish or higher frequency = more gain (+6 dB/octave).' }],
-    'antenna-beamwidth': [{ type: 'polarPattern', N: 8, title: 'Beamwidth vs array size', caption: 'HPBW narrows as elements/aperture grow; note the side lobes and steering trade-offs.' }],
-    'maxwell': [{ type: 'emWave', title: 'Propagating EM plane wave', caption: 'Self-sustaining orthogonal E and B fields travel at c = 1/√(μ₀ε₀).' }]
+    'dbpsk': [{ type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'DBPSK vs coherent BPSK', caption: 'The horizontal gap between the curves is the ~1 dB penalty.', explain: EX('<b>What it shows:</b> differential BPSK (orange) sits about 1 dB right of coherent BPSK (teal). <b>Why:</b> each decision reuses the previous noisy symbol as its reference, so noise counts twice — the price you pay for needing no carrier-phase recovery.') }],
+    'matched-filter': [{ type: 'matchedFilter', title: 'Matched filter output', caption: 'Lower the input SNR and watch the correlator still find the peak.', explain: EX('<b>What it shows:</b> a noisy pulse (grey) turned into a clean triangle peaking at t=T (orange) by correlating against the known shape (teal). <b>Try:</b> even at negative SNR the peak survives — the matched filter delivers the maximum possible SNR = 2E/N₀ at the sampling instant.') }],
+    'evm': [{ type: 'constellation', order: 16, snr: 22, title: '16-QAM constellation & EVM', caption: 'Drop the SNR and watch tightly-packed points start colliding.', explain: EX('<b>What it shows:</b> EVM is the RMS distance of each received dot from its ideal 16-QAM location. <b>Try:</b> lower SNR (worse EVM) and the clouds merge — dense constellations have tiny spacing, so they demand very low EVM (high SNR) to stay error-free.') }],
+    'pll': [{ type: 'pllStep', title: 'PLL phase-step response vs damping', caption: 'Sweep the damping ζ from ringy to sluggish.', explain: EX('<b>What it shows:</b> how the loop’s phase error settles after a disturbance. <b>Try:</b> ζ≈0.707 (the classic choice) settles fast with barely any overshoot; low ζ rings for a long time, high ζ crawls — the core loop-filter design trade-off.') }],
+    'fll': [{ type: 'fllPull', title: 'FLL frequency pull-in', caption: 'Crank up the initial offset — the FLL still drags it to zero.', explain: EX('<b>What it shows:</b> a frequency-locked loop capturing a large starting frequency error. <b>Try:</b> set a huge offset (e.g. 200 kHz) — a PLL would slip and never lock, but the FLL still converges, which is why receivers acquire with an FLL first, then hand over to a PLL.') }],
+    'costas-loop': [{ type: 'costasScurve', title: 'Costas loop S-curve', caption: 'Drag the phase error — the arrow shows which way the VCO is nudged.', explain: EX('<b>What it shows:</b> the loop error I·Q ∝ sin(2Δφ), which is <i>independent of the data bit</i>. <b>Try:</b> the curve crosses zero (stable lock) at both 0° and ±180° — that second stable point is the famous 180° phase ambiguity you fix with differential coding or a preamble.') }],
+    'dsss': [{ type: 'spread', title: 'Spreading lowers the PSD', caption: 'Raise the processing gain and push the signal under the floor.', explain: EX('<b>What it shows:</b> the same total power spread over N× the bandwidth, so its PSD drops by the processing gain (10·log₁₀N). <b>Try:</b> at high gain the blue spread signal sinks below the noise floor — exactly how GPS hides ~20 dB under the noise yet still gets recovered by despreading.') }],
+    'frequency-hopping': [{ type: 'hopping', title: 'Frequency-hop pattern', caption: 'Change the channel count and watch the jammer’s hit-rate fall.', explain: EX('<b>What it shows:</b> the carrier hopping pseudo-randomly across channels over time; the red channel is jammed. <b>Try:</b> more channels means the jammer catches a smaller fraction of dwells — and forward error correction repairs those few, so the link survives.') }],
+    'pn-codes': [{ type: 'autocorr', title: 'm-sequence autocorrelation', caption: 'Change the register length and see the period 2ⁿ−1 and the sharp peak.', explain: EX('<b>What it shows:</b> the two-valued autocorrelation of an LFSR m-sequence — a tall spike of height L at zero shift, and −1 everywhere else. <b>Try:</b> more stages → a longer code with a sharper, more selective peak, which is what lets a receiver nail code timing to a fraction of a chip.') }],
+    'gold-code': [{ type: 'crosscorr', title: 'Gold-code cross-correlation', caption: 'Slide across shifts — every value is one of just three small numbers.', explain: EX('<b>What it shows:</b> the cross-correlation between two <i>different</i> Gold codes. <b>Try:</b> every bar is −1, −9 or 7 (tiny vs the peak of 31) — this bounded three-valued property is why 30+ GPS satellites can share one frequency without drowning each other out.') }],
+    'fec': [{ type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Coding gain', caption: 'The left-shift of the curve is the coding gain, in dB.', explain: EX('<b>What it shows:</b> adding forward error correction moves the BER curve to the left. <b>Try:</b> at a target BER, the horizontal gap (~4.5 dB here) is the coding gain — dB you can spend on more range, a smaller antenna, or lower transmit power.') }],
+    'viterbi': [{ type: 'trellis', title: 'Viterbi trellis & survivor path', caption: 'Step through the decode to watch the survivor path grow.', explain: EX('<b>What it shows:</b> the trellis of a convolutional code; the orange node is the stage being processed, the teal path is the surviving maximum-likelihood sequence. <b>Try:</b> step forward — at each stage “add–compare–select” keeps only one path into every state, which is how Viterbi avoids an exponential search.') }],
+    'sdr': [{ type: 'iqDemod', title: 'I/Q: one complex sample = amplitude + phase', caption: 'Drag phase and amplitude — read off I and Q.', explain: EX('<b>What it shows:</b> an SDR represents the signal as a complex number I + jQ. <b>Try:</b> spin the phasor: I = A·cosφ and Q = A·sinφ change together, yet the pair always encodes the full amplitude <i>and</i> phase. That is why quadrature (I/Q) sampling can represent any modulation at baseband.') }],
+    'ad9361': [{ type: 'tunableRx', title: 'Agile tuning — a movable capture window', caption: 'Tune the LO across 70 MHz–6 GHz and set the bandwidth to grab a signal.', explain: EX('<b>What it shows:</b> the AD9361 is a wideband tunable transceiver — a narrow capture window you can place anywhere in the band. <b>Try:</b> slide the LO onto a signal (FM, GPS, Wi-Fi…) and widen the bandwidth until it fits; that “tune anywhere, choose your slice” agility is the whole point of the chip.') }],
+    'adc': [{ type: 'quantize', title: 'Quantization & SNR', caption: 'Add bits and watch the staircase refine (and SNR jump ~6 dB/bit).', explain: EX('<b>What it shows:</b> an N-bit ADC snapping a smooth sine onto 2ᴺ levels. <b>Try:</b> each extra bit halves the step size and adds ~6 dB of SNR (6.02N+1.76) — the fundamental resolution-vs-quality trade in every data converter.') }],
+    'dac': [{ type: 'sincImages', title: 'DAC sinc roll-off & images', caption: 'Move the signal frequency; toggle the inverse-sinc pre-emphasis.', explain: EX('<b>What it shows:</b> a DAC’s zero-order hold droops the passband by a sinc envelope and creates image copies at every multiple of fs. <b>Try:</b> slide the tone toward fs/2 to see the droop grow, then switch on pre-emphasis to flatten it — and note the images a reconstruction filter must remove.') }],
+    'rfsoc': [{ type: 'nyquistZones', title: 'Direct RF sampling & Nyquist zones', caption: 'Sweep the input frequency — see which zone it folds from.', explain: EX('<b>What it shows:</b> an RFSoC samples RF directly at gigasamples/sec. A tone above fs/2 lives in a higher Nyquist zone and <i>aliases</i> down to a baseband copy. <b>Try:</b> move the input — the orange alias is what the ADC actually captures, letting the chip receive high-band RF with no analog mixer.') }],
+    'rssi': [{ type: 'pathLoss', title: 'Received power vs distance', caption: 'Change the path-loss exponent to model open vs cluttered sites.', explain: EX('<b>What it shows:</b> RSSI is really received power, which falls with distance. <b>Try:</b> raise the exponent n from 2 (free space) toward 3.5 (indoor/urban) — the steeper drop is why RSSI-based distance estimates are so environment-dependent and noisy.') }],
+    'path-loss': [{ type: 'pathLoss', title: 'Path loss vs distance & frequency', caption: 'Compare 100 MHz / 1 GHz / 5 GHz; drag the exponent for real channels.', explain: EX('<b>What it shows:</b> free-space loss adds 6 dB per doubling of distance <i>and</i> per doubling of frequency. <b>Try:</b> the 5 GHz line always sits above the 100 MHz line — the reason sub-GHz bands reach farther and why mmWave needs dense small cells.') }],
+    'link-budget': [{ type: 'linkWaterfall', title: 'Link-budget calculator', caption: 'Slide Tx power, distance and antenna gain — watch the margin.', explain: EX('<b>What it shows:</b> gains add (green), losses subtract (red), and the running total lands at received power vs the sensitivity line. <b>Try:</b> push distance out until the margin goes negative (“LINK FAILS”), then recover it with antenna gain or Tx power — the everyday trade of RF system design.') }],
+    'antenna': [{ type: 'polarPattern', N: 4, title: 'Radiation pattern (steerable)', caption: 'Add elements to sharpen the beam; steer it off broadside.', explain: EX('<b>What it shows:</b> the polar radiation pattern of an antenna array — a main lobe plus side lobes. <b>Try:</b> more elements narrows the main beam (more gain) but raises more side lobes; steering shifts the beam electronically, the basis of phased arrays.') }],
+    'antenna-gain': [{ type: 'gainFreq', title: 'Aperture gain vs frequency', caption: 'Change dish size and frequency to read the gain directly.', explain: EX('<b>What it shows:</b> G = η·4πA/λ². <b>Try:</b> doubling the frequency or the diameter both raise the gain — a bigger dish or a higher band gives a tighter, higher-gain beam, which is why satellite and radar dishes reach tens of dBi.') }],
+    'antenna-beamwidth': [{ type: 'polarPattern', N: 8, title: 'Beamwidth vs array size', caption: 'Grow the array and watch the half-power beamwidth shrink.', explain: EX('<b>What it shows:</b> half-power beamwidth (HPBW) versus the number of elements / aperture size. <b>Try:</b> more elements → a narrower main lobe (higher gain) but a tighter pointing requirement, and more side lobes to manage — the gain-vs-beamwidth trade.') }],
+    'antenna-types': [{ type: 'antennaZoo', title: 'Antenna zoo — pick a type', caption: 'Switch between isotropic, dipole, and arrays to compare patterns.', explain: EX('<b>What it shows:</b> the radiation pattern and typical gain of common antennas. <b>Try:</b> the isotropic reference is a circle (0 dBi); the dipole is a gentle lobe (2.15 dBi); arrays focus energy into an ever-narrower beam — how you choose an antenna for coverage vs range.') }],
+    'maxwell': [{ type: 'emWave', title: 'Propagating EM plane wave', caption: 'Play/pause the self-sustaining E and B fields.', explain: EX('<b>What it shows:</b> a plane wave with the electric (blue) and magnetic (teal) fields at right angles, in step, moving together. <b>Why:</b> a changing E makes a B and vice-versa, so the fields regenerate each other and propagate at c = 1/√(μ₀ε₀) — light and radio are the same thing.') }]
   };
 
   /* ---- registry / render ---- */
