@@ -8,7 +8,7 @@ CONTENT.topics.push(
     summary: String.raw`A feedback control loop that forces a local VCO to track the phase (and hence frequency) of an input reference by driving the phase error to a constant through a phase detector, loop filter, and voltage-controlled oscillator.`,
     prerequisites: ['comm-basics', 'noise', 'phase-noise'],
     intro: String.raw`<p>The <strong>Phase-Locked Loop (PLL)</strong> is the workhorse of synchronization. It is a negative-feedback system whose job is to make a locally generated oscillator match the <em>phase</em> of an incoming signal. Because the time-derivative of phase is frequency, matching phase automatically forces the two signals to the same frequency, but with the far stronger constraint that the phase error stays bounded and, in the steady state, constant. This single idea underlies carrier recovery in coherent receivers, clock recovery, frequency synthesis, FM/PM demodulation, and clean-up of noisy references.</p>
-<p>The PLL contains three canonical blocks in a loop: a <strong>phase detector (PD)</strong> that produces a voltage proportional to the phase difference between input and VCO, a <strong>loop filter (LF)</strong> that smooths this error and sets the dynamics, and a <strong>voltage-controlled oscillator (VCO)</strong> whose instantaneous frequency is proportional to its control voltage. The crucial insight for analysis is that the VCO integrates control voltage into phase, so the VCO acts as a $1/s$ integrator in the phase domain. This makes even a "first-order" phase-detector-plus-VCO loop a type-1 system, and it is why steady-state phase error to a frequency step can be driven to zero.</p>`,
+<p>The PLL contains three canonical blocks in a loop: a <strong>phase detector (PD)</strong> that produces a voltage proportional to the phase difference between input and VCO, a <strong>loop filter (LF)</strong> that smooths this error and sets the dynamics, and a <strong>voltage-controlled oscillator (VCO)</strong> whose instantaneous frequency is proportional to its control voltage. The crucial insight for analysis is that the VCO integrates control voltage into phase, so the VCO acts as a $1/s$ integrator in the phase domain. This makes even a "first-order" phase-detector-plus-VCO loop a type-1 system, and it is why the steady-state phase error to a phase step is zero (a frequency step leaves only a finite, bounded error $\Delta\omega/K$).</p>`,
     sections: [
       {
         h: 'Motivation and the three building blocks',
@@ -53,7 +53,7 @@ CONTENT.topics.push(
         h: 'Loop bandwidth, type, order, and steady-state error',
         html: String.raw`<p>Two properties are often confused. <strong>Order</strong> is the degree of the closed-loop denominator polynomial (number of poles). <strong>Type</strong> is the number of pure integrators (poles at $s=0$) in the open loop. The VCO always contributes one integrator, so the simplest loop is type 1; adding an integrator in the loop filter makes it type 2.</p>
 <p>The <strong>one-sided noise bandwidth</strong> $B_L$ (Hz) determines how much noise power the loop passes:</p>
-<p>$$B_L=\int_0^{\infty}|H(j2\pi f)|^2\,df=\frac{\omega_n}{2}\left(\zeta+\frac{1}{4\zeta}\right)\ \text{(in Hz, with }\omega_n\text{ in rad/s)}.$$</p>
+<p>$$B_L=\frac{1}{2\pi}\int_0^{\infty}|H(j\omega)|^2\,d\omega=\frac{\omega_n}{2}\left(\zeta+\frac{1}{4\zeta}\right)\ \text{(same units as }\omega_n\text{; divide by }2\pi\text{ for Hz)}.$$</p>
 <p>Steady-state phase error follows from the final value theorem $\phi_{ss}=\lim_{s\to0}sH_e(s)\Theta_i(s)$:</p>
 <table class="data">
 <tr><th>Input</th><th>$\theta_i(t)$</th><th>Type-1 loop</th><th>Type-2 loop</th></tr>
@@ -108,7 +108,7 @@ CONTENT.topics.push(
       String.raw`The VCO is a $1/s$ integrator in the phase domain — it converts control voltage into phase, giving every PLL at least type-1 behaviour.`,
       String.raw`Closed-loop phase transfer $H(s)=G/(1+G)$ with $G(s)=K_dK_vF(s)/s$; the error transfer is $H_e(s)=1-H(s)=s/(s+K_dK_vF(s))$.`,
       String.raw`Second-order standard form: $\omega_n=\sqrt{K_dK_v/\tau_1}$, $\zeta=(\tau_2/2)\sqrt{K_dK_v/\tau_1}$; $\zeta\approx0.707$ is the usual sweet spot.`,
-      String.raw`One-sided noise bandwidth $B_L=(\omega_n/2)(\zeta+1/4\zeta)$ Hz sets passed noise; thermal phase-error variance $\sigma_\phi^2=B_LN_0/C$.`,
+      String.raw`One-sided noise bandwidth $B_L=(\omega_n/2)(\zeta+1/4\zeta)$ (same units as $\omega_n$; $\div 2\pi$ for Hz) sets passed noise; thermal phase-error variance $\sigma_\phi^2=B_LN_0/C$.`,
       String.raw`Type-1 loop has finite phase error $\Delta\omega/K$ to a frequency step; type-2 has zero error to a step and finite error to a Doppler ramp.`,
       String.raw`Lock hierarchy: capture (lock-in) $\le$ pull-in $\le$ hold-in; capture range $\approx2\zeta\omega_n$.`,
       String.raw`Loop is low-pass to reference phase noise and high-pass to VCO phase noise, crossing over near $\omega_n$.`,
@@ -167,8 +167,8 @@ CONTENT.topics.push(
       },
       {
         title: 'One-sided loop noise bandwidth',
-        tex: String.raw`$$B_L=\int_0^{\infty}|H(j2\pi f)|^2\,df=\frac{\omega_n}{2}\left(\zeta+\frac{1}{4\zeta}\right)$$`,
-        derivation: String.raw`<p>$B_L$ is defined so that a white input phase-noise density passed through $|H|^2$ produces the same output variance as an ideal brick-wall of width $B_L$. Evaluating the integral of $|H(j\omega)|^2$ for the standard second-order $H$ gives the closed form. Note it is minimised near $\zeta=0.5$ but $\zeta=0.707$ is preferred for transient behaviour; there $B_L\approx0.53\,\omega_n$ (in Hz with $\omega_n$ in rad/s).</p>`
+        tex: String.raw`$$B_L=\frac{1}{2\pi}\int_0^{\infty}|H(j\omega)|^2\,d\omega=\frac{\omega_n}{2}\left(\zeta+\frac{1}{4\zeta}\right)$$`,
+        derivation: String.raw`<p>$B_L$ is defined so that a white input phase-noise density passed through $|H|^2$ produces the same output variance as an ideal brick-wall of width $B_L$. Evaluating the integral of $|H(j\omega)|^2$ for the standard second-order $H$ gives the closed form. Note it is minimised near $\zeta=0.5$ but $\zeta=0.707$ is preferred for transient behaviour; there $B_L\approx0.53\,\omega_n$ (in the same units as $\omega_n$, i.e. rad/s; divide by $2\pi$ to get Hz).</p>`
       },
       {
         title: 'Steady-state error to a frequency step (type-1)',
@@ -203,7 +203,7 @@ CONTENT.topics.push(
       { front: String.raw`Difference between loop order and loop type?`, back: String.raw`Order = number of closed-loop poles (denominator degree). Type = number of pure integrators (poles at $s=0$) in the open loop. The VCO always gives one, so minimum type is 1.` },
       { front: String.raw`Steady-state phase error of a type-1 loop to a frequency step $\Delta\omega$?`, back: String.raw`$\phi_{ss}=\Delta\omega/K$ where $K=K_dK_v$ is the DC loop gain — finite and nonzero. A type-2 loop gives zero.` },
       { front: String.raw`Order the acquisition ranges from smallest to largest.`, back: String.raw`Capture (lock-in) $\le$ pull-in $\le$ hold-in. Capture $\approx2\zeta\omega_n$; hold-in $\approx K$.` },
-      { front: String.raw`One-sided loop noise bandwidth formula?`, back: String.raw`$B_L=(\omega_n/2)(\zeta+1/4\zeta)$ Hz (with $\omega_n$ in rad/s); minimised near $\zeta=0.5$, but $\zeta=0.707$ is used for good transients.` },
+      { front: String.raw`One-sided loop noise bandwidth formula?`, back: String.raw`$B_L=(\omega_n/2)(\zeta+1/4\zeta)$ in the same units as $\omega_n$ (rad/s; divide by $2\pi$ for Hz); minimised near $\zeta=0.5$, but $\zeta=0.707$ is used for good transients.` },
       { front: String.raw`How does the loop treat reference vs VCO phase noise?`, back: String.raw`Low-pass to reference phase noise (tracks it inside $B_L$), high-pass to VCO phase noise (suppresses it inside the loop). Crossover near $\omega_n$.` },
       { front: String.raw`What causes a cycle slip?`, back: String.raw`Phase error growing near a quarter-cycle (thermal noise + dynamics), causing a $2\pi$ jump and momentary loss of lock. Mean time between slips falls exponentially with loop SNR.` },
       { front: String.raw`Synthesizer output frequency and channel spacing?`, back: String.raw`$f_{out}=(N/R)f_{ref}$; channel spacing $=f_{ref}/R$. Loop bandwidth scales as $1/\sqrt{N}$.` },
@@ -233,7 +233,7 @@ CONTENT.topics.push(
     numericals: [
       { q: String.raw`A second-order PLL has $K_d=0.5$ V/rad, $K_v=2\pi\times10^6$ rad/s/V, and $\tau_1=10^{-3}$ s. Find $\omega_n$.`, solution: String.raw`$K_dK_v=0.5\times2\pi\times10^6=\pi\times10^6\approx3.14\times10^6$ s$^{-1}$. $\omega_n=\sqrt{K_dK_v/\tau_1}=\sqrt{3.14\times10^6/10^{-3}}=\sqrt{3.14\times10^9}\approx5.6\times10^4$ rad/s $\approx8.9$ kHz.` },
       { q: String.raw`For the loop above with $\tau_2=2.5\times10^{-5}$ s, find the damping ratio $\zeta$.`, solution: String.raw`$\zeta=\omega_n\tau_2/2=(5.6\times10^4)(2.5\times10^{-5})/2=1.40/2=0.70$. This is essentially the maximally-flat design point.` },
-      { q: String.raw`Using $\omega_n=5.6\times10^4$ rad/s and $\zeta=0.7$, estimate the one-sided noise bandwidth $B_L$ and the settling time.`, solution: String.raw`$B_L=(\omega_n/2)(\zeta+1/4\zeta)=(5.6\times10^4/2)(0.7+1/2.8)=(2.8\times10^4)(0.7+0.357)=2.8\times10^4\times1.057\approx2.96\times10^4$ Hz $\approx29.6$ kHz. Settling: $t_s\approx4/(\zeta\omega_n)=4/(0.7\times5.6\times10^4)=4/3.92\times10^4\approx1.02\times10^{-4}$ s $\approx102\ \mu$s.` },
+      { q: String.raw`Using $\omega_n=5.6\times10^4$ rad/s and $\zeta=0.7$, estimate the one-sided noise bandwidth $B_L$ and the settling time.`, solution: String.raw`$B_L=(\omega_n/2)(\zeta+1/4\zeta)=(5.6\times10^4/2)(0.7+1/2.8)=(2.8\times10^4)(0.7+0.357)=2.8\times10^4\times1.057\approx2.96\times10^4$ rad/s. In Hz, $B_L=2.96\times10^4/(2\pi)\approx4.7$ kHz. Settling: $t_s\approx4/(\zeta\omega_n)=4/(0.7\times5.6\times10^4)=4/3.92\times10^4\approx1.02\times10^{-4}$ s $\approx102\ \mu$s.` },
       { q: String.raw`A type-1 PLL has $K=K_dK_v=3.14\times10^6$ s$^{-1}$. If the input frequency is offset by $\Delta f=5$ kHz, find the steady-state phase error.`, solution: String.raw`$\Delta\omega=2\pi\times5000=3.14\times10^4$ rad/s. $\phi_{ss}=\Delta\omega/K=3.14\times10^4/3.14\times10^6=0.01$ rad $\approx0.57^{\circ}$. Small because loop gain is high.` },
       { q: String.raw`Design a synthesizer for the 2.4 GHz band with 200 kHz channel spacing from a 20 MHz reference. Find $R$ and the $N$ for 2.402 GHz.`, solution: String.raw`Channel spacing $=f_{ref}/R \Rightarrow R=f_{ref}/\Delta f=20\text{ MHz}/200\text{ kHz}=100$, so comparison frequency $=200$ kHz. $N=f_{out}R/f_{ref}=f_{out}/\Delta f=2.402\times10^9/2\times10^5=12010$. Each unit increment of $N$ moves the output by 200 kHz.` },
       { q: String.raw`A tracking loop has $B_L=20$ Hz and receives $C/N_0=40$ dB-Hz. Find the RMS phase-error (thermal only).`, solution: String.raw`$C/N_0=10^{4.0}=10^4$ Hz. $\sigma_\phi^2=B_L/(C/N_0)=20/10^4=2\times10^{-3}$ rad$^2$. $\sigma_\phi=\sqrt{2\times10^{-3}}=0.0447$ rad $\approx2.6^{\circ}$. Comfortably below the $\sim45^{\circ}$ lock threshold, so lock is robust.` },

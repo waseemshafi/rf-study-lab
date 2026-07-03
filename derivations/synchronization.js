@@ -124,7 +124,7 @@ $$ \boxed{\,\phi_{ss}=\lim_{s\to0}sH_e(s)\frac{\Delta\omega}{s^2}=\frac{\Delta\o
 `,
 
     5: String.raw`
-<p><b>Where we start.</b> Before a PLL is locked, the phase-detector output is the full nonlinear $\sin\phi$, not the small-signal $\phi$. The <i>capture (pull-in) range</i> is the largest initial frequency offset from which the loop can still acquire lock. We estimate it by balancing how fast the loop can correct against how fast the error is running away.</p>
+<p><b>Where we start.</b> Before a PLL is locked, the phase-detector output is the full nonlinear $\sin\phi$, not the small-signal $\phi$. The <i>lock range</i> $\Delta\omega_L$ is the largest frequency offset the loop can pull to zero and hold in one cycle (the widest range over which it stays locked). We estimate it by balancing how fast the loop can correct against how fast the error is running away.</p>
 
 <p><b>Step 1 — The problem is nonlinear.</b> With the full PD, the control loop equation is a nonlinear ODE in $\phi$ driven by $\sin\phi$. There is no exact closed form for a general filter, so we seek an order-of-magnitude estimate tied to the loop's own time and frequency scales.</p>
 
@@ -135,7 +135,7 @@ $$ \Delta\omega_L\approx 2\zeta\omega_n. $$
 
 <p><b>Result.</b></p>
 $$ \boxed{\,\Delta\omega_L\approx 2\zeta\omega_n\,} $$
-<p><i>Intuition:</i> the capture range grows with both loop speed ($\omega_n$) and damping ($\zeta$) — a faster, better-damped loop grabs lock from farther away. Note $2\zeta\omega_n$ is also (twice) the real part of the closed-loop poles: capture range and settling speed come from the same physical rate. The <i>lock</i> range (already locked, using linear $\phi$) is far wider than this capture range.</p>
+<p><i>Intuition:</i> the lock range grows with both loop speed ($\omega_n$) and damping ($\zeta$) — a faster, better-damped loop holds lock over a wider offset. Note $2\zeta\omega_n$ is also (twice) the real part of the closed-loop poles: lock range and settling speed come from the same physical rate. The <i>capture (pull-in)</i> range — the offset from which an unlocked loop can still acquire — is narrower than this lock range.</p>
 `,
 
     6: String.raw`
@@ -357,8 +357,8 @@ $$ \text{I ref}=2\cos(\omega_c t+\hat\theta),\qquad \text{Q ref}=2\sin(\omega_c 
 <p><b>Step 3 — Mix and low-pass the I arm.</b> Multiply and use $2\cos X\cos Y=\cos(X{-}Y)+\cos(X{+}Y)$. The low-pass filter kills the $2\omega_c$ sum term, leaving the difference:</p>
 $$ I=\text{LPF}\{r\cdot 2\cos(\omega_c t+\hat\theta)\}=A\,d(t)\cos(\theta-\hat\theta). $$
 
-<p><b>Step 4 — Mix and low-pass the Q arm.</b> Using $2\cos X\sin Y=\sin(Y{-}X)+\sin(Y{+}X)$ and dropping the $2\omega_c$ term:</p>
-$$ Q=\text{LPF}\{r\cdot 2\sin(\omega_c t+\hat\theta)\}=A\,d(t)\sin(\theta-\hat\theta). $$
+<p><b>Step 4 — Mix and low-pass the Q arm.</b> The standard Costas convention uses the local reference $-2\sin(\omega_c t+\hat\theta)$. With $2\cos X\sin Y=\sin(X{+}Y)-\sin(X{-}Y)$ applied to $X=\omega_c t+\theta$ (signal) and $Y=\omega_c t+\hat\theta$ (reference), the $-\sin(X{-}Y)$ baseband term survives and the $2\omega_c$ term is dropped, leaving:</p>
+$$ Q=\text{LPF}\{r\cdot[-2\sin(\omega_c t+\hat\theta)]\}=A\,d(t)\sin(\theta-\hat\theta). $$
 
 <p><b>Step 5 — Define the phase error.</b> Let $\phi=\theta-\hat\theta$ be the tracking error.</p>
 

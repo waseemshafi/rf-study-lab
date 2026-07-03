@@ -291,10 +291,10 @@ CONTENT.topics.push(
 <p>This arises from the statistics of the product $r_k r_{k-1}^*$; the decision variable is a difference of noncentral chi-square terms whose error integral collapses to a single exponential. At a target BER of $10^{-5}$, DBPSK needs $E_b/N_0 \approx 10.5$ dB versus $9.6$ dB for coherent BPSK — the celebrated <strong>~1 dB penalty</strong> (it narrows slightly at very high SNR and widens near threshold).</p>
 <table class="data">
 <tr><th>$E_b/N_0$ (dB)</th><th>DBPSK $P_b$</th><th>Coherent BPSK $P_b$</th></tr>
-<tr><td>7</td><td>$4.4\times10^{-3}$</td><td>$7.7\times10^{-4}$</td></tr>
-<tr><td>9.6</td><td>$5.9\times10^{-5}$</td><td>$1.0\times10^{-5}$</td></tr>
-<tr><td>10.5</td><td>$1.0\times10^{-5}$</td><td>$3.9\times10^{-6}$</td></tr>
-<tr><td>12</td><td>$4.5\times10^{-7}$</td><td>$9\times10^{-9}$</td></tr>
+<tr><td>7</td><td>$3.3\times10^{-3}$</td><td>$7.7\times10^{-4}$</td></tr>
+<tr><td>9.6</td><td>$5.5\times10^{-5}$</td><td>$1.0\times10^{-5}$</td></tr>
+<tr><td>10.5</td><td>$6.7\times10^{-6}$</td><td>$1.1\times10^{-6}$</td></tr>
+<tr><td>12</td><td>$6.5\times10^{-8}$</td><td>$9\times10^{-9}$</td></tr>
 </table>
 <p>Note the penalty grows at very high SNR (the exponential vs Q-function tails diverge), but in the practical $10^{-3}$–$10^{-6}$ region the ~1 dB rule holds well.</p>`
       },

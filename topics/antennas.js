@@ -870,7 +870,7 @@ CONTENT.topics.push(
     ],
     numericals: [
       { q: String.raw`A phased array has elements spaced $d=0.5\lambda$. Find the steering phase to point the beam at $30°$.`, solution: String.raw`$\phi=2\pi d\sin\theta/\lambda=2\pi(0.5)\sin30°=2\pi(0.5)(0.5)=\pi/2=90°$ per element.` },
-      { q: String.raw`For $d=0.6\lambda$, what maximum scan angle avoids grating lobes?`, solution: String.raw`$d\le\lambda/(1+\sin\theta_{max})\Rightarrow0.6\ge1/(1+\sin\theta_{max})$... solve $1+\sin\theta_{max}\ge1/0.6=1.667\Rightarrow\sin\theta_{max}\ge0.667\Rightarrow$ grating-free only for $\theta_{max}\le\sin^{-1}(1/0.6-1)=\sin^{-1}(0.667)=41.8°$.` },
+      { q: String.raw`For $d=0.6\lambda$, what maximum scan angle avoids grating lobes?`, solution: String.raw`$d\le\lambda/(1+\sin\theta_{max})\Rightarrow0.6\le1/(1+\sin\theta_{max})$; solve $1+\sin\theta_{max}\le1/0.6=1.667\Rightarrow\sin\theta_{max}\le0.667\Rightarrow$ grating-free only for $\theta_{max}\le\sin^{-1}(1/0.6-1)=\sin^{-1}(0.667)=41.8°$.` },
       { q: String.raw`A 2.4 m dish at 11 GHz has $\eta_{ap}=0.65$. Find the gain in dBi.`, solution: String.raw`$\lambda=3\times10^8/1.1\times10^{10}=0.0273$ m. $G=0.65(\pi\times2.4/0.0273)^2=0.65(276.2)^2=0.65\times76290=49588\Rightarrow10\log_{10}=47.0$ dBi.` },
       { q: String.raw`Find the length of a Yagi driven element (0.47λ) and reflector (0.5λ) at 145 MHz.`, solution: String.raw`$\lambda=3\times10^8/1.45\times10^8=2.069$ m. Driven $=0.47\times2.069=0.972$ m. Reflector $=0.5\times2.069=1.035$ m.` },
       { q: String.raw`A helix in axial mode has circumference $C=\lambda$ at 1.5 GHz. Find its diameter.`, solution: String.raw`$\lambda=3\times10^8/1.5\times10^9=0.2$ m. $C=\pi D=\lambda\Rightarrow D=\lambda/\pi=0.2/3.1416=0.0637$ m $=6.37$ cm.` },

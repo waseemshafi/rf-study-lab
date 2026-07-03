@@ -56,7 +56,7 @@ $$ d_{\min}=2\sqrt{E_b}. $$
 $$ \sigma^2=\frac{N_0}{2}\int_0^{T_b}\phi^2(t)\,dt=\frac{N_0}{2}. $$
 
 <p><b>Step 3 — form the SNR.</b> The decision statistic is $\pm\sqrt{E_b}+n$. Define sampled SNR as (peak signal)²/(noise variance). But the useful <i>separation-based</i> SNR that drives the error rate uses the half-distance $\sqrt{E_b}$ against $\sigma$, and because the two hypotheses are symmetric the effective SNR is</p>
-$$ \mathrm{SNR}_{\text{samp}}=\frac{(2\sqrt{E_b})^2/... }{...}\;\Longrightarrow\;\frac{(\sqrt{E_b}\,)^2}{\sigma^2/2}=\frac{E_b}{N_0/2 \cdot \tfrac12}\cdot 2. $$
+$$ \mathrm{SNR}_{\text{samp}}=\frac{(\text{signal coordinate})^2}{\text{noise variance}}=\frac{(\sqrt{E_b}\,)^2}{\sigma^2}=\frac{E_b}{N_0/2}=\frac{2E_b}{N_0}. $$
 <p>Cleanly: the argument that appears in the error function is $d_{\min}/2\sigma=\sqrt{E_b}/\sqrt{N_0/2}$, whose square is</p>
 $$ \left(\frac{d_{\min}/2}{\sigma}\right)^2=\frac{E_b}{N_0/2}=\frac{2E_b}{N_0}. $$
 
@@ -177,7 +177,7 @@ $$ \Delta(\text{dB})=10\log_{10}\!\frac{(E_b/N_0)_{\text{DBPSK}}}{(E_b/N_0)_{\te
 <p><b>Step 1 — raw coherent bit-error probability.</b> Each detected encoded bit $\hat c_k$ is in error with probability $p=Q(\sqrt{2E_b/N_0})$, independently.</p>
 
 <p><b>Step 2 — differential decode couples adjacent bits.</b> The data estimate is $\hat d_k=\hat c_k\oplus\hat c_{k-1}$. A data bit is wrong iff exactly one of the two consecutive encoded bits is wrong:</p>
-$$ P_b^{\text{dd}}=P(\hat c_k\neq c_k)\,\text{XOR}\,(\hat c_{k-1}\neq c_{k-1})=2p(1-p). $$
+$$ P_b^{\text{dd}}=P(\text{exactly one of }\hat c_k,\hat c_{k-1}\text{ wrong})=p(1-p)+(1-p)p=2p(1-p). $$
 
 <p><b>Step 3 — small-$p$ limit.</b> At useful SNR $p\ll1$, so $1-p\approx1$:</p>
 $$ P_b^{\text{dd}}\approx 2p = 2\,Q\!\left(\sqrt{\tfrac{2E_b}{N_0}}\right). $$

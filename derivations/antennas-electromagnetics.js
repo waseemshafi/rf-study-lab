@@ -103,15 +103,14 @@ $$ I(z) = I_0\cos\!\left(\frac{2\pi z}{\lambda}\right), \qquad -\tfrac{\lambda}{
 $$ E_\theta \propto \frac{\cos\!\left(\frac{\pi}{2}\cos\theta\right)}{\sin\theta}. $$
 <p>The bracketed factor peaks broadside ($\theta=90^\circ$) and vanishes along the wire.</p>
 
-<p><b>Step 3 — Radiated power by integration.</b> The time-average radiated power integrates the Poynting flux over a sphere:</p>
-$$ P_{rad} = \frac{\eta_0 I_0^2}{8\pi}\int_0^\pi \frac{\cos^2\!\left(\frac{\pi}{2}\cos\theta\right)}{\sin\theta}\,d\theta. $$
-<p>The definite integral is a known constant, $C_{in}(2\pi)/2 \approx 1.2188$. With $\eta_0\approx 120\pi$:</p>
-$$ P_{rad} = \frac{120\pi\,I_0^2}{8\pi}(1.2188) = \frac{120\,I_0^2}{8}(1.2188) = I_0^2(18.28). $$
+<p><b>Step 3 — Radiated power by integration.</b> The time-average radiated power integrates the Poynting flux over a sphere. With radiation intensity $U(\theta)=\frac{\eta_0 I_0^2}{8\pi^2}\frac{\cos^2(\frac{\pi}{2}\cos\theta)}{\sin^2\theta}$ and $P_{rad}=\int_0^{2\pi}\!\int_0^\pi U\sin\theta\,d\theta\,d\phi$, the $\phi$-integration gives $2\pi$ and one power of $\sin\theta$ cancels:</p>
+$$ P_{rad} = \frac{\eta_0 I_0^2}{4\pi}\int_0^\pi \frac{\cos^2\!\left(\frac{\pi}{2}\cos\theta\right)}{\sin\theta}\,d\theta. $$
+<p>The definite integral is a known constant, $\tfrac12 C_{in}(2\pi) \approx 1.2188$. With $\eta_0\approx 120\pi$:</p>
+$$ P_{rad} = \frac{120\pi\,I_0^2}{4\pi}(1.2188) = 30\,I_0^2(1.2188) = I_0^2(36.57). $$
 
 <p><b>Step 4 — Extract $R_r$.</b> Match to $P_{rad}=\tfrac12 I_0^2 R_r$:</p>
-$$ \tfrac12 R_r = 18.28 \;\Rightarrow\; R_r \approx 36.6\,\Omega? $$
-<p>The factor-of-two care: writing $P_{rad}=\tfrac12 I_0^2 R_r$ with the full constant $\eta_0/(4\pi)\cdot C_{in}(2\pi)$ carried consistently gives</p>
-$$ R_r = \frac{\eta_0}{4\pi}\,C_{in}(2\pi) = 30(1.2188)\cdot 2 \approx 73\,\Omega. $$
+$$ \tfrac12 R_r = 36.57 \;\Rightarrow\; R_r \approx 73.1\,\Omega. $$
+<p>Equivalently, in closed form $R_r = \dfrac{\eta_0}{4\pi}\,C_{in}(2\pi) = 30\,(2.4377) \approx 73\,\Omega$ (using $C_{in}(2\pi)\approx 2.4377$, so $\tfrac12 C_{in}(2\pi)\approx 1.2188$).
 
 <p><b>Result.</b></p>
 $$ \boxed{\,R_r \approx 73\,\Omega \quad(\ell=\lambda/2)\,} $$
@@ -437,10 +436,10 @@ $$ c = \frac{1}{\sqrt{1.1127\times10^{-17}}} = \boxed{2.998\times10^{8}\ \text{m
 
 <p><b>Step 1 — Assume a plane wave.</b> Take $\vec E = \hat{x}E_0 e^{j(\omega t - kz)}$ travelling in $+z$. Then spatial derivatives bring down $-jk$ and time derivatives bring down $j\omega$.</p>
 
-<p><b>Step 2 — Apply Faraday's law.</b> $\nabla\times\vec E = -\mu\,\partial_t\vec H$. The curl of the $\hat{x}$-directed field gives a $\hat{y}$ component:</p>
-$$ (\nabla\times\vec E)_y = -\frac{\partial E_x}{\partial z} = jk E_0 e^{j(\omega t - kz)}. $$
+<p><b>Step 2 — Apply Faraday's law.</b> $\nabla\times\vec E = -\mu\,\partial_t\vec H$. For $\vec E = \hat x E_x$ the only surviving curl component is along $\hat y$, namely $(\nabla\times\vec E)_y = \dfrac{\partial E_x}{\partial z}$:</p>
+$$ (\nabla\times\vec E)_y = \frac{\partial E_x}{\partial z} = -jk E_0 e^{j(\omega t - kz)}. $$
 <p>Set equal to $-\mu\,\partial_t H_y = -j\omega\mu H_y$:</p>
-$$ jkE_x = -(-j\omega\mu H_y)\ \Rightarrow\ H_y = \frac{k}{\omega\mu}E_x. $$
+$$ -jkE_x = -j\omega\mu H_y\ \Rightarrow\ H_y = \frac{k}{\omega\mu}E_x. $$
 
 <p><b>Step 3 — Form the impedance.</b> The intrinsic impedance is the ratio $\eta = E_x/H_y = \omega\mu/k$. Using the dispersion relation $k=\omega\sqrt{\mu\varepsilon}$:</p>
 $$ \eta = \frac{\omega\mu}{\omega\sqrt{\mu\varepsilon}} = \sqrt{\frac{\mu}{\varepsilon}}. $$

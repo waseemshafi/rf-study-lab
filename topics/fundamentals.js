@@ -214,8 +214,8 @@ $$ C = B\log_2\!\left(1+\frac{S}{N}\right) \quad \text{bits/s} $$
       h: 'Thermal noise and the kTB result',
       html: String.raw`<p>A resistor $R$ at temperature $T$ (kelvin) produces an open-circuit noise voltage with mean-square value (Nyquist's theorem):</p>
 $$ \overline{v_n^2} = 4kTRB $$
-<p>where $k = 1.38\times10^{-23}$ J/K is Boltzmann's constant and $B$ is the bandwidth. When this noisy resistor is connected to a matched load $R$, maximum power transfer delivers one quarter of $\overline{v_n^2}/R$ to the load:</p>
-$$ N = \frac{(\overline{v_n^2}/4)}{R} \cdot \frac{1}{?}\ \Rightarrow\ N = kTB $$
+<p>where $k = 1.38\times10^{-23}$ J/K is Boltzmann's constant and $B$ is the bandwidth. When this noisy resistor is connected to a matched load $R$, the voltage across the load is $v_n/2$, so the delivered power is $\overline{v_n^2}/(4R)$:</p>
+$$ N = \frac{\overline{v_n^2}}{4R} = \frac{4kTRB}{4R}\ \Rightarrow\ N = kTB $$
 <p>The available noise power — the maximum power a noise source can deliver to a matched load — is simply</p>
 $$ N = kTB $$
 <p>Strikingly, it is independent of $R$: doubling the resistance doubles the noise voltage's mean-square but halves the current delivered to the matched load. At room temperature ($T_0 = 290$ K), the noise power spectral density is $kT_0 = 4\times10^{-21}$ W/Hz, which in dBm is the famous <strong>$-174$ dBm/Hz</strong>.</p>`
@@ -343,7 +343,7 @@ $$ N_{dBm} = -174 + 10\log_{10}(B_{Hz}) $$
     { q: String.raw`The available thermal noise power of a resistor depends on:`, options: [ String.raw`R and T only`, String.raw`T and B only`, String.raw`R, T and B`, String.raw`R and B only` ], answer: 1, explain: String.raw`$N=kTB$ — resistance cancels for a matched load.` },
     { q: String.raw`The thermal noise floor in a 1 GHz bandwidth at 290 K is about:`, options: [ String.raw`-174 dBm`, String.raw`-114 dBm`, String.raw`-84 dBm`, String.raw`-54 dBm` ], answer: 2, explain: String.raw`$-174 + 10\log_{10}(10^9) = -174 + 90 = -84$ dBm.` },
     { q: String.raw`Which noise type has a PSD that increases at low frequencies?`, options: [ String.raw`Thermal`, String.raw`Shot`, String.raw`Flicker (1/f)`, String.raw`White Gaussian` ], answer: 2, explain: String.raw`Flicker noise PSD rises as $1/f$ toward DC.` },
-    { q: String.raw`The two-sided PSD of white noise is:`, options: [ String.raw`$N_0$`, String.raw`$N_0/2$`, String.raw`$2N_0$`, String.raw`$kТ/2$` ], answer: 1, explain: String.raw`Two-sided PSD is $N_0/2$; integrated over $[-B,B]$ it gives total power $N_0 B$.` },
+    { q: String.raw`The two-sided PSD of white noise is:`, options: [ String.raw`$N_0$`, String.raw`$N_0/2$`, String.raw`$2N_0$`, String.raw`$kT/2$` ], answer: 1, explain: String.raw`Two-sided PSD is $N_0/2$; integrated over $[-B,B]$ it gives total power $N_0 B$.` },
     { q: String.raw`Shot noise mean-square current is:`, options: [ String.raw`$4kTRB$`, String.raw`$2qI_{DC}B$`, String.raw`$kTB$`, String.raw`$qI_{DC}^2 B$` ], answer: 1, explain: String.raw`$\overline{i_n^2}=2qI_{DC}B$ from Poisson charge crossing.` },
     { q: String.raw`A device with noise factor F = 2 has an equivalent noise temperature of:`, options: [ String.raw`145 K`, String.raw`290 K`, String.raw`580 K`, String.raw`0 K` ], answer: 1, explain: String.raw`$T_e = T_0(F-1) = 290(2-1) = 290$ K.` },
     { q: String.raw`Thermal noise voltage across a 50 Ω resistor is proportional to:`, options: [ String.raw`R`, String.raw`$\sqrt{R}$`, String.raw`$1/R$`, String.raw`independent of R` ], answer: 1, explain: String.raw`$\overline{v_n^2}=4kTRB \Rightarrow v_n \propto \sqrt R$.` },

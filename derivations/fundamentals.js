@@ -499,7 +499,7 @@ $$ \phi_{rms}^2 = \int_{f_1}^{f_2} S_\phi(f)\,df = \int_{f_1}^{f_2} 2\mathcal{L}
 <p><b>Step 2 — Convert a phase error to a time error.</b> A small phase error $\phi_{rms}$ corresponds to the time shift that would produce it. Divide the phase error by the rate at which phase accumulates.</p>
 $$ t_{jitter} = \frac{\phi_{rms}\ (\text{rad})}{2\pi f_0\ (\text{rad/s})} $$
 
-<p><b>Result.</b> $$ t_{jitter} = \frac{\phi_{rms}}{2\pi f_0} $$ For a fixed phase error, higher carrier frequency means smaller timing jitter, because each radian of phase spans less time. Sanity check: $\phi_{rms}=0.01$ rad on a $1$ GHz clock gives $t_{jitter} = 0.01/(2\pi\times10^9) \approx 1.6$ fs — the femtosecond jitter figures quoted for good clock sources.</p>
+<p><b>Result.</b> $$ t_{jitter} = \frac{\phi_{rms}}{2\pi f_0} $$ For a fixed phase error, higher carrier frequency means smaller timing jitter, because each radian of phase spans less time. Sanity check: $\phi_{rms}=0.01$ rad on a $1$ GHz clock gives $t_{jitter} = 0.01/(2\pi\times10^9) \approx 1.6$ ps; a much smaller phase error of $\phi_{rms}=10^{-5}$ rad would give $\approx 1.6$ fs — the femtosecond jitter figures quoted for good clock sources.</p>
 `,
     5: String.raw`
 <p><b>Where we start.</b> Dividing an oscillator's frequency by $N$ (a common step in synthesizers) also divides its phase, which reduces phase noise. We derive the $20\log_{10}(N)$ improvement from how division scales phase.</p>
