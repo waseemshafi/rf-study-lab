@@ -5,6 +5,7 @@
    ============================================================ */
 
 const STORE_KEY = 'rfstudy_v1';
+const REPO = 'waseemshafi/rf-study-lab'; // topic requests are filed here as GitHub issues (visible everywhere)
 
 const DEFAULT_STATE = {
   topics: {},        // id -> { mcq:{correct,wrong}, flash:{again,hard,good}, visited, lastSeen }
@@ -255,20 +256,37 @@ function renderExplanation(t, body) {
     body.appendChild(p);
   }
 
-  // Structured sections
+  // Figures for this topic (computed + schematic), numbered and embedded inline with the reading
+  const figures = collectFigures(t);
+  if (figures.length) {
+    const names = figures.map((f, i) => 'Figure ' + (i + 1) + (f.title ? ' (' + f.title + ')' : '')).join(', ');
+    body.appendChild(el('div', 'callout tip',
+      '📊 <b>' + figures.length + ' diagram' + (figures.length > 1 ? 's' : '') + '</b> accompany this topic — ' + names +
+      '. They are embedded below as you read, and shown full-size &amp; interactive in the <b>📐 Diagrams</b> tab.'));
+  }
+
+  // Structured sections, with figures distributed evenly between them
   if (t.sections && t.sections.length) {
+    const S = t.sections.length, F = figures.length;
+    // target section index after which each figure appears
+    const figAt = {};
+    figures.forEach((f, k) => { const pos = Math.min(S - 1, Math.floor((k + 0.5) * S / Math.max(F, 1))); (figAt[pos] = figAt[pos] || []).push(k); });
     t.sections.forEach((s, i) => {
       const sec = el('div', 'panel section');
       sec.innerHTML = `<h3><span class="sec-num">${i + 1}</span>${s.h}</h3>` + (s.html || '');
       body.appendChild(sec);
+      (figAt[i] || []).forEach(k => renderFigurePanel(body, figures[k], k + 1, { compact: true }));
     });
   } else if (t.explanation) {
     const p = el('div', 'panel');
     p.innerHTML = t.explanation;
     body.appendChild(p);
+    figures.forEach((f, k) => renderFigurePanel(body, f, k + 1, { compact: true }));
+  } else if (figures.length) {
+    figures.forEach((f, k) => renderFigurePanel(body, f, k + 1, { compact: true }));
   }
 
-  if (!t.intro && !t.explanation && !(t.sections && t.sections.length)) {
+  if (!t.intro && !t.explanation && !(t.sections && t.sections.length) && !figures.length) {
     body.appendChild(el('div', 'panel', '<p class="empty">No explanation yet.</p>'));
   }
 
@@ -296,16 +314,50 @@ function renderExplanation(t, body) {
   }
 }
 
+// Gather every figure for a topic: computed/interactive first, then schematic SVGs. Numbered in this order everywhere.
+function collectFigures(t) {
+  const out = [];
+  const specs = (typeof CONTENT_FIG !== 'undefined' && CONTENT_FIG[t.id]) ||
+                (typeof FIG !== 'undefined' && FIG.map[t.id]) || [];
+  specs.forEach(s => out.push({ kind: 'fig', spec: s, title: s.title || '', caption: s.caption, explain: s.explain }));
+  if (t.diagram) {
+    (Array.isArray(t.diagram) ? t.diagram : [t.diagram]).forEach(d => {
+      out.push({ kind: 'svg', svg: d.svg || d, title: (d && d.title) || 'Schematic diagram', caption: d && d.caption });
+    });
+  }
+  return out;
+}
+
+// Render one numbered figure. compact=true (Learn tab) drops the long explanation to keep reading tight.
+function renderFigurePanel(container, entry, num, opts) {
+  opts = opts || {};
+  const p = el('div', 'panel figure-panel');
+  p.appendChild(el('div', 'figure-label', 'Figure ' + num + (entry.title ? ' — ' + entry.title : '')));
+  container.appendChild(p); // attach before FIG.render so animated figures detect they are on screen
+  if (entry.kind === 'fig') {
+    const spec = Object.assign({}, entry.spec);
+    spec.title = null;                    // number label already shown above
+    if (opts.compact) spec.explain = null; // keep it short inline; full explanation lives in the Diagrams tab
+    try { FIG.render(p, spec); } catch (e) { p.appendChild(el('div', 'diagram-caption', 'Figure error: ' + e.message)); }
+  } else {
+    const w = el('div', 'diagram-wrap'); w.innerHTML = entry.svg; p.appendChild(w);
+    if (entry.caption) p.appendChild(el('div', 'diagram-caption', entry.caption));
+  }
+  return p;
+}
+
 function renderEquations(t, body) {
-  body.appendChild(el('p', 'subtitle', 'Tap any equation to reveal its full derivation, step by step.'));
-  t.equations.forEach(eq => {
+  body.appendChild(el('p', 'subtitle', 'Tap any equation for a full from-scratch derivation — each step explained.'));
+  const overrides = (typeof CONTENT_DERIV !== 'undefined' && CONTENT_DERIV[t.id]) || null;
+  t.equations.forEach((eq, i) => {
     const card = el('div', 'eq-card');
     const head = el('div', 'eq-head');
     head.innerHTML = `<div class="eq-title-wrap">
         <div class="eq-name">${eq.title || 'Result'}</div>
         <div class="eq-tex">${eq.tex || ''}</div>
       </div><span class="eq-toggle">show derivation ▾</span>`;
-    const deriv = el('div', 'eq-deriv', eq.derivation || '<p class="empty">Derivation coming soon.</p>');
+    const derivHtml = (overrides && overrides[i]) || eq.derivation || '<p class="empty">Derivation coming soon.</p>';
+    const deriv = el('div', 'eq-deriv', derivHtml);
     head.onclick = () => {
       card.classList.toggle('open');
       head.querySelector('.eq-toggle').textContent = card.classList.contains('open') ? 'hide derivation ▴' : 'show derivation ▾';
@@ -317,29 +369,10 @@ function renderEquations(t, body) {
 }
 
 function renderDiagram(t, body) {
-  // 1) Computed, interactive figures (preferred — they teach from the real math)
-  const figs = (typeof CONTENT_FIG !== 'undefined' && CONTENT_FIG[t.id]) ||
-               (typeof FIG !== 'undefined' && FIG.map[t.id]) || [];
-  if (figs.length) {
-    body.appendChild(el('p', 'subtitle', 'Interactive figures — drag the sliders to build intuition.'));
-    figs.forEach(spec => {
-      const p = el('div', 'panel');
-      body.appendChild(p); // attach first so animated figures (e.g. EM wave) see themselves on screen
-      try { FIG.render(p, spec); } catch (e) { p.appendChild(el('div', 'diagram-caption', 'Figure error: ' + e.message)); }
-    });
-  }
-  // 2) Legacy / schematic SVGs (block diagrams where a schematic is the right tool)
-  if (t.diagram) {
-    (Array.isArray(t.diagram) ? t.diagram : [t.diagram]).forEach(d => {
-      const p = el('div', 'panel');
-      const w = el('div', 'diagram-wrap');
-      w.innerHTML = d.svg || d;
-      p.appendChild(w);
-      if (d.caption) p.appendChild(el('div', 'diagram-caption', d.caption));
-      body.appendChild(p);
-    });
-  }
-  if (!figs.length && !t.diagram) body.appendChild(el('div', 'panel', '<p class="empty">No diagram yet.</p>'));
+  const figures = collectFigures(t);
+  if (!figures.length) { body.appendChild(el('div', 'panel', '<p class="empty">No diagram yet.</p>')); return; }
+  body.appendChild(el('p', 'subtitle', 'Interactive figures — drag the sliders to build intuition. (Referenced as Figure 1–' + figures.length + ' in the Learn tab.)'));
+  figures.forEach((f, k) => renderFigurePanel(body, f, k + 1, { compact: false }));
 }
 
 function renderCode(t, body) {
@@ -591,6 +624,9 @@ function renderTopicList() {
     <input id="new-topic-cat" placeholder="Category (optional)" style="max-width:200px">
     <button class="btn" id="add-topic-btn">+ Request</button>`;
   wrap.appendChild(add);
+  wrap.appendChild(el('p', 'subtitle',
+    'Requests open a pre-filled <b>GitHub issue</b> so they sync everywhere and reach the author — click “Submit new issue” on the page that opens. ' +
+    '<a href="https://github.com/' + REPO + '/issues?q=is%3Aissue+label%3Atopic-request" target="_blank" style="color:var(--accent)">View all requests on GitHub →</a>'));
 
   // Covered, grouped by category
   const coveredCount = CONTENT.topics.length;
@@ -640,6 +676,11 @@ function renderTopicList() {
     const category = $('#new-topic-cat').value.trim();
     state.extraTopics.push({ name, category });
     saveState();
+    // File it as a GitHub issue so the request is stored in the cloud (visible on every device + to the author)
+    const title = encodeURIComponent('[Topic request] ' + name);
+    const body = encodeURIComponent('**Requested topic:** ' + name + (category ? '\n**Suggested category:** ' + category : '') + '\n\n_Sent from the RF & Comms Study Lab app._');
+    const url = 'https://github.com/' + REPO + '/issues/new?labels=topic-request&title=' + title + '&body=' + body;
+    window.open(url, '_blank', 'noopener');
     renderTopicList();
   };
   $('#new-topic').addEventListener('keydown', e => { if (e.key === 'Enter') $('#add-topic-btn').click(); });

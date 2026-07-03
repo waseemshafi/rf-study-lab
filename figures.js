@@ -1149,9 +1149,124 @@ const FIG = (function () {
     slider(card.controls, { label: 'losses', min: 0, max: 10, step: 0.5, value: 3, fmt: v => v + ' dB' }, v => { loss = v; draw(); });
   };
 
+  // The sinc function + time/frequency duality
+  T.sincFunction = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function draw(a) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [-6, 6], yr: [-0.35, 1.15], xlabel: 'x', ylabel: 'sinc(x/a)' });
+      const s = x => { const t = x / a; return Math.abs(t) < 1e-6 ? 1 : Math.sin(Math.PI * t) / (Math.PI * t); };
+      const pts = []; for (let x = -6; x <= 6; x += 0.02) pts.push([x, s(x)]); line(ctx, ax, pts, C.blue, 2.5);
+      for (let k = -6; k <= 6; k++) { if (!k) continue; const z = k * a; if (z >= -6 && z <= 6) { ctx.fillStyle = C.teal; ctx.beginPath(); ctx.arc(ax.fx(z), ax.fy(0), 3, 0, TAU); ctx.fill(); } }
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(0), ax.fy(1), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('zeros at multiples of a; wider sinc in time ⇄ narrower rectangle in frequency', ax.x + 8, ax.y + 16);
+    }
+    draw(1);
+    slider(card.controls, { label: 'width a', min: 0.5, max: 3, step: 0.1, value: 1, fmt: v => v.toFixed(1) }, v => draw(v));
+  };
+
+  // Frequency spectrum: a signal is just a few tones
+  T.spectrumBuilder = function (host, spec) {
+    const card = makeCard(host, spec, 520, 340);
+    let f2 = 7, a2 = 0.5;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 74) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [0, 1], yr: [-2, 2], xlabel: '', ylabel: 'signal' });
+      const comps = [{ f: 3, a: 1 }, { f: f2, a: a2 }];
+      const sig = []; for (let t = 0; t <= 1; t += 0.002) { let v = 0; comps.forEach(c => v += c.a * Math.sin(TAU * c.f * t)); sig.push([t, v]); }
+      line(ctx, a1, sig, C.blue, 2);
+      const b2 = { x: 52, y: 20 + b1.h + 34, w: w - 72, h: (h - 74) / 2 };
+      const a2x = drawAxes(ctx, b2, { xr: [0, 15], yr: [0, 1.2], xlabel: 'frequency (Hz)', ylabel: 'amplitude' });
+      comps.forEach(c => { ctx.strokeStyle = C.orange; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(a2x.fx(c.f), a2x.fy(0)); ctx.lineTo(a2x.fx(c.f), a2x.fy(c.a)); ctx.stroke(); ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(a2x.fx(c.f), a2x.fy(c.a), 3, 0, TAU); ctx.fill(); });
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('a wiggly signal (top) is just a sum of pure tones — its spectrum (bottom)', b1.x + 4, b1.y + 12);
+    }
+    draw();
+    slider(card.controls, { label: '2nd tone freq', min: 1, max: 14, step: 1, value: 7, fmt: v => v + ' Hz' }, v => { f2 = v; draw(); });
+    slider(card.controls, { label: '2nd tone amp', min: 0, max: 1, step: 0.05, value: 0.5, fmt: v => v.toFixed(2) }, v => { a2 = v; draw(); });
+  };
+
+  // FFT: noisy wave → clean spectral spikes
+  T.fftDemo = function (host, spec) {
+    const card = makeCard(host, spec, 520, 340);
+    let ftone = 12;
+    function dft(re) { const N = re.length, mag = []; for (let k = 0; k < N / 2; k++) { let sr = 0, si = 0; for (let n = 0; n < N; n++) { const a = -TAU * k * n / N; sr += re[n] * Math.cos(a); si += re[n] * Math.sin(a); } mag.push(Math.sqrt(sr * sr + si * si) / (N / 2)); } return mag; }
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const N = 128, sig = []; for (let n = 0; n < N; n++) sig.push(Math.sin(TAU * 5 * n / N) + 0.7 * Math.sin(TAU * ftone * n / N) + 0.3 * gauss());
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 74) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [0, N], yr: [-3, 3], xlabel: '', ylabel: 'signal' });
+      line(ctx, a1, sig.map((v, i) => [i, v]), C.dim, 1.2);
+      const mag = dft(sig);
+      const b2 = { x: 52, y: 20 + b1.h + 34, w: w - 72, h: (h - 74) / 2 };
+      const a2 = drawAxes(ctx, b2, { xr: [0, N / 2], yr: [0, 1.2], xlabel: 'frequency bin', ylabel: '|FFT|' });
+      mag.forEach((m, k) => { ctx.strokeStyle = C.blue; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(a2.fx(k), a2.fy(0)); ctx.lineTo(a2.fx(k), a2.fy(m)); ctx.stroke(); });
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('the FFT turns a noisy wave (top) into clean spikes at its hidden tones (bottom)', b1.x + 4, b1.y + 12);
+    }
+    draw();
+    slider(card.controls, { label: '2nd tone bin', min: 8, max: 60, step: 1, value: 12 }, v => { ftone = v; draw(); });
+  };
+
+  // FIR filter magnitude response (moving average) — taps adjustable
+  T.firResponse = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function draw(M) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 0.5], yr: [-60, 5], xlabel: 'normalized frequency (×fs)', ylabel: 'magnitude (dB)' });
+      const pts = []; for (let f = 0.001; f <= 0.5; f += 0.002) { const num = Math.sin(Math.PI * f * M), den = M * Math.sin(Math.PI * f); const H = Math.abs(den) < 1e-9 ? 1 : Math.abs(num / den); pts.push([f, 20 * Math.log10(H + 1e-4)]); }
+      line(ctx, ax, pts, C.blue, 2.2);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(M + '-tap FIR: more taps → sharper cutoff. Always stable, exactly linear phase.', ax.x + 8, ax.y + 16);
+    }
+    draw(8);
+    slider(card.controls, { label: 'taps', min: 2, max: 40, step: 1, value: 8 }, v => draw(Math.round(v)));
+  };
+
+  // IIR one-pole low-pass magnitude response — cheap, feedback
+  T.iirResponse = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function draw(r) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 0.5], yr: [-60, 5], xlabel: 'normalized frequency (×fs)', ylabel: 'magnitude (dB)' });
+      const pts = []; for (let f = 0.001; f <= 0.5; f += 0.002) { const wv = TAU * f, reD = 1 - r * Math.cos(wv), imD = r * Math.sin(wv); const H = (1 - r) / Math.sqrt(reD * reD + imD * imD); pts.push([f, 20 * Math.log10(H + 1e-4)]); }
+      line(ctx, ax, pts, C.blue, 2.2);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('1-pole IIR (pole r=' + r.toFixed(2) + '): just one coefficient, very cheap — stable while r < 1.', ax.x + 8, ax.y + 16);
+    }
+    draw(0.8);
+    slider(card.controls, { label: 'pole r (cutoff)', min: 0.3, max: 0.98, step: 0.02, value: 0.8, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
+  // Entropy / source coding: how compressible is a source?
+  T.entropyCoding = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function draw(p) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const H = (p <= 0 || p >= 1) ? 0 : -(p * Math.log2(p) + (1 - p) * Math.log2(1 - p));
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 1], yr: [0, 1.15], xlabel: 'probability of symbol A', ylabel: 'entropy (bits/symbol)' });
+      const pts = []; for (let x = 0.005; x < 1; x += 0.005) pts.push([x, -(x * Math.log2(x) + (1 - x) * Math.log2(1 - x))]); line(ctx, ax, pts, C.blue, 2.5);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(p), ax.fy(0)); ctx.lineTo(ax.fx(p), ax.fy(H)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(p), ax.fy(H), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('entropy = ' + H.toFixed(2) + ' bits/symbol → 1 raw bit compresses toward ' + H.toFixed(2) + ' bits (' + Math.round((1 - H) * 100) + '% saved)', ax.x + 8, ax.y + 16);
+    }
+    draw(0.5);
+    slider(card.controls, { label: 'symbol skew p', min: 0.02, max: 0.98, step: 0.02, value: 0.5, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {
+    'shannon': [{ type: 'capacity', title: 'Shannon capacity', caption: 'Drag SNR to read the maximum error-free bit-rate per hertz.', explain: EX('<b>What it shows:</b> Shannon’s ceiling C = B·log₂(1+SNR) — the fastest error-free rate any scheme can ever reach. <b>Try:</b> notice it climbs fast at low SNR then flattens; beyond ~20 dB, more power barely helps, which is why we add bandwidth or antennas (MIMO) to go faster. No code can beat this line.') }],
+    'source-coding': [{ type: 'entropyCoding', title: 'Entropy = the compression limit', caption: 'Skew the symbol probabilities and watch how compressible the source becomes.', explain: EX('<b>What it shows:</b> entropy is the average information per symbol — the hard floor for lossless compression. <b>Try:</b> a 50/50 source (entropy 1 bit) can’t be squeezed; make one symbol far more likely and entropy drops, so a coder (like Huffman/ZIP) can represent it in far fewer bits. Predictable = compressible.') }],
+    'sinc-function': [{ type: 'sincFunction', title: 'The sinc function', caption: 'Change the width and see the zero crossings move.', explain: EX('<b>What it shows:</b> sinc(x)=sin(πx)/(πx) — the shape behind ideal sampling and pulse shaping. <b>Try:</b> it’s 1 at the centre and exactly zero at every other integer (the teal dots), which is what lets samples not interfere. A wider sinc in time means a narrower rectangle in frequency — the time-frequency duality.') }],
+    'frequency-spectrum': [{ type: 'spectrumBuilder', title: 'A signal is a sum of tones', caption: 'Add a second tone and watch both the wave and its spectrum change.', explain: EX('<b>What it shows:</b> the spectrum is the list of pure tones (their frequency and amplitude) that make up a signal. <b>Try:</b> change the second tone — the wiggly time-waveform (top) reshapes, and its spectrum (bottom) is just two clean lines. Every complicated signal is really a recipe of simple sine waves.') }],
+    'fft': [{ type: 'fftDemo', title: 'FFT: find the hidden tones', caption: 'Move the second tone and watch its spike track in the spectrum.', explain: EX('<b>What it shows:</b> the FFT is a fast algorithm that computes a signal’s spectrum. <b>Try:</b> even with noise smeared over the time waveform (top), the FFT (bottom) pulls out sharp spikes exactly at the tones present. This near-magical clean-up is why the FFT is the workhorse of all DSP.') }],
+    'fir-filters': [{ type: 'firResponse', title: 'FIR filter response', caption: 'Add taps to sharpen the cutoff.', explain: EX('<b>What it shows:</b> an FIR filter mixes recent input samples (no feedback), so it is always stable and has perfectly linear phase. <b>Try:</b> more taps → a sharper transition from passband to stopband, at the cost of more computation and delay. This is the safe, predictable filter.') }],
+    'iir-filters': [{ type: 'iirResponse', title: 'IIR filter response', caption: 'Move the pole toward the unit circle to sharpen (and risk instability).', explain: EX('<b>What it shows:</b> an IIR filter uses feedback, so a single coefficient can give a sharp response — far cheaper than an FIR. <b>Try:</b> push the pole radius toward 1 and the cutoff sharpens; go past 1 and it would blow up. The trade for that efficiency is nonlinear phase and a stability worry.') }],
+    'convolutional-codes': [{ type: 'trellis', title: 'Convolutional-code trellis', caption: 'Step through the trellis the encoder walks (and Viterbi decodes).', explain: EX('<b>What it shows:</b> a convolutional encoder slides bits through a shift register, tracing a path through this trellis of states. <b>Try:</b> step through — each stage the code moves between states; the decoder (Viterbi) later finds the most likely path back. The redundancy woven into that path is what corrects errors.') }],
+    'channel-coding': [{ type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Coding gain', caption: 'The left-shift of the curve is the coding gain (dB).', explain: EX('<b>What it shows:</b> channel coding adds structured redundancy so errors can be corrected, shifting the BER curve to the left. <b>Try:</b> at a target error rate, the horizontal gap (~4.5 dB here) is the coding gain — dB you can trade for more range, a smaller antenna, or lower power. This is the flip side of source coding, which removes redundancy.') }],
     'fourier-transform': [{ type: 'fourierTransform', title: 'Building a square wave from pure tones', caption: 'Add harmonics one at a time and watch a square wave appear.', explain: EX('<b>What it shows:</b> any signal is a sum of simple sine waves — the Fourier idea. <b>Try:</b> add more harmonics and the wobbly sum snaps toward a crisp square wave (the little overshoot at the edges is the famous "Gibbs ripple"). Seeing a signal as its recipe of tones is what lets us filter and analyse it.') }],
     'laplace-transform': [{ type: 'laplacePoleZero', title: 's-plane poles ↔ time response', caption: 'Drag the pole across the imaginary axis to flip stable ↔ unstable.', explain: EX('<b>What it shows:</b> a system’s "poles" on the s-plane decide how it behaves in time. <b>Try:</b> keep the pole in the shaded left half → the response decays and settles (stable); push it to the right half → it blows up (unstable). This is exactly how engineers check that cruise control or a feedback loop won’t run away.') }],
     'z-transform': [{ type: 'zPlane', title: 'z-plane poles ↔ digital response', caption: 'Move the pole in/out of the unit circle to see stable vs unstable.', explain: EX('<b>What it shows:</b> the Z-transform is the Laplace idea for step-by-step digital signals; the "danger line" is the unit circle. <b>Try:</b> pole inside the circle → the impulse response fades (stable filter); pole outside → it grows without bound. Every digital filter lives or dies by this rule.') }],

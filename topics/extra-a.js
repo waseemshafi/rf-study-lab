@@ -1,0 +1,711 @@
+// extra-a.js — Fundamentals & Signals topics: Shannon capacity, source coding, sinc, spectrum
+CONTENT.topics.push(
+{
+  id: 'shannon',
+  title: 'Shannon Capacity & Channel Model',
+  category: 'Fundamentals',
+  tags: ['information theory', 'capacity', 'entropy', 'SNR', 'Shannon-Hartley', 'spectral efficiency'],
+  summary: String.raw`Shannon's channel model and capacity theorem set the ultimate limit on error-free data rate, given by $C = B\log_2(1+\mathrm{SNR})$ bits per second.`,
+  prerequisites: ['comm-basics', 'noise', 'psd'],
+  intro: String.raw`<p>In 1948 Claude Shannon founded information theory with a single, astonishing claim: every noisy channel has a finite number — its <b>capacity</b> $C$ — such that reliable (arbitrarily low error) communication is possible at any rate below $C$ and impossible above it. Before Shannon, engineers believed that noise forced an unavoidable trade: to get fewer errors you had to slow down without bound. Shannon proved instead that as long as you stay under $C$, you can drive the error probability to zero by clever coding. This page builds the channel model, defines information and entropy, and derives the celebrated <b>Shannon–Hartley</b> formula $C=B\log_2(1+\mathrm{SNR})$ from first principles.</p>`,
+  sections: [
+    {
+      h: 'The end-to-end channel model',
+      html: String.raw`<p>Shannon abstracted every communication system into the same block chain, no matter whether it carries voice, images, or telemetry:</p>
+      <p><b>Source → Source encoder → Channel encoder → Modulator → Channel (+ noise) → Demodulator → Channel decoder → Source decoder → Sink.</b></p>
+      <ul>
+        <li><b>Source</b> produces messages (symbols, samples, bits) with some statistical structure.</li>
+        <li><b>Source encoder</b> removes redundancy — compression — squeezing the message toward its entropy $H$ (see <a href="#source-coding">source coding</a>).</li>
+        <li><b>Channel encoder</b> deliberately <i>adds</i> structured redundancy (parity, coding) so errors can later be corrected.</li>
+        <li><b>Modulator</b> maps bits onto physical waveforms suited to the channel (e.g. <a href="#bpsk">BPSK</a>).</li>
+        <li><b>Channel</b> corrupts the waveform with attenuation, distortion and, above all, additive noise.</li>
+        <li>The receiver mirrors the transmitter, undoing each stage.</li>
+      </ul>
+      <p>The two encoders do <i>opposite</i> jobs — one strips redundancy, the other injects it. Shannon's <b>source–channel separation theorem</b> proves that (for a stationary source over a memoryless channel) you lose nothing by designing them independently: compress fully, then protect. This is why real systems have a distinct zip/JPEG/MP3 stage and a distinct FEC stage.</p>
+      <div class="callout"><b>Key abstraction.</b> The channel is fully described by a conditional probability law $p(y\mid x)$ — the chance of receiving $y$ given you sent $x$. Everything about capacity follows from this law alone.</div>`
+    },
+    {
+      h: 'Information and entropy',
+      html: String.raw`<p>Shannon measured information by <b>surprise</b>. A certain event carries no information; a rare event carries a lot. The information content of an outcome of probability $p$ is $I=-\log_2 p$ bits — halving the probability adds exactly one bit. Averaging over a source gives its <b>entropy</b>:</p>
+      $$ H(X) = -\sum_i p_i \log_2 p_i \quad\text{bits/symbol.} $$
+      <p>$H$ is maximised (equal to $\log_2 M$ for an $M$-symbol alphabet) when all symbols are equally likely, and it drops toward zero as the source becomes predictable. Entropy is the <b>irreducible</b> average number of bits needed to describe the source — the floor that compression cannot beat.</p>
+      <p>For a channel we need <b>mutual information</b> $I(X;Y)=H(Y)-H(Y\mid X)$: how much the received symbol $Y$ tells you about the transmitted symbol $X$. $H(Y\mid X)$ is the leftover uncertainty caused by noise. Capacity is the best mutual information achievable by choosing the input distribution:</p>
+      $$ C = \max_{p(x)} I(X;Y). $$
+      <div class="callout"><b>Why bits?</b> Base-2 logs give the answer in bits. Use $\ln$ and you get <i>nats</i>; the physics is identical, only the unit changes.</div>`
+    },
+    {
+      h: 'Channel capacity: the noisy-channel coding theorem',
+      html: String.raw`<p>Shannon's <b>noisy-channel coding theorem</b> is the heart of it all. It has two halves:</p>
+      <ul>
+        <li><b>Achievability.</b> For any rate $R<C$ there exist codes of increasing block length whose error probability $\to 0$. The proof uses <i>random coding</i>: pick codewords at random, and typical-set decoding almost always succeeds because random codewords are spread far apart in signal space.</li>
+        <li><b>Converse.</b> For any rate $R>C$ the error probability is bounded <i>away</i> from zero no matter how clever the code. You cannot cheat the limit.</li>
+      </ul>
+      <p>The result is counter-intuitive: reliability does not require slowing down, only staying below $C$ and paying with longer codewords (hence latency and complexity). Modern turbo and LDPC codes operate within a fraction of a dB of $C$, vindicating Shannon after fifty years.</p>
+      <p>For the <b>binary symmetric channel</b> that flips each bit with probability $p$, capacity is $C = 1 - H_b(p)$ bits/use, where $H_b(p)=-p\log_2 p-(1-p)\log_2(1-p)$. At $p=0.5$ the channel is useless ($C=0$); at $p=0$ or $1$ it is perfect ($C=1$).</p>`
+    },
+    {
+      h: 'The Shannon–Hartley formula for the AWGN channel',
+      html: String.raw`<p>The most-used result specialises capacity to the <b>band-limited additive white Gaussian noise (AWGN)</b> channel — bandwidth $B$ hertz, signal power $S$, noise power $N=N_0 B$:</p>
+      $$ \boxed{\,C = B\,\log_2\!\left(1+\frac{S}{N}\right)\ \text{bits/s}.} $$
+      <p>Two knobs raise capacity — <b>bandwidth</b> $B$ and <b>signal-to-noise ratio</b> $S/N$ — but they behave very differently. Because SNR sits inside a logarithm, doubling power adds only a fixed increment (about $B$ bits/s at high SNR), whereas capacity grows <i>linearly</i> in $B$. Bandwidth is the more powerful lever, which is why wideband systems (spread spectrum, mmWave, UWB) chase raw capacity.</p>
+      <table class="data">
+        <tr><th>Regime</th><th>Behaviour</th><th>Consequence</th></tr>
+        <tr><td>Power-limited (low SNR)</td><td>$C \approx \dfrac{B}{\ln 2}\cdot\dfrac{S}{N}$, linear in power</td><td>Deep space, spread spectrum — spend bandwidth, save power</td></tr>
+        <tr><td>Bandwidth-limited (high SNR)</td><td>$C \approx B\log_2(S/N)$, log in power</td><td>Cable, fibre, dense modulation (QAM)</td></tr>
+      </table>`
+    },
+    {
+      h: 'Spectral efficiency and the −1.59 dB limit',
+      html: String.raw`<p>Divide capacity by bandwidth to get <b>spectral efficiency</b> $\eta = C/B$ in bits/s/Hz — how many bits you cram into each hertz. Shannon–Hartley says $\eta = \log_2(1+\mathrm{SNR})$. This is the yardstick for every modulation: BPSK reaches $\sim 1$ bit/s/Hz, 64-QAM $\sim 6$, and no scheme can exceed the Shannon curve for its SNR.</p>
+      <p>Rewriting capacity in terms of energy-per-bit $E_b$ (with $S=E_b C$ and $N_0$ the noise density) yields a hard floor. As you spend unlimited bandwidth ($B\to\infty$, $\eta\to 0$), the required $E_b/N_0$ approaches</p>
+      $$ \frac{E_b}{N_0}\bigg|_{\min} = \ln 2 \approx 0.693 \equiv -1.59\ \text{dB}. $$
+      <p>This is the <b>Shannon limit</b>: no matter how good your code, you cannot communicate reliably with less than −1.59 dB of $E_b/N_0$. It is the reference against which every FEC scheme (see <a href="#eb-no">Eb/N0</a>, <a href="#channel-coding">channel coding</a>) is judged — "within 1 dB of Shannon" is the modern badge of honour.</p>
+      <div class="callout"><b>Trade-off in one line.</b> More bandwidth buys you a lower power floor (down to −1.59 dB) but lower $\eta$; less bandwidth demands more power per bit. Capacity fixes the exchange rate.</div>`
+    },
+    {
+      h: 'Worked intuition and common pitfalls',
+      html: String.raw`<p>A 3 kHz telephone channel at 30 dB SNR gives $C=3000\log_2(1+1000)\approx 3000\times 9.97 \approx 29.9$ kbit/s — remarkably close to the 33.6/56k modem ceiling that real hardware chased. This is the classic sanity check that Shannon's bound is not academic; it predicted the modem plateau.</p>
+      <ul>
+        <li><b>SNR is a ratio, not dB.</b> Always convert $\mathrm{SNR}_{dB}$ back to linear ($10^{dB/10}$) before putting it in the log.</li>
+        <li><b>Capacity is a ceiling, not a promise.</b> It tells you what is <i>possible</i>, not what a given modem achieves.</li>
+        <li><b>Bandwidth $\neq$ data rate.</b> A 1 MHz channel can carry far more or far less than 1 Mbit/s depending on SNR and coding.</li>
+        <li><b>Zero SNR ⇒ zero capacity? No.</b> $C\to 0$ only as $S\to 0$; even tiny SNR gives positive capacity if bandwidth is large.</li>
+      </ul>`
+    }
+  ],
+  keyPoints: [
+    String.raw`Shannon capacity $C$ is the maximum rate for arbitrarily reliable communication; below $C$ error $\to 0$, above $C$ error is bounded away from zero.`,
+    String.raw`The universal channel model is Source → source encoder → channel encoder → modulator → channel → demodulator → channel decoder → sink.`,
+    String.raw`Entropy $H=-\sum p_i\log_2 p_i$ measures average information per symbol and is maximised for equiprobable symbols.`,
+    String.raw`Capacity is the maximum mutual information: $C=\max_{p(x)} I(X;Y)$.`,
+    String.raw`Shannon–Hartley for AWGN: $C=B\log_2(1+\mathrm{SNR})$ bits/s.`,
+    String.raw`Capacity is linear in bandwidth but logarithmic in power — bandwidth is the stronger lever.`,
+    String.raw`Spectral efficiency $\eta=C/B=\log_2(1+\mathrm{SNR})$ bits/s/Hz bounds every modulation scheme.`,
+    String.raw`The absolute Shannon limit on energy is $E_b/N_0 \ge \ln 2 = -1.59$ dB as $B\to\infty$.`,
+    String.raw`Source–channel separation: optimal to compress fully, then protect with coding, as two independent stages.`,
+    String.raw`Modern LDPC/turbo codes operate within ~1 dB of the Shannon limit.`
+  ],
+  equations: [
+    {
+      title: 'Entropy of a source',
+      tex: String.raw`$$ H(X) = -\sum_i p_i \log_2 p_i $$`,
+      derivation: String.raw`<p><b>Where we start.</b> We want a number that measures the average "surprise" of a source that emits symbol $i$ with probability $p_i$. Whatever measure $I(p)$ we choose for a single outcome must satisfy three sensible axioms.</p>
+      <p><b>Step 1 — surprise is a decreasing function of probability.</b> A sure event ($p=1$) should carry zero information, and rarer events should carry more.</p>
+      <p><b>Step 2 — independent events add.</b> If two independent things happen, their joint probability multiplies but their information should sum: $I(p_1 p_2)=I(p_1)+I(p_2)$. The only continuous function turning products into sums is the logarithm.</p>
+      $$ I(p) = -\log_b p $$
+      <p>The minus sign makes $I$ positive (since $p\le 1$), and base $b=2$ gives the unit "bit". Halving $p$ adds exactly one bit — the meaning of a bit.</p>
+      <p><b>Step 3 — average over the source.</b> Entropy is the expected information per symbol, weighting each outcome by how often it occurs:</p>
+      $$ H(X)=\mathbb{E}[I]=\sum_i p_i\,(-\log_2 p_i). $$
+      <p><b>Result.</b> $$ H(X)=-\sum_i p_i\log_2 p_i. $$ Sanity check: for a fair coin $H=-(0.5\log_2 0.5)\times 2 = 1$ bit — exactly one bit per flip, as expected.</p>`
+    },
+    {
+      title: 'Capacity as maximum mutual information',
+      tex: String.raw`$$ C=\max_{p(x)} I(X;Y),\quad I(X;Y)=H(Y)-H(Y\mid X) $$`,
+      derivation: String.raw`<p><b>Where we start.</b> The channel is a probabilistic map $p(y\mid x)$. We want the most information about the input that the output can convey.</p>
+      <p><b>Step 1 — uncertainty before and after.</b> Before observing $Y$, our uncertainty about it is $H(Y)$. After the noise has done its work but knowing what was sent, the residual uncertainty is $H(Y\mid X)$ — this is pure noise.</p>
+      <p><b>Step 2 — information is the reduction in uncertainty.</b> The knowledge $Y$ gives us about $X$ is the difference:</p>
+      $$ I(X;Y)=H(Y)-H(Y\mid X). $$
+      <p>If the channel were noiseless, $H(Y\mid X)=0$ and $I=H(Y)$ — the output tells you everything. If it were pure noise, $H(Y\mid X)=H(Y)$ and $I=0$.</p>
+      <p><b>Step 3 — pick the best input.</b> We are free to choose how often we send each input symbol. Capacity is the mutual information under the <i>best</i> input distribution:</p>
+      $$ C=\max_{p(x)} I(X;Y). $$
+      <p><b>Result.</b> Capacity depends only on the channel law $p(y\mid x)$, not on any particular code — it is a property of the channel itself.</p>`
+    },
+    {
+      title: 'Shannon–Hartley capacity',
+      tex: String.raw`$$ C=B\log_2\!\left(1+\frac{S}{N}\right) $$`,
+      derivation: String.raw`<p><b>Where we start.</b> Specialise the mutual-information capacity to a band-limited AWGN channel: bandwidth $B$, signal power $S$, additive Gaussian noise of power $N$.</p>
+      <p><b>Step 1 — dimensions of the signal space.</b> By the Nyquist sampling theorem a signal of bandwidth $B$ observed for time $T$ has $2BT$ independent real degrees of freedom (samples). Each is one "use" of the channel.</p>
+      <p><b>Step 2 — capacity of one Gaussian use.</b> For a single real sample with signal variance $S$ and noise variance $N$, the input that maximises mutual information is Gaussian, and the differential-entropy calculation gives</p>
+      $$ C_{\text{use}}=\tfrac12\log_2\!\left(1+\frac{S}{N}\right)\ \text{bits/use.} $$
+      <p>Intuition: a Gaussian of variance $S+N$ can be reliably resolved into $\sqrt{(S+N)/N}$ distinguishable levels; taking $\log_2$ of that many levels and the $\tfrac12$ from "per real dimension" yields the formula.</p>
+      <p><b>Step 3 — multiply by the number of uses per second.</b> There are $2B$ independent uses per second, so</p>
+      $$ C = 2B\times \tfrac12\log_2\!\left(1+\frac{S}{N}\right). $$
+      <p><b>Result.</b> $$ C=B\log_2\!\left(1+\frac{S}{N}\right)\ \text{bits/s}. $$ The two factors of $\tfrac12$ and $2$ cancel — a tidy reminder that the "half" in per-dimension capacity and the "two" in $2BT$ are the same fact seen twice.</p>`
+    },
+    {
+      title: 'Spectral efficiency',
+      tex: String.raw`$$ \eta=\frac{C}{B}=\log_2(1+\mathrm{SNR}) $$`,
+      derivation: String.raw`<p><b>Where we start.</b> We want bits per second <i>per hertz</i>, the fair way to compare a wideband and a narrowband system.</p>
+      <p><b>Step 1 — divide capacity by bandwidth.</b> Take Shannon–Hartley and divide both sides by $B$:</p>
+      $$ \frac{C}{B}=\log_2(1+\mathrm{SNR}). $$
+      <p><b>Step 2 — interpret.</b> $\eta$ tells you the ceiling on modulation order for a given SNR. To reach $\eta=6$ bits/s/Hz (64-QAM) you need $\mathrm{SNR}\ge 2^6-1=63 \approx 18$ dB.</p>
+      <p><b>Result.</b> $$ \eta=\log_2(1+\mathrm{SNR}). $$ Every real modulation lives <i>below</i> this curve; the gap to it (in dB) is the coding "implementation loss".</p>`
+    },
+    {
+      title: 'The −1.59 dB Shannon limit',
+      tex: String.raw`$$ \left.\frac{E_b}{N_0}\right|_{\min}=\ln 2=-1.59\ \text{dB} $$`,
+      derivation: String.raw`<p><b>Where we start.</b> We ask: what is the least energy per bit needed for reliable communication, in the limit of infinite bandwidth?</p>
+      <p><b>Step 1 — write SNR in terms of $E_b/N_0$.</b> Signal power is energy-per-bit times bit-rate; at the limit $R=C$: $S=E_b C$. Noise power is density times bandwidth, $N=N_0 B$. So $\mathrm{SNR}=\dfrac{E_b C}{N_0 B}=\dfrac{E_b}{N_0}\,\eta$.</p>
+      <p><b>Step 2 — substitute and solve for $E_b/N_0$.</b> From $\eta=\log_2(1+\eta\,E_b/N_0)$, invert:</p>
+      $$ \frac{E_b}{N_0}=\frac{2^{\eta}-1}{\eta}. $$
+      <p><b>Step 3 — take the wideband limit $\eta\to 0$.</b> Expand $2^{\eta}=e^{\eta\ln 2}\approx 1+\eta\ln 2$, so the numerator $\to \eta\ln 2$ and</p>
+      $$ \lim_{\eta\to 0}\frac{E_b}{N_0}=\ln 2 \approx 0.693. $$
+      <p><b>Result.</b> $$ 10\log_{10}(\ln 2)=-1.59\ \text{dB}. $$ Below this you literally cannot communicate reliably at any rate — the deepest floor in all of communications.</p>`
+    },
+    {
+      title: 'Binary symmetric channel capacity',
+      tex: String.raw`$$ C=1-H_b(p),\quad H_b(p)=-p\log_2 p-(1-p)\log_2(1-p) $$`,
+      derivation: String.raw`<p><b>Where we start.</b> The BSC sends a bit and flips it with probability $p$. We use $C=\max_{p(x)}[H(Y)-H(Y\mid X)]$.</p>
+      <p><b>Step 1 — the noise term is fixed.</b> Given the input, the output equals the input except for a flip of probability $p$, so the conditional entropy is just the entropy of the flip event, independent of $x$:</p>
+      $$ H(Y\mid X)=H_b(p). $$
+      <p><b>Step 2 — maximise the output entropy.</b> $H(Y)\le 1$ bit, achieved when the output is equiprobable. Choosing equiprobable inputs makes $Y$ equiprobable, so $\max H(Y)=1$.</p>
+      <p><b>Step 3 — combine.</b> $$ C=\max H(Y)-H(Y\mid X)=1-H_b(p). $$</p>
+      <p><b>Result.</b> At $p=0.5$, $H_b=1$ so $C=0$ (channel useless); at $p=0$, $C=1$ (perfect). The channel is symmetric in $p\leftrightarrow 1-p$ because a guaranteed flip is as good as no flip.</p>`
+    }
+  ],
+  flashcards: [
+    { front: String.raw`State Shannon's capacity theorem in one sentence.`, back: String.raw`Reliable communication is possible for any rate below capacity $C$ and impossible above it.` },
+    { front: String.raw`Write the Shannon–Hartley formula.`, back: String.raw`$C=B\log_2(1+\mathrm{SNR})$ bits/s.` },
+    { front: String.raw`Define entropy.`, back: String.raw`$H=-\sum_i p_i\log_2 p_i$, the average information (bits) per source symbol.` },
+    { front: String.raw`What is capacity in information-theory terms?`, back: String.raw`The maximum mutual information over all input distributions: $C=\max_{p(x)} I(X;Y)$.` },
+    { front: String.raw`Is capacity more sensitive to bandwidth or power?`, back: String.raw`Bandwidth — capacity is linear in $B$ but only logarithmic in $S/N$.` },
+    { front: String.raw`What is the −1.59 dB limit?`, back: String.raw`The minimum $E_b/N_0=\ln 2$ for reliable communication as bandwidth $\to\infty$.` },
+    { front: String.raw`Define spectral efficiency.`, back: String.raw`$\eta=C/B=\log_2(1+\mathrm{SNR})$ in bits/s/Hz.` },
+    { front: String.raw`What does the source encoder do vs the channel encoder?`, back: String.raw`Source encoder removes redundancy (compresses); channel encoder adds structured redundancy (protects).` },
+    { front: String.raw`State the source–channel separation theorem.`, back: String.raw`For a stationary source over a memoryless channel, compressing then coding separately is optimal.` },
+    { front: String.raw`Capacity of a binary symmetric channel with flip probability $p$?`, back: String.raw`$C=1-H_b(p)$, zero at $p=0.5$, one at $p=0$ or $1$.` },
+    { front: String.raw`What is mutual information?`, back: String.raw`$I(X;Y)=H(Y)-H(Y\mid X)$ — the reduction in uncertainty about $X$ from observing $Y$.` },
+    { front: String.raw`Why does noise not force you to slow down without bound?`, back: String.raw`Shannon proved coding drives error to zero at any rate below $C$; noise sets a rate limit, not a reliability trade.` },
+    { front: String.raw`What is the information content of a probability-$p$ event?`, back: String.raw`$I=-\log_2 p$ bits.` },
+    { front: String.raw`How close do modern codes get to capacity?`, back: String.raw`LDPC and turbo codes operate within about 1 dB of the Shannon limit.` }
+  ],
+  mcqs: [
+    { q: String.raw`In $C=B\log_2(1+\mathrm{SNR})$, doubling the bandwidth (fixed noise density, fixed power) roughly does what to $C$?`, options: [String.raw`Doubles it exactly`, String.raw`Adds a fixed increment`, String.raw`Increases it, but less than double because SNR per Hz drops`, String.raw`Leaves it unchanged`], answer: 2, explain: String.raw`More bandwidth admits more noise ($N=N_0B$), lowering SNR, so capacity rises but sub-linearly.` },
+    { q: String.raw`Entropy $H=-\sum p_i\log_2 p_i$ is maximised when:`, options: [String.raw`One symbol dominates`, String.raw`Symbols are equiprobable`, String.raw`There are only two symbols`, String.raw`The source is periodic`], answer: 1, explain: String.raw`Uniform distribution gives maximum uncertainty, $H=\log_2 M$.` },
+    { q: String.raw`The −1.59 dB Shannon limit is the minimum value of:`, options: [String.raw`SNR`, String.raw`$E_b/N_0$`, String.raw`Spectral efficiency`, String.raw`Bandwidth`], answer: 1, explain: String.raw`It is the floor on energy-per-bit to noise-density as bandwidth $\to\infty$.` },
+    { q: String.raw`A 3 kHz channel at 30 dB SNR has capacity closest to:`, options: [String.raw`3 kbit/s`, String.raw`10 kbit/s`, String.raw`30 kbit/s`, String.raw`300 kbit/s`], answer: 2, explain: String.raw`$3000\log_2(1001)\approx 3000\times 9.97\approx 30$ kbit/s.` },
+    { q: String.raw`Capacity is formally defined as:`, options: [String.raw`$\min I(X;Y)$`, String.raw`$\max_{p(x)} I(X;Y)$`, String.raw`$H(X)-H(Y)$`, String.raw`$B\cdot\mathrm{SNR}$`], answer: 1, explain: String.raw`Maximise mutual information over the input distribution.` },
+    { q: String.raw`For a binary symmetric channel with $p=0.5$, capacity is:`, options: [String.raw`1 bit/use`, String.raw`0.5 bit/use`, String.raw`0 bit/use`, String.raw`Infinite`], answer: 2, explain: String.raw`$C=1-H_b(0.5)=1-1=0$; the output is independent of the input.` },
+    { q: String.raw`The channel encoder in Shannon's model:`, options: [String.raw`Compresses the source`, String.raw`Adds structured redundancy for error correction`, String.raw`Modulates the carrier`, String.raw`Filters noise`], answer: 1, explain: String.raw`It injects parity/coding so the decoder can correct errors.` },
+    { q: String.raw`Which statement about spectral efficiency is correct?`, options: [String.raw`It can exceed $\log_2(1+\mathrm{SNR})$ with good coding`, String.raw`It equals $\log_2(1+\mathrm{SNR})$ at capacity`, String.raw`It is independent of SNR`, String.raw`It is measured in watts`], answer: 1, explain: String.raw`$\eta=C/B=\log_2(1+\mathrm{SNR})$; no scheme exceeds it.` },
+    { q: String.raw`Source–channel separation says you may design compression and error-protection:`, options: [String.raw`Only jointly`, String.raw`Independently, with no loss of optimality (under its conditions)`, String.raw`Never together`, String.raw`Only for analog signals`], answer: 1, explain: String.raw`For a stationary source and memoryless channel the two stages can be optimised separately.` },
+    { q: String.raw`Information content of an event with probability $1/8$ is:`, options: [String.raw`1 bit`, String.raw`3 bits`, String.raw`8 bits`, String.raw`0 bits`], answer: 1, explain: String.raw`$-\log_2(1/8)=3$ bits.` },
+    { q: String.raw`At very low SNR, capacity is approximately:`, options: [String.raw`Independent of SNR`, String.raw`Linear in SNR (and power)`, String.raw`Logarithmic in SNR`, String.raw`Zero for all SNR`], answer: 1, explain: String.raw`$\log_2(1+x)\approx x/\ln 2$ for small $x$, so $C\propto$ power — the power-limited regime.` },
+    { q: String.raw`Which is TRUE of the noisy-channel coding theorem's converse?`, options: [String.raw`Above $C$, error can still be made arbitrarily small`, String.raw`Above $C$, error is bounded away from zero for any code`, String.raw`It applies only to noiseless channels`, String.raw`It requires infinite bandwidth`], answer: 1, explain: String.raw`No code can achieve reliability above capacity — that is the converse.` }
+  ],
+  numericals: [
+    { q: String.raw`A channel has $B=1$ MHz and SNR = 20 dB. Find capacity.`, solution: String.raw`SNR linear $=10^{20/10}=100$. $C=10^6\log_2(101)=10^6\times 6.658\approx 6.66$ Mbit/s.` },
+    { q: String.raw`What SNR (dB) is needed to reach 8 bits/s/Hz?`, solution: String.raw`$\eta=\log_2(1+\mathrm{SNR})=8 \Rightarrow \mathrm{SNR}=2^8-1=255$. In dB $=10\log_{10}255\approx 24.1$ dB.` },
+    { q: String.raw`A source has symbols with probabilities 0.5, 0.25, 0.25. Find its entropy.`, solution: String.raw`$H=-(0.5\log_2 0.5+2\times 0.25\log_2 0.25)=0.5+2\times 0.5=1.5$ bits/symbol.` },
+    { q: String.raw`A BSC has bit-flip probability $p=0.1$. Find its capacity.`, solution: String.raw`$H_b(0.1)=-0.1\log_2 0.1-0.9\log_2 0.9=0.332+0.137=0.469$. $C=1-0.469=0.531$ bit/use.` },
+    { q: String.raw`To send 100 Mbit/s reliably over a 20 MHz channel, what minimum SNR (dB) is required?`, solution: String.raw`$\eta=100/20=5$ bits/s/Hz. $\mathrm{SNR}=2^5-1=31 \Rightarrow 10\log_{10}31\approx 14.9$ dB.` },
+    { q: String.raw`Confirm the Shannon limit: compute $E_b/N_0$ at $\eta=1$ bit/s/Hz and compare to $\eta\to 0$.`, solution: String.raw`$E_b/N_0=(2^1-1)/1=1=0$ dB at $\eta=1$; as $\eta\to0$ it $\to\ln 2=0.693=-1.59$ dB. The floor is 1.59 dB below the $\eta=1$ value.` }
+  ],
+  realWorld: String.raw`<p>Shannon capacity governs every modern link. Deep-space probes (Voyager, Mars rovers) run at extremely low SNR and enormous bandwidth to sit near the −1.59 dB power-limited corner, leaning on powerful <a href="#channel-coding">FEC</a> to approach capacity. Terrestrial cellular (LTE, 5G) instead operates in the bandwidth-limited regime, packing 64/256-QAM into each hertz and adapting the modulation to the measured SNR — a direct application of $\eta=\log_2(1+\mathrm{SNR})$. Wi-Fi's rate-adaptation, DOCSIS cable modems, and fibre coherent optics all pick the highest constellation their SNR allows without crossing the Shannon curve. The dial-up modem plateau at ~56 kbit/s over a 3–4 kHz phone line was a textbook confirmation that Shannon's ceiling is real and reachable.</p>`,
+  related: ['source-coding', 'channel-coding', 'eb-no', 'noise', 'comm-basics']
+},
+{
+  id: 'source-coding',
+  title: 'Source Coding (Compression)',
+  category: 'Fundamentals',
+  tags: ['compression', 'entropy', 'Huffman', 'prefix code', 'lossless', 'lossy', 'redundancy'],
+  summary: String.raw`Source coding compresses data by removing redundancy; the entropy $H=-\sum p\log_2 p$ is the hard limit on average bits per symbol for lossless compression.`,
+  prerequisites: ['comm-basics', 'shannon'],
+  intro: String.raw`<p><b>Source coding</b> — data compression — is the first processing stage in Shannon's model. Its job is to represent a message with as few bits as possible by stripping out <b>redundancy</b>: the predictable, repetitive, or perceptually irrelevant parts. Shannon's source-coding theorem sets a precise floor — the <b>entropy</b> $H$ — that no lossless coder can beat on average, and Huffman coding gets essentially all the way there. This page builds entropy as the compression limit, constructs prefix and Huffman codes, and separates lossless from lossy compression, with ZIP, JPEG, and MP3 as running examples.</p>`,
+  sections: [
+    {
+      h: 'Why compression is possible: redundancy',
+      html: String.raw`<p>Real sources are not random. English text repeats "the", images have smooth regions, audio is dominated by a few tones. This statistical <b>redundancy</b> means the naïve fixed-length representation wastes bits. Source coding exploits three kinds of redundancy:</p>
+      <ul>
+        <li><b>Statistical / coding redundancy</b> — some symbols are far more common than others, so they deserve shorter codewords (the Morse-code insight: 'E' is one dot).</li>
+        <li><b>Inter-symbol redundancy</b> — neighbouring samples are correlated (predictive coding, run-length).</li>
+        <li><b>Perceptual redundancy</b> — parts the human eye/ear cannot detect (only exploitable by <i>lossy</i> coders).</li>
+      </ul>
+      <p>Compression = modelling the source well, then coding the residual efficiently. The better your probability model, the closer you get to the entropy limit.</p>`
+    },
+    {
+      h: 'Entropy: the compression limit',
+      html: String.raw`<p>Shannon's <b>source-coding theorem</b> states that a source of entropy $H$ bits/symbol can be losslessly compressed to an average of $H$ bits/symbol, and no lower — you can approach $H$ as closely as you like with long-enough blocks, but never beat it. Entropy is therefore the fundamental yardstick:</p>
+      $$ H(X)=-\sum_i p_i\log_2 p_i \quad\text{bits/symbol.} $$
+      <p>If a coder uses average length $\bar{L}$ bits/symbol, then $\bar{L}\ge H$ always, and the gap</p>
+      $$ \text{redundancy} = \bar{L}-H \ge 0 $$
+      <p>measures inefficiency. A source with low entropy (predictable) compresses a lot; a maximum-entropy source (equiprobable, uncorrelated) cannot be compressed at all — its $H=\log_2 M$ already equals the fixed-length cost.</p>
+      <div class="callout"><b>Key insight.</b> Compression cannot create information; it can only remove the bits you were spending on redundancy. Once you hit $H$, every remaining bit is essential.</div>`
+    },
+    {
+      h: 'Prefix codes and the Kraft inequality',
+      html: String.raw`<p>To be uniquely decodable without markers, variable-length codes are usually <b>prefix (instantaneous) codes</b>: no codeword is a prefix of another, so the decoder knows exactly where each symbol ends. Prefix codes correspond to leaves of a binary tree.</p>
+      <p>A set of codeword lengths $\{\ell_i\}$ is realisable as a prefix code if and only if it satisfies the <b>Kraft inequality</b>:</p>
+      $$ \sum_i 2^{-\ell_i} \le 1. $$
+      <p>This is the mathematical budget: short codewords are "expensive" because they consume more of the tree. Combining Kraft with entropy proves the source-coding bound $\bar{L}\ge H$, achieved when $\ell_i = -\log_2 p_i$ (which is why frequent symbols get short codes).</p>`
+    },
+    {
+      h: 'Huffman coding',
+      html: String.raw`<p><b>Huffman coding</b> builds the optimal prefix code for a known symbol distribution with a beautifully simple greedy rule:</p>
+      <ol>
+        <li>List all symbols with their probabilities.</li>
+        <li>Repeatedly merge the two <i>least</i>-probable nodes into a parent whose probability is their sum.</li>
+        <li>Continue until one root remains; label edges 0/1.</li>
+        <li>Read each symbol's codeword from root to leaf.</li>
+      </ol>
+      <p>The result is provably optimal among all prefix codes: its average length is within one bit of entropy, $H\le \bar{L}_{\text{Huffman}} < H+1$. Coding blocks of symbols shrinks that gap toward zero.</p>
+      <table class="data">
+        <tr><th>Symbol</th><th>Prob</th><th>Huffman code</th><th>Length</th></tr>
+        <tr><td>A</td><td>0.5</td><td>0</td><td>1</td></tr>
+        <tr><td>B</td><td>0.25</td><td>10</td><td>2</td></tr>
+        <tr><td>C</td><td>0.125</td><td>110</td><td>3</td></tr>
+        <tr><td>D</td><td>0.125</td><td>111</td><td>3</td></tr>
+      </table>
+      <p>Here $\bar{L}=0.5(1)+0.25(2)+0.125(3)+0.125(3)=1.75$ bits, exactly equal to $H=1.75$ — a perfect match because all probabilities are powers of two. <b>Arithmetic coding</b> and range coding go further, escaping the one-bit-per-symbol granularity of Huffman.</p>`
+    },
+    {
+      h: 'Lossless vs lossy compression',
+      html: String.raw`<p>Two families with different guarantees:</p>
+      <ul>
+        <li><b>Lossless</b> — perfect reconstruction, bounded by entropy. Used where every bit matters: text (ZIP/gzip/DEFLATE = LZ77 + Huffman), PNG images, FLAC audio, executables. Typical ratios 2:1–4:1.</li>
+        <li><b>Lossy</b> — discards perceptually irrelevant detail; NOT reversible, but ratios of 10:1–100:1. Used for media: JPEG (DCT + quantisation + Huffman), MP3/AAC (psychoacoustic masking), H.264/H.265 video. Governed by <b>rate–distortion theory</b>, $R(D)$: the minimum bits to achieve distortion $\le D$.</li>
+      </ul>
+      <p>Lossy coders combine a <i>transform</i> (DCT, wavelet, or MDCT) that concentrates energy into few coefficients, <i>quantisation</i> that throws away precision where the ear/eye won't notice, and a final <i>lossless entropy coder</i> on the survivors. The entropy coder at the end is where classical source coding still lives inside every JPEG and MP3.</p>`
+    },
+    {
+      h: 'Relation to channel coding and the big picture',
+      html: String.raw`<p>Source coding and <a href="#channel-coding">channel coding</a> are complementary opposites. Source coding <b>removes</b> redundancy to hit the entropy floor; channel coding <b>adds</b> calculated redundancy to survive noise. Shannon's <b>source–channel separation theorem</b> proves that, for a stationary source over a memoryless channel, you can design the two independently and still be optimal — first compress to $H$, then protect up to capacity $C$. Reliable end-to-end transmission is possible exactly when</p>
+      $$ H \le C. $$
+      <p>This is why the file on your disk is compressed (JPEG) yet still transmits with error-correction (Wi-Fi FEC): the two stages coexist without stepping on each other. In practice the separation is not perfect for finite blocks or fading channels, which motivates <i>joint source–channel coding</i>, but the clean textbook split remains the design default.</p>`
+    }
+  ],
+  keyPoints: [
+    String.raw`Entropy $H=-\sum p_i\log_2 p_i$ is the lossless compression limit: average length $\bar{L}\ge H$ always.`,
+    String.raw`Redundancy $=\bar{L}-H\ge 0$ measures how far a code is from optimal.`,
+    String.raw`Compression works by modelling and removing statistical, inter-symbol, and (lossy only) perceptual redundancy.`,
+    String.raw`Prefix codes are uniquely and instantaneously decodable; no codeword prefixes another.`,
+    String.raw`The Kraft inequality $\sum 2^{-\ell_i}\le 1$ decides which length sets are realisable as prefix codes.`,
+    String.raw`Huffman coding is the optimal prefix code; $H\le \bar{L}<H+1$.`,
+    String.raw`Ideal codeword length is $\ell_i=-\log_2 p_i$ — frequent symbols get short codes.`,
+    String.raw`Lossless (ZIP, PNG, FLAC) is reversible; lossy (JPEG, MP3, H.264) trades fidelity for far higher ratios.`,
+    String.raw`Lossy coders = transform + quantise + entropy-code; governed by rate–distortion $R(D)$.`,
+    String.raw`Source–channel separation: compress to $H$, then protect up to $C$; reliable transmission needs $H\le C$.`
+  ],
+  equations: [
+    {
+      title: 'Entropy as the compression limit',
+      tex: String.raw`$$ \bar{L} \ge H(X) = -\sum_i p_i\log_2 p_i $$`,
+      derivation: String.raw`<p><b>Where we start.</b> We encode each symbol $i$ (probability $p_i$) with a codeword of length $\ell_i$. The average length is $\bar{L}=\sum_i p_i \ell_i$. We want to show it can never fall below entropy.</p>
+      <p><b>Step 1 — treat lengths as an implied distribution.</b> Define $q_i = 2^{-\ell_i}/Z$ where $Z=\sum_i 2^{-\ell_i}\le 1$ by the Kraft inequality. Then $\ell_i = -\log_2(q_i Z)= -\log_2 q_i - \log_2 Z$.</p>
+      <p><b>Step 2 — write the difference $\bar{L}-H$.</b> Substitute:</p>
+      $$ \bar{L}-H=\sum_i p_i\ell_i + \sum_i p_i\log_2 p_i = \sum_i p_i\log_2\frac{p_i}{q_i} - \log_2 Z. $$
+      <p><b>Step 3 — apply non-negativity of relative entropy.</b> The sum $\sum p_i\log_2(p_i/q_i)$ is the Kullback–Leibler divergence, which is $\ge 0$ (Gibbs' inequality). And $-\log_2 Z\ge 0$ because $Z\le 1$.</p>
+      <p><b>Result.</b> Both terms are non-negative, so $$ \bar{L}\ge H. $$ Equality holds when $q_i=p_i$ and $Z=1$, i.e. $\ell_i=-\log_2 p_i$ — the code matches the source perfectly.</p>`
+    },
+    {
+      title: 'Kraft inequality',
+      tex: String.raw`$$ \sum_i 2^{-\ell_i}\le 1 $$`,
+      derivation: String.raw`<p><b>Where we start.</b> A prefix code is a set of leaves in a binary tree of depth $L_{\max}=\max_i \ell_i$. Each codeword of length $\ell_i$ is a node at depth $\ell_i$.</p>
+      <p><b>Step 1 — count descendants.</b> A node at depth $\ell_i$ owns $2^{L_{\max}-\ell_i}$ of the $2^{L_{\max}}$ leaves at the bottom level.</p>
+      <p><b>Step 2 — prefix condition = disjoint subtrees.</b> Because no codeword is a prefix of another, the subtrees rooted at the codeword nodes do not overlap, so their leaf-counts sum to at most the total:</p>
+      $$ \sum_i 2^{L_{\max}-\ell_i} \le 2^{L_{\max}}. $$
+      <p><b>Step 3 — divide by $2^{L_{\max}}$.</b></p>
+      $$ \sum_i 2^{-\ell_i}\le 1. $$
+      <p><b>Result.</b> Any realisable prefix code obeys this budget, and conversely any lengths satisfying it can be arranged into a prefix code — short codewords cost exponentially more of the tree.</p>`
+    },
+    {
+      title: 'Huffman bound',
+      tex: String.raw`$$ H \le \bar{L}_{\text{Huffman}} < H+1 $$`,
+      derivation: String.raw`<p><b>Where we start.</b> Huffman produces the minimum-$\bar{L}$ prefix code. The lower bound $\bar{L}\ge H$ we already proved; we now bound it from above.</p>
+      <p><b>Step 1 — choose Shannon lengths.</b> Pick $\ell_i=\lceil -\log_2 p_i\rceil$. These satisfy Kraft (each rounds up), so a prefix code with these lengths exists.</p>
+      <p><b>Step 2 — bound its average length.</b> Since $\lceil x\rceil < x+1$:</p>
+      $$ \bar{L}_{\text{Shannon}}=\sum_i p_i\lceil -\log_2 p_i\rceil < \sum_i p_i(-\log_2 p_i +1)=H+1. $$
+      <p><b>Step 3 — Huffman is no worse.</b> Huffman is optimal, so $\bar{L}_{\text{Huffman}}\le \bar{L}_{\text{Shannon}}<H+1$.</p>
+      <p><b>Result.</b> $$ H\le \bar{L}_{\text{Huffman}}<H+1. $$ Encoding blocks of $n$ symbols divides the "+1" penalty by $n$, so per-symbol length $\to H$.</p>`
+    },
+    {
+      title: 'Redundancy of a code',
+      tex: String.raw`$$ \rho = \bar{L}-H = \sum_i p_i\ell_i + \sum_i p_i\log_2 p_i $$`,
+      derivation: String.raw`<p><b>Where we start.</b> We want a single number for how wasteful a code is.</p>
+      <p><b>Step 1 — average length minus the floor.</b> The best any code can do is $H$; the code actually spends $\bar{L}=\sum p_i\ell_i$. The waste is the difference.</p>
+      $$ \rho=\bar{L}-H. $$
+      <p><b>Step 2 — interpret.</b> $\rho\ge 0$ by the source-coding theorem; $\rho=0$ only for a perfectly matched code ($\ell_i=-\log_2 p_i$).</p>
+      <p><b>Result.</b> Efficiency is often quoted as $\eta=H/\bar{L}\le 1$. A code with $H=1.75$, $\bar{L}=1.75$ has $\rho=0$, $\eta=100\%$.</p>`
+    },
+    {
+      title: 'Compression ratio and rate–distortion',
+      tex: String.raw`$$ \text{CR}=\frac{\text{original size}}{\text{compressed size}},\qquad R(D)=\min_{\,\mathbb{E}[d]\le D} I(X;\hat{X}) $$`,
+      derivation: String.raw`<p><b>Where we start.</b> For lossless coding we measure success by compression ratio; for lossy we need the minimum bits per symbol at a given allowed distortion $D$.</p>
+      <p><b>Step 1 — lossless ratio.</b> If a fixed-length source used $b$ bits/symbol and entropy coding uses $\bar{L}\approx H$, the ratio is $\text{CR}=b/H$. A uniform 8-bit source with $H=2$ compresses 4:1.</p>
+      <p><b>Step 2 — lossy: allow error.</b> Let $d(x,\hat{x})$ measure distortion. Among all reproductions with average distortion $\le D$, the rate–distortion function is the smallest mutual information (bits/symbol) needed:</p>
+      $$ R(D)=\min_{p(\hat{x}\mid x):\,\mathbb{E}[d]\le D} I(X;\hat{X}). $$
+      <p><b>Step 3 — behaviour.</b> $R(D)$ decreases from $H$ (at $D=0$, lossless) to $0$ (at maximum tolerable distortion). It is the lossy analogue of entropy.</p>
+      <p><b>Result.</b> For a Gaussian source of variance $\sigma^2$ with squared-error distortion, $R(D)=\tfrac12\log_2(\sigma^2/D)$ — every extra bit halves the distortion (6 dB/bit), the rule behind JPEG/MP3 quality knobs.</p>`
+    }
+  ],
+  flashcards: [
+    { front: String.raw`What is the fundamental limit of lossless compression?`, back: String.raw`The source entropy $H=-\sum p_i\log_2 p_i$; average length $\bar{L}\ge H$.` },
+    { front: String.raw`State the Kraft inequality.`, back: String.raw`$\sum_i 2^{-\ell_i}\le 1$ — the condition for codeword lengths to form a prefix code.` },
+    { front: String.raw`What makes a code a prefix (instantaneous) code?`, back: String.raw`No codeword is a prefix of any other, so it decodes without lookahead.` },
+    { front: String.raw`How does Huffman coding build its tree?`, back: String.raw`Greedily merge the two least-probable nodes until one root remains, then label edges 0/1.` },
+    { front: String.raw`How close is Huffman to entropy?`, back: String.raw`$H\le \bar{L}<H+1$; blocking symbols shrinks the gap.` },
+    { front: String.raw`Ideal codeword length for a symbol of probability $p$?`, back: String.raw`$\ell=-\log_2 p$ bits.` },
+    { front: String.raw`Lossless vs lossy — one-line difference.`, back: String.raw`Lossless reconstructs exactly (bounded by $H$); lossy discards perceptual detail for far higher ratios.` },
+    { front: String.raw`Name a lossless and a lossy real codec.`, back: String.raw`Lossless: ZIP/DEFLATE, PNG, FLAC. Lossy: JPEG, MP3, H.264.` },
+    { front: String.raw`What three stages make up a typical lossy coder?`, back: String.raw`Transform (DCT/wavelet), quantisation, then entropy coding of the survivors.` },
+    { front: String.raw`Define redundancy of a code.`, back: String.raw`$\rho=\bar{L}-H\ge 0$; zero for a perfectly matched code.` },
+    { front: String.raw`What does source–channel separation state?`, back: String.raw`Compress to $H$ and protect to $C$ separately; reliable transmission needs $H\le C$.` },
+    { front: String.raw`What is rate–distortion $R(D)$?`, back: String.raw`The minimum bits/symbol to reproduce a source within distortion $D$; the lossy analogue of entropy.` },
+    { front: String.raw`Why can equiprobable, uncorrelated sources not be compressed?`, back: String.raw`Their entropy already equals the fixed-length cost $\log_2 M$; there is no redundancy to remove.` },
+    { front: String.raw`What algorithm beats Huffman's one-bit granularity?`, back: String.raw`Arithmetic (range) coding, which codes fractional bits per symbol.` }
+  ],
+  mcqs: [
+    { q: String.raw`The minimum average number of bits per symbol for lossless coding equals:`, options: [String.raw`The alphabet size`, String.raw`The source entropy $H$`, String.raw`Twice the entropy`, String.raw`Always 8`], answer: 1, explain: String.raw`Shannon's source-coding theorem: $\bar{L}\ge H$.` },
+    { q: String.raw`A prefix code guarantees:`, options: [String.raw`Fixed-length codewords`, String.raw`No codeword is a prefix of another`, String.raw`Lossy compression`, String.raw`Maximum entropy`], answer: 1, explain: String.raw`That is the definition, enabling instantaneous decoding.` },
+    { q: String.raw`Huffman coding is optimal among:`, options: [String.raw`All possible codes`, String.raw`Prefix codes for a known distribution`, String.raw`Lossy codes`, String.raw`Fixed-length codes`], answer: 1, explain: String.raw`It gives the minimum-$\bar{L}$ prefix code for a given symbol distribution.` },
+    { q: String.raw`The Kraft inequality is:`, options: [String.raw`$\sum 2^{-\ell_i}\le 1$`, String.raw`$\sum \ell_i=1$`, String.raw`$\sum p_i=1$`, String.raw`$\prod p_i\le 1$`], answer: 0, explain: String.raw`It bounds realisable prefix-code lengths.` },
+    { q: String.raw`Which is a lossy compression standard?`, options: [String.raw`PNG`, String.raw`FLAC`, String.raw`JPEG`, String.raw`ZIP`], answer: 2, explain: String.raw`JPEG discards perceptual detail via DCT quantisation; the others are lossless.` },
+    { q: String.raw`The ideal codeword length for a symbol of probability $0.25$ is:`, options: [String.raw`1 bit`, String.raw`2 bits`, String.raw`4 bits`, String.raw`0.25 bits`], answer: 1, explain: String.raw`$-\log_2 0.25=2$ bits.` },
+    { q: String.raw`Redundancy of a code is defined as:`, options: [String.raw`$H-\bar{L}$`, String.raw`$\bar{L}-H$`, String.raw`$\bar{L}\times H$`, String.raw`$H/\bar{L}$`], answer: 1, explain: String.raw`Excess average length over entropy, always $\ge 0$.` },
+    { q: String.raw`A source with maximum entropy (equiprobable, uncorrelated) can be compressed by:`, options: [String.raw`A factor of 2`, String.raw`A factor of 10`, String.raw`Essentially not at all`, String.raw`An infinite factor`], answer: 2, explain: String.raw`No redundancy remains to remove.` },
+    { q: String.raw`The three stages of a typical lossy coder are:`, options: [String.raw`Modulate, filter, amplify`, String.raw`Transform, quantise, entropy-code`, String.raw`Encrypt, interleave, transmit`, String.raw`Sample, hold, convert`], answer: 1, explain: String.raw`e.g. DCT → quantise → Huffman in JPEG.` },
+    { q: String.raw`Source–channel separation implies reliable transmission is possible when:`, options: [String.raw`$H\ge C$`, String.raw`$H\le C$`, String.raw`$H=0$`, String.raw`$C=0$`], answer: 1, explain: String.raw`The compressed rate $H$ must fit within the channel capacity $C$.` },
+    { q: String.raw`Arithmetic coding improves on Huffman by:`, options: [String.raw`Being lossy`, String.raw`Coding fractional bits per symbol`, String.raw`Requiring no probability model`, String.raw`Using fixed-length codes`], answer: 1, explain: String.raw`It escapes Huffman's integer-bit-per-symbol granularity.` },
+    { q: String.raw`For a Gaussian source, each extra bit of rate reduces distortion by about:`, options: [String.raw`1 dB`, String.raw`3 dB`, String.raw`6 dB`, String.raw`20 dB`], answer: 2, explain: String.raw`$R(D)=\tfrac12\log_2(\sigma^2/D)$ gives 6 dB/bit.` }
+  ],
+  numericals: [
+    { q: String.raw`A source has 4 symbols with probabilities 0.5, 0.25, 0.125, 0.125. Find $H$ and design a Huffman code; compute $\bar{L}$.`, solution: String.raw`$H=0.5(1)+0.25(2)+2\times0.125(3)=0.5+0.5+0.75=1.75$ bits. Huffman: A=0, B=10, C=110, D=111. $\bar{L}=0.5(1)+0.25(2)+0.125(3)+0.125(3)=1.75$. Redundancy $=0$, efficiency 100%.` },
+    { q: String.raw`A file of 1000 8-bit symbols has entropy $H=3$ bits/symbol. What is the best possible compressed size and the compression ratio?`, solution: String.raw`Best size $=1000\times 3=3000$ bits $=375$ bytes. Original $=1000$ bytes. CR $=8/3\approx 2.67:1$.` },
+    { q: String.raw`Two symbols have probabilities 0.9 and 0.1. Find the entropy and comment on Huffman efficiency.`, solution: String.raw`$H=-0.9\log_2 0.9-0.1\log_2 0.1=0.137+0.332=0.469$ bits. But Huffman must use 1 bit each ($\bar{L}=1$), so efficiency $=0.469$ (47%). Blocking pairs would recover much of the loss.` },
+    { q: String.raw`Do the lengths $\{1,2,2,3\}$ satisfy the Kraft inequality?`, solution: String.raw`$2^{-1}+2^{-2}+2^{-2}+2^{-3}=0.5+0.25+0.25+0.125=1.125>1$. No — not realisable as a prefix code.` },
+    { q: String.raw`A Gaussian source has variance $\sigma^2=100$. What rate $R$ achieves distortion $D=1$ (MSE)?`, solution: String.raw`$R=\tfrac12\log_2(\sigma^2/D)=\tfrac12\log_2(100)=\tfrac12(6.64)=3.32$ bits/sample.` },
+    { q: String.raw`A source alphabet of 8 equiprobable symbols is coded. What is $H$, and can any lossless coder do better than 3 bits/symbol?`, solution: String.raw`$H=\log_2 8=3$ bits. No — it is maximum entropy, so 3 bits/symbol is already optimal; redundancy is zero.` }
+  ],
+  realWorld: String.raw`<p>Source coding is everywhere on the machine you're reading this on. Text and code files travel as gzip/DEFLATE (LZ77 dictionary matching followed by Huffman) inside HTTP; your photos are JPEG (block DCT, perceptual quantisation, Huffman on the coefficients); music streams as MP3/AAC using psychoacoustic masking to drop sounds the ear can't hear; video calls use H.264/H.265 motion compensation and transform coding to hit 100:1 ratios. Every one of these ends in a classical entropy coder, so the Huffman and arithmetic-coding theory here is running billions of times per second worldwide. The entropy limit even shows up in benchmarks: a text compressor quoting "1.8 bits/character" on English is implicitly claiming the language's entropy is around that value.</p>`,
+  related: ['shannon', 'channel-coding', 'comm-basics', 'fec']
+},
+{
+  id: 'sinc-function',
+  title: 'The Sinc Function',
+  category: 'Signals & Systems',
+  tags: ['sinc', 'Fourier transform', 'sampling', 'reconstruction', 'pulse shaping', 'Gibbs'],
+  summary: String.raw`The sinc function $\mathrm{sinc}(x)=\sin(\pi x)/(\pi x)$ is the Fourier transform of a rectangle and the ideal interpolation kernel for reconstructing sampled signals.`,
+  prerequisites: ['fourier-transform', 'nyquist-sampling', 'convolution'],
+  intro: String.raw`<p>The <b>sinc function</b> is the single most important shape in signal processing. It is the Fourier transform of a rectangular pulse, the impulse response of an ideal low-pass filter, and the interpolation kernel that perfectly reconstructs a band-limited signal from its samples. Wherever a signal is band-limited or a spectrum is brick-wall flat, a sinc appears in the other domain. This page defines it, maps its zeros and lobes, proves the rectangle↔sinc transform pair, and shows its central role in sampling, reconstruction, pulse shaping, and the Gibbs phenomenon.</p>`,
+  sections: [
+    {
+      h: 'Definition and two conventions',
+      html: String.raw`<p>The <b>normalised sinc</b> (signal-processing convention) is</p>
+      $$ \mathrm{sinc}(x)=\frac{\sin(\pi x)}{\pi x}, \qquad \mathrm{sinc}(0)=1. $$
+      <p>The value at $x=0$ is $1$ by the limit $\sin(\pi x)/(\pi x)\to 1$ (l'Hôpital or the small-angle expansion). The <b>unnormalised sinc</b> used in mathematics is $\sin(x)/x$; the $\pi$ in the normalised version places the zeros at the integers, which is exactly what sampling theory wants. Unless stated otherwise we use the normalised form throughout.</p>
+      <div class="callout"><b>Watch the convention.</b> MATLAB/NumPy <code>sinc</code> is normalised ($\sin \pi x/\pi x$); many math texts and calculators use $\sin x/x$. Zeros land at integers vs at multiples of $\pi$ — always check.</div>`
+    },
+    {
+      h: 'Zeros, lobes, and decay',
+      html: String.raw`<p>The normalised sinc has these landmarks:</p>
+      <ul>
+        <li><b>Peak</b> of $1$ at $x=0$.</li>
+        <li><b>Zeros</b> at every non-zero integer $x=\pm 1,\pm 2,\dots$ (wherever $\sin(\pi x)=0$ except the origin).</li>
+        <li><b>Main lobe</b> spans $x\in(-1,1)$, width $2$ between the first zeros — this is where most of the energy sits.</li>
+        <li><b>Side lobes</b> alternate in sign and decay as $1/x$ (envelope $1/(\pi|x|)$). The first side-lobe peak is about $-13.3$ dB relative to the main lobe.</li>
+      </ul>
+      <p>The slow $1/x$ decay is a double-edged sword: it means a single rectangle in one domain produces long-lasting ripple in the other, which is the root cause of spectral leakage and the need for windowing.</p>`
+    },
+    {
+      h: 'The rectangle ↔ sinc Fourier pair',
+      html: String.raw`<p>The defining fact: the Fourier transform of a rectangular pulse is a sinc, and (by duality) the transform of a sinc is a rectangle. For a rectangle of width $T$ and height 1:</p>
+      $$ \mathrm{rect}(t/T) \;\overset{\mathcal F}{\longleftrightarrow}\; T\,\mathrm{sinc}(fT). $$
+      <p>This one pair explains a huge amount:</p>
+      <ul>
+        <li>A <b>time-limited</b> pulse (finite rectangle) has an <b>infinite-bandwidth</b> sinc spectrum — you cannot be both time- and band-limited.</li>
+        <li>An <b>ideal low-pass filter</b> (rectangle in frequency) has a <b>sinc impulse response</b> in time — infinitely long and non-causal, hence only approximable.</li>
+        <li>Narrowing the rectangle widens the sinc: <b>time–bandwidth duality</b>. A short pulse needs a wide band; a narrow band gives a long pulse.</li>
+      </ul>`
+    },
+    {
+      h: 'Sinc in sampling and reconstruction',
+      html: String.raw`<p>The <b>Whittaker–Shannon interpolation formula</b> reconstructs a band-limited signal exactly from its samples using shifted sincs as building blocks:</p>
+      $$ x(t)=\sum_{n=-\infty}^{\infty} x(nT_s)\,\mathrm{sinc}\!\left(\frac{t-nT_s}{T_s}\right). $$
+      <p>Each sample "plants" a sinc centred on its instant, scaled by the sample value. Because every sinc is <i>zero</i> at all other sample instants (its zeros land on the integers/other samples), the sum passes exactly through every sample and fills the gaps perfectly — provided sampling obeyed <a href="#nyquist-sampling">Nyquist</a>. In the frequency domain this is just multiplying the sampled spectrum by an ideal rectangular low-pass filter (whose impulse response is the sinc), removing the spectral images. The sinc is therefore the <b>ideal reconstruction filter</b> — theoretically perfect but physically unrealisable (infinite, non-causal), so real DACs use approximations (zero-order hold plus analog smoothing).</p>`
+    },
+    {
+      h: 'Sinc in pulse shaping',
+      html: String.raw`<p>In digital communications, the sinc is the pulse that achieves the <b>Nyquist zero-ISI</b> criterion: because it is zero at all other symbol instants $\pm T,\pm 2T,\dots$, symbols placed one per period do not interfere at the sampling points. A sinc-shaped pulse occupies exactly the minimum bandwidth $1/(2T)$ (the Nyquist bandwidth), making it spectrally maximally efficient.</p>
+      <p>But the ideal sinc has two fatal practical flaws: its $1/x$ tails decay too slowly (so timing jitter causes large ISI) and it is non-causal/infinite. The fix is the <b>raised-cosine</b> (and root-raised-cosine) pulse — a "softened" sinc that trades a little excess bandwidth (the roll-off factor $\beta$) for tails that decay as $1/x^3$, giving robust, realisable filters. See <a href="#pulse-shaping">pulse shaping</a>.</p>`
+    },
+    {
+      h: 'Gibbs phenomenon and time–bandwidth duality',
+      html: String.raw`<p>Truncating an ideal (rectangular) frequency response to a finite length — equivalently, keeping only part of the infinite sinc impulse response — produces the <b>Gibbs phenomenon</b>: a persistent ~9% overshoot near sharp edges that never disappears as you add terms; it only narrows. This is the sinc's $1/x$ side lobes showing up as ripple. Windowing (Hamming, Hann, Blackman) tapers the sinc to suppress the overshoot at the cost of a wider transition band.</p>
+      <p>The whole story is one manifestation of <b>time–bandwidth duality</b>: sharpness (a brick wall) in one domain forces spreading (long sinc tails) in the other. You cannot localise a signal arbitrarily in both time and frequency — the sinc/rect pair is the extreme illustration of this fundamental limit.</p>`
+    }
+  ],
+  keyPoints: [
+    String.raw`Normalised sinc: $\mathrm{sinc}(x)=\sin(\pi x)/(\pi x)$, with $\mathrm{sinc}(0)=1$.`,
+    String.raw`Zeros at every non-zero integer; main lobe of width 2; side lobes decay as $1/x$.`,
+    String.raw`First side lobe is about $-13.3$ dB below the main lobe.`,
+    String.raw`Fourier pair: $\mathrm{rect}(t/T)\leftrightarrow T\,\mathrm{sinc}(fT)$ — rectangle and sinc are transforms of each other.`,
+    String.raw`Time-limited $\Rightarrow$ infinite bandwidth (and vice versa); you cannot be both.`,
+    String.raw`The sinc is the impulse response of an ideal low-pass filter — infinite and non-causal, hence unrealisable.`,
+    String.raw`Whittaker–Shannon: a band-limited signal is exactly a sum of sample-weighted shifted sincs.`,
+    String.raw`Sinc pulses achieve minimum-bandwidth zero-ISI signalling but have poor jitter tolerance ($1/x$ tails).`,
+    String.raw`Raised-cosine pulses soften the sinc, trading excess bandwidth for $1/x^3$ tails.`,
+    String.raw`Truncating a sinc causes the Gibbs ~9% overshoot; windowing tapers it away.`
+  ],
+  equations: [
+    {
+      title: 'Value at the origin',
+      tex: String.raw`$$ \mathrm{sinc}(0)=\lim_{x\to 0}\frac{\sin(\pi x)}{\pi x}=1 $$`,
+      derivation: String.raw`<p><b>Where we start.</b> At $x=0$ the definition $\sin(\pi x)/(\pi x)$ is the indeterminate form $0/0$. We resolve the limit.</p>
+      <p><b>Step 1 — expand the sine.</b> The Taylor series is $\sin(\pi x)=\pi x - \dfrac{(\pi x)^3}{6}+\cdots$</p>
+      <p><b>Step 2 — divide by $\pi x$.</b></p>
+      $$ \frac{\sin(\pi x)}{\pi x}=1-\frac{(\pi x)^2}{6}+\cdots $$
+      <p><b>Step 3 — take $x\to 0$.</b> All higher terms vanish, leaving $1$.</p>
+      <p><b>Result.</b> $\mathrm{sinc}(0)=1$. This is why the sinc is a well-behaved, continuous function everywhere despite the $x$ in the denominator.</p>`
+    },
+    {
+      title: 'Fourier transform of a rectangle is a sinc',
+      tex: String.raw`$$ \mathcal{F}\{\mathrm{rect}(t/T)\}=T\,\mathrm{sinc}(fT) $$`,
+      derivation: String.raw`<p><b>Where we start.</b> The rectangle $\mathrm{rect}(t/T)$ equals 1 for $|t|<T/2$ and 0 elsewhere. Compute its Fourier transform directly.</p>
+      <p><b>Step 1 — write the integral over the support.</b> Outside $[-T/2,T/2]$ the function is zero, so</p>
+      $$ X(f)=\int_{-T/2}^{T/2} e^{-j2\pi f t}\,dt. $$
+      <p><b>Step 2 — integrate the exponential.</b></p>
+      $$ X(f)=\left[\frac{e^{-j2\pi f t}}{-j2\pi f}\right]_{-T/2}^{T/2}=\frac{e^{-j\pi f T}-e^{j\pi f T}}{-j2\pi f}. $$
+      <p><b>Step 3 — use $e^{j\theta}-e^{-j\theta}=2j\sin\theta$.</b> The numerator becomes $-2j\sin(\pi f T)$:</p>
+      $$ X(f)=\frac{-2j\sin(\pi f T)}{-j2\pi f}=\frac{\sin(\pi f T)}{\pi f}. $$
+      <p><b>Step 4 — factor out $T$.</b> Multiply top and bottom by $T$: $\dfrac{\sin(\pi f T)}{\pi f T}\cdot T$.</p>
+      <p><b>Result.</b> $$ X(f)=T\,\frac{\sin(\pi f T)}{\pi f T}=T\,\mathrm{sinc}(fT). $$ A finite rectangle in time gives an infinitely-wide sinc in frequency — time-limited means not band-limited.</p>`
+    },
+    {
+      title: 'Zeros of the sinc',
+      tex: String.raw`$$ \mathrm{sinc}(x)=0 \iff x\in\{\pm1,\pm2,\dots\} $$`,
+      derivation: String.raw`<p><b>Where we start.</b> We want every $x$ where $\sin(\pi x)/(\pi x)=0$.</p>
+      <p><b>Step 1 — the numerator controls the zeros.</b> The fraction is zero exactly when $\sin(\pi x)=0$ and the denominator is non-zero.</p>
+      <p><b>Step 2 — solve the sine.</b> $\sin(\pi x)=0$ when $\pi x=k\pi$, i.e. $x=k$ for integer $k$.</p>
+      <p><b>Step 3 — exclude the origin.</b> At $x=0$ the denominator is also zero, and we showed the value is $1$, not $0$. So drop $k=0$.</p>
+      <p><b>Result.</b> Zeros at $x=\pm1,\pm2,\dots$ — the integers. This regular spacing is precisely why shifted sincs at integer sample points don't interfere: each is zero at every other sample.</p>`
+    },
+    {
+      title: 'Whittaker–Shannon interpolation',
+      tex: String.raw`$$ x(t)=\sum_{n} x(nT_s)\,\mathrm{sinc}\!\left(\frac{t-nT_s}{T_s}\right) $$`,
+      derivation: String.raw`<p><b>Where we start.</b> Sampling multiplies $x(t)$ by an impulse train, which in frequency <i>replicates</i> the spectrum at multiples of $f_s=1/T_s$. If $x$ is band-limited below $f_s/2$, the copies don't overlap.</p>
+      <p><b>Step 1 — isolate the baseband copy.</b> Multiply the replicated spectrum by an ideal rectangular low-pass filter of width $f_s$, height $T_s$ — it keeps the original copy and deletes the images.</p>
+      $$ X_r(f)=X_s(f)\cdot T_s\,\mathrm{rect}(f/f_s). $$
+      <p><b>Step 2 — multiplication in frequency is convolution in time.</b> The filter's impulse response is the transform of the rectangle: a sinc, $\mathrm{sinc}(t/T_s)$.</p>
+      <p><b>Step 3 — convolve the samples with the sinc.</b> The sampled signal is $\sum_n x(nT_s)\delta(t-nT_s)$; convolving each impulse with the sinc shifts a sinc to that instant:</p>
+      $$ x(t)=\sum_n x(nT_s)\,\mathrm{sinc}\!\left(\frac{t-nT_s}{T_s}\right). $$
+      <p><b>Result.</b> Because each sinc is 1 at its own sample and 0 at all others, the sum reproduces every sample exactly and interpolates perfectly in between — the ideal reconstruction.</p>`
+    },
+    {
+      title: 'First side-lobe level',
+      tex: String.raw`$$ 20\log_{10}\!\left|\frac{\sin(\pi x)}{\pi x}\right|_{x\approx 1.43} \approx -13.3\ \text{dB} $$`,
+      derivation: String.raw`<p><b>Where we start.</b> The side lobes sit between the zeros; the first one lies between $x=1$ and $x=2$. We locate its peak.</p>
+      <p><b>Step 1 — differentiate and set to zero.</b> The extrema of $\sin(\pi x)/(\pi x)$ satisfy $\tan(\pi x)=\pi x$. The first non-trivial root beyond the main lobe is $x\approx 1.4303$.</p>
+      <p><b>Step 2 — evaluate the amplitude there.</b> $\left|\dfrac{\sin(\pi\cdot1.4303)}{\pi\cdot1.4303}\right|\approx 0.2172$.</p>
+      <p><b>Step 3 — convert to dB relative to the main lobe (value 1).</b></p>
+      $$ 20\log_{10}(0.2172)\approx -13.3\ \text{dB}. $$
+      <p><b>Result.</b> The first side lobe is 13.3 dB down — high enough to cause noticeable spectral leakage, which is exactly why windowing is used to push side lobes lower.</p>`
+    }
+  ],
+  flashcards: [
+    { front: String.raw`Define the normalised sinc function.`, back: String.raw`$\mathrm{sinc}(x)=\sin(\pi x)/(\pi x)$, with $\mathrm{sinc}(0)=1$.` },
+    { front: String.raw`Where are the zeros of the normalised sinc?`, back: String.raw`At every non-zero integer, $x=\pm1,\pm2,\dots$` },
+    { front: String.raw`What is the Fourier transform of a rectangular pulse?`, back: String.raw`A sinc: $\mathrm{rect}(t/T)\leftrightarrow T\,\mathrm{sinc}(fT)$.` },
+    { front: String.raw`What is the impulse response of an ideal low-pass filter?`, back: String.raw`A sinc function — infinite in extent and non-causal.` },
+    { front: String.raw`How wide is the sinc's main lobe?`, back: String.raw`Width 2 (between the first zeros at $x=\pm1$).` },
+    { front: String.raw`How fast do sinc side lobes decay?`, back: String.raw`As $1/x$ (envelope $1/(\pi|x|)$).` },
+    { front: String.raw`What is the first side-lobe level of a sinc?`, back: String.raw`About $-13.3$ dB relative to the main lobe.` },
+    { front: String.raw`State the Whittaker–Shannon interpolation formula's idea.`, back: String.raw`Reconstruct $x(t)=\sum_n x(nT_s)\,\mathrm{sinc}((t-nT_s)/T_s)$ — sample-weighted shifted sincs.` },
+    { front: String.raw`Why can a sinc pulse give zero ISI?`, back: String.raw`Its zeros land on all other symbol instants, so symbols don't interfere at the sampling points.` },
+    { front: String.raw`Why is the ideal sinc pulse impractical for comms?`, back: String.raw`Non-causal, infinite, and $1/x$ tails give poor timing-jitter tolerance.` },
+    { front: String.raw`What replaces the sinc in real pulse shaping?`, back: String.raw`Raised-cosine / root-raised-cosine pulses with $1/x^3$ tails.` },
+    { front: String.raw`What is the Gibbs phenomenon?`, back: String.raw`~9% overshoot near sharp edges when a sinc/ideal response is truncated; it narrows but never vanishes.` },
+    { front: String.raw`State time–bandwidth duality via the sinc.`, back: String.raw`A brick wall in one domain forces long sinc tails in the other; you cannot localise in both.` },
+    { front: String.raw`Difference between normalised and unnormalised sinc?`, back: String.raw`Normalised $\sin(\pi x)/(\pi x)$ (zeros at integers); unnormalised $\sin(x)/x$ (zeros at multiples of $\pi$).` }
+  ],
+  mcqs: [
+    { q: String.raw`The Fourier transform of a rectangular pulse is:`, options: [String.raw`Another rectangle`, String.raw`A sinc function`, String.raw`A Gaussian`, String.raw`An impulse`], answer: 1, explain: String.raw`$\mathrm{rect}\leftrightarrow \mathrm{sinc}$; a finite pulse has an infinite sinc spectrum.` },
+    { q: String.raw`$\mathrm{sinc}(0)$ equals:`, options: [String.raw`0`, String.raw`1`, String.raw`$\infty$`, String.raw`Undefined`], answer: 1, explain: String.raw`The $0/0$ limit resolves to 1.` },
+    { q: String.raw`The zeros of the normalised sinc are at:`, options: [String.raw`Multiples of $\pi$`, String.raw`Non-zero integers`, String.raw`Half-integers`, String.raw`Only at $x=1$`], answer: 1, explain: String.raw`$\sin(\pi x)=0$ at integers; $x=0$ excluded.` },
+    { q: String.raw`The sinc is the impulse response of a(n):`, options: [String.raw`Ideal high-pass filter`, String.raw`Ideal low-pass filter`, String.raw`Differentiator`, String.raw`All-pass filter`], answer: 1, explain: String.raw`A rectangle in frequency transforms to a sinc in time.` },
+    { q: String.raw`Sinc side lobes decay as:`, options: [String.raw`$1/x^2$`, String.raw`$1/x$`, String.raw`Exponentially`, String.raw`They don't decay`], answer: 1, explain: String.raw`The envelope is $1/(\pi|x|)$, slow $1/x$ decay.` },
+    { q: String.raw`In Whittaker–Shannon reconstruction, each sample contributes:`, options: [String.raw`A rectangle`, String.raw`A shifted, scaled sinc`, String.raw`A Gaussian`, String.raw`A step`], answer: 1, explain: String.raw`$x(t)=\sum x(nT_s)\mathrm{sinc}((t-nT_s)/T_s)$.` },
+    { q: String.raw`A time-limited pulse necessarily has:`, options: [String.raw`Finite bandwidth`, String.raw`Infinite bandwidth`, String.raw`Zero bandwidth`, String.raw`Negative bandwidth`], answer: 1, explain: String.raw`Its spectrum is a sinc, which extends forever.` },
+    { q: String.raw`The main lobe of the normalised sinc has width:`, options: [String.raw`1`, String.raw`2`, String.raw`$\pi$`, String.raw`$2\pi$`], answer: 1, explain: String.raw`Between first zeros at $\pm1$, width is 2.` },
+    { q: String.raw`Why is a sinc pulse impractical in real modems?`, options: [String.raw`It has no zeros`, String.raw`Its $1/x$ tails give poor jitter tolerance and it is non-causal`, String.raw`It uses too little bandwidth`, String.raw`It cannot be sampled`], answer: 1, explain: String.raw`Slowly decaying tails and non-causality force the use of raised-cosine pulses.` },
+    { q: String.raw`The Gibbs phenomenon is caused by:`, options: [String.raw`Aliasing`, String.raw`Truncating an ideal (sinc) response`, String.raw`Quantisation`, String.raw`Thermal noise`], answer: 1, explain: String.raw`Cutting off the infinite sinc leaves a persistent ~9% overshoot.` },
+    { q: String.raw`The first side lobe of a sinc is about how far below the main lobe?`, options: [String.raw`3 dB`, String.raw`6 dB`, String.raw`13 dB`, String.raw`40 dB`], answer: 2, explain: String.raw`Approximately $-13.3$ dB.` },
+    { q: String.raw`Narrowing a rectangle in time does what to its sinc spectrum?`, options: [String.raw`Narrows it`, String.raw`Widens it`, String.raw`Leaves it unchanged`, String.raw`Shifts it up`], answer: 1, explain: String.raw`Time–bandwidth duality: a shorter pulse spreads its spectrum.` }
+  ],
+  numericals: [
+    { q: String.raw`A rectangular pulse has width $T=1$ ms. At what frequencies does its sinc spectrum first hit zero?`, solution: String.raw`Spectrum $\propto \mathrm{sinc}(fT)$, zero when $fT=\pm1,\pm2,\dots$, i.e. $f=\pm1/T=\pm1$ kHz, $\pm2$ kHz, etc. First null at $\pm1$ kHz.` },
+    { q: String.raw`Compute $\mathrm{sinc}(0.5)$.`, solution: String.raw`$\mathrm{sinc}(0.5)=\sin(\pi/2)/(\pi/2)=1/(1.5708)=0.6366=2/\pi$.` },
+    { q: String.raw`A signal is sampled at $f_s=8$ kHz. What is the spacing of the zeros of the reconstruction sinc kernel in time?`, solution: String.raw`$T_s=1/8000=125\ \mu s$. The kernel $\mathrm{sinc}(t/T_s)$ has zeros at multiples of $T_s=125\ \mu s$.` },
+    { q: String.raw`What is the amplitude (linear) of the sinc at its first side-lobe peak ($x\approx1.43$)?`, solution: String.raw`$\sin(1.43\pi)/(1.43\pi)\approx \sin(258.5^\circ)/4.49 \approx -0.976/4.49\approx -0.217$; magnitude $0.217$, i.e. $-13.3$ dB.` },
+    { q: String.raw`A sinc pulse is used for zero-ISI signalling at symbol rate $1/T=2400$ Bd. What is its minimum (Nyquist) bandwidth?`, solution: String.raw`Minimum bandwidth $=1/(2T)=$ symbol rate$/2=1200$ Hz (one-sided baseband).` },
+    { q: String.raw`Verify that $\mathrm{sinc}(2)=0$ and explain its significance for sampling.`, solution: String.raw`$\mathrm{sinc}(2)=\sin(2\pi)/(2\pi)=0/(2\pi)=0$. Significance: the reconstruction sinc centred on one sample is exactly zero at the sample two positions away, so it does not corrupt that sample's value.` }
+  ],
+  realWorld: String.raw`<p>The sinc is baked into every digital-to-analog converter and every modem. A DAC's ideal reconstruction filter is a sinc; because that's unrealisable, real converters use a zero-order hold (which imposes its own $\mathrm{sinc}(f/f_s)$ droop across the band, corrected by a digital "sinc compensation" filter) followed by an analog low-pass. In communications, root-raised-cosine filters — tamed sincs — shape virtually every QAM/PSK transmit pulse in Wi-Fi, LTE, and satellite links to pack symbols into minimum bandwidth without inter-symbol interference. And every time an engineer applies a Hamming or Blackman window to an FFT to fight spectral leakage, they are fighting the sinc's $1/x$ side lobes head-on. The sinc/rect duality is also why a spectrum analyzer's resolution bandwidth and sweep time trade off — sharper frequency resolution demands longer time-domain observation.</p>`,
+  related: ['fourier-transform', 'nyquist-sampling', 'pulse-shaping', 'frequency-spectrum', 'aliasing']
+},
+{
+  id: 'frequency-spectrum',
+  title: 'Frequency Spectrum',
+  category: 'Signals & Systems',
+  tags: ['spectrum', 'Fourier', 'amplitude', 'phase', 'PSD', 'bandwidth', 'spectrum analyzer'],
+  summary: String.raw`A frequency spectrum shows how a signal's energy is distributed over frequency — its amplitude and phase versus frequency — and is the Fourier-domain view of a time signal.`,
+  prerequisites: ['fourier-transform', 'sinc-function', 'psd'],
+  intro: String.raw`<p>A signal can be viewed two ways: as a <b>waveform</b> (amplitude versus time) or as a <b>spectrum</b> (content versus frequency). The spectrum answers "which frequencies are present, how strong, and in what phase?" It is the Fourier transform made visible, and it is how engineers read bandwidth, harmonics, noise, and interference. This page defines amplitude and phase spectra, distinguishes line from continuous and one-sided from two-sided spectra, connects the spectrum to the Fourier transform and power spectral density, and explains how to read a spectrum analyzer display.</p>`,
+  sections: [
+    {
+      h: 'What a spectrum is: amplitude and phase versus frequency',
+      html: String.raw`<p>Any well-behaved signal can be written as a sum (or integral) of sinusoids. The <b>spectrum</b> specifies, for each frequency, the <b>amplitude</b> (how much of that sinusoid is present) and the <b>phase</b> (its timing offset). A complete spectrum therefore has two parts:</p>
+      <ul>
+        <li><b>Amplitude (magnitude) spectrum</b> $|X(f)|$ — the strength of each frequency component. This is what most displays show.</li>
+        <li><b>Phase spectrum</b> $\angle X(f)$ — the relative phase of each component, essential for reconstructing the waveform and for group-delay/distortion analysis.</li>
+      </ul>
+      <p>Because $X(f)=|X(f)|e^{j\angle X(f)}$ is complex, both parts are needed to fully describe the signal; discarding phase (as a power spectrum does) loses the ability to reconstruct the exact waveform. The amplitude spectrum alone still reveals bandwidth, tones, and noise floor — which is usually what you want.</p>`
+    },
+    {
+      h: 'Line spectra vs continuous spectra',
+      html: String.raw`<p>The shape of a spectrum depends on the nature of the signal:</p>
+      <table class="data">
+        <tr><th>Signal type</th><th>Spectrum</th><th>Example</th></tr>
+        <tr><td>Periodic</td><td><b>Line spectrum</b> — discrete spikes at the fundamental and its harmonics (Fourier <i>series</i>)</td><td>Square wave: odd harmonics at $f_0,3f_0,5f_0,\dots$</td></tr>
+        <tr><td>Aperiodic / finite-energy</td><td><b>Continuous spectrum</b> — energy spread smoothly over a band (Fourier <i>transform</i>)</td><td>A single pulse → sinc spectrum</td></tr>
+        <tr><td>Random / noise</td><td><b>Continuous power spectrum</b> (PSD) — statistical distribution of power</td><td>White noise: flat PSD</td></tr>
+      </table>
+      <p>A pure sinusoid is the extreme line spectrum: a single spike. As a tone is switched on for only a finite time, that spike broadens into a sinc (see <a href="#sinc-function">sinc function</a>) — the finite observation window smears the line. This is the same effect that limits a spectrum analyzer's resolution.</p>`
+    },
+    {
+      h: 'One-sided vs two-sided spectra',
+      html: String.raw`<p>The Fourier transform naturally produces a <b>two-sided</b> spectrum spanning positive <i>and</i> negative frequencies. For a real signal the spectrum is <b>conjugate-symmetric</b>: $X(-f)=X^*(f)$, so the magnitude is even and the phase is odd. The negative-frequency half is redundant.</p>
+      <ul>
+        <li><b>Two-sided</b> ($-\infty<f<\infty$): mathematically natural; each real sinusoid appears as two half-amplitude spikes at $\pm f$. Used in analysis and I/Q processing.</li>
+        <li><b>One-sided</b> ($f\ge 0$): folds the negative half onto the positive, <i>doubling</i> the amplitudes (except DC). This matches physical intuition — a 1 V, 1 kHz tone shows as a single 1 V line at 1 kHz. Used by most spectrum analyzers and engineers.</li>
+      </ul>
+      <div class="callout"><b>Factor-of-two trap.</b> When converting two-sided to one-sided, multiply amplitudes by 2 (power by 2) for all $f>0$, but leave the DC (and Nyquist) term alone. Forgetting this is the classic 3 dB error.</div>`
+    },
+    {
+      h: 'Bandwidth: measuring the width of a spectrum',
+      html: String.raw`<p><b>Bandwidth</b> is the width of the frequency band a signal occupies, but "occupies" needs a definition. Common measures:</p>
+      <ul>
+        <li><b>−3 dB (half-power) bandwidth</b> — width between points where power falls to half (amplitude to $1/\sqrt2$). The default for filters.</li>
+        <li><b>Null-to-null bandwidth</b> — main-lobe width between the first spectral nulls (e.g. $2/T$ for a rectangular pulse).</li>
+        <li><b>Occupied bandwidth</b> — band containing a specified fraction (e.g. 99%) of the total power; used in regulatory specs.</li>
+        <li><b>Equivalent noise bandwidth</b> — width of an ideal brick-wall filter passing the same noise power.</li>
+      </ul>
+      <p>These differ numerically, so a stated "bandwidth" is only meaningful with its definition attached. Bandwidth ties directly to <a href="#shannon">Shannon capacity</a> ($C=B\log_2(1+\mathrm{SNR})$) and to time–bandwidth duality: a shorter pulse or faster data rate occupies a wider spectrum.</p>`
+    },
+    {
+      h: 'Spectrum, Fourier transform, and PSD',
+      html: String.raw`<p>Three closely-related but distinct objects:</p>
+      <ul>
+        <li><b>Fourier transform</b> $X(f)$ — the complex spectrum (amplitude and phase) of a deterministic, finite-energy signal. See <a href="#fourier-transform">Fourier transform</a>.</li>
+        <li><b>Energy spectral density</b> $|X(f)|^2$ — energy per hertz for finite-energy signals.</li>
+        <li><b>Power spectral density (PSD)</b> — power per hertz for infinite-energy (power) signals like noise or ongoing transmissions; it is the Fourier transform of the autocorrelation (Wiener–Khinchin). See <a href="#psd">PSD</a>.</li>
+      </ul>
+      <p>The rule of thumb: use the Fourier transform (amplitude/phase) for deterministic pulses, and the PSD (power only, phase discarded) for random signals and noise. A spectrum analyzer measuring a live signal effectively estimates a PSD. The <a href="#noise-floor">noise floor</a> you see on the display is the PSD of the receiver/instrument noise.</p>`
+    },
+    {
+      h: 'Reading a spectrum analyzer',
+      html: String.raw`<p>A spectrum analyzer plots amplitude (usually dBm on a log axis) versus frequency. Key controls and what they mean:</p>
+      <ul>
+        <li><b>Center frequency & span</b> — where you look and how wide.</li>
+        <li><b>Resolution bandwidth (RBW)</b> — the width of the analyzer's internal filter; narrower RBW resolves closely-spaced tones and lowers the displayed noise floor (by ~10 dB per decade of RBW), but slows the sweep. This is the sinc/time-bandwidth trade-off again.</li>
+        <li><b>Video bandwidth (VBW)</b> — smooths the trace by averaging, revealing signals near the noise floor.</li>
+        <li><b>Reference level & scale</b> — top of the screen and dB/division.</li>
+      </ul>
+      <p>What you read off the screen: the <b>carrier</b> and its power, <b>harmonics</b> and <b>spurs</b> (unwanted discrete tones), <b>occupied bandwidth</b>, the <b>noise floor</b>, and intermodulation products. A clean transmitter shows a single dominant line with harmonics far below; a distorted or overdriven one sprouts spurious lines. Because the display is a PSD, absolute power depends on RBW for noise-like signals but not for discrete tones — a crucial distinction when quoting numbers.</p>`
+    }
+  ],
+  keyPoints: [
+    String.raw`A spectrum is the frequency-domain view of a signal: amplitude $|X(f)|$ and phase $\angle X(f)$ versus frequency.`,
+    String.raw`Periodic signals have line (discrete) spectra; aperiodic signals have continuous spectra; noise has a continuous PSD.`,
+    String.raw`For real signals the spectrum is conjugate-symmetric: $X(-f)=X^*(f)$ (even magnitude, odd phase).`,
+    String.raw`Two-sided spectra span $\pm f$; one-sided fold the negative half over, doubling amplitudes (except DC).`,
+    String.raw`Bandwidth has several definitions (−3 dB, null-to-null, occupied, equivalent noise) — always state which.`,
+    String.raw`Energy spectral density is $|X(f)|^2$; PSD is power/Hz for random/power signals (Wiener–Khinchin).`,
+    String.raw`Use Fourier transform for deterministic pulses, PSD for noise and ongoing signals.`,
+    String.raw`A finite observation window smears a spectral line into a sinc — the resolution limit.`,
+    String.raw`On a spectrum analyzer, narrower RBW improves resolution and lowers the displayed noise floor but slows the sweep.`,
+    String.raw`Displayed noise power depends on RBW; discrete-tone power does not.`
+  ],
+  equations: [
+    {
+      title: 'Spectrum as a Fourier transform',
+      tex: String.raw`$$ X(f)=\int_{-\infty}^{\infty} x(t)\,e^{-j2\pi f t}\,dt $$`,
+      derivation: String.raw`<p><b>Where we start.</b> We want to know "how much of frequency $f$" is inside a time signal $x(t)$. The trick is to correlate the signal with a test sinusoid of that frequency.</p>
+      <p><b>Step 1 — build a probe.</b> The complex sinusoid $e^{j2\pi f t}$ is a pure tone at frequency $f$. To ask how much of it $x(t)$ contains, multiply by its conjugate $e^{-j2\pi f t}$ and see if they line up.</p>
+      <p><b>Step 2 — integrate to measure overlap.</b> Summing (integrating) the product over all time isolates the amount of that frequency, because any other frequency averages out to zero over the full axis:</p>
+      $$ X(f)=\int_{-\infty}^{\infty} x(t)\,e^{-j2\pi f t}\,dt. $$
+      <p><b>Step 3 — read off amplitude and phase.</b> $X(f)$ is complex; $|X(f)|$ is the amplitude spectrum and $\angle X(f)$ the phase spectrum.</p>
+      <p><b>Result.</b> $X(f)$ <i>is</i> the spectrum. The inverse transform rebuilds $x(t)$ by summing all these frequency components back up — proof that the spectrum loses nothing.</p>`
+    },
+    {
+      title: 'Conjugate symmetry of real signals',
+      tex: String.raw`$$ x(t)\ \text{real}\ \Rightarrow\ X(-f)=X^*(f) $$`,
+      derivation: String.raw`<p><b>Where we start.</b> We show why the negative-frequency half of a real signal's spectrum is redundant.</p>
+      <p><b>Step 1 — evaluate the transform at $-f$.</b></p>
+      $$ X(-f)=\int x(t)\,e^{+j2\pi f t}\,dt. $$
+      <p><b>Step 2 — take the conjugate of $X(f)$.</b> Since $x(t)$ is real, $x^*(t)=x(t)$, so</p>
+      $$ X^*(f)=\int x(t)\,e^{+j2\pi f t}\,dt. $$
+      <p><b>Step 3 — compare.</b> The two integrals are identical.</p>
+      <p><b>Result.</b> $$ X(-f)=X^*(f). $$ Hence $|X(-f)|=|X(f)|$ (even magnitude) and $\angle X(-f)=-\angle X(f)$ (odd phase) — the reason a one-sided spectrum captures everything for real signals.</p>`
+    },
+    {
+      title: 'One-sided from two-sided amplitude',
+      tex: String.raw`$$ A_1(f)=2|X(f)|\ (f>0),\quad A_1(0)=|X(0)| $$`,
+      derivation: String.raw`<p><b>Where we start.</b> A real cosine $A\cos(2\pi f_0 t)$ has a two-sided spectrum with two spikes of height $A/2$ at $\pm f_0$. We want the single physical line of height $A$.</p>
+      <p><b>Step 1 — recall Euler.</b> $A\cos(2\pi f_0 t)=\tfrac{A}{2}e^{j2\pi f_0 t}+\tfrac{A}{2}e^{-j2\pi f_0 t}$ — half the amplitude sits at $+f_0$, half at $-f_0$.</p>
+      <p><b>Step 2 — fold and add.</b> Because of conjugate symmetry, the negative spike carries the same magnitude. Reflecting it onto the positive axis and adding gives $\tfrac{A}{2}+\tfrac{A}{2}=A$.</p>
+      $$ A_1(f)=2|X(f)|\quad(f>0). $$
+      <p><b>Step 3 — leave DC alone.</b> The $f=0$ component has no mirror partner, so it is <i>not</i> doubled: $A_1(0)=|X(0)|$.</p>
+      <p><b>Result.</b> The one-sided amplitude matches the physical peak of each sinusoid; forgetting to exempt DC (and the Nyquist bin) is the classic 3 dB blunder.</p>`
+    },
+    {
+      title: 'Power spectral density (Wiener–Khinchin)',
+      tex: String.raw`$$ S_x(f)=\int_{-\infty}^{\infty} R_x(\tau)\,e^{-j2\pi f\tau}\,d\tau $$`,
+      derivation: String.raw`<p><b>Where we start.</b> Random signals (noise) have infinite energy, so their plain Fourier transform doesn't converge. We need a power-based spectrum via the autocorrelation.</p>
+      <p><b>Step 1 — define autocorrelation.</b> $R_x(\tau)=\mathbb{E}[x(t)x(t+\tau)]$ measures how similar the signal is to a shifted copy of itself — its "memory".</p>
+      <p><b>Step 2 — state the Wiener–Khinchin theorem.</b> For a wide-sense-stationary process the PSD is the Fourier transform of the autocorrelation:</p>
+      $$ S_x(f)=\int R_x(\tau) e^{-j2\pi f\tau}\,d\tau. $$
+      <p><b>Step 3 — interpret.</b> $S_x(f)$ is power per hertz; integrating it over all $f$ gives total power $R_x(0)=\mathbb{E}[x^2]$. Phase information is gone — only power remains.</p>
+      <p><b>Result.</b> White noise has $R_x(\tau)=\tfrac{N_0}{2}\delta(\tau)$ (uncorrelated), whose transform is the flat PSD $S_x(f)=N_0/2$ — the "white" spectrum. This is the object a spectrum analyzer estimates for noise.</p>`
+    },
+    {
+      title: 'Null-to-null bandwidth of a rectangular pulse',
+      tex: String.raw`$$ B_{\text{null}}=\frac{2}{T} $$`,
+      derivation: String.raw`<p><b>Where we start.</b> A data pulse of duration $T$ (a rectangle) has a sinc spectrum. We find the width of its main lobe — the usual "bandwidth" of the pulse.</p>
+      <p><b>Step 1 — the spectrum is a sinc.</b> From the rect↔sinc pair, $X(f)\propto \mathrm{sinc}(fT)$.</p>
+      <p><b>Step 2 — locate the first nulls.</b> $\mathrm{sinc}(fT)=0$ when $fT=\pm1$, i.e. at $f=\pm1/T$.</p>
+      <p><b>Step 3 — measure the main-lobe width.</b> From $-1/T$ to $+1/T$ is a two-sided width of $2/T$.</p>
+      <p><b>Result.</b> $$ B_{\text{null}}=\frac{2}{T}. $$ Faster signalling (smaller $T$) means a proportionally wider spectrum — the direct spectral cost of higher data rate.</p>`
+    }
+  ],
+  flashcards: [
+    { front: String.raw`What does a frequency spectrum show?`, back: String.raw`Amplitude $|X(f)|$ and phase $\angle X(f)$ of each frequency component versus frequency.` },
+    { front: String.raw`Line spectrum vs continuous spectrum — which signals?`, back: String.raw`Periodic signals give line spectra (harmonics); aperiodic signals give continuous spectra.` },
+    { front: String.raw`What symmetry does a real signal's spectrum have?`, back: String.raw`Conjugate symmetry $X(-f)=X^*(f)$: even magnitude, odd phase.` },
+    { front: String.raw`Two-sided vs one-sided spectrum?`, back: String.raw`Two-sided spans $\pm f$; one-sided folds the negative half over, doubling amplitudes (except DC).` },
+    { front: String.raw`Why is DC not doubled when going one-sided?`, back: String.raw`It has no negative-frequency mirror partner to fold in.` },
+    { front: String.raw`Name three bandwidth definitions.`, back: String.raw`−3 dB (half-power), null-to-null, occupied (e.g. 99%) — also equivalent noise bandwidth.` },
+    { front: String.raw`What is the PSD and what theorem defines it?`, back: String.raw`Power per hertz; the Fourier transform of the autocorrelation (Wiener–Khinchin).` },
+    { front: String.raw`When use Fourier transform vs PSD?`, back: String.raw`Fourier transform for deterministic finite-energy pulses; PSD for random/power signals and noise.` },
+    { front: String.raw`What does resolution bandwidth (RBW) control on a spectrum analyzer?`, back: String.raw`Filter width — narrower RBW resolves closer tones and lowers displayed noise floor but slows the sweep.` },
+    { front: String.raw`Does displayed noise power depend on RBW?`, back: String.raw`Yes — noise power scales with RBW; discrete-tone power does not.` },
+    { front: String.raw`Null-to-null bandwidth of a duration-$T$ rectangular pulse?`, back: String.raw`$2/T$.` },
+    { front: String.raw`Why does a finite observation window smear a spectral line?`, back: String.raw`Windowing multiplies in time = convolving with a sinc in frequency, broadening the line.` },
+    { front: String.raw`What is the amplitude spectrum vs phase spectrum?`, back: String.raw`Amplitude is $|X(f)|$ (strength of each component); phase is $\angle X(f)$ (timing).` },
+    { front: String.raw`What does the noise floor on an analyzer represent?`, back: String.raw`The PSD of the instrument/receiver noise.` }
+  ],
+  mcqs: [
+    { q: String.raw`A periodic signal has what kind of spectrum?`, options: [String.raw`Continuous`, String.raw`A line (discrete harmonic) spectrum`, String.raw`Flat`, String.raw`Random`], answer: 1, explain: String.raw`Fourier series → spikes at the fundamental and harmonics.` },
+    { q: String.raw`For a real signal, the spectrum satisfies:`, options: [String.raw`$X(-f)=X(f)$`, String.raw`$X(-f)=X^*(f)$`, String.raw`$X(-f)=-X(f)$`, String.raw`$X(f)=0$ for $f<0$`], answer: 1, explain: String.raw`Conjugate symmetry — even magnitude, odd phase.` },
+    { q: String.raw`Converting a two-sided amplitude spectrum to one-sided, you multiply positive-frequency amplitudes by:`, options: [String.raw`1 (no change)`, String.raw`2, except DC`, String.raw`0.5`, String.raw`$\pi$`], answer: 1, explain: String.raw`Fold negative half over; DC has no partner so is unchanged.` },
+    { q: String.raw`The PSD is the Fourier transform of:`, options: [String.raw`The signal`, String.raw`The autocorrelation`, String.raw`The phase`, String.raw`The impulse response`], answer: 1, explain: String.raw`Wiener–Khinchin theorem.` },
+    { q: String.raw`Which quantity discards phase information?`, options: [String.raw`The Fourier transform`, String.raw`The power spectrum / PSD`, String.raw`The inverse transform`, String.raw`The waveform`], answer: 1, explain: String.raw`Power spectra keep magnitude-squared only.` },
+    { q: String.raw`A single pure sinusoid has a spectrum that is:`, options: [String.raw`A flat band`, String.raw`A single spectral line (per side)`, String.raw`A sinc`, String.raw`Continuous`], answer: 1, explain: String.raw`An ideal, infinitely-long tone is one line (two-sided: two).` },
+    { q: String.raw`Narrowing the resolution bandwidth on a spectrum analyzer:`, options: [String.raw`Raises the noise floor`, String.raw`Lowers the displayed noise floor and improves resolution`, String.raw`Has no effect`, String.raw`Speeds up the sweep`], answer: 1, explain: String.raw`Less noise passes the narrower filter; but the sweep slows.` },
+    { q: String.raw`Null-to-null bandwidth of a rectangular pulse of width $T$ is:`, options: [String.raw`$1/T$`, String.raw`$2/T$`, String.raw`$T/2$`, String.raw`$1/(2T)$`], answer: 1, explain: String.raw`Sinc spectrum with first nulls at $\pm1/T$, width $2/T$.` },
+    { q: String.raw`A finite-duration observation of a tone produces:`, options: [String.raw`A perfect line`, String.raw`A sinc-broadened line`, String.raw`Zero spectrum`, String.raw`White noise`], answer: 1, explain: String.raw`Time windowing convolves the line with a sinc, smearing it.` },
+    { q: String.raw`For random noise, the appropriate spectral description is:`, options: [String.raw`The Fourier transform`, String.raw`The power spectral density`, String.raw`The phase spectrum`, String.raw`The Laplace transform`], answer: 1, explain: String.raw`Noise has infinite energy; use PSD (power/Hz).` },
+    { q: String.raw`On a spectrum analyzer, the power of a discrete tone (unlike noise) is:`, options: [String.raw`Dependent on RBW`, String.raw`Independent of RBW`, String.raw`Always at the noise floor`, String.raw`Negative`], answer: 1, explain: String.raw`A tone's power is concentrated, so RBW doesn't change its reading; noise power does scale with RBW.` },
+    { q: String.raw`The −3 dB bandwidth is the width between points where power falls to:`, options: [String.raw`One-tenth`, String.raw`One-half`, String.raw`One-quarter`, String.raw`Zero`], answer: 1, explain: String.raw`Half power = −3 dB = amplitude $1/\sqrt2$.` }
+  ],
+  numericals: [
+    { q: String.raw`A 2 V peak, 1 kHz cosine is analyzed. What amplitude appears at 1 kHz on a two-sided vs a one-sided spectrum?`, solution: String.raw`Two-sided: two lines of 1 V each at $\pm1$ kHz. One-sided: a single 2 V line at 1 kHz (positive half doubled).` },
+    { q: String.raw`A rectangular data pulse lasts $T=0.5\ \mu s$. Find its null-to-null bandwidth.`, solution: String.raw`$B_{\text{null}}=2/T=2/(0.5\times10^{-6})=4$ MHz.` },
+    { q: String.raw`A spectrum analyzer shows a noise floor of $-90$ dBm at RBW = 10 kHz. What noise floor would you expect at RBW = 1 kHz?`, solution: String.raw`Noise power scales with RBW: reducing by 10× lowers it 10 dB, giving $-100$ dBm.` },
+    { q: String.raw`A square wave has fundamental 1 kHz. List the frequencies of its first three spectral lines.`, solution: String.raw`Odd harmonics only: 1 kHz, 3 kHz, 5 kHz (amplitudes $\propto 1,1/3,1/5$).` },
+    { q: String.raw`White noise has PSD $N_0/2 = 10^{-20}$ W/Hz. What noise power falls in a 1 MHz bandwidth?`, solution: String.raw`Two-sided-to-one-sided: use $N_0=2\times10^{-20}$ W/Hz. $P=N_0 B=2\times10^{-20}\times10^{6}=2\times10^{-14}$ W $=-107$ dBm.` },
+    { q: String.raw`A signal occupies from 100.0 to 100.2 MHz. State its bandwidth and the analyzer center frequency to display it centered.`, solution: String.raw`Bandwidth $=100.2-100.0=0.2$ MHz $=200$ kHz. Center frequency $=(100.0+100.2)/2=100.1$ MHz.` }
+  ],
+  realWorld: String.raw`<p>The frequency spectrum is the working language of RF engineering. Regulators (FCC, ITU) allocate and police spectrum by occupied bandwidth and spurious-emission masks read directly off a spectrum analyzer. Cellular and Wi-Fi radios must keep their power within an assigned channel and their out-of-band emissions below a spectral mask — verified by the amplitude spectrum. EMC/EMI compliance testing hunts for harmonics and spurs. In diagnostics, a spectrum reveals oscillator <a href="#phase-noise">phase noise</a> as a skirt around the carrier, intermodulation as extra tones, and interference as unexpected lines. Audio engineers read the same displays to spot hum (50/60 Hz lines) and distortion harmonics. Every SDR waterfall display, every satellite-link power-flux-density check, and every radar Doppler measurement is fundamentally a frequency-spectrum reading.</p>`,
+  related: ['fourier-transform', 'psd', 'sinc-function', 'shannon', 'noise-floor']
+}
+);

@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v6';
+const CACHE = 'rfstudy-v9';
 
 const ASSETS = [
   './',
@@ -9,7 +9,9 @@ const ASSETS = [
   'app.js',
   'content.js',
   'dummies.js',
+  'dummies-extra.js',
   'figures.js',
+  'figures-extra.js',
   'manifest.webmanifest',
   'topics/fundamentals.js',
   'topics/signals.js',
@@ -21,6 +23,17 @@ const ASSETS = [
   'topics/sdr.js',
   'topics/rf-link.js',
   'topics/antennas.js',
+  'topics/extra-a.js',
+  'topics/extra-b.js',
+  'topics/extra-c.js',
+  'derivations/fundamentals.js',
+  'derivations/signals-systems.js',
+  'derivations/modulation-detection.js',
+  'derivations/synchronization.js',
+  'derivations/spread-spectrum-coding.js',
+  'derivations/rf-link-metrics.js',
+  'derivations/sdr-data-converters.js',
+  'derivations/antennas-electromagnetics.js',
   'code/fundamentals.js',
   'code/signals.js',
   'code/modulation.js',
@@ -30,6 +43,7 @@ const ASSETS = [
   'code/sdr.js',
   'code/rf-link.js',
   'code/antennas.js',
+  'code/extra.js',
   'vendor/mathjax/tex-svg.js',
   'icons/icon-192.png',
   'icons/icon-512.png',

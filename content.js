@@ -37,11 +37,11 @@ const CONTENT = {
   ],
   // Canonical display order (nav sorts by this within each category).
   topicOrder: [
-    'comm-basics', 'noise', 'psd', 'noise-floor', 'noise-figure', 'phase-noise',
-    'fourier-transform', 'laplace-transform', 'z-transform', 'convolution', 'correlation', 'nyquist-sampling', 'aliasing',
+    'comm-basics', 'shannon', 'source-coding', 'noise', 'psd', 'noise-floor', 'noise-figure', 'phase-noise',
+    'fourier-transform', 'fft', 'sinc-function', 'frequency-spectrum', 'laplace-transform', 'z-transform', 'convolution', 'correlation', 'fir-filters', 'iir-filters', 'nyquist-sampling', 'aliasing',
     'bpsk', 'dbpsk', 'pulse-shaping', 'eye-diagram', 'matched-filter', 'ber', 'eb-no', 'evm',
     'pll', 'fll', 'costas-loop',
-    'dsss', 'frequency-hopping', 'processing-gain', 'jamming-margin', 'pn-codes', 'gold-code', 'fec', 'viterbi',
+    'dsss', 'frequency-hopping', 'processing-gain', 'jamming-margin', 'pn-codes', 'gold-code', 'channel-coding', 'fec', 'convolutional-codes', 'viterbi',
     'sdr', 'adc', 'dac', 'ad9361', 'rfsoc',
     'rssi', 'path-loss', 'link-budget', 'sensitivity',
     'antenna', 'antenna-gain', 'antenna-beamwidth', 'antenna-types', 'maxwell'
@@ -54,6 +54,11 @@ const CONTENT_CODE = {};
 
 /* Plain-English "For dummies" explanations per topic id. Populated by dummies.js. */
 const CONTENT_DUMMIES = {};
+
+/* Upgraded from-scratch derivations, keyed by topic id then equation index.
+   e.g. CONTENT_DERIV['bpsk'] = { 0: '<html>', 1: '<html>' }. Populated by /derivations files.
+   When present, overrides the equation's built-in derivation. */
+const CONTENT_DERIV = {};
 
 /* Computed/interactive figure specs per topic id. Populated by figures.js (FIG.map). */
 const CONTENT_FIG = {};
