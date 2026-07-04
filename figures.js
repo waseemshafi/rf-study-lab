@@ -1367,9 +1367,217 @@ const FIG = (function () {
     ctx.fillText('Each input bit produces 2 output bits (rate 1/2), each an XOR of tapped register stages (K=3).', w / 2, h - 6);
   };
 
+  // Step-waveform helper: bits array (0/1) → drawn digital signal in a box
+  function stepWave(ctx, bits, box, color, hi, lo) {
+    const n = bits.length, X = v => box.x + v * box.w / n, Y = b => b ? hi : lo;
+    ctx.strokeStyle = color; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(X(0), Y(bits[0]));
+    for (let i = 0; i < n; i++) { ctx.lineTo(X(i + 1), Y(bits[i])); if (i + 1 < n) ctx.lineTo(X(i + 1), Y(bits[i + 1])); }
+    ctx.stroke();
+  }
+
+  // Async serial frame (UART / RS-232): idle-start-8data-stop
+  T.serialFrame = function (host, spec) {
+    const card = makeCard(host, spec, 540, 230);
+    function draw(val) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const bits = [1, 1, 0]; for (let i = 0; i < 8; i++) bits.push((val >> i) & 1); bits.push(1, 1);
+      const labels = ['idle', 'idle', 'START', 'D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'STOP', 'idle'];
+      const box = { x: 30, w: w - 46 }, top = 46, bot = h - 52, n = bits.length;
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+      for (let i = 0; i <= n; i++) { const x = box.x + i * box.w / n; ctx.beginPath(); ctx.moveTo(x, top - 6); ctx.lineTo(x, bot + 6); ctx.stroke(); if (i < n) { ctx.fillStyle = (i >= 3 && i <= 10) ? C.teal : (labels[i] === 'START' || labels[i] === 'STOP' ? C.orange : C.dim); ctx.fillText(labels[i], x + box.w / n / 2, bot + 18); } }
+      stepWave(ctx, bits, { x: box.x, w: box.w }, C.blue, top, bot);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('byte 0x' + val.toString(16).toUpperCase().padStart(2, '0') + ' (' + val + ') sent LSB-first · 8N1 = 10 bits on the wire for 8 data → 80% efficient', 30, 26);
+    }
+    draw(0x53);
+    slider(card.controls, { label: 'data byte', min: 0, max: 255, step: 1, value: 0x53, fmt: v => '0x' + Math.round(v).toString(16).toUpperCase() }, v => draw(Math.round(v)));
+  };
+
+  // Differential signalling & common-mode noise rejection (RS-422/485/LVDS/1553)
+  T.diffSignal = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    function draw(noise) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const N = 240, sw = 0.5, data = i => (Math.floor(i / 30) % 2 ? 1 : -1);
+      const cm = []; for (let i = 0; i < N; i++) cm.push(noise * (Math.sin(i * 0.06) + 0.4 * Math.sin(i * 0.31)));
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 74) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [0, N], yr: [-2, 2], xlabel: '', ylabel: 'A, B (V)' });
+      const A = [], B = []; for (let i = 0; i < N; i++) { A.push([i, sw * data(i) + cm[i]]); B.push([i, -sw * data(i) + cm[i]]); }
+      line(ctx, a1, A, C.blue, 1.6); line(ctx, a1, B, C.orange, 1.6);
+      legend(ctx, b1, [{ label: 'A (D+)', color: C.blue }, { label: 'B (D−)', color: C.orange }]);
+      const b2 = { x: 52, y: 20 + b1.h + 34, w: w - 72, h: (h - 74) / 2 };
+      const a2 = drawAxes(ctx, b2, { xr: [0, N], yr: [-1.5, 1.5], xlabel: 'time', ylabel: 'A − B' });
+      const D = []; for (let i = 0; i < N; i++) D.push([i, 2 * sw * data(i)]); line(ctx, a2, D, C.teal, 2.4);
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('the same noise rides on BOTH wires; the receiver takes A−B, so the common-mode noise cancels', b1.x + 4, b1.y + 12);
+    }
+    draw(0.6);
+    slider(card.controls, { label: 'common-mode noise', min: 0, max: 1.4, step: 0.05, value: 0.6, fmt: v => v.toFixed(2) + ' V' }, v => draw(v));
+  };
+
+  // Bus topology: multidrop vs point-to-point
+  T.busTopology = function (host, spec) {
+    const card = makeCard(host, spec, 520, 250);
+    const multidrop = spec.multidrop !== false;
+    let N = spec.nodes || 4;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const busY = h / 2, x0 = 55, x1 = w - 55;
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x0, busY); ctx.lineTo(x1, busY); ctx.stroke();
+      ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      [x0, x1].forEach(x => { ctx.strokeStyle = C.orange; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, busY - 9); ctx.lineTo(x, busY + 9); ctx.stroke(); ctx.fillStyle = C.orange; ctx.fillText('R', x, busY + 22); });
+      for (let i = 0; i < N; i++) {
+        const x = x0 + (x1 - x0) * (i + 0.5) / N, ny = i % 2 ? busY + 46 : busY - 46;
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, busY); ctx.lineTo(x, ny > busY ? ny - 14 : ny + 14); ctx.stroke();
+        ctx.fillStyle = C.box; ctx.strokeStyle = C.teal; ctx.lineWidth = 1.5; ctx.fillRect(x - 24, ny - 13, 48, 26); ctx.strokeRect(x - 24, ny - 13, 48, 26);
+        ctx.fillStyle = C.text; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(i === 0 ? 'Ctrl' : 'Dev ' + i, x, ny + 3);
+      }
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(multidrop ? (N + ' devices share one bus (multidrop) · terminated (R) at both ends') : 'point-to-point link (one driver, one receiver)', 30, 22);
+    }
+    draw();
+    if (multidrop) slider(card.controls, { label: 'devices', min: 2, max: 16, step: 1, value: N }, v => { N = Math.round(v); draw(); });
+  };
+
+  // SPI timing with CPOL/CPHA modes
+  T.spiTiming = function (host, spec) {
+    const card = makeCard(host, spec, 540, 300);
+    let mode = 0;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const cpol = (mode >> 1) & 1, cpha = mode & 1, N = 8, x0 = 70, x1 = w - 20, bw = (x1 - x0) / N;
+      const rows = [{ lbl: 'SS', y: 40 }, { lbl: 'SCLK', y: 100 }, { lbl: 'MOSI', y: 170 }, { lbl: 'MISO', y: 240 }];
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+      rows.forEach(r => ctx.fillText(r.lbl, x0 - 8, r.y + 4));
+      const hi = -16, lo = 16;
+      // SS active low (0 during transfer)
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(x0 - 30, 40 + hi); ctx.lineTo(x0, 40 + hi); ctx.lineTo(x0, 40 + lo); ctx.lineTo(x1, 40 + lo); ctx.lineTo(x1, 40 + hi); ctx.lineTo(x1 + 10, 40 + hi); ctx.stroke();
+      // SCLK: N pulses, idle = cpol
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2.2; ctx.beginPath(); let cy = 100; const idle = cpol ? hi : lo;
+      ctx.moveTo(x0, cy + idle);
+      for (let i = 0; i < N; i++) { const a = x0 + i * bw, m = a + bw / 2, b = a + bw; ctx.lineTo(m, cy + idle); ctx.lineTo(m, cy + (cpol ? lo : hi)); ctx.lineTo(b, cy + (cpol ? lo : hi)); ctx.lineTo(b, cy + idle); }
+      ctx.stroke();
+      // data bits (a byte) for MOSI/MISO
+      const dv = 0xB4, dv2 = 0x6D;
+      [[170, dv, C.teal], [240, dv2, C.orange]].forEach(g => {
+        ctx.strokeStyle = g[2]; ctx.lineWidth = 2.2; ctx.beginPath();
+        for (let i = 0; i < N; i++) { const bit = (g[1] >> (7 - i)) & 1, a = x0 + i * bw, b = a + bw, y = g[0] + (bit ? hi : lo); if (i === 0) ctx.moveTo(a, y); else ctx.lineTo(a, y); ctx.lineTo(b, y); }
+        ctx.stroke();
+      });
+      // sample-edge markers
+      ctx.strokeStyle = C.red; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+      for (let i = 0; i < N; i++) { const edge = x0 + i * bw + (cpha ? bw : bw / 2); ctx.beginPath(); ctx.moveTo(edge, 155); ctx.lineTo(edge, 258); ctx.stroke(); }
+      ctx.setLineDash([]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('Mode ' + mode + ' (CPOL=' + cpol + ', CPHA=' + cpha + ') · red = sample edges · 1 bit per clock, full-duplex', 30, 20);
+    }
+    draw();
+    chooser(card.controls, [0, 1, 2, 3].map(m => ({ v: m, l: 'Mode ' + m })), 0, v => { mode = v; draw(); });
+  };
+
+  // Cable length vs data rate trade-off (RS-422/485/LVDS)
+  T.lengthVsRate = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function draw(rate) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [1e4, 1e8], yr: [1, 2000], logx: true, logy: true, xlabel: 'data rate (bps)', ylabel: 'max cable length (m)', xtickfmt: t => t >= 1e6 ? (t / 1e6) + 'M' : (t / 1e3) + 'k' });
+      // rule of thumb: length·rate ≈ 1.2e8 (10Mbps→12m, 100kbps→1200m), capped 1200 m
+      const pts = []; for (let e = 4; e <= 8; e += 0.05) { const r = Math.pow(10, e); pts.push([r, Math.min(1200, 1.2e8 / r)]); }
+      line(ctx, ax, pts, C.blue, 2.5);
+      const L = Math.min(1200, 1.2e8 / rate);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(rate), ax.y + ax.h); ctx.lineTo(ax.fx(rate), ax.fy(L)); ctx.lineTo(ax.x, ax.fy(L)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(rate), ax.fy(L), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('at ' + (rate >= 1e6 ? (rate / 1e6) + ' Mbps' : (rate / 1e3) + ' kbps') + ' → up to ~' + L.toFixed(0) + ' m (faster = shorter reach)', ax.x + 8, ax.y + 16);
+    }
+    draw(1e6);
+    slider(card.controls, { label: 'data rate', min: 4, max: 7, step: 0.1, value: 6, fmt: v => { const r = Math.pow(10, v); return r >= 1e6 ? (r / 1e6).toFixed(1) + ' Mbps' : (r / 1e3).toFixed(0) + ' kbps'; } }, v => draw(Math.pow(10, v)));
+  };
+
+  // Manchester encoding (MIL-STD-1553)
+  T.manchester = function (host, spec) {
+    const { ctx, w, h } = makeCard(host, spec, 540, 260);
+    const data = [1, 0, 1, 1, 0, 0, 1, 0], N = data.length, x0 = 40, x1 = w - 16, bw = (x1 - x0) / N;
+    // NRZ (top)
+    const b1 = { top: 44, bot: 108 };
+    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('NRZ data', 8, 40);
+    stepWave(ctx, data, { x: x0, w: x1 - x0 }, C.dim, b1.top, b1.bot);
+    // Manchester (bottom): each bit = transition mid-bit; 1 = hi→lo (or lo→hi per convention). Use IEEE: 0 = lo→hi, 1 = hi→lo? 1553 uses 1 = hi-lo.
+    const b2 = { top: 150, bot: 214 };
+    ctx.fillStyle = C.teal; ctx.fillText('Manchester-II (self-clocking)', 8, 146);
+    ctx.strokeStyle = C.blue; ctx.lineWidth = 2.4; ctx.beginPath();
+    for (let i = 0; i < N; i++) { const a = x0 + i * bw, m = a + bw / 2, b = a + bw; const first = data[i] ? b2.top : b2.bot, second = data[i] ? b2.bot : b2.top; if (i === 0) ctx.moveTo(a, first); else ctx.lineTo(a, first); ctx.lineTo(m, first); ctx.lineTo(m, second); ctx.lineTo(b, second); }
+    ctx.stroke();
+    ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = C.dim;
+    for (let i = 0; i < N; i++) { const x = x0 + i * bw; ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(x, 40); ctx.lineTo(x, 220); ctx.stroke(); ctx.fillStyle = C.text; ctx.fillText(data[i], x + bw / 2, 235); }
+    ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('every bit has a mid-bit transition → the clock is embedded in the data (no separate clock wire)', 30, h - 6);
+  };
+
+  // AXI VALID/READY handshake
+  T.axiHandshake = function (host, spec) {
+    const card = makeCard(host, spec, 540, 280);
+    function draw(stall) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const N = 8, x0 = 80, x1 = w - 20, bw = (x1 - x0) / N;
+      // VALID high from beat1; READY high except a stall window
+      const valid = [0, 1, 1, 1, 1, 1, 1, 0];
+      const ready = []; for (let i = 0; i < N; i++) ready.push((i >= 2 && i < 2 + stall) ? 0 : 1);
+      const rows = [{ lbl: 'ACLK', y: 40 }, { lbl: 'VALID', y: 100 }, { lbl: 'READY', y: 160 }, { lbl: 'DATA', y: 220 }];
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; rows.forEach(r => ctx.fillText(r.lbl, x0 - 8, r.y + 4));
+      const hi = -16, lo = 16;
+      // clock
+      ctx.strokeStyle = C.dim; ctx.lineWidth = 1.6; ctx.beginPath(); for (let i = 0; i < N; i++) { const a = x0 + i * bw, m = a + bw / 2, b = a + bw; ctx.moveTo(a, 40 + lo); ctx.lineTo(m, 40 + lo); ctx.lineTo(m, 40 + hi); ctx.lineTo(b, 40 + hi); ctx.lineTo(b, 40 + lo); } ctx.stroke();
+      stepWave(ctx, valid, { x: x0, w: x1 - x0 }, C.blue, 100 + hi, 100 + lo);
+      stepWave(ctx, ready, { x: x0, w: x1 - x0 }, C.orange, 160 + hi, 160 + lo);
+      // DATA beats + transfer markers when valid&ready
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 2.2; ctx.strokeRect(x0, 220 + hi, x1 - x0, lo - hi);
+      let count = 0;
+      for (let i = 0; i < N; i++) { if (valid[i] && ready[i]) { count++; const a = x0 + i * bw; ctx.fillStyle = 'rgba(99,230,190,0.25)'; ctx.fillRect(a, 220 + hi, bw, lo - hi); ctx.fillStyle = C.teal; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('beat' + count, a + bw / 2, 220 + 3); } }
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('a transfer happens ONLY when VALID and READY are both high · ' + count + ' beats moved (READY low = back-pressure/stall)', 30, 20);
+    }
+    draw(1);
+    slider(card.controls, { label: 'stall length', min: 0, max: 3, step: 1, value: 1, fmt: v => v + ' clk' }, v => draw(Math.round(v)));
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {
+    'rs232': [
+      { type: 'serialFrame', title: 'RS-232 async frame (8N1)', caption: 'Change the byte and watch the start/data/stop bits.', explain: EX('<b>What it shows:</b> RS-232 has no clock wire — it frames each byte with a start bit and stop bit so the receiver can find the byte. <b>Try:</b> change the data byte; bits go out LSB-first between the orange start/stop bits. 10 bits carry 8 data bits → 80% efficient.') },
+      { type: 'lengthVsRate', title: 'Speed vs cable length', caption: 'Faster signalling means shorter usable cable.', explain: EX('<b>What it shows:</b> RS-232 is single-ended and short-range; like all wired links, going faster shortens the reach. <b>Try:</b> slide the rate — RS-232 tops out around 15 m at modest speeds.') },
+      { type: 'busTopology', multidrop: false, title: 'Point-to-point link', caption: 'RS-232 connects exactly two devices.', explain: EX('<b>What it shows:</b> RS-232 is strictly one driver to one receiver (e.g. PC ↔ modem) — no sharing, no addressing.') }
+    ],
+    'rs422': [
+      { type: 'diffSignal', title: 'Differential noise rejection', caption: 'Add common-mode noise — A−B cancels it.', explain: EX('<b>What it shows:</b> RS-422 sends each bit as the difference between two wires. <b>Try:</b> add noise — it lands on both wires equally, so the receiver’s A−B subtraction cancels it. That is why RS-422 runs far and fast where RS-232 can’t.') },
+      { type: 'serialFrame', title: 'Same async framing', caption: 'RS-422 usually carries UART-style frames.', explain: EX('<b>What it shows:</b> RS-422 changes only the electrical layer — the data is still framed like RS-232 (start/data/stop), just sent differentially.') },
+      { type: 'lengthVsRate', title: 'Reach vs speed', caption: '10 Mbps at ~12 m down to 100 kbps at ~1200 m.', explain: EX('<b>What it shows:</b> the classic RS-422/485 trade — up to ~1200 m slow, or ~10 Mbps short. <b>Try:</b> drag the rate to read the max length.') }
+    ],
+    'rs485': [
+      { type: 'diffSignal', title: 'Differential signalling', caption: 'Common-mode noise cancels in A−B.', explain: EX('<b>What it shows:</b> like RS-422, RS-485 is differential for noise immunity and long reach. <b>Try:</b> add noise and watch A−B stay clean.') },
+      { type: 'busTopology', multidrop: true, nodes: 6, title: 'Multidrop bus', caption: 'Many devices share one twisted pair.', explain: EX('<b>What it shows:</b> RS-485’s superpower — up to 32 unit loads share one bus, terminated (R) at both ends. <b>Try:</b> add devices. Only one may drive at a time (half-duplex), so a protocol decides whose turn it is.') },
+      { type: 'lengthVsRate', title: 'Reach vs speed', caption: 'Same length-rate curve as RS-422.', explain: EX('<b>What it shows:</b> RS-485 shares the RS-422 reach curve — long and slow, or short and fast.') }
+    ],
+    'lvds': [
+      { type: 'diffSignal', title: 'Low-voltage differential', caption: 'A tiny differential swing, noise cancels.', explain: EX('<b>What it shows:</b> LVDS drives a small (~350 mV) differential swing at very high speed. <b>Try:</b> add noise — the differential receiver rejects it, so LVDS can run at gigabit rates on low power.') },
+      { type: 'lengthVsRate', title: 'Very fast, short reach', caption: 'Gigabit rates over short distances.', explain: EX('<b>What it shows:</b> LVDS trades distance for blistering speed — it lives on short board/cable runs (displays, camera links), the far top-left of this curve.') },
+      { type: 'busTopology', multidrop: false, title: 'Usually point-to-point', caption: 'Short, terminated differential pair.', explain: EX('<b>What it shows:</b> LVDS is typically a point-to-point differential pair with a 100 Ω termination at the receiver.') }
+    ],
+    'spi': [
+      { type: 'spiTiming', title: 'SPI timing (CPOL/CPHA)', caption: 'Pick a mode — see the clock idle level & sample edge.', explain: EX('<b>What it shows:</b> SPI is clocked (SCLK) and full-duplex — MOSI and MISO shift together, one bit per clock, while SS is low. <b>Try:</b> switch modes; CPOL sets the idle clock level and CPHA sets which edge samples the data.') },
+      { type: 'busTopology', multidrop: true, nodes: 4, title: 'One master, several slaves', caption: 'Each slave gets its own chip-select.', explain: EX('<b>What it shows:</b> SPI shares SCLK/MOSI/MISO but selects one slave at a time with a dedicated SS line — no addressing, no acknowledge.') },
+      { type: 'lengthVsRate', title: 'Short on-board reach', caption: 'SPI is a fast, very short-range bus.', explain: EX('<b>What it shows:</b> with no differential signalling, SPI is meant for chip-to-chip on one board — high clock rate but centimetres, not metres.') }
+    ],
+    'axi': [
+      { type: 'axiHandshake', title: 'VALID/READY handshake', caption: 'Data moves only when both are high.', explain: EX('<b>What it shows:</b> every AXI channel uses a VALID/READY handshake — the sender raises VALID, the receiver raises READY, and a beat transfers only when both are high. <b>Try:</b> add a stall (READY low) to see back-pressure pause the burst with no data lost.') },
+      { type: 'busTopology', multidrop: true, nodes: 5, title: 'On-chip interconnect', caption: 'Masters and slaves via an interconnect.', explain: EX('<b>What it shows:</b> AXI is the on-chip bus that ties CPUs, DMA and peripherals together inside an SoC/FPGA through an interconnect.') },
+      { type: 'spiTiming', title: 'Contrast: a simple serial bus', caption: 'SPI is trivial next to AXI’s channels.', explain: EX('<b>Contrast:</b> where SPI just shifts bits on a clock, AXI adds separate address/data/response channels, bursts, and handshaking for high-throughput memory-mapped access.') }
+    ],
+    'mil-std-1553': [
+      { type: 'manchester', title: 'Manchester-encoded words', caption: 'The clock is embedded in every bit.', explain: EX('<b>What it shows:</b> 1553 encodes data in Manchester-II, so every bit has a mid-bit transition — the receiver recovers the clock from the data itself (no separate clock wire), and it’s DC-balanced for transformer coupling.') },
+      { type: 'busTopology', multidrop: true, nodes: 6, title: 'Dual-redundant bus', caption: 'A Bus Controller commands up to 31 terminals.', explain: EX('<b>What it shows:</b> 1553 is a command/response bus — one Bus Controller directs up to 31 Remote Terminals over a shared, terminated bus (usually dual-redundant for reliability).') },
+      { type: 'diffSignal', title: 'Transformer-coupled differential', caption: 'Balanced differential for noise immunity.', explain: EX('<b>What it shows:</b> 1553 uses a balanced, transformer-coupled differential pair — robust against the harsh electrical noise of a military aircraft.') }
+    ],
     'am': [{ type: 'amWave', title: 'AM waveform & envelope', caption: 'Raise the modulation index and watch the envelope grow.', explain: EX('<b>What it shows:</b> AM rides the message on the carrier’s amplitude — the orange envelope IS your signal. <b>Try:</b> push m past 1 and the envelope crosses zero (overmodulation), which a simple envelope detector can no longer recover. Note how little power is efficient (≤33%).') }],
     'fm': [{ type: 'fmWave', title: 'FM waveform', caption: 'The carrier squeezes and stretches with the message.', explain: EX('<b>What it shows:</b> FM puts the message into the carrier’s frequency — tighter cycles where the message is high, looser where it’s low. <b>Try:</b> raise β and the frequency swings harder, widening the spectrum per Carson’s rule (~2(β+1)·fm). That extra bandwidth is what buys FM its noise immunity.') }],
     'qpsk': [{ type: 'constellation', order: 4, snr: 14, title: 'QPSK constellation', caption: 'Four phases = 2 bits/symbol; lower SNR to see errors.', explain: EX('<b>What it shows:</b> QPSK is two BPSK channels (I and Q) at once — four points, 2 bits each. <b>Try:</b> drop the SNR until the clouds cross the axes. Per-bit error rate is identical to BPSK, but QPSK carries twice the data in the same bandwidth.') }],

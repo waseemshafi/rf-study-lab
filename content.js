@@ -32,6 +32,7 @@ const CONTENT = {
     'Synchronization',
     'Spread Spectrum & Coding',
     'SDR & Data Converters',
+    'Interfaces & Protocols',
     'RF Link & Metrics',
     'Antennas & Electromagnetics'
   ],
@@ -43,6 +44,7 @@ const CONTENT = {
     'pll', 'fll', 'early-late-correlator', 'costas-loop',
     'dsss', 'frequency-hopping', 'processing-gain', 'jamming-margin', 'pn-codes', 'gold-code', 'channel-coding', 'fec', 'convolutional-codes', 'viterbi',
     'sdr', 'adc', 'dac', 'ad9361', 'rfsoc',
+    'rs232', 'rs422', 'rs485', 'lvds', 'spi', 'axi', 'mil-std-1553',
     'rssi', 'path-loss', 'link-budget', 'sensitivity',
     'antenna', 'antenna-gain', 'antenna-beamwidth', 'polarization', 'antenna-types', 'maxwell'
   ],
