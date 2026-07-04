@@ -1569,6 +1569,65 @@ const FIG = (function () {
     });
   };
 
+  // MIL-STD-1553 message formats (word sequence on the bus)
+  T.msgSequence1553 = function (host, spec) {
+    const card = makeCard(host, spec, 540, 250);
+    const F = {
+      'bc-rt': { l: 'BC → RT (receive)', seq: [['C', 'BC'], ['D', 'BC'], ['D', 'BC'], ['G', ''], ['S', 'RT']] },
+      'rt-bc': { l: 'RT → BC (transmit)', seq: [['C', 'BC'], ['G', ''], ['S', 'RT'], ['D', 'RT'], ['D', 'RT']] },
+      'rt-rt': { l: 'RT → RT', seq: [['C', 'BC'], ['C', 'BC'], ['G', ''], ['S', 'RT'], ['D', 'RT'], ['D', 'RT'], ['G', ''], ['S', 'RT']] },
+      'mode': { l: 'Mode command (no data)', seq: [['C', 'BC'], ['G', ''], ['S', 'RT']] }
+    };
+    const col = { C: C.blue, D: C.teal, S: C.orange };
+    const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+    let cur = 'bc-rt';
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const seq = F[cur].seq, x0 = 20, x1 = w - 20, y = h / 2 - 6, bh = 48;
+      const units = seq.length, bw = (x1 - x0) / units;
+      ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(x0, y + bh + 22); ctx.lineTo(x1, y + bh + 22); ctx.stroke();
+      let x = x0;
+      seq.forEach(s => {
+        if (s[0] === 'G') { ctx.fillStyle = C.dim; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('gap', x + bw / 2, y + bh / 2 + 3); }
+        else {
+          const c = col[s[0]], name = s[0] === 'C' ? 'Command' : s[0] === 'S' ? 'Status' : 'Data';
+          ctx.fillStyle = rgba(c, 0.2); ctx.fillRect(x + 4, y, bw - 8, bh); ctx.strokeStyle = c; ctx.lineWidth = 1.6; ctx.strokeRect(x + 4, y, bw - 8, bh);
+          ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, x + bw / 2, y + bh / 2 - 2);
+          ctx.fillStyle = C.dim; ctx.font = '9px sans-serif'; ctx.fillText('word', x + bw / 2, y + bh / 2 + 12);
+          ctx.fillStyle = s[1] === 'BC' ? C.purple : C.teal; ctx.font = '10px sans-serif'; ctx.fillText(s[1] + ' sends', x + bw / 2, y - 8);
+        }
+        x += bw;
+      });
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(F[cur].l + ' · every word is 20 bit-times (20 µs) · the RT answers within 4–12 µs', 20, 22);
+    }
+    draw();
+    chooser(card.controls, Object.keys(F).map(k => ({ v: k, l: F[k].l.split(' ')[0] })), 'bc-rt', v => { cur = v; draw(); });
+  };
+
+  // AXI burst types: how the address advances across beats
+  T.axiBurst = function (host, spec) {
+    const card = makeCard(host, spec, 520, 260);
+    let type = 'INCR';
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const len = 4, size = 4, base = 0x108, boundary = len * size;
+      const addr = i => type === 'FIXED' ? base : type === 'INCR' ? base + i * size : (base - (base % boundary) + ((base % boundary + i * size) % boundary));
+      const x0 = 30, x1 = w - 20, y = 70, bh = 60, bw = (x1 - x0) / len;
+      for (let i = 0; i < len; i++) {
+        const x = x0 + i * bw;
+        ctx.fillStyle = 'rgba(77,171,247,0.14)'; ctx.fillRect(x + 6, y, bw - 12, bh); ctx.strokeStyle = C.blue; ctx.lineWidth = 1.6; ctx.strokeRect(x + 6, y, bw - 12, bh);
+        ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('beat ' + i, x + bw / 2, y + 20);
+        ctx.fillStyle = C.orange; ctx.font = '13px monospace'; ctx.fillText('0x' + addr(i).toString(16).toUpperCase(), x + bw / 2, y + 42);
+      }
+      const notes = { FIXED: 'address stays fixed (e.g. reading one FIFO/register repeatedly)', INCR: 'address increments by the transfer size each beat (normal memory access)', WRAP: 'increments then wraps at a boundary (cache-line fills — critical word first)' };
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(type + ' burst, ' + len + ' beats × ' + size + ' bytes from 0x' + base.toString(16).toUpperCase(), 30, 30);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.fillText(notes[type], 30, h - 16);
+    }
+    draw();
+    chooser(card.controls, ['FIXED', 'INCR', 'WRAP'].map(t => ({ v: t, l: t })), 'INCR', v => { type = v; draw(); });
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {

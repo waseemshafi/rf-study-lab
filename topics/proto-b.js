@@ -89,7 +89,17 @@ CONTENT.topics.push(
           <li><b>Frame time</b> for an $N$-bit word: $T = N / f_{SCLK}$, plus small inter-frame SS setup/hold gaps.</li>
           <li><b>Round-trip constraint</b>: on a read, the master drives SCLK, the slave responds after its clock-to-out delay, and that data must return and settle before the master samples it. At high $f_{SCLK}$ this MISO round-trip (not the shift register) is often the true speed ceiling.</li>
         </ul>
-        <p>Wider "Dual" and "Quad" SPI (QSPI) variants use 2 or 4 data lines to multiply throughput by 2x or 4x while sacrificing pure full-duplex - a common extension for serial flash, though outside base SPI.</p>`
+        <p>Wider "Dual" and "Quad" SPI (QSPI) variants use 2 or 4 data lines to multiply throughput by 2x or 4x while sacrificing pure full-duplex - a common extension for serial flash, though outside base SPI.</p>
+        <p><b>Key SPI variants</b> beyond the canonical 4-wire form:</p>
+        <table class="data">
+          <tr><th>Variant</th><th>Data lines</th><th>Duplex</th><th>Notes</th></tr>
+          <tr><td>Standard (4-wire)</td><td>MOSI + MISO (2)</td><td>Full-duplex</td><td>The canonical form: separate in and out lines.</td></tr>
+          <tr><td>3-wire (half-duplex)</td><td>Single bidirectional SDIO/SISO (1)</td><td>Half-duplex</td><td>MOSI and MISO merged into one bidirectional data line plus SCLK and SS; saves a pin at the cost of full-duplex. Common on space-constrained sensors.</td></tr>
+          <tr><td>Dual SPI</td><td>IO0, IO1 (2)</td><td>Half-duplex</td><td>Both lines carry data in the same direction to double throughput; used by serial flash.</td></tr>
+          <tr><td>Quad SPI / QSPI</td><td>IO0-IO3 (4)</td><td>Half-duplex</td><td>Four data lines for 4x throughput; the standard fast-read mode for NOR flash and XIP boot.</td></tr>
+          <tr><td>Microwire</td><td>SI + SO (2)</td><td>Half-duplex (typ.)</td><td>National Semiconductor's predecessor/subset of SPI, effectively fixed to Mode 0, typically half-duplex with a command/response framing.</td></tr>
+        </table>
+        <p>Note that Dual/Quad/QSPI trade SPI's inherent full-duplex for higher one-directional throughput, and the 3-wire form trades it for a lower pin count.</p>`
       },
       {
         h: 'Use Cases, Pros and Cons, and a Comparison Table',
@@ -121,7 +131,8 @@ CONTENT.topics.push(
       String.raw`Frame time for an $N$-bit word is $T = N/f_{SCLK}$; at high speed the MISO round-trip delay, not the shift register, caps the rate.`,
       String.raw`Device count in independent mode is limited by the master's SS pins, not by any address space; daisy-chaining shares one SS as one long shift register.`,
       String.raw`Short reach: single-ended, unterminated push-pull signalling meant for a single PCB, not cables.`,
-      String.raw`No formal standard document exists; SPI is a de-facto convention with vendor-specific naming (controller/peripheral, SDO/SDI).`
+      String.raw`No formal standard document exists; SPI is a de-facto convention with vendor-specific naming (controller/peripheral, SDO/SDI).`,
+      String.raw`Variants: 3-wire (single bidirectional SDIO line, half-duplex, saves a pin); Dual/Quad/QSPI (2/4 data lines for 2x/4x throughput, half-duplex, used by serial flash); Microwire (National's SPI predecessor, effectively Mode 0).`
     ],
     equations: [
       {
@@ -170,7 +181,10 @@ CONTENT.topics.push(
       { front: String.raw`What limits SPI's maximum speed?`, back: String.raw`Not the standard (there is none) but the slowest slave's rated SCLK and the MISO round-trip delay (clock-to-out plus return settling) at high frequency.` },
       { front: String.raw`Independent vs daisy-chain SPI topology?`, back: String.raw`Independent: shared SCLK/MOSI/MISO with one SS per slave (star). Daisy-chain: slaves form one long shift register sharing a single SS and SCLK.` },
       { front: String.raw`What must happen on MISO for unselected slaves?`, back: String.raw`They must tri-state (high-Z) their MISO output so only the one selected slave drives the shared line - otherwise bus contention.` },
-      { front: String.raw`How long does a 16-bit SPI word take at 10 MHz?`, back: String.raw`$T = N/f_{SCLK} = 16/10^7 = 1.6\ \mu s$, plus small SS setup/hold and inter-word gaps.` }
+      { front: String.raw`How long does a 16-bit SPI word take at 10 MHz?`, back: String.raw`$T = N/f_{SCLK} = 16/10^7 = 1.6\ \mu s$, plus small SS setup/hold and inter-word gaps.` },
+      { front: String.raw`What is 3-wire SPI?`, back: String.raw`A half-duplex variant where MOSI and MISO are merged into a single bidirectional data line (SDIO), leaving SCLK, SDIO, and SS. It saves a pin but gives up full-duplex; the direction is turned around under software control.` },
+      { front: String.raw`What are Dual, Quad, and QSPI?`, back: String.raw`Multi-lane SPI extensions using 2 (Dual) or 4 (Quad/QSPI) data lines carrying data in the same direction for 2x or 4x throughput. They are half-duplex and are the standard fast-read modes for serial NOR flash and execute-in-place (XIP) boot.` },
+      { front: String.raw`What is Microwire?`, back: String.raw`National Semiconductor's predecessor to / subset of SPI, effectively locked to Mode 0 and typically half-duplex with a simple command/response framing. It interoperates with SPI Mode 0 devices.` }
     ],
     mcqs: [
       { q: String.raw`Which signal in a standard SPI bus is generated exclusively by the master?`, options: ['MISO', 'SCLK', 'SS of the master', 'MOSI and MISO equally'], answer: 1, explain: String.raw`Only the master generates SCLK. MOSI is master-driven data, MISO is slave-driven data, and SS lines are master outputs, but the clock is uniquely the master's.` },
@@ -186,7 +200,9 @@ CONTENT.topics.push(
       { q: String.raw`Which is the true speed ceiling for SPI reads at high $f_{SCLK}$?`, options: ['Parity recomputation', 'MISO round-trip delay (clock-to-out plus return settling)', 'The 32-word message limit', 'Manchester decoding'], answer: 1, explain: String.raw`At high clock rates the slave's clock-to-out delay plus the return path must settle before the master samples - this round-trip, not the shift register, usually limits speed.` },
       { q: String.raw`A daisy-chained SPI arrangement:`, options: ['Uses one SS per device', 'Forms one long shift register sharing a single SS and SCLK', 'Requires I2C addressing', 'Is full-duplex per device with separate clocks'], answer: 1, explain: String.raw`In daisy-chain mode MISO->MOSI links devices into one shift register clocked by a shared SCLK under a single SS.` },
       { q: String.raw`Time to clock a 24-bit SPI word at 8 MHz (ignoring gaps) is:`, options: ['$1.5\ \mu s$', '$3\ \mu s$', '$0.33\ \mu s$', '$24\ \mu s$'], answer: 1, explain: String.raw`$T = N/f_{SCLK} = 24/(8\times10^6) = 3\ \mu s$.` },
-      { q: String.raw`SPI's intended physical reach is:`, options: ['Up to 1200 m', 'On-board, centimetre-scale', 'Tens of metres over cable', 'Global via transformers'], answer: 1, explain: String.raw`Single-ended, unterminated push-pull signalling limits SPI to short on-board traces.` }
+      { q: String.raw`SPI's intended physical reach is:`, options: ['Up to 1200 m', 'On-board, centimetre-scale', 'Tens of metres over cable', 'Global via transformers'], answer: 1, explain: String.raw`Single-ended, unterminated push-pull signalling limits SPI to short on-board traces.` },
+      { q: String.raw`Which SPI variant merges MOSI and MISO into one bidirectional line and is therefore half-duplex?`, options: ['Quad SPI (QSPI)', '3-wire SPI', 'Daisy-chain SPI', 'Microwire'], answer: 1, explain: String.raw`3-wire SPI uses a single bidirectional SDIO line (plus SCLK and SS), saving a pin at the cost of full-duplex operation.` },
+      { q: String.raw`Compared with standard 4-wire SPI, Quad SPI (QSPI):`, options: ['Adds a CRC to every frame', 'Uses 4 data lines for up to 4x throughput but is half-duplex', 'Doubles the reach to metres', 'Adds a 7-bit address field'], answer: 1, explain: String.raw`QSPI uses four data lines (IO0-IO3) carrying data in the same direction, giving up to 4x throughput at the expense of full-duplex - the standard fast-read mode for NOR flash.` }
     ],
     numericals: [
       { q: String.raw`An SPI ADC is read as a 16-bit word at $f_{SCLK}=25$ MHz. What is the frame time and the payload throughput?`, solution: String.raw`Frame time $T = N/f_{SCLK} = 16/(25\times10^6) = 0.64\ \mu s$. Throughput $R = f_{SCLK} = 25$ Mbit/s (overhead-free). If words are read back-to-back with no gap, sample rate $\approx 1/0.64\ \mu s \approx 1.56$ Msps.` },
@@ -252,7 +268,8 @@ CONTENT.topics.push(
           <li><b>WSTRB</b> - per-byte write strobes let a beat write only some byte lanes (sparse/partial writes).</li>
           <li><b>xLAST</b> - asserted on the final beat to delimit the burst; there is no separate length counter on the data channel.</li>
         </ul>
-        <p>A single address handshake amortized over up to 256 data beats is why AXI sustains high bandwidth: the address overhead is paid once per burst, not per beat. Address alignment and the "no 4KB boundary crossing" rule keep bursts within a single subordinate region.</p>`
+        <p>A single address handshake amortized over up to 256 data beats is why AXI sustains high bandwidth: the address overhead is paid once per burst, not per beat. Address alignment and the "no 4KB boundary crossing" rule keep bursts within a single subordinate region.</p>
+        <p><b>Narrow and unaligned transfers:</b> a beat need not use the full data-bus width. When AxSIZE is smaller than the bus width, the transfer is <b>narrow</b> - the active byte lanes shift according to the address and burst type, and WSTRB (writes) marks which lanes are live. When the start address is not aligned to AxSIZE, the first beat is <b>unaligned</b> and only the bytes at/above the address are valid. Together, narrow and unaligned support let AXI faithfully move a single byte, a half-word, or a misaligned struct without a separate protocol.</p>`
       },
       {
         h: 'Outstanding, Out-of-Order Transactions and IDs',
@@ -265,6 +282,27 @@ CONTENT.topics.push(
         <p>This is how AXI hides DRAM latency: rather than stalling for one transaction to return, the manager launches many, and the interconnect/subordinate services and returns them by ID. Out-of-order plus outstanding transactions are the throughput levers that a purely in-order, one-at-a-time bus lacks.</p>`
       },
       {
+        h: 'Exclusive/Locked Access and the Control Sidebands (QoS/CACHE/PROT)',
+        html: String.raw`<p>Beyond address and data, each AXI address channel carries <b>sideband control signals</b> that qualify a transaction, plus a mechanism for atomic access:</p>
+        <ul>
+          <li><b>Exclusive access</b> (AxLOCK = exclusive) implements atomic read-modify-write for semaphores/mutexes without locking the whole bus. A manager issues an <b>exclusive read</b>, later an <b>exclusive write</b> to the same address; if no other master wrote that location in between, the subordinate returns <b>EXOKAY</b> and the write succeeds - otherwise it returns OKAY and the write is not performed, so the manager retries. This is the load-linked/store-conditional idiom carried on the bus.</li>
+          <li><b>Locked access</b> (a legacy AXI3 AxLOCK value) held the bus/slave locked across a sequence of transactions; AXI4 <b>deprecated true locked transfers</b> in favour of the lighter exclusive-access scheme, leaving AxLOCK a single bit (normal vs exclusive).</li>
+          <li><b>AxCACHE</b> (4 bits) - memory attributes: Bufferable, Modifiable/Cacheable, Read-Allocate, Write-Allocate - telling the interconnect/memory how the access may be buffered or cached.</li>
+          <li><b>AxPROT</b> (3 bits) - protection type: privileged vs unprivileged, secure vs non-secure (TrustZone), and instruction vs data access.</li>
+          <li><b>AxQOS</b> (4 bits, added in AXI4) - a Quality-of-Service priority hint the interconnect can use to arbitrate between competing managers.</li>
+          <li><b>AxREGION</b> (4 bits, AXI4) - a region identifier letting one physical slave interface present multiple logical regions without extra address decode.</li>
+        </ul>
+        <table class="data">
+          <tr><th>Signal</th><th>Width</th><th>Purpose</th></tr>
+          <tr><td>AxLOCK</td><td>1 bit (AXI4)</td><td>Normal vs exclusive (atomic) access; locked transfers deprecated from AXI3.</td></tr>
+          <tr><td>AxCACHE</td><td>4 bits</td><td>Bufferable / Modifiable / Read-Allocate / Write-Allocate memory attributes.</td></tr>
+          <tr><td>AxPROT</td><td>3 bits</td><td>Privileged/unprivileged, Secure/Non-secure, Instruction/Data.</td></tr>
+          <tr><td>AxQOS</td><td>4 bits</td><td>Quality-of-Service arbitration priority hint (AXI4).</td></tr>
+          <tr><td>AxREGION</td><td>4 bits</td><td>Region identifier for multi-region slave interfaces (AXI4).</td></tr>
+        </table>
+        <p>These sidebands are how AXI conveys security, cacheability, atomicity, and priority to the interconnect without any extra transaction - metadata riding alongside every address handshake.</p>`
+      },
+      {
         h: 'AXI4 vs AXI4-Lite vs AXI4-Stream',
         html: String.raw`<p>The AMBA AXI4 specification defines three variants tuned to different needs:</p>
         <table class="data">
@@ -273,7 +311,17 @@ CONTENT.topics.push(
           <tr><td><b>AXI4-Lite</b></td><td>All 5, but single-beat</td><td>1 beat only</td><td>Memory-mapped</td><td>Simple register/control access</td></tr>
           <tr><td><b>AXI4-Stream</b></td><td>1 (data only)</td><td>Unbounded flow</td><td>None (no address)</td><td>Streaming data (video, DSP, IQ)</td></tr>
         </table>
-        <p><b>AXI4-Lite</b> strips out bursts, IDs, and out-of-order support for a lightweight register interface - ideal for a peripheral's control/status registers. <b>AXI4-Stream</b> throws away addresses entirely: it is a pure point-to-point data pipe with TVALID/TREADY handshake, TDATA, TLAST (frame boundary), TKEEP, and TUSER - perfect for streaming an IQ sample flow from an SDR front end into a DSP block. Full <b>AXI4</b> is the memory-mapped workhorse.</p>`
+        <p><b>AXI4-Lite</b> strips out bursts, IDs, and out-of-order support for a lightweight register interface - ideal for a peripheral's control/status registers. <b>AXI4-Stream</b> throws away addresses entirely: it is a pure point-to-point data pipe with TVALID/TREADY handshake, TDATA, TLAST (frame boundary), TKEEP, and TUSER - perfect for streaming an IQ sample flow from an SDR front end into a DSP block. Full <b>AXI4</b> is the memory-mapped workhorse.</p>
+        <p>The broader <b>AMBA</b> family that AXI belongs to (all ARM specifications) situates these profiles among related buses:</p>
+        <table class="data">
+          <tr><th>Protocol</th><th>Role in AMBA</th><th>Distinguishing feature</th></tr>
+          <tr><td><b>AXI3</b></td><td>Original high-performance interface</td><td>5 channels; bursts up to 16 beats; supported write-data interleaving.</td></tr>
+          <tr><td><b>AXI4</b></td><td>Refined high-performance interface</td><td>Bursts up to 256 beats (INCR); added QoS signals; dropped write interleaving.</td></tr>
+          <tr><td><b>AXI4-Lite</b></td><td>Lightweight subset</td><td>Single-beat, no bursts/IDs - for registers.</td></tr>
+          <tr><td><b>AXI4-Stream</b></td><td>Streaming subset</td><td>Address-less data flow (TVALID/TREADY/TDATA/TLAST).</td></tr>
+          <tr><td><b>ACE</b> (AXI Coherency Extensions)</td><td>Cache-coherent extension of AXI4</td><td>Adds coherency channels/signals (snoop address AC, snoop response CR, snoop data CD, plus ACSNOOP/ARSNOOP/AWSNOOP domains) so multiple caching masters share a coherent view of memory; <b>ACE-Lite</b> is the one-way-coherent variant for I/O-coherent masters (e.g. a DMA that snoops CPU caches but is not itself snooped).</td></tr>
+          <tr><td><b>AHB / APB</b></td><td>Older/simpler AMBA buses</td><td>AHB is a pipelined shared bus; APB is a low-power peripheral bus - both predate AXI and are still used for low-bandwidth blocks.</td></tr>
+        </table>`
       },
       {
         h: 'Bandwidth, Data Width and Clocking',
@@ -315,7 +363,10 @@ CONTENT.topics.push(
       String.raw`Three profiles: AXI4 (full bursts, memory-mapped), AXI4-Lite (single-beat register access), AXI4-Stream (address-less data flow, TVALID/TREADY/TLAST).`,
       String.raw`AXI is fully synchronous on a shared clock; peak bandwidth $BW = W_{bytes}\times f_{clk}$.`,
       String.raw`On-wire status is the 2-bit RRESP/BRESP (OKAY, EXOKAY, SLVERR, DECERR); there is no CRC in base AXI - it is an on-chip controlled environment.`,
-      String.raw`Contrast with SPI (serial, no flow control, on-board) and 1553 (self-clocked, redundant, avionics): AXI trades reach for on-chip bandwidth.`
+      String.raw`Contrast with SPI (serial, no flow control, on-board) and 1553 (self-clocked, redundant, avionics): AXI trades reach for on-chip bandwidth.`,
+      String.raw`AMBA family: AXI3 (16-beat bursts), AXI4 (256-beat, QoS, no write-interleave), AXI4-Lite, AXI4-Stream, and ACE/ACE-Lite (cache-coherency extensions adding snoop channels AC/CR/CD); older AHB/APB round out AMBA.`,
+      String.raw`Atomic access uses exclusive transactions (AxLOCK=exclusive): an exclusive read then exclusive write, succeeding with EXOKAY only if the location was untouched in between - AXI4 deprecated the older true "locked" transfers.`,
+      String.raw`Address sidebands qualify each transaction: AxCACHE (bufferable/cacheable attributes), AxPROT (privileged/secure/instruction), AxQOS (priority hint), AxREGION - plus narrow (AxSIZE < bus width) and unaligned transfers.`
     ],
     equations: [
       {
@@ -367,7 +418,11 @@ CONTENT.topics.push(
       { front: String.raw`Give AXI's peak bandwidth formula.`, back: String.raw`$BW = W_{bytes}\times f_{clk}$: bytes per beat times beats per second at one beat/cycle with no wait states.` },
       { front: String.raw`Is AXI synchronous or self-clocked?`, back: String.raw`Fully synchronous: all five channels share one clock and every handshake/beat is sampled on its rising edge - no clock recovery.` },
       { front: String.raw`What does WSTRB do?`, back: String.raw`Per-byte write strobes select which byte lanes of a write beat are actually written, enabling sparse/partial writes.` },
-      { front: String.raw`How do outstanding transactions improve throughput?`, back: String.raw`They hide latency: the manager issues many addresses before responses return, keeping the data channel full so the pipeline never drains.` }
+      { front: String.raw`How do outstanding transactions improve throughput?`, back: String.raw`They hide latency: the manager issues many addresses before responses return, keeping the data channel full so the pipeline never drains.` },
+      { front: String.raw`What is ACE in the AMBA family?`, back: String.raw`AXI Coherency Extensions - it extends AXI4 with snoop channels (AC snoop-address, CR snoop-response, CD snoop-data) and snoop-domain signals so multiple cached masters keep a coherent view of shared memory. ACE-Lite is the one-way (I/O-coherent) variant.` },
+      { front: String.raw`How does AXI perform an atomic (exclusive) access?`, back: String.raw`With AxLOCK set to exclusive: the manager does an exclusive read then an exclusive write to the same address. The subordinate returns EXOKAY (and performs the write) only if nothing wrote that location in between; otherwise it returns OKAY and skips the write, so the manager retries. AXI4 deprecated the older true "locked" transactions.` },
+      { front: String.raw`What do AxCACHE, AxPROT, and AxQOS convey?`, back: String.raw`AxCACHE gives memory attributes (bufferable/cacheable/allocate); AxPROT gives protection (privileged/secure/instruction-vs-data); AxQOS (AXI4) is a Quality-of-Service priority hint the interconnect uses to arbitrate between managers.` },
+      { front: String.raw`What are narrow and unaligned AXI transfers?`, back: String.raw`A narrow transfer uses AxSIZE smaller than the full data-bus width, so only some byte lanes are active; an unaligned transfer starts at an address not aligned to AxSIZE, so only the bytes at/above the address are valid in the first beat.` }
     ],
     mcqs: [
       { q: String.raw`How many independent channels does AXI define?`, options: ['3', '5', '2', '8'], answer: 1, explain: String.raw`Five: AR and R (read), AW, W, and B (write). Separate address and data channels enable pipelining.` },
@@ -383,7 +438,11 @@ CONTENT.topics.push(
       { q: String.raw`AXI clocking is:`, options: ['Self-clocked Manchester', 'Source-synchronous serial', 'Fully synchronous on a shared clock', 'Asynchronous start/stop'], answer: 2, explain: String.raw`All channels are timed by one shared clock; every handshake is sampled on its rising edge.` },
       { q: String.raw`Amortizing one address cycle over a 256-beat burst gives an efficiency of about:`, options: ['50%', '75%', '99.6%', '25%'], answer: 2, explain: String.raw`$\eta \approx N/(N+1) = 256/257 \approx 99.6\%$ - long bursts hide the single address-cycle overhead.` },
       { q: String.raw`To hide a 100 ns latency at a 5 ns beat time, the minimum outstanding transactions needed is:`, options: ['5', '10', '20', '100'], answer: 2, explain: String.raw`$D_{min} = \lceil L/T_{beat}\rceil = \lceil 100/5\rceil = 20$.` },
-      { q: String.raw`Compared with SPI and MIL-STD-1553B, AXI is distinguished by:`, options: ['Longest physical reach', 'On-chip GB/s parallel bandwidth with per-channel VALID/READY flow control', 'Dual-redundant transformer coupling', 'Self-clocked serial signalling'], answer: 1, explain: String.raw`AXI is the on-chip, wide, parallel, high-bandwidth fabric with handshake flow control - not a reach-oriented or redundant bus.` }
+      { q: String.raw`Compared with SPI and MIL-STD-1553B, AXI is distinguished by:`, options: ['Longest physical reach', 'On-chip GB/s parallel bandwidth with per-channel VALID/READY flow control', 'Dual-redundant transformer coupling', 'Self-clocked serial signalling'], answer: 1, explain: String.raw`AXI is the on-chip, wide, parallel, high-bandwidth fabric with handshake flow control - not a reach-oriented or redundant bus.` },
+      { q: String.raw`Which AMBA protocol adds cache-coherency (snoop) support on top of AXI4?`, options: ['AXI4-Lite', 'AXI4-Stream', 'ACE (AXI Coherency Extensions)', 'APB'], answer: 2, explain: String.raw`ACE extends AXI4 with snoop channels (AC/CR/CD) and snoop domains so multiple cached masters share a coherent view of memory; ACE-Lite is the I/O-coherent variant.` },
+      { q: String.raw`An AXI exclusive (atomic) access succeeds - returning EXOKAY - when:`, options: ['The burst is exactly 256 beats', 'No other master wrote the location between the exclusive read and exclusive write', 'AxPROT indicates a secure access', 'The address is 4KB-aligned'], answer: 1, explain: String.raw`Exclusive access (AxLOCK=exclusive) returns EXOKAY and performs the write only if the location was untouched since the exclusive read; otherwise OKAY is returned and the write is skipped, so the manager retries.` },
+      { q: String.raw`The AXI signal that carries a Quality-of-Service arbitration priority hint is:`, options: ['AxCACHE', 'AxPROT', 'AxQOS', 'AxSIZE'], answer: 2, explain: String.raw`AxQOS (added in AXI4) is a 4-bit priority hint the interconnect can use to arbitrate among competing managers; AxCACHE gives memory attributes and AxPROT gives protection type.` },
+      { q: String.raw`A "narrow" AXI transfer is one where:`, options: ['The address channel is disabled', 'AxSIZE is smaller than the full data-bus width, so only some byte lanes are active', 'The burst uses WRAP', 'Only reads are allowed'], answer: 1, explain: String.raw`A narrow transfer sets AxSIZE below the bus width, activating a subset of byte lanes (which lanes depends on address and burst type); an unaligned transfer starts off an AxSIZE boundary.` }
     ],
     numericals: [
       { q: String.raw`A full AXI4 write burst on a 64-bit bus has AWLEN = 15. How many bytes are written, and how many data beats occur?`, solution: String.raw`Beats $= $ AWLEN $+1 = 16$. Bytes/beat $= 64/8 = 8$. Total $D_{burst} = 16\times8 = 128$ bytes over 16 W-channel beats, launched by a single AW address handshake.` },
@@ -491,7 +550,10 @@ CONTENT.topics.push(
           <tr><td>10001 (17)</td><td>Synchronize (with data word)</td></tr>
           <tr><td>10010 (18)</td><td>Transmit Last Command (with data word)</td></tr>
           <tr><td>10011 (19)</td><td>Transmit Built-In-Test (BIT) Word (with data word)</td></tr>
-        </table>`
+          <tr><td>10100 (20)</td><td>Selected Transmitter Shutdown (with data word)</td></tr>
+          <tr><td>10101 (21)</td><td>Override Selected Transmitter Shutdown (with data word)</td></tr>
+        </table>
+        <p>Mode codes <b>0-15 (0-01111) carry no data word</b>; mode codes <b>16-21 (10000-10101) carry a single data word</b>. The T/R bit distinguishes transmit (RT sends the data word) from receive (BC sends it) mode commands. Codes 01001-01111 and 10110-11111 are <b>reserved</b>.</p>`
       },
       {
         h: 'Message Formats and Who Initiates',
@@ -503,6 +565,21 @@ CONTENT.topics.push(
           <li><b>Mode commands</b> - special commands (subaddress 0 or 31) for bus control functions (synchronize, transmit status, initiate self-test, etc.).</li>
           <li><b>Broadcast</b> - using RT address 31, the BC addresses all RTs at once (they do not return Status, to avoid collisions).</li>
         </ul>
+        <p>The standard formally defines <b>ten information-transfer formats</b> (the six non-broadcast forms plus four broadcast variants). "C" = Command word, "D" = Data word, "S" = Status word; arrows show direction and the sequence is left-to-right in time:</p>
+        <table class="data">
+          <tr><th>#</th><th>Message format</th><th>Sequence on the bus</th><th>Broadcast?</th></tr>
+          <tr><td>1</td><td>BC &rarr; RT (receive)</td><td>C (rcv) + up to 32 D from BC, then S from RT</td><td>No</td></tr>
+          <tr><td>2</td><td>RT &rarr; BC (transmit)</td><td>C (xmt) from BC, then S + up to 32 D from RT</td><td>No</td></tr>
+          <tr><td>3</td><td>RT &rarr; RT</td><td>C (rcv) to RT-A, C (xmt) to RT-B; RT-B sends S + D; RT-A sends S</td><td>No</td></tr>
+          <tr><td>4</td><td>Mode command without data word</td><td>C (mode) from BC, then S from RT</td><td>No</td></tr>
+          <tr><td>5</td><td>Mode command with data word (transmit)</td><td>C (mode) from BC, then S + one D from RT</td><td>No</td></tr>
+          <tr><td>6</td><td>Mode command with data word (receive)</td><td>C (mode) + one D from BC, then S from RT</td><td>No</td></tr>
+          <tr><td>7</td><td>Broadcast BC &rarr; RT(s)</td><td>C (rcv, addr 31) + up to 32 D from BC; no Status returned</td><td>Yes</td></tr>
+          <tr><td>8</td><td>Broadcast RT &rarr; RT(s)</td><td>C (rcv, addr 31) + C (xmt) to one RT; that RT sends S + D; no Status from receivers</td><td>Yes</td></tr>
+          <tr><td>9</td><td>Broadcast mode command without data word</td><td>C (mode, addr 31) from BC; no Status returned</td><td>Yes</td></tr>
+          <tr><td>10</td><td>Broadcast mode command with data word (receive)</td><td>C (mode, addr 31) + one D from BC; no Status returned</td><td>Yes</td></tr>
+        </table>
+        <p>Note the rule for all broadcast forms: because every addressed RT would otherwise reply simultaneously, <b>RTs suppress their Status word on a broadcast</b> (they instead set the Broadcast Command Received bit for the next non-broadcast Status request). There is no broadcast form of RT&rarr;BC transmit (a single transmitter would not be a broadcast).</p>
         <p><b>Response time:</b> a commanded RT must begin its Status response within <b>4-12 us</b> of the command (the "response time"); the BC uses a <b>no-response timeout</b> (~14 us) to detect a dead RT and can then retry, including switching to the redundant bus. This deterministic timing is what bounds latency.</p>
         <div class="callout"><b>Duplex:</b> the bus is <b>half-duplex</b> - a single pair carries traffic in one direction at a time, arbitrated entirely by the BC's schedule. There is never contention because only the commanded terminal transmits.</div>`
       },
@@ -561,7 +638,11 @@ CONTENT.topics.push(
       String.raw`Error checking = odd parity per word + Manchester coding validity + Status-word error bits + no-response timeout; retries can switch to the redundant bus.`,
       String.raw`RT response time is 4-12 us; a no-response timeout (~14 us) lets the BC detect a dead terminal - the basis of bounded latency.`,
       String.raw`The bus is half-duplex; the BC's scheduled minor/major frame structure makes worst-case latency deterministic.`,
-      String.raw`Chosen for avionics/military for determinism, redundancy, and EMI-hardened ruggedness despite its modest 1 Mbps rate.`
+      String.raw`Chosen for avionics/military for determinism, redundancy, and EMI-hardened ruggedness despite its modest 1 Mbps rate.`,
+      String.raw`Ten information-transfer formats: BC-to-RT, RT-to-BC, RT-to-RT, mode command without data, mode command with data (transmit), mode command with data (receive), plus four broadcast variants; on any broadcast the RTs suppress their Status word to avoid collisions.`,
+      String.raw`Mode codes 0-15 carry no data word; codes 16-21 carry a single data word (e.g. Transmit Vector Word, Synchronize-with-data, Transmit Last Command, Transmit BIT Word, Selected Transmitter Shutdown/Override).`,
+      String.raw`Command/Status sync and Data sync are opposite-polarity invalid-Manchester patterns (Command/Status: positive-then-negative half; Data: negative-then-positive), so the receiver tells word type from the sync alone.`,
+      String.raw`Full Status-word bit set: Message Error, Instrumentation (always 0), Service Request, three Reserved, Broadcast Command Received, Busy, Subsystem Flag, Dynamic Bus Control Acceptance, and Terminal Flag.`
     ],
     equations: [
       {
@@ -615,7 +696,12 @@ CONTENT.topics.push(
       { front: String.raw`Is 1553 full- or half-duplex?`, back: String.raw`Half-duplex - one direction at a time on the shared pair, arbitrated entirely by the BC's schedule, so there is never contention.` },
       { front: String.raw`What is the RT response time and no-response timeout?`, back: String.raw`An RT must begin its Status response within about 4-12 us of the command; if no valid Status returns within ~14 us, the BC declares a no-response error and may retry.` },
       { front: String.raw`What makes 1553 deterministic?`, back: String.raw`Fixed 20-us word timing plus the BC's pre-planned minor/major frame schedule give a known worst-case latency for every parameter.` },
-      { front: String.raw`Why is 1553 still used despite only 1 Mbps?`, back: String.raw`Its bounded, jitter-free determinism, dual-redundant fault tolerance, and EMI-hardened ruggedness are what avionics certification requires - speed is secondary.` }
+      { front: String.raw`Why is 1553 still used despite only 1 Mbps?`, back: String.raw`Its bounded, jitter-free determinism, dual-redundant fault tolerance, and EMI-hardened ruggedness are what avionics certification requires - speed is secondary.` },
+      { front: String.raw`Name the 1553 information-transfer message formats.`, back: String.raw`Ten total: BC-to-RT (receive), RT-to-BC (transmit), RT-to-RT, mode command without data, mode command with data (transmit), mode command with data (receive), and the four broadcast variants (broadcast BC-to-RT, broadcast RT-to-RT, broadcast mode without data, broadcast mode with data-receive).` },
+      { front: String.raw`Which 1553 mode codes carry a data word?`, back: String.raw`Mode codes 16-21 carry one data word (Transmit Vector Word, Synchronize-with-data, Transmit Last Command, Transmit BIT Word, Selected Transmitter Shutdown, Override Selected Transmitter Shutdown). Codes 0-15 carry no data word.` },
+      { front: String.raw`How does the receiver distinguish a Data word from a Command/Status word?`, back: String.raw`By the sync polarity: the Command/Status sync is a positive-half-then-negative-half invalid-Manchester pattern, and the Data sync is the exact opposite (negative-then-positive). The two are inverses, so sync alone identifies the word type.` },
+      { front: String.raw`Why do RTs not send a Status word on a broadcast?`, back: String.raw`Because every addressed RT (address 31) would otherwise reply at once and collide. Instead each RT sets its Broadcast Command Received bit, reported in its Status word at the next non-broadcast request.` },
+      { front: String.raw`List the fields of the 1553 Status word.`, back: String.raw`RT Address (5), then Message Error, Instrumentation (always 0), Service Request, three Reserved, Broadcast Command Received, Busy, Subsystem Flag, Dynamic Bus Control Acceptance, Terminal Flag - plus the parity bit.` }
     ],
     mcqs: [
       { q: String.raw`The raw data rate of MIL-STD-1553B is:`, options: ['100 kbps', '1 Mbps', '10 Mbps', '1 Gbps'], answer: 1, explain: String.raw`1553B runs at a fixed 1 Mbps using Manchester II encoding.` },
@@ -631,7 +717,12 @@ CONTENT.topics.push(
       { q: String.raw`A commanded RT must begin its Status response within about:`, options: ['1 us', '4-12 us', '100 us', '1 ms'], answer: 1, explain: String.raw`The RT response time is 4-12 us; a ~14 us no-response timeout lets the BC detect a dead terminal.` },
       { q: String.raw`What primarily makes 1553 attractive for flight-critical avionics?`, options: ['Its GB/s throughput', 'Bounded, deterministic latency with dual-redundant fault tolerance', 'Its lack of any error checking', 'Its long cable reach of 1200 m'], answer: 1, explain: String.raw`Determinism (scheduled fixed-timing frames) plus redundancy and EMI hardening are why it is certified for flight-critical use despite modest speed.` },
       { q: String.raw`The sync field at the start of each 1553 word is special because it:`, options: ['Carries the parity bit', 'Deliberately violates normal Manchester timing so it is unmistakable', 'Is the RT address', 'Contains the CRC'], answer: 1, explain: String.raw`The 3-bit-time sync intentionally breaks the mid-bit-transition rule so a receiver cannot confuse it with data - marking the word boundary.` },
-      { q: String.raw`A BC-to-RT message with 32 data words takes roughly (with typical gaps):`, options: ['~20 us', '~200 us', '~700 us', '~7 ms'], answer: 2, explain: String.raw`$(2+32)\times20\ \mu s + \sim12\ \mu s \approx 692\ \mu s$ - under a millisecond, so many fit in a 20 ms minor frame.` }
+      { q: String.raw`A BC-to-RT message with 32 data words takes roughly (with typical gaps):`, options: ['~20 us', '~200 us', '~700 us', '~7 ms'], answer: 2, explain: String.raw`$(2+32)\times20\ \mu s + \sim12\ \mu s \approx 692\ \mu s$ - under a millisecond, so many fit in a 20 ms minor frame.` },
+      { q: String.raw`How many information-transfer message formats does MIL-STD-1553B define?`, options: ['3', '6', '10', '32'], answer: 2, explain: String.raw`Ten: the six non-broadcast forms (BC-to-RT, RT-to-BC, RT-to-RT, mode without data, mode with data transmit, mode with data receive) plus four broadcast variants.` },
+      { q: String.raw`In every broadcast message format, the addressed RTs:`, options: ['Each return a Status word in turn', 'Suppress their Status word to avoid collisions', 'Switch to Bus B', 'Return a data word instead of status'], answer: 1, explain: String.raw`Because all addressed RTs would reply simultaneously, they suppress the Status word on a broadcast and instead set the Broadcast Command Received bit for the next request.` },
+      { q: String.raw`Which mode codes carry an associated data word?`, options: ['Codes 0-15', 'Codes 16-21', 'Only code 0', 'All 32 codes'], answer: 1, explain: String.raw`Mode codes 16-21 (e.g. Transmit Vector Word, Synchronize-with-data, Transmit Last Command, Transmit BIT Word) carry one data word; codes 0-15 carry none.` },
+      { q: String.raw`In an RT-to-RT transfer, the Bus Controller sends:`, options: ['One command word only', 'A receive command to one RT and a transmit command to another', 'Two data words', 'A broadcast to address 31'], answer: 1, explain: String.raw`The BC issues a receive command to the destination RT and a transmit command to the source RT; the source sends Status + data and the destination sends Status.` },
+      { q: String.raw`The Instrumentation bit in a 1553 Status word is:`, options: ['Set to signal an error', 'Always logic 0, distinguishing status from a command word', 'The parity bit', 'The broadcast flag'], answer: 1, explain: String.raw`The Instrumentation bit is always logic 0 in the Status word, which (with the shared Command/Status sync) helps distinguish a Status word from a Command word.` }
     ],
     numericals: [
       { q: String.raw`How long does it take to transmit a single 1553 data word, and what fraction of that time is actual payload?`, solution: String.raw`Word time $= 20\ \mu s$ (3 sync + 16 data + 1 parity at 1 us/bit). Payload = 16 data bits = $16\ \mu s$. Fraction $= 16/20 = 80\%$; the 3-us sync and 1-us parity are the 20% overhead of a single word.` },

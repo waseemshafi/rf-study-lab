@@ -37,6 +37,10 @@
     { name: 'Data Word', unit: ' bit-times', fields: [{ l: 'Sync', bits: 3 }, { l: 'Data', bits: 16 }, { l: 'P', bits: 1 }] }
   ], title: 'MIL-STD-1553 word structures', caption: 'The Command, Status and Data words — each 20 bit-times.', explain: EX('<b>What it shows:</b> all three 1553 word types, field by field. The <b>Command Word</b> (from the Bus Controller) names a terminal, direction, subaddress and word count. The <b>Status Word</b> (from the terminal) carries the health bits — ME=Message Error, SRQ=Service Request, BCR=Broadcast Received, Busy, SSF=Subsystem Flag, DBC=Dynamic Bus Control, TF=Terminal Flag. The <b>Data Word</b> wraps 16 payload bits. Each starts with a 3-bit sync and ends with a parity bit.') });
 
+  // ---- Protocol dynamic-behaviour figures ----
+  add('axi', { type: 'axiBurst', title: 'AXI burst types', caption: 'FIXED / INCR / WRAP — how the address advances.', explain: EX('<b>What it shows:</b> an AXI burst sends the address once, then streams beats. <b>Try:</b> FIXED reuses one address (a FIFO), INCR walks through memory, and WRAP increments then wraps at a boundary (cache-line fills). AWLEN sets how many beats, AWSIZE the bytes per beat.') });
+  add('mil-std-1553', { type: 'msgSequence1553', title: '1553 message formats', caption: 'Command → (gap) → Status/Data — pick a format.', explain: EX('<b>What it shows:</b> how words flow on the bus for each message type. <b>Try:</b> in BC→RT the controller sends a Command then Data words and the RT replies with a Status word; in RT→BC the RT sends Status then Data; RT→RT chains two commands. Each word is 20 µs and the RT must answer within 4–12 µs.') });
+
   // ---- Round 11: guarantee every topic has >=3 diagrams (a third figure each) ----
 
   // ---- Fundamentals ----
