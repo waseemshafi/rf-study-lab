@@ -6,7 +6,8 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['AM', 'DSB', 'SSB', 'VSB', 'envelope detection', 'modulation index', 'sidebands', 'analog modulation'],
   summary: String.raw`Amplitude modulation encodes a message onto the envelope of a sinusoidal carrier, trading power efficiency for the simplicity of envelope detection.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-am" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <text x="20" y="46" fill="#9aa7b5">m(t)</text>
@@ -28,6 +29,59 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`AM mechanism: message and carrier multiply in the modulator to ride the envelope, which an RC envelope detector recovers.`
   },
+  {
+    title: String.raw`Spectrum anatomy: carrier + two sidebands`,
+    svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-am" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="40" y1="160" x2="510" y2="160" stroke="#9aa7b5" marker-end="url(#arr2-am)"/>
+  <text x="505" y="178" fill="#9aa7b5">f</text>
+  <line x1="270" y1="160" x2="270" y2="40" stroke="#4dabf7" stroke-width="3"/>
+  <text x="270" y="32" fill="#4dabf7" text-anchor="middle">carrier A_c</text>
+  <text x="270" y="176" fill="#9aa7b5" text-anchor="middle">f_c</text>
+  <line x1="190" y1="160" x2="190" y2="110" stroke="#63e6be" stroke-width="3"/>
+  <text x="150" y="104" fill="#63e6be">LSB mA_c/2</text>
+  <text x="190" y="176" fill="#9aa7b5" text-anchor="middle">f_c−f_m</text>
+  <line x1="350" y1="160" x2="350" y2="110" stroke="#ffa94d" stroke-width="3"/>
+  <text x="360" y="104" fill="#ffa94d">USB mA_c/2</text>
+  <text x="350" y="176" fill="#9aa7b5" text-anchor="middle">f_c+f_m</text>
+  <rect x="140" y="188" width="120" height="26" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="200" y="205" fill="#e6edf3" text-anchor="middle">SSB: keep 1 SB</text>
+  <rect x="290" y="188" width="130" height="26" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="355" y="205" fill="#e6edf3" text-anchor="middle">DSB-SC: drop carrier</text>
+  <line x1="190" y1="200" x2="270" y2="188" stroke="#9aa7b5" stroke-dasharray="3 3"/>
+  <line x1="355" y1="188" x2="290" y2="55" stroke="#b197fc" stroke-dasharray="3 3" marker-end="url(#arr2-am)"/>
+</svg>`,
+    caption: String.raw`AM spectrum anatomy: a tall carrier line at f_c (pure overhead) flanked by USB and LSB each of height mA_c/2. Trimming the carrier gives DSB-SC; keeping one sideband gives SSB.`
+  },
+  {
+    title: String.raw`Superheterodyne AM receiver chain`,
+    svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr3-am" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="15" y="40" width="80" height="45" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="55" y="60" fill="#e6edf3" text-anchor="middle">RF amp</text>
+  <text x="55" y="76" fill="#9aa7b5" text-anchor="middle">+ preselect</text>
+  <rect x="120" y="40" width="80" height="45" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="160" y="66" fill="#e6edf3" text-anchor="middle">Mixer</text>
+  <rect x="120" y="120" width="80" height="40" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="160" y="145" fill="#e6edf3" text-anchor="middle">LO</text>
+  <rect x="225" y="40" width="80" height="45" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="265" y="60" fill="#e6edf3" text-anchor="middle">IF amp</text>
+  <text x="265" y="76" fill="#9aa7b5" text-anchor="middle">455 kHz</text>
+  <rect x="330" y="40" width="90" height="45" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="375" y="60" fill="#e6edf3" text-anchor="middle">Envelope</text>
+  <text x="375" y="76" fill="#9aa7b5" text-anchor="middle">detector</text>
+  <rect x="445" y="40" width="80" height="45" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="485" y="66" fill="#e6edf3" text-anchor="middle">Audio</text>
+  <line x1="95" y1="62" x2="118" y2="62" stroke="#9aa7b5" marker-end="url(#arr3-am)"/>
+  <line x1="160" y1="120" x2="160" y2="87" stroke="#9aa7b5" marker-end="url(#arr3-am)"/>
+  <line x1="200" y1="62" x2="223" y2="62" stroke="#9aa7b5" marker-end="url(#arr3-am)"/>
+  <line x1="305" y1="62" x2="328" y2="62" stroke="#9aa7b5" marker-end="url(#arr3-am)"/>
+  <line x1="420" y1="62" x2="443" y2="62" stroke="#9aa7b5" marker-end="url(#arr3-am)"/>
+  <text x="270" y="188" fill="#9aa7b5" text-anchor="middle">mixer + LO shift every station to a fixed IF; envelope detector then recovers audio</text>
+</svg>`,
+    caption: String.raw`Superhet AM receiver: RF amp → mixer (beat against LO) → fixed IF strip → envelope detector → audio. The LO tunes stations to one IF where sharp filtering and the simple diode detector do the work.`
+  }
+  ],
   prerequisites: ['comm-basics', 'fourier-transform', 'frequency-spectrum', 'bandwidth'],
   intro: String.raw`<p>Amplitude modulation (AM) is the oldest and conceptually simplest way to carry information on a radio wave: let the <em>amplitude</em> of a high-frequency carrier follow the shape of a low-frequency message. If the message is $m(t)$ and the carrier is $A_c\cos(\omega_c t)$, standard (full-carrier) AM transmits $s(t)=A_c[1+k_a m(t)]\cos(\omega_c t)$, so the carrier's envelope traces $A_c[1+k_a m(t)]$. This single idea underpins a whole family — DSB-SC, SSB and VSB — that differ only in which parts of the spectrum are kept. AM's enduring appeal is the <strong>envelope detector</strong>: a diode, a capacitor and a resistor recover the message with no local oscillator, which is why broadcast AM survived for a century. Its enduring weakness is <strong>power efficiency</strong>: in standard AM most of the transmitted power sits in a carrier that conveys no information, capping efficiency at $33\%$.</p>`,
   sections: [
@@ -107,6 +161,19 @@ CONTENT.topics.push(
         <li><strong>Adjacent-channel interference:</strong> the $2W$ bandwidth and slow spectral roll-off require guard bands; broadcast AM channels are spaced 9 or 10 kHz.</li>
         <li><strong>Linearity:</strong> AM must be amplified with a <em>linear</em> PA (or use high-level plate modulation); a saturated (Class-C/E) PA would clip the envelope and destroy the information — unlike FM, which tolerates nonlinear PAs.</li>
       </ul></p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<p>Pulling the whole picture together, here is the mental model to carry away:</p>
+      <ul>
+        <li><strong>The one equation.</strong> Standard AM is $s(t)=A_c[1+m\cos\omega_m t]\cos\omega_c t$: the message rides the <em>envelope</em>, and the modulation index $m$ is the fractional swing you can read straight off a scope as $(A_{max}-A_{min})/(A_{max}+A_{min})$.</li>
+        <li><strong>Spectrum = 3 pieces.</strong> A carrier spike at $f_c$ plus two mirror-image sidebands at $f_c\pm f_m$, occupying $2W$. Each sideband alone carries the complete message — the redundancy SSB exploits.</li>
+        <li><strong>The efficiency tax.</strong> $P_T=P_c(1+m^2/2)$ and $\eta=m^2/(2+m^2)\le 33\%$: even at full modulation two-thirds of the power sits in the information-free carrier. You pay that tax to buy a $10¢$ diode receiver.</li>
+        <li><strong>The variant family.</strong> DSB-SC (drop the carrier, 100% efficient), SSB (drop a sideband too, half the bandwidth), and VSB (a compromise for near-DC messages like TV video) are all just "trim what you don't need," at the cost of coherent detection.</li>
+        <li><strong>Detector must match the modulation.</strong> Envelope detection is cheap but needs a present carrier and $m\le 1$; DSB-SC/SSB force coherent detection, whose phase error scales the output by $\cos\phi$ — the same quadrature null that reappears in Costas loops and QPSK.</li>
+        <li><strong>Why AM lost ground.</strong> The envelope carries the data, so AM needs a linear PA and suffers a threshold effect and selective-fading distortion — exactly the weaknesses that constant-envelope FM was built to cure.</li>
+      </ul>
+      <div class="callout tip">If you remember only one thing: in AM the <em>information is in the amplitude</em>. Every strength (dumb detector) and every weakness (wasted carrier power, linear-PA requirement, fading sensitivity) follows directly from that single fact.</div>`
     }
   ],
   keyPoints: [
@@ -227,13 +294,34 @@ CONTENT.topics.push(
     { q: String.raw`Removing the carrier from full AM (creating DSB-SC) changes efficiency to:`, options: [String.raw`Still 33%`, String.raw`100%`, String.raw`50%`, String.raw`11%`], answer: 1, explain: String.raw`With no carrier, all transmitted power resides in the information-bearing sidebands — 100% efficient.` }
   ],
   numericals: [
-    { q: String.raw`A 5 kW AM transmitter operates at $m=0.8$ with a single-tone message. Find the carrier power and the total transmitted power. (Take 5 kW as the carrier power $P_c$.)`, solution: String.raw`<p>$P_c=5$ kW (given as the unmodulated carrier power).</p><p>$P_T=P_c(1+m^2/2)=5(1+0.64/2)=5(1.32)=6.6$ kW.</p><p>Sideband power $=P_T-P_c=1.6$ kW; efficiency $\eta=1.6/6.6=24.2\%$ (or $m^2/(2+m^2)=0.64/2.64=24.2\%$).</p>` },
-    { q: String.raw`An AM envelope on a scope reads $A_{max}=15$ V and $A_{min}=5$ V. Compute $m$ and the sideband-to-total power ratio.`, solution: String.raw`<p>$m=(15-5)/(15+5)=10/20=0.5$.</p><p>$\eta=m^2/(2+m^2)=0.25/2.25=0.111=11.1\%$.</p>` },
-    { q: String.raw`A message occupies 0–4.5 kHz. Find the AM bandwidth, and the SSB bandwidth.`, solution: String.raw`<p>AM (DSB): $B=2W=2\times4.5=9$ kHz — the standard broadcast AM channel spacing.</p><p>SSB: $B=W=4.5$ kHz — half the bandwidth.</p>` },
-    { q: String.raw`Two tones modulate a carrier: $m_1=0.4$ and $m_2=0.3$. Find the effective modulation index and the efficiency.`, solution: String.raw`<p>Effective index (uncorrelated tones): $m_{eff}=\sqrt{m_1^2+m_2^2}=\sqrt{0.16+0.09}=\sqrt{0.25}=0.5$.</p><p>$\eta=m_{eff}^2/(2+m_{eff}^2)=0.25/2.25=11.1\%$.</p>` },
-    { q: String.raw`A carrier $A_c=10$ V is amplitude-modulated to $m=1$. Find $A_{max}$, $A_{min}$, and the peak envelope power relative to the carrier power.`, solution: String.raw`<p>$A_{max}=A_c(1+m)=20$ V; $A_{min}=A_c(1-m)=0$ V.</p><p>Peak envelope power $\propto A_{max}^2=400$ vs carrier $\propto A_c^2=100$, i.e. peak envelope power is $4\times$ the carrier power.</p>` },
-    { q: String.raw`An AM broadcast station transmits total power $P_T=10$ kW at $m=0.6$. How much power is wasted in the carrier?`, solution: String.raw`<p>$P_T=P_c(1+m^2/2)=P_c(1+0.18)=1.18P_c\Rightarrow P_c=10/1.18=8.47$ kW.</p><p>The carrier (no information) wastes $8.47$ kW of the $10$ kW — about $84.7\%$ of transmitted power.</p>` },
-    { q: String.raw`Design an envelope detector for a 1 MHz carrier and a 5 kHz message. Give an acceptable $RC$ range.`, solution: String.raw`<p>Require $1/f_c \ll RC \ll 1/W$: $1\,\mu\text{s}\ll RC\ll 200\,\mu\text{s}$.</p><p>A good choice is $RC\approx 20$–$50\,\mu$s (e.g. $R=10$ k$\Omega$, $C=3.3$ nF gives $33\,\mu$s), safely between the two limits.</p>` }
+    { q: String.raw`A 5 kW AM transmitter operates at $m=0.8$ with a single-tone message. Find the carrier power and the total transmitted power. (Take 5 kW as the carrier power $P_c$.)`, solution: String.raw`<p><b>Formula.</b> $$P_T=P_c\!\left(1+\frac{m^2}{2}\right),$$ where $P_c$ is the carrier (unmodulated) power, $m$ the modulation index, and $P_T$ the total transmitted power.</p>
+      <p><b>Substitute.</b> With $P_c=5$ kW and $m=0.8$: $$P_T=5\left(1+\frac{0.8^2}{2}\right)=5\left(1+\frac{0.64}{2}\right).$$</p>
+      <p><b>Compute.</b> $P_T=5(1+0.32)=5(1.32)=6.6$ kW. Sideband power $=P_T-P_c=1.6$ kW, and efficiency $\eta=m^2/(2+m^2)=0.64/2.64=24.2\%$ (equivalently $1.6/6.6$).</p>
+      <p><b>Explanation.</b> Even at a deep $m=0.8$ only about a quarter of the transmitted power carries information; the carrier still dominates. This is the fundamental power penalty of full-carrier AM, and the reason broadcasters accept it only because the receiver can be a bare diode.</p>` },
+    { q: String.raw`An AM envelope on a scope reads $A_{max}=15$ V and $A_{min}=5$ V. Compute $m$ and the sideband-to-total power ratio.`, solution: String.raw`<p><b>Formula.</b> $$m=\frac{A_{max}-A_{min}}{A_{max}+A_{min}},\qquad \eta=\frac{m^2}{2+m^2},$$ where $A_{max}=A_c(1+m)$ and $A_{min}=A_c(1-m)$ are the envelope extremes and $\eta$ is the fraction of power in the sidebands.</p>
+      <p><b>Substitute.</b> $$m=\frac{15-5}{15+5}=\frac{10}{20},\qquad \eta=\frac{0.5^2}{2+0.5^2}=\frac{0.25}{2.25}.$$</p>
+      <p><b>Compute.</b> $m=0.5$; $\eta=0.25/2.25=0.111=11.1\%$.</p>
+      <p><b>Explanation.</b> Halving the modulation depth from 1 to 0.5 collapses the sideband fraction from 33% to just 11% — efficiency falls with $m^2$, so under-modulation is doubly wasteful. Reading $m$ directly off the trapezoid/envelope is the standard bench check that the transmitter is neither under- nor over-modulating.</p>` },
+    { q: String.raw`A message occupies 0–4.5 kHz. Find the AM bandwidth, and the SSB bandwidth.`, solution: String.raw`<p><b>Formula.</b> $$B_{AM}=2W,\qquad B_{SSB}=W,$$ where $W$ is the highest message frequency; DSB carries both sidebands, SSB just one.</p>
+      <p><b>Substitute.</b> With $W=4.5$ kHz: $B_{AM}=2\times4.5$ kHz and $B_{SSB}=4.5$ kHz.</p>
+      <p><b>Compute.</b> $B_{AM}=9$ kHz; $B_{SSB}=4.5$ kHz.</p>
+      <p><b>Explanation.</b> The 9 kHz figure is exactly the standard medium-wave AM channel spacing, confirming the calculation against real regulation. SSB halves the occupied band by discarding the redundant mirror-image sideband — the same information in half the spectrum.</p>` },
+    { q: String.raw`Two tones modulate a carrier: $m_1=0.4$ and $m_2=0.3$. Find the effective modulation index and the efficiency.`, solution: String.raw`<p><b>Formula.</b> $$m_{eff}=\sqrt{m_1^2+m_2^2},\qquad \eta=\frac{m_{eff}^2}{2+m_{eff}^2},$$ valid because uncorrelated tones add in <em>power</em>, so their indices combine in quadrature.</p>
+      <p><b>Substitute.</b> $$m_{eff}=\sqrt{0.4^2+0.3^2}=\sqrt{0.16+0.09},\qquad \eta=\frac{0.5^2}{2+0.5^2}.$$</p>
+      <p><b>Compute.</b> $m_{eff}=\sqrt{0.25}=0.5$; $\eta=0.25/2.25=11.1\%$.</p>
+      <p><b>Explanation.</b> The 3-4-5 right-triangle arithmetic gives a clean $m_{eff}=0.5$. The quadrature sum (not a simple add) matters: it keeps the composite modulation from exceeding 1 too easily, but you must budget the combined index to avoid over-modulation on peaks.</p>` },
+    { q: String.raw`A carrier $A_c=10$ V is amplitude-modulated to $m=1$. Find $A_{max}$, $A_{min}$, and the peak envelope power relative to the carrier power.`, solution: String.raw`<p><b>Formula.</b> $$A_{max}=A_c(1+m),\quad A_{min}=A_c(1-m),\quad \frac{\text{PEP}}{P_c}=\left(\frac{A_{max}}{A_c}\right)^2,$$ since power scales as the square of amplitude.</p>
+      <p><b>Substitute.</b> With $A_c=10$ V, $m=1$: $A_{max}=10(1+1)$, $A_{min}=10(1-1)$, PEP ratio $=(20/10)^2$.</p>
+      <p><b>Compute.</b> $A_{max}=20$ V; $A_{min}=0$ V; peak envelope power $\propto 20^2=400$ vs carrier $\propto 10^2=100$, i.e. PEP is $4\times$ the carrier power.</p>
+      <p><b>Explanation.</b> At 100% modulation the envelope just kisses zero at troughs (the $m\le1$ boundary) and peaks at $4\times$ carrier power. That $4\times$ peak is what a linear PA must handle without clipping — a key sizing number, since exceeding it (over-modulation) folds the envelope and wrecks envelope detection.</p>` },
+    { q: String.raw`An AM broadcast station transmits total power $P_T=10$ kW at $m=0.6$. How much power is wasted in the carrier?`, solution: String.raw`<p><b>Formula.</b> $$P_T=P_c\!\left(1+\frac{m^2}{2}\right)\ \Rightarrow\ P_c=\frac{P_T}{1+m^2/2},$$ then the carrier is "wasted" because it carries no information.</p>
+      <p><b>Substitute.</b> $$P_c=\frac{10}{1+0.6^2/2}=\frac{10}{1+0.18}=\frac{10}{1.18}.$$</p>
+      <p><b>Compute.</b> $P_c=8.47$ kW, so the sidebands carry only $10-8.47=1.53$ kW; the carrier wastes $8.47$ kW ($84.7\%$ of the total).</p>
+      <p><b>Explanation.</b> At a typical $m=0.6$, roughly six-sevenths of a station's transmitted power is spent radiating an information-free carrier. Sanity check: $\eta=m^2/(2+m^2)=0.36/2.36=15.3\%$ of $10$ kW $=1.53$ kW in the sidebands, matching the subtraction.</p>` },
+    { q: String.raw`Design an envelope detector for a 1 MHz carrier and a 5 kHz message. Give an acceptable $RC$ range.`, solution: String.raw`<p><b>Formula.</b> $$\frac{1}{f_c}\ll RC\ll\frac{1}{W},$$ the detector time constant must be slow enough to skip individual RF cycles yet fast enough to follow the message envelope.</p>
+      <p><b>Substitute.</b> $$\frac{1}{10^6}\,\text{s}\ll RC\ll\frac{1}{5\times10^3}\,\text{s}.$$</p>
+      <p><b>Compute.</b> $1\,\mu\text{s}\ll RC\ll 200\,\mu$s. A good midpoint is $RC\approx 20$–$50\,\mu$s (e.g. $R=10$ k$\Omega$, $C=3.3$ nF gives $33\,\mu$s), comfortably between the limits.</p>
+      <p><b>Explanation.</b> The two-order-of-magnitude gap between $1\,\mu$s and $200\,\mu$s gives ample design room. Too small an $RC$ lets RF ripple through; too large causes "diagonal clipping" where the capacitor cannot discharge fast enough to track steep message downslopes — both are classic detector-distortion failure modes.</p>` }
   ],
   realWorld: String.raw`<p>Standard AM still fills the medium-wave broadcast band (530–1710 kHz) precisely because a receiver needs nothing more than a diode, capacitor and earpiece — the "crystal set" that put radio in every home. Its power inefficiency is tolerated for the sake of receiver simplicity and universal compatibility. SSB, by contrast, dominates long-haul HF voice — amateur, aeronautical and marine radio — where every watt and every kilohertz counts and operators accept the more complex coherent receiver. VSB carried analog broadcast television's video for decades. Even in modern digital radios, the AM envelope-and-quadrature machinery reappears: quadrature (I/Q) up/down-conversion is DSB-SC in two orthogonal channels, and the Costas loop that recovers a suppressed carrier is the direct descendant of AM's coherent detector.</p>`,
   related: ['fm', 'comm-basics', 'bandwidth', 'costas-loop', 'qpsk']
@@ -244,7 +332,8 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['FM', 'frequency modulation', 'modulation index', 'Carson rule', 'Bessel', 'capture effect', 'pre-emphasis', 'constant envelope'],
   summary: String.raw`Frequency modulation encodes the message in the carrier's instantaneous frequency, giving a constant-envelope signal that trades bandwidth for a large SNR improvement.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-fm" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <rect x="20" y="35" width="70" height="50" rx="6" fill="#1c232e" stroke="#ffa94d"/>
@@ -266,6 +355,63 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`FM mechanism: the message drives a VCO to set the instantaneous frequency; a limiter-discriminator differentiates the phase back to m(t).`
   },
+  {
+    title: String.raw`Bessel sidebands and Carson's rule`,
+    svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-fm" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="30" y1="160" x2="515" y2="160" stroke="#9aa7b5" marker-end="url(#arr2-fm)"/>
+  <text x="510" y="178" fill="#9aa7b5">f</text>
+  <line x1="270" y1="160" x2="270" y2="55" stroke="#4dabf7" stroke-width="2"/>
+  <line x1="230" y1="160" x2="230" y2="70" stroke="#63e6be" stroke-width="2"/>
+  <line x1="310" y1="160" x2="310" y2="70" stroke="#63e6be" stroke-width="2"/>
+  <line x1="190" y1="160" x2="190" y2="95" stroke="#63e6be" stroke-width="2"/>
+  <line x1="350" y1="160" x2="350" y2="95" stroke="#63e6be" stroke-width="2"/>
+  <line x1="150" y1="160" x2="150" y2="125" stroke="#63e6be" stroke-width="2"/>
+  <line x1="390" y1="160" x2="390" y2="125" stroke="#63e6be" stroke-width="2"/>
+  <line x1="110" y1="160" x2="110" y2="145" stroke="#9aa7b5" stroke-width="2"/>
+  <line x1="430" y1="160" x2="430" y2="145" stroke="#9aa7b5" stroke-width="2"/>
+  <text x="270" y="48" fill="#4dabf7" text-anchor="middle">J₀(β) carrier</text>
+  <text x="270" y="176" fill="#9aa7b5" text-anchor="middle">f_c</text>
+  <text x="150" y="176" fill="#9aa7b5" text-anchor="middle">f_c−nf_m</text>
+  <text x="390" y="176" fill="#9aa7b5" text-anchor="middle">f_c+nf_m</text>
+  <line x1="150" y1="200" x2="390" y2="200" stroke="#ffa94d" marker-end="url(#arr2-fm)"/>
+  <line x1="390" y1="200" x2="150" y2="200" stroke="#ffa94d" marker-end="url(#arr2-fm)"/>
+  <rect x="205" y="188" width="130" height="24" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="270" y="205" fill="#e6edf3" text-anchor="middle">B ≈ 2(Δf + f_m)</text>
+  <text x="270" y="90" fill="#b197fc" text-anchor="middle">sidebands |n|≤β+1 hold ~98% power</text>
+</svg>`,
+    caption: String.raw`FM is a Bessel-weighted comb of sidebands at f_c±nf_m. Only lines with |n|≲β+1 carry appreciable power, so Carson's rule B≈2(Δf+f_m) brackets ~98% of the energy.`
+  },
+  {
+    title: String.raw`PLL-based FM demodulator`,
+    svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr3-fm" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="15" y="45" width="70" height="45" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="50" y="64" fill="#e6edf3" text-anchor="middle">FM in</text>
+  <text x="50" y="80" fill="#9aa7b5" text-anchor="middle">limiter</text>
+  <circle cx="150" cy="67" r="20" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="150" y="64" fill="#e6edf3" text-anchor="middle">PD</text>
+  <text x="150" y="78" fill="#9aa7b5" text-anchor="middle">×</text>
+  <rect x="215" y="45" width="80" height="45" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="255" y="64" fill="#e6edf3" text-anchor="middle">Loop</text>
+  <text x="255" y="80" fill="#9aa7b5" text-anchor="middle">filter LF</text>
+  <rect x="330" y="45" width="70" height="45" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="365" y="70" fill="#e6edf3" text-anchor="middle">VCO</text>
+  <rect x="430" y="45" width="95" height="45" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="477" y="64" fill="#e6edf3" text-anchor="middle">m(t) =</text>
+  <text x="477" y="80" fill="#9aa7b5" text-anchor="middle">VCO control</text>
+  <line x1="85" y1="67" x2="128" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fm)"/>
+  <line x1="170" y1="67" x2="213" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fm)"/>
+  <line x1="295" y1="67" x2="328" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fm)"/>
+  <line x1="295" y1="67" x2="295" y2="150" stroke="#9aa7b5"/>
+  <line x1="295" y1="150" x2="477" y2="150" stroke="#9aa7b5"/>
+  <line x1="477" y1="150" x2="477" y2="92" stroke="#9aa7b5" marker-end="url(#arr3-fm)"/>
+  <path d="M365,90 L365,120 L150,120 L150,89" fill="none" stroke="#9aa7b5" stroke-dasharray="3 3" marker-end="url(#arr3-fm)"/>
+  <text x="255" y="135" fill="#9aa7b5" text-anchor="middle">VCO tracks f_i; control voltage = message</text>
+</svg>`,
+    caption: String.raw`PLL FM demodulator: the phase detector compares the incoming FM to the VCO; the loop filter drives the VCO to track the instantaneous frequency, so the VCO control voltage is a direct copy of m(t).`
+  }
+  ],
   prerequisites: ['comm-basics', 'am', 'fourier-transform', 'bandwidth', 'noise'],
   intro: String.raw`<p>Frequency modulation (FM) leaves the carrier amplitude alone and instead varies its <em>instantaneous frequency</em> in proportion to the message. Because the envelope is constant, FM is immune to the amplitude noise and fading that plague AM, and it can be amplified by efficient saturating (Class-C) power amplifiers. FM is an <strong>angle modulation</strong>: the information lives in the phase/frequency of $s(t)=A_c\cos[\omega_c t+\phi(t)]$, and it is fundamentally <em>nonlinear</em> — its spectrum is not a simple frequency-shifted copy of the message but an infinite set of Bessel-weighted sidebands. FM's defining bargain is that by spreading over more bandwidth (governed by the modulation index $\beta$ and summarised by Carson's rule) it buys a disproportionate improvement in output SNR. This wideband trade of bandwidth for noise immunity is why FM gave hi-fi broadcast radio and why it underlies the capture effect that lets the strongest signal win.</p>`,
   sections: [
@@ -347,6 +493,19 @@ CONTENT.topics.push(
       <p>$$\frac{\text{SNR}_o}{\text{SNR}_{baseband}}=3\beta^2(\beta+1)\approx 3\beta^3\quad(\text{large }\beta),$$</p>
       <p>where $\text{SNR}_{baseband}$ is the reference SNR in the message bandwidth. Doubling $\beta$ (and hence roughly doubling bandwidth) multiplies output SNR by $\sim8$ ($9$ dB). This is a dramatically better exchange rate than any linear scheme, and it is the fundamental reason WBFM sounds so clean. The catch is the threshold: you cannot keep raising $\beta$ indefinitely, because a wider bandwidth admits more noise power and eventually pushes the receiver below threshold. FM thus embodies Shannon's bandwidth–power trade-off in an analog form: spend bandwidth to save power (SNR).</p>
       <div class="callout"><strong>Rule of thumb:</strong> Every doubling of FM bandwidth (deviation) buys about $9$ dB of output SNR — until the FM threshold bites.</div></p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<p>Step back and the whole topic reduces to one design choice — put the information in <em>frequency</em> instead of amplitude — and everything else is a consequence:</p>
+      <ul>
+        <li><strong>The signal.</strong> $f_i=f_c+k_f m(t)$ and $s(t)=A_c\cos[2\pi f_c t+2\pi k_f\int m\,d\tau]$. FM is PM of the <em>integral</em> of the message; the phase, not the amplitude, carries the data.</li>
+        <li><strong>Two numbers describe it.</strong> Deviation $\Delta f=k_f|m|_{max}$ (set by message amplitude alone) and index $\beta=\Delta f/f_m$ (the peak phase swing, which may be $\gg1$). Small $\beta$ = narrowband (AM-like $2f_m$); large $\beta$ = wideband, many sidebands.</li>
+        <li><strong>The spectrum is nonlinear.</strong> A single tone produces a Bessel comb $\sum_n J_n(\beta)\cos[(\omega_c+n\omega_m)t]$ with $\sum_n J_n^2=1$, so power is only redistributed, never created — the envelope stays constant. Carrier nulls at $\beta\approx2.405,5.52,\dots$ let you calibrate deviation.</li>
+        <li><strong>Bandwidth is finite in practice.</strong> Carson's rule $B\approx2(\Delta f+f_m)$ captures ~98% of the power; broadcast FM ($\Delta f=75$, $f_m=15$ kHz, $\beta=5$) needs ~180 kHz in a 200 kHz slot.</li>
+        <li><strong>Constant envelope pays off twice.</strong> It permits efficient nonlinear (Class-C) PAs and, via a limiter, strips amplitude noise — giving the capture effect and immunity to fading that AM lacks.</li>
+        <li><strong>The grand bargain.</strong> Output SNR $\approx3\beta^3$: doubling bandwidth buys ~9 dB — an analog form of Shannon's bandwidth-for-power trade — but only above the ~10 dB FM threshold, below which clicks make the output collapse.</li>
+      </ul>
+      <div class="callout tip">The single sentence to keep: FM <em>spends bandwidth to buy noise immunity</em>. Deviation sets $\Delta f$, the ratio $\Delta f/f_m$ sets $\beta$, and $\beta$ sets both the bandwidth (Carson) and the SNR gain ($\sim3\beta^3$) — until the threshold stops the trade.</div>`
     }
   ],
   keyPoints: [
@@ -472,14 +631,38 @@ CONTENT.topics.push(
     { q: String.raw`Below the FM threshold, the output exhibits:`, options: [String.raw`Graceful linear SNR degradation`, String.raw`Impulsive clicks and rapid SNR collapse`, String.raw`Improved SNR`, String.raw`Constant SNR`], answer: 1, explain: String.raw`Below ~10 dB input SNR, the discriminator produces clicks and the output SNR falls off a cliff.` }
   ],
   numericals: [
-    { q: String.raw`An FM signal has $k_f=10$ kHz/V and message $m(t)=3\cos(2\pi\cdot2000t)$. Find $\Delta f$, $\beta$, and the Carson bandwidth.`, solution: String.raw`<p>$\Delta f=k_f A_m=10\text{ kHz}\times3=30$ kHz.</p><p>$\beta=\Delta f/f_m=30/2=15$.</p><p>$B=2(\Delta f+f_m)=2(30+2)=64$ kHz.</p>` },
-    { q: String.raw`Broadcast FM uses $\Delta f=75$ kHz and audio to 15 kHz. Find $\beta$ and Carson bandwidth. If the audio tone drops to 3 kHz at the same deviation, what is the new $\beta$?`, solution: String.raw`<p>$\beta=75/15=5$; $B=2(75+15)=180$ kHz.</p><p>At $f_m=3$ kHz with $\Delta f=75$ kHz: $\beta=75/3=25$ (deviation set by amplitude, so unchanged).</p>` },
-    { q: String.raw`An FM transmitter is calibrated using the first carrier null. If the modulating frequency is $f_m=1$ kHz, what deviation $\Delta f$ produces the first $J_0$ null?`, solution: String.raw`<p>First $J_0$ null at $\beta=2.405$. So $\Delta f=\beta f_m=2.405\times1\text{ kHz}=2.405$ kHz.</p>` },
-    { q: String.raw`A message of bandwidth $W=5$ kHz frequency-modulates a carrier with $\beta=3$. Estimate the transmission bandwidth by Carson's rule.`, solution: String.raw`<p>$\Delta f=\beta W=3\times5=15$ kHz. $B=2(\Delta f+W)=2(15+5)=40$ kHz.</p>` },
-    { q: String.raw`Compare NBFM and WBFM bandwidth for $f_m=4$ kHz with $\beta=0.2$ vs $\beta=8$.`, solution: String.raw`<p>NBFM: $B=2(1+0.2)(4)=9.6$ kHz $\approx2f_m$. WBFM: $\Delta f=8\times4=32$ kHz, $B=2(32+4)=72$ kHz $\approx2\Delta f$.</p>` },
-    { q: String.raw`Above threshold, an FM system operates at $\beta=5$. By how many dB does its output SNR exceed the baseline (using $3\beta^2(\beta+1)$)?`, solution: String.raw`<p>Gain $=3\beta^2(\beta+1)=3\times25\times6=450$. In dB: $10\log_{10}450=26.5$ dB above the baseband reference.</p>` },
-    { q: String.raw`An FM signal has instantaneous frequency $f_i(t)=100\text{ MHz}+5000\cos(2\pi\cdot1000t)$ Hz. Find $\Delta f$, $f_m$, $\beta$.`, solution: String.raw`<p>$\Delta f=5000$ Hz $=5$ kHz; $f_m=1000$ Hz $=1$ kHz; $\beta=\Delta f/f_m=5$.</p>` },
-    { q: String.raw`FM channels are spaced 200 kHz. If a station uses $f_m=15$ kHz, what maximum deviation keeps the Carson bandwidth within 180 kHz?`, solution: String.raw`<p>$B=2(\Delta f+f_m)\le180\Rightarrow\Delta f\le90-15=75$ kHz — exactly the standard broadcast deviation, leaving a 20 kHz guard band within the 200 kHz slot.</p>` }
+    { q: String.raw`An FM signal has $k_f=10$ kHz/V and message $m(t)=3\cos(2\pi\cdot2000t)$. Find $\Delta f$, $\beta$, and the Carson bandwidth.`, solution: String.raw`<p><b>Formula.</b> $$\Delta f=k_f A_m,\qquad \beta=\frac{\Delta f}{f_m},\qquad B=2(\Delta f+f_m),$$ where $k_f$ is the frequency sensitivity (Hz/V), $A_m$ the message peak amplitude, $f_m$ its frequency, $\Delta f$ the peak deviation, $\beta$ the modulation index, and $B$ the Carson bandwidth.</p>
+      <p><b>Substitute.</b> From $m(t)=3\cos(2\pi\cdot2000t)$: $A_m=3$ V, $f_m=2$ kHz. Then $\Delta f=10\text{ kHz/V}\times3$ V, $\beta=\Delta f/2$, $B=2(\Delta f+2)$.</p>
+      <p><b>Compute.</b> $\Delta f=30$ kHz; $\beta=30/2=15$; $B=2(30+2)=64$ kHz.</p>
+      <p><b>Explanation.</b> With $\beta=15$ this is firmly wideband FM, so the bandwidth is dominated by deviation ($2\Delta f=60$ kHz) with only a small $2f_m$ correction. Note $\Delta f$ came from the amplitude (3 V) alone — the message frequency only enters through $\beta$ and the additive $f_m$ term.</p>` },
+    { q: String.raw`Broadcast FM uses $\Delta f=75$ kHz and audio to 15 kHz. Find $\beta$ and Carson bandwidth. If the audio tone drops to 3 kHz at the same deviation, what is the new $\beta$?`, solution: String.raw`<p><b>Formula.</b> $$\beta=\frac{\Delta f}{f_m},\qquad B=2(\Delta f+f_m).$$ Deviation is set by message amplitude, so it stays fixed when only the tone frequency changes.</p>
+      <p><b>Substitute.</b> First $\beta=75/15$ and $B=2(75+15)$; then, holding $\Delta f=75$ kHz, $\beta'=75/3$.</p>
+      <p><b>Compute.</b> $\beta=5$; $B=180$ kHz. At $f_m=3$ kHz: $\beta'=25$.</p>
+      <p><b>Explanation.</b> This is the canonical broadcast-FM operating point ($\beta=5$, $\sim180$ kHz). The key insight is that lowering the tone frequency at fixed deviation <em>raises</em> $\beta$ — the index depends on both, but $\Delta f$ (hence the loudness) is unchanged because it tracks amplitude, not pitch.</p>` },
+    { q: String.raw`An FM transmitter is calibrated using the first carrier null. If the modulating frequency is $f_m=1$ kHz, what deviation $\Delta f$ produces the first $J_0$ null?`, solution: String.raw`<p><b>Formula.</b> $$\Delta f=\beta f_m,\qquad \text{first }J_0(\beta)=0\ \text{at}\ \beta=2.405,$$ using the fact that the carrier line amplitude is $A_c J_0(\beta)$ and vanishes at the first Bessel zero.</p>
+      <p><b>Substitute.</b> $\Delta f=2.405\times1$ kHz.</p>
+      <p><b>Compute.</b> $\Delta f=2.405$ kHz.</p>
+      <p><b>Explanation.</b> Watching a spectrum analyzer and increasing deviation until the carrier line disappears gives a precise, calibration-grade deviation measurement — no absolute amplitude reference needed. At $f_m=1$ kHz the first null lands at exactly $2.405$ kHz of deviation.</p>` },
+    { q: String.raw`A message of bandwidth $W=5$ kHz frequency-modulates a carrier with $\beta=3$. Estimate the transmission bandwidth by Carson's rule.`, solution: String.raw`<p><b>Formula.</b> $$\Delta f=\beta W,\qquad B=2(\Delta f+W),$$ treating the highest message frequency $W$ as $f_m$ in Carson's rule.</p>
+      <p><b>Substitute.</b> $\Delta f=3\times5$ kHz, then $B=2(15+5)$.</p>
+      <p><b>Compute.</b> $\Delta f=15$ kHz; $B=2(20)=40$ kHz.</p>
+      <p><b>Explanation.</b> With $\beta=3$ the signal is moderately wideband, so both terms in Carson's rule contribute meaningfully ($2\Delta f=30$, $2W=10$). Equivalently $B=2W(1+\beta)=2\cdot5\cdot4=40$ kHz, a useful cross-check of the algebra.</p>` },
+    { q: String.raw`Compare NBFM and WBFM bandwidth for $f_m=4$ kHz with $\beta=0.2$ vs $\beta=8$.`, solution: String.raw`<p><b>Formula.</b> $$B=2f_m(1+\beta)=2(\Delta f+f_m),\qquad \Delta f=\beta f_m,$$ letting us see how the same rule collapses to $2f_m$ (small $\beta$) or $2\Delta f$ (large $\beta$).</p>
+      <p><b>Substitute.</b> NBFM: $B=2(4)(1+0.2)$. WBFM: $\Delta f=8\times4=32$ kHz, $B=2(32+4)$.</p>
+      <p><b>Compute.</b> NBFM: $B=9.6$ kHz $\approx2f_m$. WBFM: $B=72$ kHz $\approx2\Delta f$.</p>
+      <p><b>Explanation.</b> The two regimes are visibly different: at $\beta=0.2$ the bandwidth is essentially the AM-like $2f_m=8$ kHz, while at $\beta=8$ it is set almost entirely by deviation. This is the trade FM offers — spend 7.5× the bandwidth to gain the large-$\beta$ SNR advantage.</p>` },
+    { q: String.raw`Above threshold, an FM system operates at $\beta=5$. By how many dB does its output SNR exceed the baseline (using $3\beta^2(\beta+1)$)?`, solution: String.raw`<p><b>Formula.</b> $$\frac{\text{SNR}_o}{\text{SNR}_{baseband}}=3\beta^2(\beta+1),\qquad \text{gain}_{dB}=10\log_{10}[\,\cdot\,],$$ the FM figure of merit valid above the FM threshold.</p>
+      <p><b>Substitute.</b> $3\times5^2\times(5+1)=3\times25\times6$, then convert to dB.</p>
+      <p><b>Compute.</b> Gain $=450$; $10\log_{10}450=26.5$ dB above the baseband reference.</p>
+      <p><b>Explanation.</b> A 26.5 dB improvement is enormous and explains hi-fi FM's clean sound. The cubic-in-$\beta$ growth ($3\beta^3\approx375$ for large-$\beta$ approximation, close to the exact 450) is why wideband FM trades bandwidth so favourably — provided the input SNR stays above the ~10 dB threshold.</p>` },
+    { q: String.raw`An FM signal has instantaneous frequency $f_i(t)=100\text{ MHz}+5000\cos(2\pi\cdot1000t)$ Hz. Find $\Delta f$, $f_m$, $\beta$.`, solution: String.raw`<p><b>Formula.</b> $$f_i(t)=f_c+\Delta f\cos(2\pi f_m t),\qquad \beta=\frac{\Delta f}{f_m},$$ read the deviation and message frequency directly off the instantaneous-frequency expression.</p>
+      <p><b>Substitute.</b> Matching terms: $f_c=100$ MHz, the coefficient of the cosine is $\Delta f=5000$ Hz, and the modulating frequency is $f_m=1000$ Hz; then $\beta=5000/1000$.</p>
+      <p><b>Compute.</b> $\Delta f=5$ kHz; $f_m=1$ kHz; $\beta=5$.</p>
+      <p><b>Explanation.</b> This is the inverse of the usual problem: given $f_i(t)$ you read $\Delta f$ (the swing amplitude) and $f_m$ (the swing rate) by inspection. The $\beta=5$ result puts it in the wideband regime, Carson bandwidth $2(5+1)=12$ kHz.</p>` },
+    { q: String.raw`FM channels are spaced 200 kHz. If a station uses $f_m=15$ kHz, what maximum deviation keeps the Carson bandwidth within 180 kHz?`, solution: String.raw`<p><b>Formula.</b> $$B=2(\Delta f+f_m)\le B_{max}\ \Rightarrow\ \Delta f\le\frac{B_{max}}{2}-f_m.$$</p>
+      <p><b>Substitute.</b> $\Delta f\le\dfrac{180}{2}-15=90-15$.</p>
+      <p><b>Compute.</b> $\Delta f\le75$ kHz.</p>
+      <p><b>Explanation.</b> The answer is exactly the standard broadcast deviation, confirming why the FCC pairs 75 kHz deviation with 200 kHz channel spacing: Carson bandwidth 180 kHz plus a 20 kHz guard band fits neatly in each 200 kHz slot without adjacent-channel spillover.</p>` }
   ],
   realWorld: String.raw`<p>Wideband FM is why broadcast radio (88–108 MHz) sounds so clean: its $\beta=5$ index and the pre-/de-emphasis pairing deliver hi-fi audio with strong noise immunity, and the capture effect makes co-channel interference switch cleanly rather than blur. Narrowband FM (and its digital cousins) runs two-way land-mobile radio, aviation ILS marker beacons, and countless embedded telemetry links, prized for the constant envelope that lets cheap Class-C amplifiers run at high efficiency. FM's bandwidth-for-SNR trade also inspired spread-spectrum thinking, and the frequency discriminator lives on in modern PLL-based demodulators inside every SDR. Even GPS and many satellite links exploit angle modulation's constant-envelope robustness against the nonlinear, power-limited amplifiers aboard spacecraft.</p>`,
   related: ['am', 'comm-basics', 'bandwidth', 'pll', 'noise']
@@ -490,7 +673,8 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['QPSK', 'digital modulation', 'I/Q', 'constellation', 'Gray coding', 'BER', 'offset QPSK', 'PAPR', 'phase shift keying'],
   summary: String.raw`QPSK sends two bits per symbol using four carrier phases, structured as two orthogonal BPSK streams on the I and Q axes, doubling spectral efficiency at the same per-bit BER as BPSK.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-qpsk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <rect x="15" y="85" width="90" height="45" rx="6" fill="#1c232e" stroke="#ffa94d"/>
@@ -517,6 +701,68 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`QPSK mechanism: serial-to-parallel splits bits into I and Q BPSK arms modulated on cos and −sin, then summed — two orthogonal BPSK streams.`
   },
+  {
+    title: String.raw`Constellation with Gray mapping`,
+    svg: String.raw`<svg viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-qpsk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="40" y1="150" x2="420" y2="150" stroke="#9aa7b5" marker-end="url(#arr2-qpsk)"/>
+  <line x1="230" y1="285" x2="230" y2="20" stroke="#9aa7b5" marker-end="url(#arr2-qpsk)"/>
+  <text x="412" y="168" fill="#9aa7b5">I</text>
+  <text x="240" y="30" fill="#9aa7b5">Q</text>
+  <circle cx="330" cy="55" r="8" fill="#4dabf7"/>
+  <text x="352" y="50" fill="#e6edf3">00 (45°)</text>
+  <circle cx="130" cy="55" r="8" fill="#63e6be"/>
+  <text x="70" y="50" fill="#e6edf3">01 (135°)</text>
+  <circle cx="130" cy="245" r="8" fill="#ffa94d"/>
+  <text x="70" y="265" fill="#e6edf3">11 (225°)</text>
+  <circle cx="330" cy="245" r="8" fill="#b197fc"/>
+  <text x="330" y="265" fill="#e6edf3">10 (315°)</text>
+  <line x1="130" y1="55" x2="330" y2="55" stroke="#9aa7b5" stroke-dasharray="4 3"/>
+  <line x1="330" y1="55" x2="330" y2="245" stroke="#9aa7b5" stroke-dasharray="4 3"/>
+  <line x1="330" y1="245" x2="130" y2="245" stroke="#9aa7b5" stroke-dasharray="4 3"/>
+  <line x1="130" y1="245" x2="130" y2="55" stroke="#9aa7b5" stroke-dasharray="4 3"/>
+  <text x="230" y="52" fill="#9aa7b5" text-anchor="middle">1 bit</text>
+  <text x="230" y="298" fill="#9aa7b5" text-anchor="middle">neighbours differ by exactly one bit — one symbol slip = one bit error</text>
+</svg>`,
+    caption: String.raw`Gray-coded QPSK constellation: 2 bits select one of 4 phases on a circle. Adjacent points (the likeliest error) differ in a single bit, so a symbol slip usually flips just one bit — the key to BPSK-equal per-bit BER.`
+  },
+  {
+    title: String.raw`Coherent QPSK receiver chain`,
+    svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr3-qpsk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <text x="18" y="105" fill="#9aa7b5">r(t)</text>
+  <circle cx="90" cy="55" r="16" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="90" y="60" fill="#e6edf3" text-anchor="middle">×</text>
+  <text x="90" y="28" fill="#9aa7b5" text-anchor="middle">cos ω_c t</text>
+  <circle cx="90" cy="150" r="16" fill="#1c232e" stroke="#63e6be"/>
+  <text x="90" y="155" fill="#e6edf3" text-anchor="middle">×</text>
+  <text x="90" y="185" fill="#9aa7b5" text-anchor="middle">−sin ω_c t</text>
+  <rect x="150" y="38" width="95" height="35" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="197" y="60" fill="#e6edf3" text-anchor="middle">matched filt</text>
+  <rect x="150" y="133" width="95" height="35" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="197" y="155" fill="#e6edf3" text-anchor="middle">matched filt</text>
+  <rect x="275" y="38" width="80" height="35" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="315" y="60" fill="#e6edf3" text-anchor="middle">sample</text>
+  <rect x="275" y="133" width="80" height="35" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="315" y="155" fill="#e6edf3" text-anchor="middle">sample</text>
+  <rect x="385" y="85" width="90" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="430" y="102" fill="#e6edf3" text-anchor="middle">decide</text>
+  <text x="430" y="118" fill="#9aa7b5" text-anchor="middle">P→S bits</text>
+  <line x1="35" y1="100" x2="74" y2="62" stroke="#9aa7b5" marker-end="url(#arr3-qpsk)"/>
+  <line x1="35" y1="100" x2="74" y2="143" stroke="#9aa7b5" marker-end="url(#arr3-qpsk)"/>
+  <line x1="106" y1="55" x2="148" y2="55" stroke="#9aa7b5" marker-end="url(#arr3-qpsk)"/>
+  <line x1="106" y1="150" x2="148" y2="150" stroke="#9aa7b5" marker-end="url(#arr3-qpsk)"/>
+  <line x1="245" y1="55" x2="273" y2="55" stroke="#9aa7b5" marker-end="url(#arr3-qpsk)"/>
+  <line x1="245" y1="150" x2="273" y2="150" stroke="#9aa7b5" marker-end="url(#arr3-qpsk)"/>
+  <line x1="355" y1="55" x2="405" y2="88" stroke="#9aa7b5" marker-end="url(#arr3-qpsk)"/>
+  <line x1="355" y1="150" x2="405" y2="122" stroke="#9aa7b5" marker-end="url(#arr3-qpsk)"/>
+  <text x="130" y="30" fill="#4dabf7">I</text>
+  <text x="130" y="185" fill="#63e6be">Q</text>
+  <text x="270" y="205" fill="#9aa7b5" text-anchor="middle">I/Q downconvert → matched filters → sample → independent sign decisions</text>
+</svg>`,
+    caption: String.raw`Coherent QPSK receiver: multiply r(t) by cos and −sin to split into I and Q, matched-filter each arm, sample at the symbol instant, then make two independent sign decisions — two parallel BPSK detectors.`
+  }
+  ],
   prerequisites: ['bpsk', 'comm-basics', 'ber', 'eb-no', 'matched-filter'],
   intro: String.raw`<p>Quadrature Phase Shift Keying (QPSK) is the workhorse of digital communications: it carries <strong>two bits per symbol</strong> by choosing one of four carrier phases, typically $\{45°,135°,225°,315°\}$. The deep insight is that QPSK is nothing more than <em>two independent BPSK signals sent simultaneously on orthogonal carriers</em> — a cosine (in-phase, I) and a sine (quadrature, Q) — that do not interfere because $\cos$ and $\sin$ are orthogonal over a symbol. This orthogonality is what lets QPSK achieve <strong>twice the spectral efficiency of BPSK</strong> (2 bit/s/Hz) while, with Gray coding, keeping exactly the <strong>same bit error rate per bit</strong>: $\text{BER}=Q(\sqrt{2E_b/N_0})$. From that single I/Q idea flow all the practical variants — offset QPSK and $\pi/4$-QPSK to tame envelope transitions, and the PAPR concerns that shape real transmitter design.</p>`,
   sections: [
@@ -591,6 +837,18 @@ CONTENT.topics.push(
         <li>Contrast with OFDM (many subcarriers), where PAPR can reach 10+ dB — a far worse problem.</li>
       </ul>
       <p>PAPR is the reason handset designers favour OQPSK-like schemes: a lower PAPR lets the PA run closer to saturation (higher efficiency, longer battery life) without violating the spectral mask through nonlinear regrowth.</p></p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<p>Every result in this topic hangs off a single structural fact: <strong>QPSK is two orthogonal BPSK channels</strong>. Hold that and the rest follows:</p>
+      <ul>
+        <li><strong>The decomposition.</strong> $s(t)=I\cos\omega_c t-Q\sin\omega_c t$ with $I,Q\in\{\pm A/\sqrt2\}$. Because $\cos$ and $\sin$ are orthogonal over a symbol, the receiver recovers I and Q independently — two parallel matched-filter/sign detectors.</li>
+        <li><strong>Two bits, four phases, Gray-mapped.</strong> Adjacent constellation points differ by one bit, so the most likely (nearest-neighbour) symbol slip costs just one bit — this is what keeps QPSK's per-bit BER equal to BPSK's.</li>
+        <li><strong>The headline identity.</strong> $\text{BER}=Q(\sqrt{2E_b/N_0})$ (same as BPSK) while $\eta=2$ bit/s/Hz (double BPSK). QPSK <em>doubles the data rate in the same bandwidth at the same $E_b/N_0$ with no BER penalty</em> — the reason it is the default when spectrum is scarce.</li>
+        <li><strong>Symbol vs bit accounting.</strong> $E_s=2E_b$ and $\text{SER}\approx2\cdot\text{BER}$: the points are closer per <em>symbol</em>, but each symbol carries twice the bits, so per <em>bit</em> it comes out even. Resolving that apparent paradox is the most common conceptual test.</li>
+        <li><strong>Variants shape the envelope, not the BER.</strong> OQPSK (delay Q by $T_s/2$, phase steps $\le\pm90°$) and $\pi/4$-QPSK (rotate $45°$ per symbol, steps $\le\pm135°$, differential-detectable) avoid the origin-crossing $180°$ jumps of plain QPSK, lowering PAPR so the PA can run efficiently.</li>
+      </ul>
+      <div class="callout tip">One sentence to remember: QPSK = <em>two BPSKs in quadrature</em>. That single idea gives the I/Q receiver, the BPSK-equal BER, the doubled spectral efficiency, and — via origin crossings — the PAPR story behind OQPSK and $\pi/4$-QPSK.</div>`
     }
   ],
   keyPoints: [
@@ -703,13 +961,34 @@ CONTENT.topics.push(
     { q: String.raw`The QPSK symbol error rate for small $p=Q(\sqrt{2E_b/N_0})$ is about:`, options: [String.raw`$p/2$`, String.raw`$p$`, String.raw`$2p$`, String.raw`$4p$`], answer: 2, explain: String.raw`$\text{SER}=2p-p^2\approx2p$; either arm erring causes a symbol error.` }
   ],
   numericals: [
-    { q: String.raw`A QPSK link operates at $E_b/N_0=9.6$ dB. Estimate the BER. (Use $Q(x)$ with $x=\sqrt{2E_b/N_0}$.)`, solution: String.raw`<p>$E_b/N_0=10^{0.96}\approx9.12$ (linear). $x=\sqrt{2\times9.12}=\sqrt{18.24}\approx4.27$.</p><p>$\text{BER}=Q(4.27)\approx1\times10^{-5}$ — the classic QPSK operating point.</p>` },
-    { q: String.raw`A QPSK system transmits at symbol rate $R_s=5$ Msym/s. Find the bit rate and the ideal bandwidth efficiency.`, solution: String.raw`<p>$R_b=2R_s=10$ Mb/s. Ideal bandwidth $B=R_s=5$ MHz, so $\eta=R_b/B=10/5=2$ bit/s/Hz.</p>` },
-    { q: String.raw`A channel of 6 MHz (passband) uses QPSK with RRC roll-off $\beta=0.25$. Find the maximum symbol rate and bit rate.`, solution: String.raw`<p>$B=(1+\beta)R_s\Rightarrow R_s=6/1.25=4.8$ Msym/s. $R_b=2R_s=9.6$ Mb/s. Efficiency $\eta=9.6/6=1.6$ bit/s/Hz.</p>` },
-    { q: String.raw`At $E_b/N_0=10.5$ dB, compute the QPSK BER and the approximate SER.`, solution: String.raw`<p>$E_b/N_0=10^{1.05}\approx11.2$. $x=\sqrt{2\times11.2}=\sqrt{22.4}\approx4.73$. $\text{BER}=Q(4.73)\approx1.1\times10^{-6}$.</p><p>$\text{SER}\approx2\times\text{BER}\approx2.3\times10^{-6}$.</p>` },
-    { q: String.raw`Compare the throughput of BPSK and QPSK over a 10 MHz channel (ideal Nyquist).`, solution: String.raw`<p>BPSK: 1 bit/s/Hz $\Rightarrow$ 10 Mb/s. QPSK: 2 bit/s/Hz $\Rightarrow$ 20 Mb/s. QPSK doubles throughput at the same BER and $E_b/N_0$.</p>` },
-    { q: String.raw`A QPSK symbol has amplitude $A=2$ V (constellation radius). Find the per-arm amplitude and the symbol energy over $T_s=1\,\mu$s (into $1\,\Omega$).`, solution: String.raw`<p>Per-arm amplitude $=A/\sqrt2=2/1.414=1.414$ V. Symbol energy $E_s=\tfrac12 A^2 T_s=\tfrac12(4)(10^{-6})=2\times10^{-6}$ J. Per-bit $E_b=E_s/2=1\times10^{-6}$ J.</p>` },
-    { q: String.raw`A QPSK modem targets $R_b=100$ Mb/s. What symbol rate is needed, and what channel bandwidth for $\beta=0.2$?`, solution: String.raw`<p>$R_s=R_b/2=50$ Msym/s. $B=(1+\beta)R_s=1.2\times50=60$ MHz.</p>` }
+    { q: String.raw`A QPSK link operates at $E_b/N_0=9.6$ dB. Estimate the BER. (Use $Q(x)$ with $x=\sqrt{2E_b/N_0}$.)`, solution: String.raw`<p><b>Formula.</b> $$\text{BER}=Q\!\left(\sqrt{\frac{2E_b}{N_0}}\right),$$ where $E_b/N_0$ is the per-bit signal-to-noise ratio (linear) and $Q(\cdot)$ is the Gaussian tail probability.</p>
+      <p><b>Substitute.</b> Convert dB to linear: $E_b/N_0=10^{9.6/10}=10^{0.96}=9.12$. Then $x=\sqrt{2\times9.12}=\sqrt{18.24}$.</p>
+      <p><b>Compute.</b> $x\approx4.27$, so $\text{BER}=Q(4.27)\approx1\times10^{-5}$.</p>
+      <p><b>Explanation.</b> This $\sim10^{-5}$ at $\approx9.6$ dB is the textbook QPSK/BPSK operating point worth memorizing. It is identical to BPSK at the same $E_b/N_0$ — the doubled data rate of QPSK costs nothing in per-bit error performance.</p>` },
+    { q: String.raw`A QPSK system transmits at symbol rate $R_s=5$ Msym/s. Find the bit rate and the ideal bandwidth efficiency.`, solution: String.raw`<p><b>Formula.</b> $$R_b=R_s\log_2 M=2R_s,\qquad \eta=\frac{R_b}{B},\quad B_{ideal}=R_s,$$ with $M=4$ for QPSK so $\log_2 M=2$, and ideal Nyquist passband bandwidth equal to $R_s$.</p>
+      <p><b>Substitute.</b> $R_b=2\times5$ Msym/s; $B=5$ MHz; $\eta=10/5$.</p>
+      <p><b>Compute.</b> $R_b=10$ Mb/s; $\eta=2$ bit/s/Hz.</p>
+      <p><b>Explanation.</b> The 2 bit/s/Hz is the ideal QPSK ceiling, exactly double BPSK's 1 bit/s/Hz — the payoff for packing two bits into each phase symbol. Real links with RRC roll-off fall to $2/(1+\beta)$.</p>` },
+    { q: String.raw`A channel of 6 MHz (passband) uses QPSK with RRC roll-off $\beta=0.25$. Find the maximum symbol rate and bit rate.`, solution: String.raw`<p><b>Formula.</b> $$B=(1+\beta)R_s\ \Rightarrow\ R_s=\frac{B}{1+\beta},\qquad R_b=2R_s,$$ where $B$ is the passband bandwidth and $\beta$ the RRC excess-bandwidth factor.</p>
+      <p><b>Substitute.</b> $R_s=\dfrac{6}{1+0.25}=\dfrac{6}{1.25}$, then $R_b=2R_s$.</p>
+      <p><b>Compute.</b> $R_s=4.8$ Msym/s; $R_b=9.6$ Mb/s; efficiency $\eta=9.6/6=1.6$ bit/s/Hz.</p>
+      <p><b>Explanation.</b> The 25% roll-off costs 25% of the symbol rate versus ideal Nyquist, dropping efficiency from 2 to $2/1.25=1.6$ bit/s/Hz. This is the routine trade: a little spectrum for a realizable filter and finite pulse tails.</p>` },
+    { q: String.raw`At $E_b/N_0=10.5$ dB, compute the QPSK BER and the approximate SER.`, solution: String.raw`<p><b>Formula.</b> $$\text{BER}=Q\!\left(\sqrt{\frac{2E_b}{N_0}}\right),\qquad \text{SER}\approx2\,\text{BER},$$ the symbol error rate being about twice the bit error rate since either of the two independent arms may err.</p>
+      <p><b>Substitute.</b> $E_b/N_0=10^{10.5/10}=10^{1.05}=11.2$; $x=\sqrt{2\times11.2}=\sqrt{22.4}$.</p>
+      <p><b>Compute.</b> $x\approx4.73$; $\text{BER}=Q(4.73)\approx1.1\times10^{-6}$; $\text{SER}\approx2.3\times10^{-6}$.</p>
+      <p><b>Explanation.</b> Less than 1 dB more $E_b/N_0$ than the previous problem drops the BER by nearly an order of magnitude — the steep $Q$-function slope typical of coherent PSK near the operating point. The SER being $\approx2\times$ the BER reflects the two-bit-per-symbol structure.</p>` },
+    { q: String.raw`Compare the throughput of BPSK and QPSK over a 10 MHz channel (ideal Nyquist).`, solution: String.raw`<p><b>Formula.</b> $$R_b=\eta\,B,\qquad \eta_{BPSK}=1,\ \eta_{QPSK}=2\ \text{bit/s/Hz (ideal)}.$$</p>
+      <p><b>Substitute.</b> BPSK: $R_b=1\times10$ MHz; QPSK: $R_b=2\times10$ MHz.</p>
+      <p><b>Compute.</b> BPSK $=10$ Mb/s; QPSK $=20$ Mb/s.</p>
+      <p><b>Explanation.</b> QPSK doubles the throughput in the identical bandwidth at the identical BER and $E_b/N_0$ — no downside in the ideal case. This is precisely why QPSK, not BPSK, is the baseline modulation whenever spectrum is the constraint.</p>` },
+    { q: String.raw`A QPSK symbol has amplitude $A=2$ V (constellation radius). Find the per-arm amplitude and the symbol energy over $T_s=1\,\mu$s (into $1\,\Omega$).`, solution: String.raw`<p><b>Formula.</b> $$A_{arm}=\frac{A}{\sqrt2},\qquad E_s=\tfrac12 A^2 T_s,\qquad E_b=\frac{E_s}{2},$$ where $A$ is the constellation radius, $A_{arm}$ the per-axis (I or Q) amplitude, and $E_s$, $E_b$ the symbol and bit energies into $1\,\Omega$.</p>
+      <p><b>Substitute.</b> $A_{arm}=2/\sqrt2$; $E_s=\tfrac12(2)^2(10^{-6})$; $E_b=E_s/2$.</p>
+      <p><b>Compute.</b> $A_{arm}=1.414$ V; $E_s=\tfrac12(4)(10^{-6})=2\times10^{-6}$ J; $E_b=1\times10^{-6}$ J.</p>
+      <p><b>Explanation.</b> The I and Q arms each carry $A/\sqrt2$ so that their vector sum has magnitude $A$ — the constellation radius. The relation $E_s=2E_b$ is what lets QPSK match BPSK's per-bit performance: twice the symbol energy shared over twice the bits.</p>` },
+    { q: String.raw`A QPSK modem targets $R_b=100$ Mb/s. What symbol rate is needed, and what channel bandwidth for $\beta=0.2$?`, solution: String.raw`<p><b>Formula.</b> $$R_s=\frac{R_b}{2},\qquad B=(1+\beta)R_s,$$ inverting the 2-bits-per-symbol and RRC bandwidth relations.</p>
+      <p><b>Substitute.</b> $R_s=100/2$ Msym/s; $B=(1+0.2)\times50$.</p>
+      <p><b>Compute.</b> $R_s=50$ Msym/s; $B=1.2\times50=60$ MHz.</p>
+      <p><b>Explanation.</b> To hit 100 Mb/s you need 50 Msym/s and, with a 20% roll-off, 60 MHz of channel. Halving the required symbol rate (versus a 1-bit scheme) is exactly why QPSK is chosen for high-rate modems — it keeps the symbol rate, and hence the bandwidth, manageable.</p>` }
   ],
   realWorld: String.raw`<p>QPSK is arguably the single most-used digital modulation on Earth. It carries the control and lower-rate data channels of virtually every cellular standard from 3G through 5G (where it is the robust base of the adaptive-modulation ladder), the physical layer of satellite links (DVB-S/S2, GPS's navigation data on the I channel), cable modems, and countless microwave backhaul hops. Its variants are everywhere the envelope matters: OQPSK underlies Zigbee (802.15.4) and the older CDMA reverse link, while $\pi/4$-DQPSK powered TETRA public-safety radio and TDMA cellular. In an SDR, QPSK modulation and demodulation are a few lines of I/Q arithmetic, and the same I/Q correlator that demodulates QPSK is the front end for QAM, making QPSK the conceptual gateway to all higher-order modulation.</p>`,
   related: ['bpsk', 'ber', 'eb-no', 'rrc-filter', 'matched-filter']
@@ -720,7 +999,8 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['RRC', 'raised cosine', 'matched filter', 'Nyquist', 'pulse shaping', 'roll-off', 'ISI', 'excess bandwidth'],
   summary: String.raw`The root-raised-cosine filter splits a Nyquist raised-cosine response equally between transmitter and receiver so their cascade is ISI-free while the receiver is simultaneously a matched filter.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-rrc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <rect x="15" y="45" width="70" height="48" rx="6" fill="#1c232e" stroke="#ffa94d"/>
@@ -745,6 +1025,56 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`RRC mechanism: identical √H_RC filters at Tx and Rx; their cascade forms the Nyquist raised cosine while the Rx is a matched filter.`
   },
+  {
+    title: String.raw`Frequency-response anatomy: roll-off β`,
+    svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-rrc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="40" y1="170" x2="510" y2="170" stroke="#9aa7b5" marker-end="url(#arr2-rrc)"/>
+  <text x="505" y="188" fill="#9aa7b5">f</text>
+  <line x1="60" y1="170" x2="60" y2="40" stroke="#9aa7b5"/>
+  <text x="46" y="44" fill="#9aa7b5">|H|</text>
+  <path d="M60,60 L250,60 L250,170" fill="none" stroke="#4dabf7" stroke-width="2" stroke-dasharray="5 3"/>
+  <text x="150" y="52" fill="#4dabf7">β=0 brick wall</text>
+  <path d="M60,60 L200,60 Q250,60 265,115 Q280,170 320,170" fill="none" stroke="#63e6be" stroke-width="2"/>
+  <text x="330" y="110" fill="#63e6be">β small: sharp</text>
+  <path d="M60,60 L150,60 Q250,62 300,140 Q330,170 400,170" fill="none" stroke="#ffa94d" stroke-width="2"/>
+  <text x="410" y="150" fill="#ffa94d">β large: gentle</text>
+  <line x1="250" y1="170" x2="250" y2="178" stroke="#9aa7b5"/>
+  <text x="250" y="192" fill="#9aa7b5" text-anchor="middle">R_s/2</text>
+  <line x1="400" y1="170" x2="400" y2="178" stroke="#9aa7b5"/>
+  <text x="400" y="192" fill="#9aa7b5" text-anchor="middle">(1+β)R_s/2</text>
+  <text x="285" y="212" fill="#b197fc" text-anchor="middle">excess bandwidth = fraction β above the Nyquist minimum R_s/2</text>
+</svg>`,
+    caption: String.raw`RRC frequency response: a flat passband, a cosine taper set by roll-off β, then a stopband. β=0 is the ideal brick wall; larger β trades excess bandwidth (1+β)R_s/2 for a gentler, more realizable skirt.`
+  },
+  {
+    title: String.raw`Impulse response: zero-ISI mechanism`,
+    svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr3-rrc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="30" y1="120" x2="515" y2="120" stroke="#9aa7b5" marker-end="url(#arr3-rrc)"/>
+  <text x="508" y="138" fill="#9aa7b5">t</text>
+  <path d="M40,120 Q90,122 120,118 Q150,112 180,135 Q205,120 230,50 Q270,20 310,50 Q335,120 360,135 Q390,112 420,118 Q450,122 500,120" fill="none" stroke="#63e6be" stroke-width="2"/>
+  <circle cx="120" cy="120" r="4" fill="#ffa94d"/>
+  <circle cx="180" cy="120" r="4" fill="#ffa94d"/>
+  <circle cx="360" cy="120" r="4" fill="#ffa94d"/>
+  <circle cx="420" cy="120" r="4" fill="#ffa94d"/>
+  <circle cx="270" cy="20" r="4" fill="#b197fc"/>
+  <line x1="120" y1="120" x2="120" y2="185" stroke="#9aa7b5" stroke-dasharray="3 3"/>
+  <line x1="180" y1="120" x2="180" y2="185" stroke="#9aa7b5" stroke-dasharray="3 3"/>
+  <line x1="270" y1="120" x2="270" y2="185" stroke="#9aa7b5" stroke-dasharray="3 3"/>
+  <line x1="360" y1="120" x2="360" y2="185" stroke="#9aa7b5" stroke-dasharray="3 3"/>
+  <line x1="420" y1="120" x2="420" y2="185" stroke="#9aa7b5" stroke-dasharray="3 3"/>
+  <text x="120" y="200" fill="#9aa7b5" text-anchor="middle">−2T</text>
+  <text x="180" y="200" fill="#9aa7b5" text-anchor="middle">−T</text>
+  <text x="270" y="200" fill="#b197fc" text-anchor="middle">0</text>
+  <text x="360" y="200" fill="#9aa7b5" text-anchor="middle">T</text>
+  <text x="420" y="200" fill="#9aa7b5" text-anchor="middle">2T</text>
+  <text x="285" y="40" fill="#b197fc">h(0)=peak</text>
+  <text x="270" y="105" fill="#ffa94d" text-anchor="middle">zeros at every kT (k≠0) → no ISI</text>
+</svg>`,
+    caption: String.raw`The Nyquist (raised-cosine) cascade response peaks at t=0 and crosses zero at every other symbol instant kT, so neighbouring symbols contribute nothing at the sampling times — the zero-ISI property. A lone RRC does not have these zeros; only the Tx+Rx cascade does.`
+  }
+  ],
   prerequisites: ['pulse-shaping', 'matched-filter', 'nyquist-sampling', 'convolution', 'fourier-transform'],
   intro: String.raw`<p>The root-raised-cosine (RRC) filter answers a subtle engineering demand: a digital receiver wants <em>two</em> things at once — <strong>zero intersymbol interference</strong> (ISI) at the sampling instants, and a <strong>matched filter</strong> that maximises SNR. These pull in different directions, because the zero-ISI (Nyquist) property is a constraint on the <em>end-to-end</em> pulse, whereas matched filtering is a constraint on the <em>receive</em> filter alone. The elegant resolution: take the raised-cosine (RC) filter — the standard Nyquist pulse — and split it into two identical square-root halves, $H_{RRC}(f)=\sqrt{H_{RC}(f)}$, placing one at the transmitter and one at the receiver. Their cascade reconstitutes the full raised cosine (so the <em>system</em> is ISI-free), and because both halves are identical, the receive RRC is exactly matched to the transmit RRC (so SNR is maximised). The price is a crucial subtlety: a <em>single</em> RRC pulse is <strong>not</strong> zero-ISI — only the Tx+Rx cascade is.</p>`,
   sections: [
@@ -824,6 +1154,18 @@ CONTENT.topics.push(
         <li><strong>PAPR/envelope:</strong> like all pulse shaping, RRC gives a varying envelope (rings between symbols), raising PAPR versus an unshaped constant-envelope signal.</li>
         <li><strong>Matched pair matters:</strong> if the Tx and Rx roll-offs differ, the cascade is no longer a clean RC and ISI reappears — always match $\beta$ at both ends.</li>
       </ul></p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<p>The whole topic is the resolution of one tension: a receiver wants <em>zero ISI</em> (a constraint on the end-to-end pulse) <em>and</em> a <em>matched filter</em> (a constraint on the receive filter alone). RRC delivers both by splitting the Nyquist filter in half. Carry these away:</p>
+      <ul>
+        <li><strong>The trick.</strong> $H_{RRC}(f)=\sqrt{H_{RC}(f)}$, one copy at each end. The cascade $\sqrt{H_{RC}}\cdot\sqrt{H_{RC}}=H_{RC}$ is Nyquist (zero ISI), and because the RRC is real and even it equals its own matched filter, so the receiver is matched to the transmit pulse.</li>
+        <li><strong>The most-tested subtlety.</strong> A <em>lone</em> RRC pulse is <strong>not</strong> ISI-free — its impulse response does not zero at every $kT$. Only the Tx+Rx cascade recovers those zero crossings. "Is the RRC ISI-free? No — only RRC∗RRC = RC is."</li>
+        <li><strong>Best-possible SNR.</strong> Matched filtering achieves $\text{SNR}_{max}=2E/N_0$ in AWGN; RRC-at-both-ends reaches it while staying Nyquist — something no single-filter arrangement can do.</li>
+        <li><strong>Bandwidth and roll-off.</strong> Single-sided $B=(1+\beta)R_s/2$ (passband $(1+\beta)R_s$); $\beta$ is the excess bandwidth. Small $\beta$ saves spectrum but demands tight timing and longer filters; large $\beta$ is robust but wide.</li>
+        <li><strong>Practical realities.</strong> Implemented as an oversampled, truncated linear-phase FIR (constant group delay $NT$ per filter, $2NT$ end-to-end). Both ends must use the <em>same</em> $\beta$, and the shaped pulse rings between symbols, raising PAPR versus an unshaped signal.</li>
+      </ul>
+      <div class="callout tip">One line to keep: <em>square-root the Nyquist filter, put a copy at each end</em> — the product is zero-ISI and each end is the other's matched filter. And never forget: a single RRC alone is not zero-ISI.</div>`
     }
   ],
   keyPoints: [
@@ -935,13 +1277,34 @@ CONTENT.topics.push(
     { q: String.raw`Which pulse actually has zero crossings at every $kT$ ($k\ne0$)?`, options: [String.raw`The lone RRC pulse`, String.raw`The raised cosine (RRC-RRC cascade)`, String.raw`Neither`, String.raw`A rectangular pulse`], answer: 1, explain: String.raw`The RC has the Nyquist zero crossings; the single RRC does not.` }
   ],
   numericals: [
-    { q: String.raw`An RRC-shaped QPSK link has $R_s=20$ Msym/s and roll-off $\beta=0.25$. Find the passband occupied bandwidth.`, solution: String.raw`<p>Passband bandwidth $=(1+\beta)R_s=1.25\times20=25$ MHz. (Single-sided baseband $B=(1+\beta)R_s/2=12.5$ MHz.)</p>` },
-    { q: String.raw`A 30 MHz passband channel uses RRC with $\beta=0.2$. What maximum symbol rate fits, and what QPSK bit rate results?`, solution: String.raw`<p>$R_s=B/(1+\beta)=30/1.2=25$ Msym/s. QPSK: $R_b=2R_s=50$ Mb/s.</p>` },
-    { q: String.raw`Compute the excess bandwidth (MHz and %) for $R_s=10$ Msym/s at $\beta=0.35$ (single-sided).`, solution: String.raw`<p>Nyquist min single-sided $=R_s/2=5$ MHz. Actual $=(1+0.35)(10)/2=6.75$ MHz. Excess $=6.75-5=1.75$ MHz $=35\%$ — matching $\beta$.</p>` },
-    { q: String.raw`An FIR RRC spans $\pm 6$ symbols at 8 samples/symbol. Find the filter length and the per-filter group delay if $T=0.1\,\mu$s.`, solution: String.raw`<p>Length $=2NL+1=2(6)(8)+1=97$ taps. Group delay $=NT=6\times0.1\,\mu\text{s}=0.6\,\mu$s per filter; Tx+Rx total $=1.2\,\mu$s.</p>` },
-    { q: String.raw`Evaluate $h_{RRC}(0)$ for $\beta=0.35$ and $T=1$ (normalised).`, solution: String.raw`<p>$h_{RRC}(0)=\frac{1}{\sqrt T}[1+\beta(4/\pi-1)]=1\times[1+0.35(1.273-1)]=1+0.35(0.273)=1.096$.</p>` },
-    { q: String.raw`A matched RRC receiver operates on a pulse of energy $E=2\times10^{-9}$ J in noise $N_0=1\times10^{-10}$ W/Hz. Find the maximum output SNR (dB).`, solution: String.raw`<p>$\text{SNR}=2E/N_0=2(2\times10^{-9})/(1\times10^{-10})=40$. In dB: $10\log_{10}40=16.0$ dB.</p>` },
-    { q: String.raw`Two RRC filters with roll-offs 0.3 (Tx) and 0.3 (Rx) cascade. What is the effective end-to-end pulse, and is it zero-ISI?`, solution: String.raw`<p>$H_T H_R=\sqrt{H_{RC}}\cdot\sqrt{H_{RC}}=H_{RC}$ with $\beta=0.3$ — a raised cosine. Yes, it is zero-ISI (zeros at all $kT$), and the Rx is matched to the Tx.</p>` }
+    { q: String.raw`An RRC-shaped QPSK link has $R_s=20$ Msym/s and roll-off $\beta=0.25$. Find the passband occupied bandwidth.`, solution: String.raw`<p><b>Formula.</b> $$B_{passband}=(1+\beta)R_s,\qquad B_{baseband}=\frac{(1+\beta)R_s}{2},$$ where $R_s$ is the symbol rate and $\beta$ the roll-off; the passband is twice the single-sided baseband width.</p>
+      <p><b>Substitute.</b> $B_{passband}=(1+0.25)\times20$ MHz; $B_{baseband}=(1.25\times20)/2$.</p>
+      <p><b>Compute.</b> $B_{passband}=1.25\times20=25$ MHz (single-sided baseband $=12.5$ MHz).</p>
+      <p><b>Explanation.</b> The $(1+\beta)$ factor is the excess bandwidth: the 25% roll-off inflates the ideal $R_s=20$ MHz passband to 25 MHz. This occupied width is what must fit inside the channel allocation.</p>` },
+    { q: String.raw`A 30 MHz passband channel uses RRC with $\beta=0.2$. What maximum symbol rate fits, and what QPSK bit rate results?`, solution: String.raw`<p><b>Formula.</b> $$R_s=\frac{B}{1+\beta},\qquad R_b=2R_s\ (\text{QPSK}),$$ inverting the passband relation $B=(1+\beta)R_s$ and using 2 bits/symbol.</p>
+      <p><b>Substitute.</b> $R_s=\dfrac{30}{1+0.2}=\dfrac{30}{1.2}$; $R_b=2R_s$.</p>
+      <p><b>Compute.</b> $R_s=25$ Msym/s; $R_b=50$ Mb/s.</p>
+      <p><b>Explanation.</b> The 20% roll-off means the 30 MHz channel supports only 25 Msym/s (not the ideal 30). With QPSK's 2 bits/symbol that is 50 Mb/s — the bandwidth budget and the modulation order together set the throughput.</p>` },
+    { q: String.raw`Compute the excess bandwidth (MHz and %) for $R_s=10$ Msym/s at $\beta=0.35$ (single-sided).`, solution: String.raw`<p><b>Formula.</b> $$B_{min}=\frac{R_s}{2},\quad B=\frac{(1+\beta)R_s}{2},\quad B_{excess}=B-B_{min}=\frac{\beta R_s}{2},$$ the excess being the amount above the Nyquist minimum single-sided bandwidth.</p>
+      <p><b>Substitute.</b> $B_{min}=10/2$; $B=(1.35\times10)/2$; $B_{excess}=B-B_{min}$.</p>
+      <p><b>Compute.</b> $B_{min}=5$ MHz; $B=6.75$ MHz; $B_{excess}=1.75$ MHz $=1.75/5=35\%$.</p>
+      <p><b>Explanation.</b> The excess bandwidth as a fraction of the Nyquist minimum equals $\beta$ exactly ($35\%$) — a useful sanity check on the definition. That 1.75 MHz is the physical spectrum "wasted" to make the ideal brick-wall filter realizable.</p>` },
+    { q: String.raw`An FIR RRC spans $\pm 6$ symbols at 8 samples/symbol. Find the filter length and the per-filter group delay if $T=0.1\,\mu$s.`, solution: String.raw`<p><b>Formula.</b> $$L_{taps}=2NL+1,\qquad \tau_g=NT,\qquad \tau_{total}=2NT,$$ where $N$ is the one-sided span in symbols, $L$ the samples per symbol, and $T$ the symbol period.</p>
+      <p><b>Substitute.</b> $L_{taps}=2(6)(8)+1$; $\tau_g=6\times0.1\,\mu$s; $\tau_{total}=2\tau_g$.</p>
+      <p><b>Compute.</b> $L_{taps}=97$ taps; $\tau_g=0.6\,\mu$s per filter; $\tau_{total}=1.2\,\mu$s for the Tx+Rx pair.</p>
+      <p><b>Explanation.</b> The symmetric 97-tap FIR has its peak at the centre, $N=6$ symbols in, giving a constant (linear-phase) group delay of $0.6\,\mu$s each. Constant group delay means no phase distortion — the pulse shape is preserved, only latency ($1.2\,\mu$s round the cascade) is added.</p>` },
+    { q: String.raw`Evaluate $h_{RRC}(0)$ for $\beta=0.35$ and $T=1$ (normalised).`, solution: String.raw`<p><b>Formula.</b> $$h_{RRC}(0)=\frac{1}{\sqrt T}\left[1+\beta\!\left(\frac{4}{\pi}-1\right)\right],$$ the L'Hopital value of the impulse response at the removable singularity $t=0$.</p>
+      <p><b>Substitute.</b> With $T=1$, $\beta=0.35$: $h_{RRC}(0)=1\times[1+0.35(4/\pi-1)]$, and $4/\pi=1.273$.</p>
+      <p><b>Compute.</b> $h_{RRC}(0)=1+0.35(1.273-1)=1+0.35(0.273)=1.096$.</p>
+      <p><b>Explanation.</b> The peak tap exceeds $1/\sqrt T$ by a $\beta$-dependent amount because the roll-off region adds energy at $t=0$. This is the value used to normalize the filter so the cascade has unit peak — getting it right ensures the intended output power.</p>` },
+    { q: String.raw`A matched RRC receiver operates on a pulse of energy $E=2\times10^{-9}$ J in noise $N_0=1\times10^{-10}$ W/Hz. Find the maximum output SNR (dB).`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}_{max}=\frac{2E}{N_0},\qquad \text{SNR}_{dB}=10\log_{10}\text{SNR},$$ the matched-filter bound in AWGN, where $E$ is the pulse energy and $N_0$ the one-sided noise density.</p>
+      <p><b>Substitute.</b> $\text{SNR}=\dfrac{2(2\times10^{-9})}{1\times10^{-10}}$, then convert to dB.</p>
+      <p><b>Compute.</b> $\text{SNR}=40$; $10\log_{10}40=16.0$ dB.</p>
+      <p><b>Explanation.</b> The matched RRC receiver extracts the theoretical maximum SNR of $2E/N_0$ — no linear receiver can do better. The 16 dB result depends only on pulse energy and noise density, not on pulse shape, which is why energy (not peak amplitude) is the currency of detection.</p>` },
+    { q: String.raw`Two RRC filters with roll-offs 0.3 (Tx) and 0.3 (Rx) cascade. What is the effective end-to-end pulse, and is it zero-ISI?`, solution: String.raw`<p><b>Formula.</b> $$H_T(f)H_R(f)=\sqrt{H_{RC}(f)}\cdot\sqrt{H_{RC}(f)}=H_{RC}(f),$$ valid only when both roll-offs are equal so the two square roots reconstitute the same raised cosine.</p>
+      <p><b>Substitute.</b> With $\beta_T=\beta_R=0.3$: $H_T H_R=H_{RC}$ at $\beta=0.3$.</p>
+      <p><b>Compute.</b> The effective end-to-end pulse is a raised cosine with $\beta=0.3$; it has zeros at all $t=kT$ ($k\ne0$), so yes — it is zero-ISI, and the Rx is simultaneously matched to the Tx.</p>
+      <p><b>Explanation.</b> Matched roll-offs are essential: had $\beta_T\ne\beta_R$, the product would not be a clean raised cosine and residual ISI would appear. This confirms the central rule — the zero-ISI property belongs to the cascade, never to a lone RRC.</p>` }
   ],
   realWorld: String.raw`<p>Matched RRC pairs are the invisible standard behind almost every single-carrier digital radio. DVB-S/S2 satellite TV specifies RRC with roll-offs of 0.35/0.25/0.20; 3G WCDMA used $\beta=0.22$; LTE and many satellite modems, cable systems, and microwave backhaul links all rely on RRC transmit/receive pairs to pack symbols tightly while achieving optimum matched-filter SNR. In an SDR, the RRC is one of the first blocks in the transmit chain and the last before symbol decision in the receive chain — often the largest FIR in the design. Test equipment (vector signal analysers) apply a reference RRC to demodulate captured signals, and the classic eye-diagram measurement is really a check that the RRC-RRC cascade is opening the eye as intended. Understanding that a lone RRC is not ISI-free is the single most common insight that separates engineers who can debug a link from those who cannot.</p>`,
   related: ['pulse-shaping', 'matched-filter', 'eye-diagram', 'qpsk', 'nyquist-sampling']

@@ -6,7 +6,8 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['DFT', 'FFT', 'Cooley-Tukey', 'spectrum', 'butterfly', 'twiddle', 'windowing'],
   summary: String.raw`The FFT is a family of fast algorithms that compute the Discrete Fourier Transform in $O(N\log N)$ operations instead of the direct $O(N^2)$, by recursively splitting the sum into even- and odd-indexed subsequences.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 175" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-fft" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="8" y="60" width="86" height="50" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="51" y="82" fill="#e6edf3" text-anchor="middle">N samples</text><text x="51" y="97" fill="#9aa7b5" text-anchor="middle" font-size="10">x[n]</text>
@@ -20,6 +21,41 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`FFT mechanism: $N$ samples are recursively split into even/odd subsequences and recombined by radix-2 butterflies ($E\pm W_N^k O$), yielding $N$ frequency bins in $O(N\log N)$.`,
   },
+  {
+    title: String.raw`8-point DIT: bit-reverse in → 3 butterfly stages → in-order out`,
+    svg: String.raw`<svg viewBox="0 0 540 190" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-fft" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="60" width="92" height="60" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="54" y="82" fill="#e6edf3" text-anchor="middle" font-size="11">bit-reverse</text><text x="54" y="98" fill="#9aa7b5" text-anchor="middle" font-size="10">x[0,4,2,6,</text><text x="54" y="110" fill="#9aa7b5" text-anchor="middle" font-size="10">1,5,3,7]</text>
+<rect x="126" y="60" width="80" height="60" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="166" y="86" fill="#e6edf3" text-anchor="middle" font-size="11">stage 1</text><text x="166" y="102" fill="#9aa7b5" text-anchor="middle" font-size="10">2-pt DFTs</text>
+<rect x="232" y="60" width="80" height="60" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="272" y="86" fill="#e6edf3" text-anchor="middle" font-size="11">stage 2</text><text x="272" y="102" fill="#9aa7b5" text-anchor="middle" font-size="10">4-pt combine</text>
+<rect x="338" y="60" width="80" height="60" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="378" y="86" fill="#e6edf3" text-anchor="middle" font-size="11">stage 3</text><text x="378" y="102" fill="#9aa7b5" text-anchor="middle" font-size="10">8-pt combine</text>
+<rect x="444" y="60" width="88" height="60" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="488" y="82" fill="#e6edf3" text-anchor="middle" font-size="11">X[0..7]</text><text x="488" y="98" fill="#9aa7b5" text-anchor="middle" font-size="10">natural</text><text x="488" y="110" fill="#9aa7b5" text-anchor="middle" font-size="10">order</text>
+<text x="270" y="40" fill="#ffa94d" text-anchor="middle" font-size="11">log₂8 = 3 stages, N/2 = 4 butterflies each</text>
+<line x1="100" y1="90" x2="124" y2="90" stroke="#9aa7b5" marker-end="url(#arr2-fft)"/>
+<line x1="206" y1="90" x2="230" y2="90" stroke="#9aa7b5" marker-end="url(#arr2-fft)"/>
+<line x1="312" y1="90" x2="336" y2="90" stroke="#9aa7b5" marker-end="url(#arr2-fft)"/>
+<line x1="418" y1="90" x2="442" y2="90" stroke="#9aa7b5" marker-end="url(#arr2-fft)"/>
+<text x="270" y="150" fill="#b197fc" text-anchor="middle" font-size="10">each stage doubles the transform size until all 8 bins are combined</text>
+</svg>`,
+    caption: String.raw`Radix-2 DIT flow for $N=8$: reorder the input into bit-reversed order, then apply $\log_2 8=3$ butterfly stages (2-point, then 4-point, then 8-point combines) of $N/2=4$ butterflies each, producing the spectrum in natural order.`,
+  },
+  {
+    title: String.raw`Real-time spectrum chain: window → FFT → |·|² → average → display`,
+    svg: String.raw`<svg viewBox="0 0 540 130" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-fft" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="6" y="45" width="86" height="44" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="49" y="64" fill="#e6edf3" text-anchor="middle" font-size="11">window</text><text x="49" y="79" fill="#9aa7b5" text-anchor="middle" font-size="10">w[n]·x[n]</text>
+<rect x="112" y="45" width="70" height="44" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="147" y="70" fill="#e6edf3" text-anchor="middle" font-size="11">FFT</text>
+<rect x="202" y="45" width="76" height="44" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="240" y="64" fill="#e6edf3" text-anchor="middle" font-size="11">|·|²</text><text x="240" y="79" fill="#9aa7b5" text-anchor="middle" font-size="10">power</text>
+<rect x="298" y="45" width="96" height="44" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="346" y="64" fill="#e6edf3" text-anchor="middle" font-size="11">average</text><text x="346" y="79" fill="#9aa7b5" text-anchor="middle" font-size="10">Welch</text>
+<rect x="414" y="45" width="118" height="44" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="473" y="64" fill="#e6edf3" text-anchor="middle" font-size="11">display</text><text x="473" y="79" fill="#9aa7b5" text-anchor="middle" font-size="10">PSD vs f</text>
+<line x1="92" y1="67" x2="110" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fft)"/>
+<line x1="182" y1="67" x2="200" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fft)"/>
+<line x1="278" y1="67" x2="296" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fft)"/>
+<line x1="394" y1="67" x2="412" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fft)"/>
+</svg>`,
+    caption: String.raw`Real-time spectral estimation: each block is windowed to suppress leakage, FFT'd, converted to power $|X[k]|^2$, and averaged over overlapping segments (Welch's method) for a stable noise floor before display.`,
+  }
+  ],
   prerequisites: ['fourier-transform', 'convolution', 'nyquist-sampling', 'frequency-spectrum'],
   intro: String.raw`<p>The <b>Discrete Fourier Transform (DFT)</b> takes $N$ samples of a signal in time and produces $N$ complex numbers describing the amplitude and phase of $N$ evenly-spaced frequency bins. It is the workhorse of digital spectral analysis: every spectrum analyzer display, every OFDM modem, every audio equalizer, and every fast convolution engine rests on it.</p>
 <p>The problem is that the DFT, computed straight from its definition, costs on the order of $N^2$ complex multiply-adds. For $N=1024$ that is about a million operations; for $N=10^6$ it is $10^{12}$ — hopelessly slow in real time. The <b>Fast Fourier Transform (FFT)</b> is not a different transform; it computes <i>exactly</i> the same DFT, but exploits deep symmetry in the twiddle factors to reduce the cost to $O(N\log N)$. For $N=1024$ that is roughly $10^4$ operations — a hundredfold speed-up, and the gap widens without bound as $N$ grows. This single algorithmic insight, popularized by Cooley and Tukey in 1965, is arguably the most important numerical algorithm of the 20th century.</p>`,
@@ -80,7 +116,16 @@ $$ \tfrac{N}{2}\log_2 N \text{ complex multiplies}, \qquad N\log_2 N \text{ comp
 <tr><td>Blackman</td><td>3×</td><td>−58 dB</td><td>large dynamic range</td></tr>
 </table>
 <div class="callout"><b>Scalloping loss:</b> a tone falling between two bins is attenuated by up to 3.9 dB (rectangular). <b>Zero-padding</b> the record before the FFT interpolates the spectrum to more bins — it makes the display smoother but does <i>not</i> improve true resolution, which is still set by the record length.</div>` },
-    { h: 'Fast convolution and practical use', html: String.raw`<p>Because convolution in time is multiplication in frequency, filtering a long signal with a filter of $M$ taps is often faster via the FFT: transform, multiply, inverse-transform. Using <b>overlap-add</b> or <b>overlap-save</b> block methods, the cost drops from $O(NM)$ direct to $O(N\log M)$ — a huge win when $M$ is large. The FFT also underpins <b>OFDM</b> (each symbol is an IFFT of the subcarrier data), <b>power spectral density</b> estimation (Welch's method averages FFTs of overlapping windowed segments), correlation/matched filtering, and image processing.</p>` }
+    { h: 'Fast convolution and practical use', html: String.raw`<p>Because convolution in time is multiplication in frequency, filtering a long signal with a filter of $M$ taps is often faster via the FFT: transform, multiply, inverse-transform. Using <b>overlap-add</b> or <b>overlap-save</b> block methods, the cost drops from $O(NM)$ direct to $O(N\log M)$ — a huge win when $M$ is large. The FFT also underpins <b>OFDM</b> (each symbol is an IFFT of the subcarrier data), <b>power spectral density</b> estimation (Welch's method averages FFTs of overlapping windowed segments), correlation/matched filtering, and image processing.</p>` },
+    { h: 'What you should now understand', html: String.raw`<div class="callout tip"><p>Stepping back, the FFT story reduces to a few durable ideas:</p>
+<ul>
+<li><b>The FFT is not a new transform</b> — it computes the exact same DFT, just in $O(N\log N)$ instead of $O(N^2)$ by exploiting twiddle-factor symmetry.</li>
+<li><b>Divide and conquer:</b> split into even/odd samples, combine two half-length DFTs with $X[k]=E[k]+W_N^k O[k]$; the sign flip $W_N^{k+N/2}=-W_N^k$ gives the upper half for free.</li>
+<li><b>The butterfly is the atom</b> — one complex multiply, two adds — with $N/2$ per stage across $\log_2 N$ stages, and the whole thing runs in place.</li>
+<li><b>Bit-reversal</b> reorders the data once; frequency resolution $\Delta f=1/T_{\text{record}}$ depends on record length, and zero-padding only interpolates the display.</li>
+<li><b>Non-integer cycles cause leakage;</b> windows (Hann, Hamming, Blackman) trade a wider main lobe for lower side lobes.</li>
+<li><b>Why it matters:</b> every spectrum display, OFDM modem, and fast-convolution filter in modern comms rests on this single algorithm.</li>
+</ul></div>` }
   ],
   keyPoints: [
     String.raw`The FFT computes the <i>exact same</i> DFT as the direct sum — it is an efficient algorithm, not an approximation.`,
@@ -179,13 +224,34 @@ $$ \sum_n |x[n]|^2=\sum_n x[n]\overline{x[n]}=\sum_n x[n]\cdot\frac1N\sum_k \ove
     { q: String.raw`Scalloping loss refers to:`, options: [String.raw`Loss from a tone falling between bins`, String.raw`Quantization noise`, String.raw`ADC clipping`, String.raw`Filter roll-off`], answer: 0, explain: String.raw`A tone between bin centers is attenuated (up to ~3.9 dB for rectangular) because no bin sits exactly on it.` }
   ],
   numericals: [
-    { q: String.raw`A 4096-point radix-2 FFT: how many complex multiplies, and how many for the direct DFT?`, solution: String.raw`FFT: $\tfrac N2\log_2 N=2048\times12=24{,}576$. Direct DFT: $N^2=4096^2=16{,}777{,}216$. Speed-up $\approx683\times$.` },
-    { q: String.raw`Sampling at $f_s=48$ kHz with $N=8192$, find the bin spacing and the frequency of bin 100.`, solution: String.raw`$\Delta f=f_s/N=48000/8192=5.859$ Hz. Bin 100: $f=100\times5.859=585.9$ Hz.` },
-    { q: String.raw`You must resolve two tones 2 Hz apart. What minimum record length and (at $f_s=10$ kHz) minimum $N$?`, solution: String.raw`$T_{\text{record}}\ge1/\Delta f=1/2=0.5$ s. $N\ge f_s T=10000\times0.5=5000$; round up to $N=8192$ for radix-2.` },
-    { q: String.raw`How many stages and total butterflies in a 1024-point FFT?`, solution: String.raw`Stages $=\log_2 1024=10$. Butterflies per stage $=N/2=512$. Total $=512\times10=5120$ (equals the multiply count).` },
-    { q: String.raw`In an 8-point FFT, where does input sample $x[3]$ go after bit-reversal?`, solution: String.raw`$3=011_2$; reversed $=110_2=6$. So $x[3]$ moves to position 6.` },
-    { q: String.raw`A rectangular-windowed FFT shows a tone leaking badly. Switching to Hann, by roughly how much do peak side lobes drop?`, solution: String.raw`Rectangular peak side lobe $\approx-13$ dB; Hann $\approx-31$ dB. Improvement $\approx18$ dB, at the cost of doubling the main-lobe width.` },
-    { q: String.raw`Estimate the time for a $2^{20}$-point FFT on a processor doing $10^9$ complex multiplies per second.`, solution: String.raw`Multiplies $=\tfrac N2\log_2N=524288\times20=1.05\times10^7$. Time $=1.05\times10^7/10^9\approx10.5$ ms. The direct DFT ($\sim1.1\times10^{12}$) would take $\sim18$ minutes.` }
+    { q: String.raw`A 4096-point radix-2 FFT: how many complex multiplies, and how many for the direct DFT?`, solution: String.raw`<p><b>Formula.</b> $$ C_{\text{FFT}}=\tfrac{N}{2}\log_2 N,\qquad C_{\text{DFT}}=N^2 $$ where $N$ is the transform length and $C$ is the number of complex multiplies.</p>
+<p><b>Substitute.</b> $$ C_{\text{FFT}}=\frac{4096}{2}\times\log_2 4096=2048\times12,\qquad C_{\text{DFT}}=4096^2. $$</p>
+<p><b>Compute.</b> $C_{\text{FFT}}=24{,}576$ and $C_{\text{DFT}}=16{,}777{,}216$, so the speed-up is $16{,}777{,}216/24{,}576\approx 683\times$.</p>
+<p><b>Explanation.</b> The FFT does the identical transform with about 683 times less arithmetic. Sanity check: the ratio should be $2N/\log_2 N=8192/12\approx683$ — it matches.</p>` },
+    { q: String.raw`Sampling at $f_s=48$ kHz with $N=8192$, find the bin spacing and the frequency of bin 100.`, solution: String.raw`<p><b>Formula.</b> $$ \Delta f=\frac{f_s}{N},\qquad f_k=k\,\Delta f $$ where $\Delta f$ is the bin spacing, $f_s$ the sample rate, $N$ the FFT length and $k$ the bin index.</p>
+<p><b>Substitute.</b> $$ \Delta f=\frac{48000\ \text{Hz}}{8192},\qquad f_{100}=100\times\Delta f. $$</p>
+<p><b>Compute.</b> $\Delta f=5.859$ Hz; $f_{100}=100\times5.859=585.9$ Hz.</p>
+<p><b>Explanation.</b> Each bin is about 5.86 Hz wide, and bin 100 sits at 585.9 Hz. The resolution is fixed by the record length $N/f_s=0.171$ s, not by the sample rate alone.</p>` },
+    { q: String.raw`You must resolve two tones 2 Hz apart. What minimum record length and (at $f_s=10$ kHz) minimum $N$?`, solution: String.raw`<p><b>Formula.</b> $$ T_{\text{record}}\ge\frac{1}{\Delta f},\qquad N\ge f_s\,T_{\text{record}} $$ where $\Delta f$ is the required frequency resolution and $T_{\text{record}}$ the observation time.</p>
+<p><b>Substitute.</b> $$ T_{\text{record}}\ge\frac{1}{2\ \text{Hz}}=0.5\ \text{s},\qquad N\ge 10000\times0.5. $$</p>
+<p><b>Compute.</b> $T_{\text{record}}\ge0.5$ s and $N\ge5000$; the next power of two for a radix-2 FFT is $N=8192$.</p>
+<p><b>Explanation.</b> Resolving 2 Hz-spaced tones demands at least half a second of data regardless of sample rate — the time–frequency uncertainty. Rounding up to 8192 satisfies the radix-2 requirement.</p>` },
+    { q: String.raw`How many stages and total butterflies in a 1024-point FFT?`, solution: String.raw`<p><b>Formula.</b> $$ \text{stages}=\log_2 N,\qquad \text{butterflies}=\frac{N}{2}\log_2 N $$ where each of the $\log_2 N$ stages contains $N/2$ butterflies.</p>
+<p><b>Substitute.</b> $$ \text{stages}=\log_2 1024,\qquad \text{butterflies}=\frac{1024}{2}\times\log_2 1024. $$</p>
+<p><b>Compute.</b> Stages $=10$; butterflies per stage $=512$; total $=512\times10=5120$.</p>
+<p><b>Explanation.</b> The 5120 total equals the complex-multiply count, since each butterfly does exactly one multiply. Sanity check: $\tfrac{N}{2}\log_2N=512\times10=5120$ confirms it.</p>` },
+    { q: String.raw`In an 8-point FFT, where does input sample $x[3]$ go after bit-reversal?`, solution: String.raw`<p><b>Formula.</b> For $N=8$, an index uses $\log_2 8=3$ bits; bit-reversal reads those bits in reverse order to give the new position.</p>
+<p><b>Substitute.</b> $$ 3=011_2\ \longrightarrow\ \text{reverse the 3 bits}\ \longrightarrow\ 110_2. $$</p>
+<p><b>Compute.</b> $110_2=6$, so $x[3]$ moves to position 6.</p>
+<p><b>Explanation.</b> This one-time $O(N)$ permutation is what lets a DIT FFT consume bit-reversed input and emit natural-order output. Note the pair is symmetric: $x[6]$ correspondingly moves to position 3.</p>` },
+    { q: String.raw`A rectangular-windowed FFT shows a tone leaking badly. Switching to Hann, by roughly how much do peak side lobes drop?`, solution: String.raw`<p><b>Formula.</b> $$ \Delta_{\text{dB}}=|\text{SLL}_{\text{Hann}}|-|\text{SLL}_{\text{rect}}| $$ comparing the peak side-lobe levels (SLL) of the two windows.</p>
+<p><b>Substitute.</b> Rectangular peak SLL $\approx-13$ dB, Hann $\approx-31$ dB, so $$ \Delta_{\text{dB}}=31-13. $$</p>
+<p><b>Compute.</b> $\Delta_{\text{dB}}\approx18$ dB of extra side-lobe suppression.</p>
+<p><b>Explanation.</b> The Hann window buys about 18 dB less leakage, which uncovers weak tones near a strong one — at the cost of doubling the main-lobe width (worse resolution). This is the fundamental window trade-off.</p>` },
+    { q: String.raw`Estimate the time for a $2^{20}$-point FFT on a processor doing $10^9$ complex multiplies per second.`, solution: String.raw`<p><b>Formula.</b> $$ C=\tfrac{N}{2}\log_2 N,\qquad t=\frac{C}{R} $$ where $C$ is the multiply count, $R$ the processor rate (multiplies/s) and $t$ the run time.</p>
+<p><b>Substitute.</b> With $N=2^{20}=1{,}048{,}576$: $$ C=\frac{2^{20}}{2}\times20=524{,}288\times20,\qquad t=\frac{C}{10^9}. $$</p>
+<p><b>Compute.</b> $C=1.05\times10^7$ multiplies, so $t=1.05\times10^7/10^9\approx10.5$ ms. The direct DFT would need $N^2\approx1.1\times10^{12}$ multiplies, i.e. $\approx1100$ s $\approx18$ minutes.</p>
+<p><b>Explanation.</b> A megapoint transform runs in about 10 ms with the FFT but would take a quarter-hour by brute force — the difference between real-time DSP and none at all.</p>` }
   ],
   realWorld: String.raw`<p>The FFT is everywhere in RF and communications. Every spectrum analyzer and SDR waterfall display computes streaming FFTs (often with Welch averaging for a stable noise floor). <b>OFDM</b> systems — Wi-Fi, LTE, 5G-NR, DVB — map data onto orthogonal subcarriers via an IFFT at the transmitter and recover them with an FFT at the receiver, turning a frequency-selective channel into many flat sub-channels. Radar and sonar use FFTs for Doppler processing and pulse compression; the chirp-z and matched-filter operations are FFT-based. Audio codecs (MP3, AAC), image compression, and machine-learning spectrograms all lean on it. In hardware, pipelined and streaming FFT cores on FPGAs (e.g. on RFSoC-class devices) sustain gigasample throughput, and the in-place, bit-reversed structure maps cleanly onto dedicated butterfly datapaths.</p>`,
   related: ['fourier-transform', 'frequency-spectrum', 'psd', 'convolution', 'nyquist-sampling', 'sinc-function']
@@ -196,7 +262,8 @@ $$ \sum_n |x[n]|^2=\sum_n x[n]\overline{x[n]}=\sum_n x[n]\cdot\frac1N\sum_k \ove
   category: 'Signals & Systems',
   tags: ['FIR', 'linear phase', 'convolution', 'taps', 'windowed sinc', 'Parks-McClellan', 'group delay'],
   summary: String.raw`A Finite Impulse Response filter computes its output as a weighted sum of a finite window of past inputs, $y[n]=\sum_k b_k\,x[n-k]$, making it inherently stable and capable of exactly linear phase.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-fir-filters" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
 <text x="30" y="40" fill="#e6edf3" text-anchor="middle">x[n]</text>
@@ -214,6 +281,36 @@ $$ \sum_n |x[n]|^2=\sum_n x[n]\overline{x[n]}=\sum_n x[n]\cdot\frac1N\sum_k \ove
 </svg>`,
     caption: String.raw`FIR structure: a tapped delay line ($z^{-1}$) scales each delayed input by $b_k$ and sums them — purely feed-forward, giving $y[n]=\sum_k b_k x[n-k]$.`,
   },
+  {
+    title: String.raw`FIR design flow: spec → window/Parks-McClellan → taps → verify`,
+    svg: String.raw`<svg viewBox="0 0 540 130" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-fir-filters" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="6" y="45" width="104" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="58" y="64" fill="#e6edf3" text-anchor="middle" font-size="11">spec</text><text x="58" y="79" fill="#9aa7b5" text-anchor="middle" font-size="10">f_c, ripple, Δf</text>
+<rect x="130" y="45" width="120" height="46" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="190" y="61" fill="#e6edf3" text-anchor="middle" font-size="11">design method</text><text x="190" y="76" fill="#9aa7b5" text-anchor="middle" font-size="9">window / Parks-McClellan</text>
+<rect x="270" y="45" width="110" height="46" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="325" y="64" fill="#e6edf3" text-anchor="middle" font-size="11">coefficients</text><text x="325" y="79" fill="#9aa7b5" text-anchor="middle" font-size="10">taps b_k</text>
+<rect x="400" y="45" width="132" height="46" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="466" y="61" fill="#e6edf3" text-anchor="middle" font-size="11">verify</text><text x="466" y="76" fill="#9aa7b5" text-anchor="middle" font-size="9">|H(e^{jω})| vs mask</text>
+<line x1="110" y1="68" x2="128" y2="68" stroke="#9aa7b5" marker-end="url(#arr2-fir-filters)"/>
+<line x1="250" y1="68" x2="268" y2="68" stroke="#9aa7b5" marker-end="url(#arr2-fir-filters)"/>
+<line x1="380" y1="68" x2="398" y2="68" stroke="#9aa7b5" marker-end="url(#arr2-fir-filters)"/>
+<line x1="466" y1="91" x2="466" y2="108" stroke="#9aa7b5"/><line x1="466" y1="108" x2="190" y2="108" stroke="#9aa7b5"/><line x1="190" y1="108" x2="190" y2="93" stroke="#9aa7b5" marker-end="url(#arr2-fir-filters)"/>
+<text x="325" y="122" fill="#9aa7b5" text-anchor="middle" font-size="9">fail mask → raise N, re-design</text>
+</svg>`,
+    caption: String.raw`FIR design flow: translate the spec (cutoff, ripple, transition width) into taps via the window method or Parks–McClellan, then verify the magnitude response against the mask, raising the tap count $N$ and iterating if it fails.`,
+  },
+  {
+    title: String.raw`Linear phase: symmetric taps → constant group delay`,
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-fir-filters" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="14" y="30" width="180" height="50" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="104" y="50" fill="#e6edf3" text-anchor="middle" font-size="11">symmetric taps</text><text x="104" y="66" fill="#9aa7b5" text-anchor="middle" font-size="10">b_k = b_{N-1-k}</text>
+<rect x="232" y="30" width="180" height="50" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="322" y="50" fill="#e6edf3" text-anchor="middle" font-size="11">linear phase</text><text x="322" y="66" fill="#9aa7b5" text-anchor="middle" font-size="10">∠H = −ω(N−1)/2</text>
+<rect x="180" y="98" width="180" height="42" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="270" y="116" fill="#e6edf3" text-anchor="middle" font-size="11">constant group delay</text><text x="270" y="131" fill="#9aa7b5" text-anchor="middle" font-size="10">τ_g = (N−1)/2 samples</text>
+<line x1="194" y1="55" x2="230" y2="55" stroke="#9aa7b5" marker-end="url(#arr3-fir-filters)"/>
+<line x1="322" y1="80" x2="290" y2="96" stroke="#9aa7b5" marker-end="url(#arr3-fir-filters)"/>
+<text x="450" y="120" fill="#9aa7b5" text-anchor="middle" font-size="9">no waveform</text><text x="450" y="132" fill="#9aa7b5" text-anchor="middle" font-size="9">distortion / ISI</text>
+</svg>`,
+    caption: String.raw`Why FIR is prized in comms: mirror-symmetric taps ($b_k=b_{N-1-k}$) force a purely linear phase $\angle H=-\omega(N-1)/2$, hence a constant group delay of $(N-1)/2$ samples — every frequency delayed equally, so no waveform distortion or filter-induced ISI.`,
+  }
+  ],
   prerequisites: ['convolution', 'z-transform', 'sinc-function', 'frequency-spectrum'],
   intro: String.raw`<p>A <b>Finite Impulse Response (FIR)</b> filter builds each output sample from a fixed-length weighted sum of recent input samples — nothing else. Its impulse response is exactly the list of weights (the <b>taps</b>) and lasts only as long as that list: hit it with a single impulse and after $N$ samples the output is dead silent. There is no feedback, so a bounded input can never blow up: <b>every FIR filter is stable</b>, full stop.</p>
 <p>The property that makes FIR filters beloved in communications is <b>exactly linear phase</b>. If the taps are symmetric, every frequency is delayed by the same constant time, so the waveform's shape is preserved — no phase distortion, no smearing of pulse edges, no inter-symbol interference introduced by the filter itself. The price is length: to get a sharp transition band an FIR may need dozens or hundreds of taps, meaning more multiplies per sample and more latency than a comparable IIR filter. FIR filters are the default choice whenever waveform fidelity matters more than raw efficiency: pulse shaping, matched filtering, channelization, and decimation/interpolation.</p>`,
@@ -255,7 +352,16 @@ $$ N \approx \frac{-10\log_{10}(\delta_p\,\delta_s)-13}{14.6\,\Delta f/f_s}+1, $
 <tr><td>More passband ripple allowed</td><td>$N$ decreases</td><td>less flat passband</td></tr>
 </table>
 <p>Each output sample of an $N$-tap FIR needs $N$ multiply-accumulates, so long filters are expensive at high sample rates. This computational cost — many taps for a sharp response — is precisely the weakness that IIR filters exploit.</p>` },
-    { h: 'Efficient forms and implementation', html: String.raw`<p>Several tricks cut the cost of FIR filters. <b>Symmetric folding:</b> because $b_k=b_{N-1-k}$, you can add the two mirror-image taps <i>before</i> multiplying, halving the multiplier count. <b>Polyphase decomposition:</b> in decimators and interpolators, split the filter into sub-filters so multiplies happen only at the lower rate — a big saving in multirate systems. <b>FFT-based fast convolution</b> (overlap-add/save) beats direct convolution when the filter is very long. In hardware, FIR filters map onto systolic MAC arrays and DSP slices with regular, pipelineable structure; the lack of feedback means the pipeline never stalls on a recursive dependency.</p>` }
+    { h: 'Efficient forms and implementation', html: String.raw`<p>Several tricks cut the cost of FIR filters. <b>Symmetric folding:</b> because $b_k=b_{N-1-k}$, you can add the two mirror-image taps <i>before</i> multiplying, halving the multiplier count. <b>Polyphase decomposition:</b> in decimators and interpolators, split the filter into sub-filters so multiplies happen only at the lower rate — a big saving in multirate systems. <b>FFT-based fast convolution</b> (overlap-add/save) beats direct convolution when the filter is very long. In hardware, FIR filters map onto systolic MAC arrays and DSP slices with regular, pipelineable structure; the lack of feedback means the pipeline never stalls on a recursive dependency.</p>` },
+    { h: 'What you should now understand', html: String.raw`<div class="callout tip"><p>The essential FIR takeaways:</p>
+<ul>
+<li><b>An FIR is a finite feed-forward sum,</b> $y[n]=\sum_k b_k x[n-k]$ — pure convolution, and the taps <i>are</i> the impulse response.</li>
+<li><b>Every FIR is unconditionally stable</b> because a finite impulse response is always absolutely summable; all poles sit at $z=0$.</li>
+<li><b>Symmetric taps give exactly linear phase,</b> hence a constant group delay $(N-1)/2$ samples — no waveform distortion, no filter-induced ISI.</li>
+<li><b>Two main design routes:</b> windowed-sinc (truncate the ideal sinc and taper) and Parks–McClellan (optimal equiripple, shortest filter for a spec).</li>
+<li><b>The cost is length:</b> sharper transitions or deeper stopbands need more taps ($N\propto1/\Delta f$), meaning more MACs and more latency than a comparable IIR.</li>
+<li><b>Why it matters:</b> pulse shaping, matched filtering, and channelizers use FIR precisely because phase fidelity — not raw efficiency — is what they cannot compromise.</li>
+</ul></div>` }
   ],
   keyPoints: [
     String.raw`FIR output is a finite weighted sum of past inputs: $y[n]=\sum_{k=0}^{N-1}b_k\,x[n-k]$ — pure convolution, no feedback.`,
@@ -347,13 +453,34 @@ $$ H(e^{j\omega})=e^{-j\omega M}\Big[b_M+\sum_{m=1}^{M}2b_{M+m}\cos(\omega m)\Bi
     { q: String.raw`Compared with an IIR filter of equal sharpness, an FIR filter typically has:`, options: [String.raw`Fewer taps`, String.raw`More taps but guaranteed stability and linear phase`, String.raw`Nonlinear phase`, String.raw`Unstable behavior`], answer: 1, explain: String.raw`FIR trades higher order/latency for unconditional stability and exact linear phase.` }
   ],
   numericals: [
-    { q: String.raw`A 65-tap linear-phase FIR runs at $f_s=1$ MHz. What is its group delay in samples and microseconds?`, solution: String.raw`$\tau_g=(N-1)/2=64/2=32$ samples. In time: $32/10^6=32\ \mu\text{s}$.` },
-    { q: String.raw`Design a low-pass FIR with cutoff $f_c=2$ kHz at $f_s=16$ kHz. Give the first few ideal (unwindowed) tap values around the center.`, solution: String.raw`$2f_c/f_s=0.25$. Center tap ($m=0$): $0.25\,\operatorname{sinc}(0)=0.25$. $m=\pm1$: $0.25\,\operatorname{sinc}(0.25)=0.25\times(\sin(0.25\pi)/(0.25\pi))=0.25\times0.9003=0.225$. $m=\pm2$: $0.25\,\operatorname{sinc}(0.5)=0.25\times0.6366=0.159$. Then multiply by a window and shift for causality.` },
-    { q: String.raw`Using the Kaiser estimate $N\approx(A-8)/(2.285\,\Delta\omega)+1$, find $N$ for $A=60$ dB and a transition of $\Delta\omega=0.1$ rad/sample.`, solution: String.raw`$N\approx(60-8)/(2.285\times0.1)+1=52/0.2285+1\approx227.6+1\approx229$ taps.` },
-    { q: String.raw`An FIR needs a transition width of 500 Hz. Roughly how many taps if 250 Hz needed 400 taps (same attenuation, same $f_s$)?`, solution: String.raw`$N\propto1/\Delta f$, so halving $\Delta f$ from 500 to 250 doubles $N$. Thus 500 Hz needs $\approx400/2=200$ taps.` },
-    { q: String.raw`How many multiply-accumulates per second does a 128-tap FIR need at $f_s=10$ MHz, and how many with symmetry folding?`, solution: String.raw`Direct: $128\times10^7=1.28\times10^9$ MAC/s. With symmetry folding: $\approx64\times10^7=6.4\times10^8$ MAC/s.` },
-    { q: String.raw`Verify stability: an FIR has taps $[0.5,\,1.2,\,-0.9,\,2.0]$. Is it stable?`, solution: String.raw`Yes — unconditionally. $\sum|h[n]|=0.5+1.2+0.9+2.0=4.6<\infty$, and all poles are at $z=0$. Tap magnitudes never affect FIR stability.` },
-    { q: String.raw`A symmetric 7-tap FIR has taps $b=[1,2,3,4,3,2,1]$ (unnormalized). Confirm linear phase and give the group delay.`, solution: String.raw`Taps satisfy $b_k=b_{6-k}$ (symmetric), so phase is linear. Group delay $=(N-1)/2=6/2=3$ samples.` }
+    { q: String.raw`A 65-tap linear-phase FIR runs at $f_s=1$ MHz. What is its group delay in samples and microseconds?`, solution: String.raw`<p><b>Formula.</b> $$ \tau_g=\frac{N-1}{2}\ \text{samples}=\frac{N-1}{2 f_s}\ \text{seconds} $$ where $N$ is the tap count and $f_s$ the sample rate; for a linear-phase FIR this delay is constant over all frequencies.</p>
+<p><b>Substitute.</b> $$ \tau_g=\frac{65-1}{2}=\frac{64}{2}\ \text{samples},\qquad t=\frac{32}{10^6\ \text{Hz}}. $$</p>
+<p><b>Compute.</b> $\tau_g=32$ samples $=32/10^6=32\ \mu\text{s}$.</p>
+<p><b>Explanation.</b> Every frequency is delayed by exactly 32 samples, so the waveform emerges undistorted 32 µs later. Half the filter length is pure latency — the price of linear phase.</p>` },
+    { q: String.raw`Design a low-pass FIR with cutoff $f_c=2$ kHz at $f_s=16$ kHz. Give the first few ideal (unwindowed) tap values around the center.`, solution: String.raw`<p><b>Formula.</b> $$ h[m]=2\frac{f_c}{f_s}\operatorname{sinc}\!\Big(2\tfrac{f_c}{f_s}\,m\Big),\qquad \operatorname{sinc}(x)=\frac{\sin(\pi x)}{\pi x} $$ where $m$ is the tap index measured from the centre.</p>
+<p><b>Substitute.</b> $2f_c/f_s=2(2000)/16000=0.25$, so $h[m]=0.25\,\operatorname{sinc}(0.25\,m)$. Evaluate at $m=0,\pm1,\pm2$.</p>
+<p><b>Compute.</b> $m=0$: $0.25\,\operatorname{sinc}(0)=0.25$. $m=\pm1$: $0.25\,\operatorname{sinc}(0.25)=0.25\times0.9003=0.225$. $m=\pm2$: $0.25\,\operatorname{sinc}(0.5)=0.25\times0.6366=0.159$.</p>
+<p><b>Explanation.</b> These are the ideal (infinite) sinc samples; a real design multiplies them by a window and shifts to be causal. The centre tap $0.25$ equals the fractional cutoff $f_c/f_s\times2$, as expected for the DC gain.</p>` },
+    { q: String.raw`Using the Kaiser estimate $N\approx(A-8)/(2.285\,\Delta\omega)+1$, find $N$ for $A=60$ dB and a transition of $\Delta\omega=0.1$ rad/sample.`, solution: String.raw`<p><b>Formula.</b> $$ N\approx\frac{A-8}{2.285\,\Delta\omega}+1 $$ where $A$ is the required stopband attenuation (dB) and $\Delta\omega$ the transition width (rad/sample).</p>
+<p><b>Substitute.</b> $$ N\approx\frac{60-8}{2.285\times0.1}+1=\frac{52}{0.2285}+1. $$</p>
+<p><b>Compute.</b> $52/0.2285=227.6$, so $N\approx227.6+1\approx229$ taps.</p>
+<p><b>Explanation.</b> Roughly 229 taps are needed for a 60 dB stopband and this transition width. Sanity check: $N$ scales linearly with attenuation and inversely with $\Delta\omega$ — deeper or sharper both cost taps.</p>` },
+    { q: String.raw`An FIR needs a transition width of 500 Hz. Roughly how many taps if 250 Hz needed 400 taps (same attenuation, same $f_s$)?`, solution: String.raw`<p><b>Formula.</b> $$ N\propto\frac{1}{\Delta f}\ \Rightarrow\ \frac{N_2}{N_1}=\frac{\Delta f_1}{\Delta f_2} $$ where tap count is inversely proportional to transition width $\Delta f$ at fixed attenuation.</p>
+<p><b>Substitute.</b> $$ N_2=N_1\frac{\Delta f_1}{\Delta f_2}=400\times\frac{250}{500}. $$</p>
+<p><b>Compute.</b> $N_2=400\times0.5=200$ taps.</p>
+<p><b>Explanation.</b> Relaxing the transition from 250 Hz to 500 Hz (twice as wide) halves the tap count. Equivalently, sharpening a filter is expensive: halving $\Delta f$ doubles the taps, MACs, and latency.</p>` },
+    { q: String.raw`How many multiply-accumulates per second does a 128-tap FIR need at $f_s=10$ MHz, and how many with symmetry folding?`, solution: String.raw`<p><b>Formula.</b> $$ \text{MAC/s}=N\,f_s,\qquad \text{(folded)}\approx\frac{N}{2}f_s $$ where each output needs $N$ multiply-accumulates, halved by symmetry folding for a linear-phase FIR.</p>
+<p><b>Substitute.</b> $$ \text{MAC/s}=128\times10^7,\qquad \text{folded}=64\times10^7. $$</p>
+<p><b>Compute.</b> Direct: $1.28\times10^9$ MAC/s. Folded: $6.4\times10^8$ MAC/s.</p>
+<p><b>Explanation.</b> Over a billion multiplies per second — long FIRs are compute-heavy at high sample rates. Symmetry folding adds the two mirror taps before multiplying, cutting the multiplier count in half.</p>` },
+    { q: String.raw`Verify stability: an FIR has taps $[0.5,\,1.2,\,-0.9,\,2.0]$. Is it stable?`, solution: String.raw`<p><b>Formula.</b> $$ \text{BIBO stable}\iff \sum_n|h[n]|<\infty $$ and for an FIR the sum has only $N$ finite terms, so it always converges (all poles at $z=0$).</p>
+<p><b>Substitute.</b> $$ \sum_n|h[n]|=|0.5|+|1.2|+|-0.9|+|2.0|. $$</p>
+<p><b>Compute.</b> $=0.5+1.2+0.9+2.0=4.6<\infty$.</p>
+<p><b>Explanation.</b> Yes — stable, unconditionally. The finite sum is bounded no matter how large the tap values are; FIR stability never depends on coefficient magnitudes, only on the response being finite in length.</p>` },
+    { q: String.raw`A symmetric 7-tap FIR has taps $b=[1,2,3,4,3,2,1]$ (unnormalized). Confirm linear phase and give the group delay.`, solution: String.raw`<p><b>Formula.</b> $$ b_k=b_{N-1-k}\ \Rightarrow\ \text{linear phase},\qquad \tau_g=\frac{N-1}{2}\ \text{samples} $$ where symmetry of the taps guarantees a constant group delay.</p>
+<p><b>Substitute.</b> Check symmetry: $b_0=b_6=1$, $b_1=b_5=2$, $b_2=b_4=3$, centre $b_3=4$. With $N=7$: $\tau_g=(7-1)/2$.</p>
+<p><b>Compute.</b> The taps satisfy $b_k=b_{6-k}$, so the phase is linear; $\tau_g=6/2=3$ samples.</p>
+<p><b>Explanation.</b> A symmetric odd-length filter is a Type I linear-phase FIR, delaying every frequency by exactly 3 samples — the centre tap's position. This is precisely why such filters preserve pulse shape.</p>` }
   ],
   realWorld: String.raw`<p>FIR filters dominate wherever waveform fidelity is non-negotiable. In digital modems the transmit <b>pulse-shaping</b> filter (root-raised-cosine) and the receiver's <b>matched filter</b> are linear-phase FIRs, chosen precisely because their constant group delay avoids adding inter-symbol interference. SDR <b>channelizers</b> and polyphase <b>decimation/interpolation</b> filters (e.g. in the digital front-ends of the AD9361 or on RFSoC FPGAs) are FIR, exploiting polyphase structure to run efficiently across sample-rate changes. Half-band FIRs (nearly half the taps are zero) are workhorses for 2:1 rate changes. Audio crossovers and measurement/anti-aliasing filters use linear-phase FIR to keep transients undistorted. The trade-off — many taps for a sharp cut — is accepted in these applications because the alternative (IIR phase distortion) would corrupt the very information the filter is meant to preserve.</p>`,
   related: ['iir-filters', 'convolution', 'sinc-function', 'pulse-shaping', 'matched-filter', 'z-transform']
@@ -364,7 +491,8 @@ $$ H(e^{j\omega})=e^{-j\omega M}\Big[b_M+\sum_{m=1}^{M}2b_{M+m}\cos(\omega m)\Bi
   category: 'Signals & Systems',
   tags: ['IIR', 'recursive', 'poles', 'stability', 'Butterworth', 'Chebyshev', 'elliptic', 'biquad'],
   summary: String.raw`An Infinite Impulse Response filter feeds past outputs back into the computation, giving a recursive difference equation whose transfer function $H(z)=B(z)/A(z)$ has poles that must lie inside the unit circle for stability.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 185" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-iir-filters" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
 <text x="30" y="55" fill="#e6edf3" text-anchor="middle">x[n]</text>
@@ -383,6 +511,43 @@ $$ H(e^{j\omega})=e^{-j\omega M}\Big[b_M+\sum_{m=1}^{M}2b_{M+m}\cos(\omega m)\Bi
 </svg>`,
     caption: String.raw`IIR structure: feed-forward inputs sum at $\Sigma$, then delayed, scaled past outputs ($z^{-1}\cdot a_k$) are fed back — the feedback loop that gives an infinite response and demands poles inside the unit circle.`,
   },
+  {
+    title: String.raw`Direct-Form-II biquad: one shared delay line, a/b paths`,
+    svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-iir-filters" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<text x="24" y="46" fill="#e6edf3" text-anchor="middle">x[n]</text>
+<circle cx="120" cy="42" r="14" fill="#1c232e" stroke="#ffa94d"/><text x="120" y="47" fill="#e6edf3" text-anchor="middle" font-size="13">Σ</text>
+<line x1="42" y1="42" x2="106" y2="42" stroke="#9aa7b5" marker-end="url(#arr2-iir-filters)"/>
+<line x1="134" y1="42" x2="420" y2="42" stroke="#9aa7b5" marker-end="url(#arr2-iir-filters)"/>
+<circle cx="440" cy="42" r="14" fill="#1c232e" stroke="#ffa94d"/><text x="440" y="47" fill="#e6edf3" text-anchor="middle" font-size="13">Σ</text>
+<line x1="454" y1="42" x2="520" y2="42" stroke="#9aa7b5" marker-end="url(#arr2-iir-filters)"/><text x="512" y="34" fill="#e6edf3" text-anchor="middle">y[n]</text>
+<rect x="240" y="74" width="80" height="28" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="280" y="93" fill="#e6edf3" text-anchor="middle" font-size="11">z⁻¹ (w1)</text>
+<rect x="240" y="128" width="80" height="28" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="280" y="147" fill="#e6edf3" text-anchor="middle" font-size="11">z⁻¹ (w2)</text>
+<line x1="280" y1="42" x2="280" y2="74" stroke="#9aa7b5" marker-end="url(#arr2-iir-filters)"/>
+<line x1="280" y1="102" x2="280" y2="128" stroke="#9aa7b5" marker-end="url(#arr2-iir-filters)"/>
+<line x1="240" y1="88" x2="150" y2="88" stroke="#b197fc"/><line x1="150" y1="88" x2="150" y2="56" stroke="#b197fc" marker-end="url(#arr2-iir-filters)"/><text x="180" y="84" fill="#b197fc" text-anchor="middle" font-size="10">−a₁</text>
+<line x1="320" y1="88" x2="410" y2="88" stroke="#63e6be"/><line x1="410" y1="88" x2="410" y2="56" stroke="#63e6be" marker-end="url(#arr2-iir-filters)"/><text x="372" y="84" fill="#63e6be" text-anchor="middle" font-size="10">b₁</text>
+<line x1="240" y1="142" x2="150" y2="142" stroke="#b197fc"/><line x1="150" y1="142" x2="150" y2="100" stroke="#b197fc"/><text x="180" y="138" fill="#b197fc" text-anchor="middle" font-size="10">−a₂</text>
+<line x1="320" y1="142" x2="410" y2="142" stroke="#63e6be"/><line x1="410" y1="142" x2="410" y2="100" stroke="#63e6be"/><text x="372" y="138" fill="#63e6be" text-anchor="middle" font-size="10">b₂</text>
+<text x="270" y="172" fill="#9aa7b5" text-anchor="middle" font-size="10">feedback (−aₖ, purple) and feed-forward (bₖ, green) share the SAME two delays</text>
+</svg>`,
+    caption: String.raw`Direct-Form-II biquad internals: a single pair of delay elements (state $w_1,w_2$) is shared between the feedback path (coefficients $-a_1,-a_2$) and the feed-forward path ($b_1,b_2$), minimizing storage — the canonical second-order building block.`,
+  },
+  {
+    title: String.raw`IIR design flow: Butterworth prototype → bilinear → H(z)`,
+    svg: String.raw`<svg viewBox="0 0 540 120" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-iir-filters" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="6" y="40" width="118" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="65" y="59" fill="#e6edf3" text-anchor="middle" font-size="11">analog prototype</text><text x="65" y="74" fill="#9aa7b5" text-anchor="middle" font-size="10">Butterworth H(s)</text>
+<rect x="146" y="40" width="110" height="46" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="201" y="59" fill="#e6edf3" text-anchor="middle" font-size="11">pre-warp edges</text><text x="201" y="74" fill="#9aa7b5" text-anchor="middle" font-size="9">Ω=2/T·tan(ω/2)</text>
+<rect x="278" y="40" width="118" height="46" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="337" y="59" fill="#e6edf3" text-anchor="middle" font-size="11">bilinear transform</text><text x="337" y="74" fill="#9aa7b5" text-anchor="middle" font-size="9">s=2/T·(1−z⁻¹)/(1+z⁻¹)</text>
+<rect x="418" y="40" width="114" height="46" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="475" y="59" fill="#e6edf3" text-anchor="middle" font-size="11">digital H(z)</text><text x="475" y="74" fill="#9aa7b5" text-anchor="middle" font-size="10">biquad cascade</text>
+<line x1="124" y1="63" x2="144" y2="63" stroke="#9aa7b5" marker-end="url(#arr3-iir-filters)"/>
+<line x1="256" y1="63" x2="276" y2="63" stroke="#9aa7b5" marker-end="url(#arr3-iir-filters)"/>
+<line x1="396" y1="63" x2="416" y2="63" stroke="#9aa7b5" marker-end="url(#arr3-iir-filters)"/>
+</svg>`,
+    caption: String.raw`Standard IIR design flow: start from a well-studied analog prototype $H(s)$ (e.g. Butterworth), pre-warp the critical band edges, apply the bilinear transform to get $H(z)$, and realize it as a numerically robust biquad cascade.`,
+  }
+  ],
   prerequisites: ['z-transform', 'laplace-transform', 'fir-filters', 'convolution'],
   intro: String.raw`<p>An <b>Infinite Impulse Response (IIR)</b> filter computes each output from a weighted sum of past <i>inputs</i> <b>and</b> past <i>outputs</i>. That feedback path is the whole story: it lets a handful of coefficients create a response that, in principle, rings on forever — an <i>infinite</i> impulse response. The same feedback that gives IIR its efficiency also gives it its dangers: poles that can escape the unit circle and make the filter unstable, and a phase response that is inherently nonlinear.</p>
 <p>The payoff is dramatic economy. A recursive filter of order 4–8 can achieve a transition sharpness that would demand a hundred or more FIR taps. IIR filters are the digital cousins of the classic analog prototypes — <b>Butterworth</b>, <b>Chebyshev</b>, <b>elliptic</b> — and are typically designed by warping an analog design into the digital domain with the <b>bilinear transform</b>. They are implemented as cascades of second-order <b>biquad</b> sections to keep the arithmetic well-conditioned. Choose IIR when computational efficiency, low order, and steep roll-off matter more than exact phase linearity — the mirror image of the FIR trade-off.</p>`,
@@ -430,7 +595,16 @@ $$ s=\frac{2}{T}\,\frac{1-z^{-1}}{1+z^{-1}}. $$
 <p>This conformal map sends the entire left half of the $s$-plane (stable analog region) into the interior of the unit circle (stable digital region), so <b>stability is preserved</b>. It also folds the infinite analog frequency axis into the finite digital range $[0,\pi)$, which introduces <b>frequency warping</b>: the relation between analog frequency $\Omega$ and digital frequency $\omega$ is $\Omega=(2/T)\tan(\omega/2)$. Designers <b>pre-warp</b> the critical band edges so they land on target after the mapping. (An alternative, <b>impulse invariance</b>, matches the impulse response but can alias — the bilinear transform avoids aliasing at the cost of warping.)</p>` },
     { h: 'Implementation: biquad (second-order) sections', html: String.raw`<p>A high-order IIR filter is almost never implemented as one big difference equation — the coefficient sensitivity is catastrophic and rounding can destabilize it. Instead it is factored into a <b>cascade of second-order sections</b> ("biquads"), each with its own conjugate pole pair and zero pair:</p>
 $$ H(z)=\prod_i \frac{b_{0i}+b_{1i}z^{-1}+b_{2i}z^{-2}}{1+a_{1i}z^{-1}+a_{2i}z^{-2}}. $$
-<p>Second-order sections keep each pole pair local, so coefficient quantization moves each pair only slightly and cannot easily push it outside the unit circle. Robust structures such as <b>Direct Form II transposed</b> minimize round-off noise and internal overflow. Ordering and scaling the sections (pairing poles with nearby zeros, sorting by peak gain) further controls dynamic range. This biquad-cascade form is the universal way IIR filters ship in DSP libraries and audio hardware.</p>` }
+<p>Second-order sections keep each pole pair local, so coefficient quantization moves each pair only slightly and cannot easily push it outside the unit circle. Robust structures such as <b>Direct Form II transposed</b> minimize round-off noise and internal overflow. Ordering and scaling the sections (pairing poles with nearby zeros, sorting by peak gain) further controls dynamic range. This biquad-cascade form is the universal way IIR filters ship in DSP libraries and audio hardware.</p>` },
+    { h: 'What you should now understand', html: String.raw`<div class="callout tip"><p>The IIR essentials, and how they mirror the FIR trade-offs:</p>
+<ul>
+<li><b>IIR uses feedback:</b> $y[n]=\sum_k b_k x[n-k]-\sum_{k\ge1}a_k y[n-k]$, giving a generally infinite impulse response and a rational $H(z)=B(z)/A(z)$.</li>
+<li><b>Stability is a pole condition:</b> every pole (root of $A(z)$) must lie strictly inside the unit circle; each pole contributes a mode $p^n$ that decays only if $|p|<1$.</li>
+<li><b>The reward is economy</b> — roughly an order of magnitude fewer coefficients than an equivalent FIR — because feedback places sharp poles cheaply.</li>
+<li><b>The price is nonlinear phase</b> (frequency-dependent group delay) and the risk that coefficient quantization moves a pole outside the circle.</li>
+<li><b>Design by analog prototype:</b> pick Butterworth/Chebyshev/elliptic/Bessel, pre-warp, apply the bilinear transform, and realize as a robust biquad cascade.</li>
+<li><b>Why it matters:</b> audio EQ, anti-alias filtering, notch/hum removal, and control compensators use IIR whenever compute and latency are tight and magnitude — not phase — is what counts.</li>
+</ul></div>` }
   ],
   keyPoints: [
     String.raw`IIR output uses feedback: $y[n]=\sum_k b_k x[n-k]-\sum_{k\ge1} a_k y[n-k]$ — past outputs re-enter the computation.`,
@@ -524,13 +698,34 @@ $$ \tau_g(\omega)=-\frac{d\phi}{d\omega}, \quad \text{varying with } \omega. $$
     { q: String.raw`In $H(z)=B(z)/A(z)$, the poles are:`, options: [String.raw`Roots of $B(z)$`, String.raw`Roots of $A(z)$`, String.raw`Always at $z=0$`, String.raw`On the unit circle`], answer: 1, explain: String.raw`Poles are denominator roots; zeros are numerator roots. FIR (denominator $z^{N-1}$) puts all poles at the origin.` }
   ],
   numericals: [
-    { q: String.raw`A first-order IIR filter is $y[n]=x[n]+0.9\,y[n-1]$. Find its pole and state whether it is stable.`, solution: String.raw`$H(z)=\dfrac{1}{1-0.9z^{-1}}$, pole at $z=0.9$. Since $|0.9|<1$, it is stable. Impulse response $h[n]=0.9^n u[n]$ decays.` },
-    { q: String.raw`For $y[n]=x[n]+1.2\,y[n-1]$, is the filter stable? What is the impulse response?`, solution: String.raw`Pole at $z=1.2$, $|1.2|>1$, so it is <b>unstable</b>. $h[n]=1.2^n u[n]$ grows without bound.` },
-    { q: String.raw`A conjugate pole pair sits at radius $r=0.95$, angle $\theta=\pi/4$. Give the biquad denominator coefficients $a_1,a_2$.`, solution: String.raw`$a_1=-2r\cos\theta=-2(0.95)(0.7071)=-1.343$. $a_2=r^2=0.9025$. Denominator: $1-1.343z^{-1}+0.9025z^{-2}$. Poles inside the circle ($r<1$) ⇒ stable.` },
-    { q: String.raw`Pre-warp a digital cutoff of $\omega_c=0.2\pi$ for a bilinear design with $T=1$. Find the analog design frequency $\Omega_c$.`, solution: String.raw`$\Omega_c=\dfrac{2}{T}\tan(\omega_c/2)=2\tan(0.1\pi)=2\tan(18^\circ)=2(0.3249)=0.6498$ rad/s.` },
-    { q: String.raw`A 6th-order elliptic IIR is factored into biquads. How many second-order sections are needed?`, solution: String.raw`$6/2=3$ biquad sections (three conjugate pole pairs), each a second-order stage.` },
-    { q: String.raw`Roughly compare coefficient counts: an FIR needs 120 taps for a spec that a Butterworth IIR meets at order 8. State the multiply saving per sample (direct forms).`, solution: String.raw`FIR: ~120 MACs/sample. IIR order 8 ≈ 4 biquads ≈ $4\times5=20$ MACs/sample. Saving ≈ $120/20=6\times$ fewer multiplies (plus far lower latency).` },
-    { q: String.raw`An IIR filter has poles at $z=0.8$ and $z=-0.6$ and a zero at $z=1$. Write $H(z)$ (gain 1 at DC-normalizable) and confirm stability.`, solution: String.raw`$H(z)=\dfrac{(1-z^{-1})}{(1-0.8z^{-1})(1+0.6z^{-1})}=\dfrac{1-z^{-1}}{1-0.2z^{-1}-0.48z^{-2}}$. Poles $0.8$ and $-0.6$ both have magnitude $<1$ ⇒ stable. The zero at $z=1$ gives a null at DC (a high-pass characteristic).` }
+    { q: String.raw`A first-order IIR filter is $y[n]=x[n]+0.9\,y[n-1]$. Find its pole and state whether it is stable.`, solution: String.raw`<p><b>Formula.</b> $$ H(z)=\frac{1}{1-a\,z^{-1}},\qquad \text{pole at }z=a,\quad \text{stable}\iff|a|<1 $$ where $a$ is the feedback coefficient.</p>
+<p><b>Substitute.</b> Here $a=0.9$, so $H(z)=\dfrac{1}{1-0.9z^{-1}}$ with a pole at $z=0.9$.</p>
+<p><b>Compute.</b> $|0.9|<1$, so the filter is <b>stable</b>; its impulse response is $h[n]=0.9^{\,n}u[n]$.</p>
+<p><b>Explanation.</b> The pole sits inside the unit circle, so the mode $0.9^n$ decays geometrically to zero. This is the classic one-pole leaky integrator / low-pass smoother.</p>` },
+    { q: String.raw`For $y[n]=x[n]+1.2\,y[n-1]$, is the filter stable? What is the impulse response?`, solution: String.raw`<p><b>Formula.</b> $$ H(z)=\frac{1}{1-a\,z^{-1}},\qquad h[n]=a^{\,n}u[n],\quad \text{stable}\iff|a|<1 $$ with feedback coefficient $a$.</p>
+<p><b>Substitute.</b> Here $a=1.2$, giving a pole at $z=1.2$ and $h[n]=1.2^{\,n}u[n]$.</p>
+<p><b>Compute.</b> $|1.2|>1$, so the filter is <b>unstable</b>; $h[n]=1.2^{\,n}u[n]$ grows without bound.</p>
+<p><b>Explanation.</b> A pole outside the unit circle makes the mode $1.2^n$ blow up, so any nonzero input drives the output to infinity. This is exactly the failure that coefficient rounding can trigger by nudging a near-circle pole outward.</p>` },
+    { q: String.raw`A conjugate pole pair sits at radius $r=0.95$, angle $\theta=\pi/4$. Give the biquad denominator coefficients $a_1,a_2$.`, solution: String.raw`<p><b>Formula.</b> $$ a_1=-2r\cos\theta,\qquad a_2=r^2 $$ for a conjugate pole pair at radius $r$ and angle $\theta$, giving denominator $1+a_1 z^{-1}+a_2 z^{-2}$.</p>
+<p><b>Substitute.</b> $$ a_1=-2(0.95)\cos(\pi/4)=-2(0.95)(0.7071),\qquad a_2=(0.95)^2. $$</p>
+<p><b>Compute.</b> $a_1=-1.343$ and $a_2=0.9025$, so the denominator is $1-1.343z^{-1}+0.9025z^{-2}$.</p>
+<p><b>Explanation.</b> Since $r=0.95<1$ the pair is inside the unit circle, so the biquad is stable. Note $a_2=r^2=|p|^2$ directly reads off the pole radius — a quick stability check on any biquad.</p>` },
+    { q: String.raw`Pre-warp a digital cutoff of $\omega_c=0.2\pi$ for a bilinear design with $T=1$. Find the analog design frequency $\Omega_c$.`, solution: String.raw`<p><b>Formula.</b> $$ \Omega_c=\frac{2}{T}\tan\!\Big(\frac{\omega_c}{2}\Big) $$ the pre-warp relation that corrects the bilinear transform's frequency warping, where $T$ is the sample period.</p>
+<p><b>Substitute.</b> $$ \Omega_c=\frac{2}{1}\tan\!\Big(\frac{0.2\pi}{2}\Big)=2\tan(0.1\pi). $$</p>
+<p><b>Compute.</b> $0.1\pi=18^\circ$ and $\tan(18^\circ)=0.3249$, so $\Omega_c=2(0.3249)=0.6498$ rad/s.</p>
+<p><b>Explanation.</b> Designing the analog prototype at $\Omega_c=0.6498$ rad/s makes the digital cutoff land exactly at $0.2\pi$ after the bilinear map. Skipping the pre-warp would place the cutoff at the wrong frequency.</p>` },
+    { q: String.raw`A 6th-order elliptic IIR is factored into biquads. How many second-order sections are needed?`, solution: String.raw`<p><b>Formula.</b> $$ \text{sections}=\frac{\text{order}}{2} $$ since each biquad realizes one conjugate pole pair (a second-order section).</p>
+<p><b>Substitute.</b> $$ \text{sections}=\frac{6}{2}. $$</p>
+<p><b>Compute.</b> $=3$ biquad sections.</p>
+<p><b>Explanation.</b> Three cascaded second-order stages handle the six poles (three conjugate pairs). Cascading biquads localizes coefficient sensitivity so rounding cannot easily push any pole outside the unit circle.</p>` },
+    { q: String.raw`Roughly compare coefficient counts: an FIR needs 120 taps for a spec that a Butterworth IIR meets at order 8. State the multiply saving per sample (direct forms).`, solution: String.raw`<p><b>Formula.</b> $$ \text{FIR MACs}\approx N,\qquad \text{IIR MACs}\approx 5\times\frac{\text{order}}{2} $$ where a direct-form FIR does $N$ MACs and each biquad does about 5 MACs.</p>
+<p><b>Substitute.</b> FIR: $\approx120$ MACs/sample. IIR order 8 $=4$ biquads: $4\times5=20$ MACs/sample.</p>
+<p><b>Compute.</b> Saving $=120/20=6\times$ fewer multiplies per sample.</p>
+<p><b>Explanation.</b> Feedback lets the IIR meet the same spec with roughly six times less arithmetic, plus far lower latency. The trade paid for it is nonlinear phase and the need to guard pole placement against quantization.</p>` },
+    { q: String.raw`An IIR filter has poles at $z=0.8$ and $z=-0.6$ and a zero at $z=1$. Write $H(z)$ (gain 1 at DC-normalizable) and confirm stability.`, solution: String.raw`<p><b>Formula.</b> $$ H(z)=\frac{\prod_i(1-z_i z^{-1})}{\prod_k(1-p_k z^{-1})},\qquad \text{stable}\iff|p_k|<1 $$ built from zeros $z_i$ and poles $p_k$.</p>
+<p><b>Substitute.</b> With zero at $z=1$ and poles at $0.8,-0.6$: $$ H(z)=\frac{1-z^{-1}}{(1-0.8z^{-1})(1+0.6z^{-1})}. $$</p>
+<p><b>Compute.</b> Expanding the denominator: $(1-0.8z^{-1})(1+0.6z^{-1})=1-0.2z^{-1}-0.48z^{-2}$, so $H(z)=\dfrac{1-z^{-1}}{1-0.2z^{-1}-0.48z^{-2}}$. Both poles ($0.8$ and $-0.6$) have magnitude $<1$, so it is <b>stable</b>.</p>
+<p><b>Explanation.</b> The zero at $z=1$ forces a null at DC ($\omega=0$), giving a high-pass character — a one-line way to build a DC blocker. Stability follows directly because every pole lies inside the unit circle.</p>` }
   ],
   realWorld: String.raw`<p>IIR filters are the efficient workhorses wherever compute and latency are tight and phase linearity is not sacred. Audio equalizers, tone controls, crossovers, and the biquad banks in every DAW and codec are IIR — a parametric EQ band is a single biquad. In RF and instrumentation, IIR filters implement steep anti-alias and anti-image filtering, DC blocking (a one-pole high-pass), and narrow resonant/notch filters (e.g. removing 50/60 Hz hum) with just a couple of coefficients. Control systems use IIR structures for PID and lead-lag compensators. Their low order means low delay, which matters in real-time feedback loops and active noise cancellation. The catch — nonlinear phase — is why data-communication pulse shaping and matched filtering stay with FIR, while magnitude-only tasks happily use IIR. In fixed-point DSP and FPGA/ASIC designs, IIR filters ship as scaled Direct-Form-II-transposed biquad cascades to guard against the pole-migration instability that finite word lengths would otherwise cause.</p>`,
   related: ['fir-filters', 'z-transform', 'laplace-transform', 'convolution', 'frequency-spectrum']

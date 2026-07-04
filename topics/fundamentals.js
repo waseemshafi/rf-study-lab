@@ -7,7 +7,8 @@ CONTENT.topics.push(
   tags: [ 'communication', 'signals', 'bandwidth', 'snr', 'shannon', 'modulation' ],
   summary: String.raw`A digital communication system trades bandwidth, power, and complexity to move information reliably through a noisy channel, bounded ultimately by the Shannon capacity limit.`,
   prerequisites: [ 'maxwell' ],
-  intro: String.raw`<p>Communication engineering is the discipline of transporting information from a source to a destination across an imperfect physical medium. Every link — a deep-space probe, a Wi-Fi router, a fiber backbone — can be reduced to the same canonical chain: a <em>source</em> produces information, a <em>transmitter</em> maps it onto a physical waveform, a <em>channel</em> distorts and corrupts that waveform, and a <em>receiver</em> attempts to recover the original message with minimum error.</p>
+  intro: String.raw`<p>Why does this topic exist? Because moving information across the real world is never free: the medium is noisy, the spectrum is finite, and power is limited. Without a common framework, every link — radio, fiber, cable — would be designed by trial and error with no way to know how close it comes to the best possible performance. This topic supplies that framework and the hard limit (Shannon capacity) that tells you when to stop optimizing.</p>
+<p>Communication engineering is the discipline of transporting information from a source to a destination across an imperfect physical medium. Every link — a deep-space probe, a Wi-Fi router, a fiber backbone — can be reduced to the same canonical chain: a <em>source</em> produces information, a <em>transmitter</em> maps it onto a physical waveform, a <em>channel</em> distorts and corrupts that waveform, and a <em>receiver</em> attempts to recover the original message with minimum error.</p>
 <p>The central tension of the field is that the channel is finite: it offers only so much bandwidth, tolerates only so much power, and injects unavoidable noise. The engineer's job is to spend bandwidth, power, and processing complexity wisely so that the delivered information rate and reliability meet the application's needs. This topic frames the vocabulary and the fundamental limits — signal-to-noise ratio, bandwidth, and the Shannon capacity — that every later topic refines.</p>`,
   sections: [
     {
@@ -50,7 +51,8 @@ $$ \frac{E_b}{N_0} = \frac{S}{N}\cdot\frac{B}{R_b} $$
     },
     {
       h: 'The Shannon capacity limit',
-      html: String.raw`<p>The crowning result of information theory is the <strong>Shannon–Hartley capacity</strong> for an additive white Gaussian noise (AWGN) channel:</p>
+      html: String.raw`<div class="callout tip"><strong>Intuition first:</strong> Think of the channel as a noisy ruler. Bandwidth sets how many independent measurements per second you can take (Nyquist); SNR sets how many distinct marks you can reliably read on each measurement. Multiply "measurements per second" by "bits per measurement" and you get a rate ceiling — that is exactly what the capacity formula below counts.</div>
+<p>Now that we have SNR and bandwidth as the two resources, the crowning result of information theory is the <strong>Shannon–Hartley capacity</strong> for an additive white Gaussian noise (AWGN) channel:</p>
 $$ C = B\log_2\!\left(1+\frac{S}{N}\right) \quad \text{bits/s} $$
 <p>$C$ is the maximum error-free information rate. Shannon proved that <em>for any rate $R < C$</em>, codes exist that drive the error probability arbitrarily close to zero; for $R > C$, reliable communication is impossible. This is an existence theorem — it promises the limit exists but not how to reach it. Modern LDPC and turbo codes operate within a fraction of a dB of it.</p>
 <p>Two regimes matter. <strong>Bandwidth-limited:</strong> with plenty of power, doubling bandwidth roughly doubles capacity. <strong>Power-limited:</strong> at low SNR, capacity grows only logarithmically with power, and the fundamental limit emerges: $E_b/N_0 \ge \ln 2 \approx -1.59$ dB, the Shannon limit below which no reliable communication is possible at any rate.</p>
@@ -64,6 +66,16 @@ $$ C = B\log_2\!\left(1+\frac{S}{N}\right) \quad \text{bits/s} $$
     {
       h: 'Duplexing and multiple access',
       html: String.raw`<p>Sharing a channel among two-way traffic and many users requires organizing the resource. <strong>Duplexing</strong> separates uplink and downlink: FDD uses different frequencies, TDD different time slots. <strong>Multiple access</strong> shares the medium among users: FDMA (frequency slots), TDMA (time slots), CDMA (orthogonal spreading codes), and OFDMA (subcarrier groups). Each partitions the fundamental resources — time, frequency, code, or space — that the capacity theorem quantifies.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<ul>
+<li><strong>The chain and where noise enters.</strong> Every link is source → encode → modulate → channel (noise here) → demodulate → decode → sink; source and channel coding can be designed separately.</li>
+<li><strong>The two quality metrics.</strong> SNR is bandwidth-dependent; $E_b/N_0 = (S/N)(B/R_b)$ is the bandwidth-independent metric you actually compare modulations against.</li>
+<li><strong>How bits map to bandwidth.</strong> $R_b = R_s\log_2 M$ packs more bits per symbol with higher-order modulation, while Nyquist plus roll-off $(1+\alpha)$ sets the bandwidth those symbols occupy.</li>
+<li><strong>The hard ceiling.</strong> $C = B\log_2(1+S/N)$ bounds error-free rate; more bandwidth helps linearly, more power only logarithmically, and $E_b/N_0$ can never fall below $-1.59$ dB.</li>
+<li><strong>Why it all connects.</strong> Bandwidth, power, and complexity are the three currencies you spend, and the capacity limit is the exchange rate — knowing it tells you which lever to pull for a given link.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -179,11 +191,26 @@ $$ C = B\log_2\!\left(1+\frac{S}{N}\right) \quad \text{bits/s} $$
     { q: String.raw`Spectral efficiency has units of:`, options: [ String.raw`bits/s`, String.raw`Hz`, String.raw`bits/s/Hz`, String.raw`dB` ], answer: 2, explain: String.raw`$\eta = R_b/B$ is bits per second per hertz.` }
   ],
   numericals: [
-    { q: String.raw`A link uses QPSK at 5 Mbaud with raised-cosine roll-off $\alpha=0.2$. Find the bit rate, occupied passband bandwidth, and spectral efficiency.`, solution: String.raw`<p>QPSK: $M=4$, so bits/symbol $=\log_2 4 = 2$.</p><p>Bit rate $R_b = R_s\log_2 M = 5\times10^6 \times 2 = 10$ Mbit/s.</p><p>Passband DSB bandwidth $B = R_s(1+\alpha) = 5\times10^6(1.2) = 6$ MHz.</p><p>Spectral efficiency $\eta = R_b/B = 10/6 \approx 1.67$ bits/s/Hz.</p>` },
-    { q: String.raw`Compute the Shannon capacity of a 20 MHz Wi-Fi channel at an SNR of 25 dB.`, solution: String.raw`<p>Convert SNR: $25$ dB $= 10^{2.5} \approx 316$ (linear).</p><p>$C = B\log_2(1+S/N) = 20\times10^6\log_2(317)$.</p><p>$\log_2(317) = \ln 317/\ln 2 = 5.759/0.693 \approx 8.31$.</p><p>$C \approx 20\times10^6 \times 8.31 \approx 166$ Mbit/s.</p>` },
-    { q: String.raw`A system requires $E_b/N_0 = 10$ dB, transmits at $R_b = 2$ Mbit/s in a noise bandwidth of 3 MHz. What SNR (dB) is needed?`, solution: String.raw`<p>$E_b/N_0 = (S/N)(B/R_b)$, so $S/N = (E_b/N_0)(R_b/B)$.</p><p>$E_b/N_0 = 10$ dB $= 10$ linear. $R_b/B = 2/3 = 0.667$.</p><p>$S/N = 10\times0.667 = 6.67$ linear $= 10\log_{10}(6.67) = 8.24$ dB.</p>` },
-    { q: String.raw`How much bandwidth is needed to achieve 100 Mbit/s error-free at an SNR of 10 dB?`, solution: String.raw`<p>SNR $=10$ dB $=10$ linear, so $\log_2(1+10)=\log_2 11 = 3.46$ bits/s/Hz.</p><p>$B = C/\eta_{max} = 100\times10^6 / 3.46 \approx 28.9$ MHz minimum.</p>` },
-    { q: String.raw`At the absolute Shannon limit, what SNR corresponds to a spectral efficiency approaching zero over 1 GHz of bandwidth carrying 10 Mbit/s?`, solution: String.raw`<p>$\eta = R_b/B = 10^7/10^9 = 0.01$ bits/s/Hz.</p><p>Required $E_b/N_0 = (2^\eta-1)/\eta = (2^{0.01}-1)/0.01 = (0.00696)/0.01 = 0.696 = -1.57$ dB, essentially the $\ln 2$ limit.</p><p>This shows that spreading a low rate over huge bandwidth lets you operate near the theoretical power floor.</p>` }
+    { q: String.raw`A link uses QPSK at 5 Mbaud with raised-cosine roll-off $\alpha=0.2$. Find the bit rate, occupied passband bandwidth, and spectral efficiency.`, solution: String.raw`<p><b>Formula.</b> $$ R_b = R_s\log_2 M, \qquad B = R_s(1+\alpha), \qquad \eta = \frac{R_b}{B} $$ where $R_s$ is the symbol (baud) rate, $M$ the constellation size, $\alpha$ the roll-off factor, $B$ the occupied passband (double-sideband) bandwidth, and $\eta$ the spectral efficiency.</p>
+<p><b>Substitute.</b> QPSK has $M=4$, so $\log_2 4 = 2$. $$ R_b = (5\times10^6)(2), \qquad B = (5\times10^6)(1+0.2), \qquad \eta = \frac{10\times10^6}{6\times10^6} $$</p>
+<p><b>Compute.</b> $R_b = 10$ Mbit/s; $B = 5\times10^6 \times 1.2 = 6$ MHz; $\eta = 10/6 \approx 1.67$ bits/s/Hz.</p>
+<p><b>Explanation.</b> Each QPSK symbol carries 2 bits, doubling the bit rate above the baud rate; the 20% excess bandwidth is the price of a realizable pulse shape. An $\eta$ of 1.67 bits/s/Hz is modest and robust — exactly what you expect from a low-order modulation chosen for reliability over raw throughput.</p>` },
+    { q: String.raw`Compute the Shannon capacity of a 20 MHz Wi-Fi channel at an SNR of 25 dB.`, solution: String.raw`<p><b>Formula.</b> $$ C = B\log_2\!\left(1+\frac{S}{N}\right) $$ where $C$ is the channel capacity (bits/s), $B$ the bandwidth (Hz), and $S/N$ the linear signal-to-noise ratio. The SNR must first be converted from dB via $S/N = 10^{\mathrm{SNR_{dB}}/10}$.</p>
+<p><b>Substitute.</b> $25$ dB $= 10^{2.5} \approx 316$ (linear). $$ C = 20\times10^6 \cdot \log_2(1+316) = 20\times10^6 \cdot \log_2(317) $$</p>
+<p><b>Compute.</b> $\log_2(317) = \ln 317/\ln 2 = 5.759/0.693 \approx 8.31$, so $C \approx 20\times10^6 \times 8.31 \approx 166$ Mbit/s.</p>
+<p><b>Explanation.</b> This is the theoretical ceiling — no code can beat it on this channel. Real Wi-Fi throughput on a 20 MHz channel tops out well below this (around 100 Mbit/s at best) because of framing overhead, guard intervals, and practical modulation-and-coding limits, but the capacity tells you how much headroom the physics still allows.</p>` },
+    { q: String.raw`A system requires $E_b/N_0 = 10$ dB, transmits at $R_b = 2$ Mbit/s in a noise bandwidth of 3 MHz. What SNR (dB) is needed?`, solution: String.raw`<p><b>Formula.</b> Starting from $\dfrac{E_b}{N_0} = \dfrac{S}{N}\cdot\dfrac{B}{R_b}$, rearrange for the SNR: $$ \frac{S}{N} = \frac{E_b}{N_0}\cdot\frac{R_b}{B} $$ where $E_b/N_0$ is the energy-per-bit to noise-density ratio, $R_b$ the bit rate, and $B$ the noise bandwidth.</p>
+<p><b>Substitute.</b> $E_b/N_0 = 10$ dB $= 10$ (linear); $R_b/B = 2/3 = 0.667$. $$ \frac{S}{N} = 10 \times 0.667 $$</p>
+<p><b>Compute.</b> $S/N = 6.67$ (linear) $= 10\log_{10}(6.67) = 8.24$ dB.</p>
+<p><b>Explanation.</b> The required SNR is lower than $E_b/N_0$ because the signal is spread over a bandwidth (3 MHz) wider than its bit rate (2 Mbit/s), so noise power is collected over more hertz than each bit "needs." When $B > R_b$ the SNR requirement drops; this is the same bandwidth-spreading effect that lets spread-spectrum systems tolerate very low SNR.</p>` },
+    { q: String.raw`How much bandwidth is needed to achieve 100 Mbit/s error-free at an SNR of 10 dB?`, solution: String.raw`<p><b>Formula.</b> Invert the Shannon capacity, using the maximum spectral efficiency $\eta_{max} = \log_2(1+S/N)$: $$ B = \frac{C}{\eta_{max}} = \frac{C}{\log_2(1+S/N)} $$ where $C$ is the target error-free rate and $S/N$ the linear SNR.</p>
+<p><b>Substitute.</b> SNR $=10$ dB $=10$ (linear), so $\eta_{max} = \log_2(1+10) = \log_2 11$. $$ B = \frac{100\times10^6}{\log_2 11} $$</p>
+<p><b>Compute.</b> $\log_2 11 = 3.46$ bits/s/Hz, so $B = 100\times10^6/3.46 \approx 28.9$ MHz (minimum).</p>
+<p><b>Explanation.</b> This is the least bandwidth that could carry 100 Mbit/s at this SNR; a real system needs more because it cannot reach the Shannon bound. The result shows the trade you can always make — if bandwidth is scarce, raise the SNR (more power or gain) to shrink the required band, and vice versa.</p>` },
+    { q: String.raw`At the absolute Shannon limit, what SNR corresponds to a spectral efficiency approaching zero over 1 GHz of bandwidth carrying 10 Mbit/s?`, solution: String.raw`<p><b>Formula.</b> $$ \eta = \frac{R_b}{B}, \qquad \frac{E_b}{N_0} = \frac{2^\eta - 1}{\eta} $$ where $\eta$ is the spectral efficiency and $E_b/N_0$ the minimum energy-per-bit ratio needed to support it (from $\eta = \log_2(1+\eta\,E_b/N_0)$).</p>
+<p><b>Substitute.</b> $$ \eta = \frac{10\times10^6}{1\times10^9} = 0.01, \qquad \frac{E_b}{N_0} = \frac{2^{0.01}-1}{0.01} $$</p>
+<p><b>Compute.</b> $2^{0.01} = 1.00696$, so $E_b/N_0 = 0.00696/0.01 = 0.696 = 10\log_{10}(0.696) = -1.57$ dB — essentially the $\ln 2 = -1.59$ dB limit.</p>
+<p><b>Explanation.</b> Spreading a low rate over enormous bandwidth drives $\eta\to 0$, which is exactly the regime where the required $E_b/N_0$ bottoms out at $\ln 2$. This is why bandwidth-rich, power-starved links (deep space) operate near the absolute Shannon floor: they buy the last dB of power efficiency by spending bandwidth.</p>` }
   ],
   realWorld: String.raw`<p>Deep-space missions live at the Shannon limit: the Mars rovers and Voyager probes use powerful concatenated and turbo codes to communicate at just a fraction of a dB above the theoretical $E_b/N_0$ floor, trading enormous bandwidth and time for reliability under crushing path loss. Every fraction of a dB of coding gain translates directly into more science data returned or a smaller, cheaper dish.</p>
 <p>Terrestrially, the same theory governs why your phone drops from 256-QAM to QPSK as you walk away from a cell tower: the modulation order is dynamically reduced to keep the constellation points separable as SNR falls, trading throughput for reliability — an explicit walk along the capacity curve. Wi-Fi 6 and 5G NR both implement dozens of such modulation-and-coding-scheme (MCS) steps to track the instantaneous channel.</p>`,
@@ -212,7 +239,8 @@ $$ C = B\log_2\!\left(1+\frac{S}{N}\right) \quad \text{bits/s} $$
     },
     {
       h: 'Thermal noise and the kTB result',
-      html: String.raw`<p>A resistor $R$ at temperature $T$ (kelvin) produces an open-circuit noise voltage with mean-square value (Nyquist's theorem):</p>
+      html: String.raw`<div class="callout tip"><strong>Intuition first:</strong> Heat is jiggling motion. In a resistor, that jiggle randomly pushes electrons back and forth, and a randomly moving charge is a tiny random current — noise. The hotter the resistor and the wider the band you listen over, the more of this random power you collect. That single sentence is the whole story; the algebra below just makes it exact and, surprisingly, shows the resistance value drops out entirely.</div>
+<p>A resistor $R$ at temperature $T$ (kelvin) produces an open-circuit noise voltage with mean-square value (Nyquist's theorem):</p>
 $$ \overline{v_n^2} = 4kTRB $$
 <p>where $k = 1.38\times10^{-23}$ J/K is Boltzmann's constant and $B$ is the bandwidth. When this noisy resistor is connected to a matched load $R$, the voltage across the load is $v_n/2$, so the delivered power is $\overline{v_n^2}/(4R)$:</p>
 $$ N = \frac{\overline{v_n^2}}{4R} = \frac{4kTRB}{4R}\ \Rightarrow\ N = kTB $$
@@ -255,6 +283,17 @@ $$ N_{dBm} = -174 + 10\log_{10}(B_{Hz}) $$
     {
       h: 'Engineering implications',
       html: String.raw`<p>Noise dictates the receiver <strong>sensitivity</strong> — the weakest signal that yields an acceptable SNR or BER. Since the thermal floor is fixed by physics, the only levers are (1) reduce bandwidth to the minimum the signal needs, (2) minimize added noise (low noise figure front-end), (3) increase signal energy via coding gain, processing gain, or antenna gain, and (4) cool the front end (cryogenic receivers). Every dB of noise you fail to control costs a dB of link margin — equivalently, range, data rate, or transmit power.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<ul>
+<li><strong>Why noise is irreducible.</strong> Unlike interference or distortion, thermal noise comes from the heat of matter itself — you can lower it but never remove it.</li>
+<li><strong>The one formula to know.</strong> Available thermal noise power is $N = kTB$, independent of resistance, giving the reference $-174$ dBm/Hz at 290 K and the floor $-174 + 10\log_{10}B$ in any band.</li>
+<li><strong>Why the AWGN model is legitimate.</strong> Many independent electrons make the amplitude Gaussian (Central Limit Theorem), and a delta-like autocorrelation makes the spectrum white (Wiener–Khinchin).</li>
+<li><strong>The factor-of-two discipline.</strong> One-sided $N_0 = kT$ versus two-sided $N_0/2$ both integrate to $N_0 B$ — mixing them up is a 3 dB error.</li>
+<li><strong>Other noise types and their place.</strong> Shot noise $2qI_{DC}B$ where DC current crosses junctions; flicker $1/f$ near DC and in oscillators; thermal dominates the RF background.</li>
+<li><strong>How to fight it.</strong> Narrow $B$, lower NF, add gain/coding, or cool the front end — every uncontrolled dB of noise is a dB of lost range or rate.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -301,6 +340,26 @@ $$ N_{dBm} = -174 + 10\log_{10}(B_{Hz}) $$
 <text x="430" y="45" text-anchor="middle" fill="#ff6b6b">white noise waveform</text>
 </g></svg>`,
       caption: 'AWGN: Gaussian amplitude distribution (left) and a broadband, uncorrelated time waveform (right).'
+    },
+    {
+      title: String.raw`noise sources into receiver`,
+      svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-noise" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<g fill="#e6edf3" font-size="10" text-anchor="middle">
+<rect x="10" y="20" width="120" height="34" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="70" y="34">Thermal kTB</text><text x="70" y="48" font-size="8" fill="#9aa7b5">resistors, antenna</text>
+<rect x="10" y="70" width="120" height="34" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="70" y="84">Shot 2qI_DC B</text><text x="70" y="98" font-size="8" fill="#9aa7b5">junctions</text>
+<rect x="10" y="120" width="120" height="34" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="70" y="134">Flicker 1/f</text><text x="70" y="148" font-size="8" fill="#9aa7b5">devices near DC</text>
+<circle cx="250" cy="87" r="22" fill="#1c232e" stroke="#b197fc"/><text x="250" y="91" font-size="16">&#931;</text>
+<rect x="330" y="68" width="90" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="375" y="86">Receiver</text><text x="375" y="99" font-size="8" fill="#9aa7b5">(adds NF)</text>
+<rect x="450" y="68" width="80" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="490" y="86">Detect</text><text x="490" y="99" font-size="8" fill="#9aa7b5">SNR out</text>
+<line x1="130" y1="37" x2="228" y2="78" stroke="#9aa7b5" marker-end="url(#arr3-noise)"/>
+<line x1="130" y1="87" x2="226" y2="87" stroke="#9aa7b5" marker-end="url(#arr3-noise)"/>
+<line x1="130" y1="137" x2="228" y2="97" stroke="#9aa7b5" marker-end="url(#arr3-noise)"/>
+<line x1="272" y1="87" x2="328" y2="87" stroke="#9aa7b5" marker-end="url(#arr3-noise)"/>
+<line x1="420" y1="88" x2="448" y2="88" stroke="#9aa7b5" marker-end="url(#arr3-noise)"/>
+<text x="250" y="130" font-size="8" fill="#9aa7b5">powers add (linear)</text>
+</g></svg>`,
+      caption: String.raw`Independent noise sources add in power at the receiver input, setting the SNR the detector must work with.`
     }
   ],
   equations: [
@@ -366,11 +425,26 @@ $$ N_{dBm} = -174 + 10\log_{10}(B_{Hz}) $$
     { q: String.raw`A cryogenically cooled LNA improves sensitivity because:`, options: [ String.raw`It increases bandwidth`, String.raw`Lower T lowers $kTB$ noise`, String.raw`It removes shot noise entirely`, String.raw`It increases gain to infinity` ], answer: 1, explain: String.raw`Since $N=kTB$, reducing physical temperature directly reduces the thermal noise floor.` }
   ],
   numericals: [
-    { q: String.raw`Find the RMS thermal noise voltage across a 1 MΩ resistor at 300 K over a 10 kHz bandwidth.`, solution: String.raw`<p>$\overline{v_n^2}=4kTRB = 4(1.38\times10^{-23})(300)(10^6)(10^4)$.</p><p>$= 4\times1.38\times3\times10^{-23+2+6+4} = 16.56\times10^{-11} = 1.656\times10^{-10}\ \text{V}^2$.</p><p>$v_{rms} = \sqrt{1.656\times10^{-10}} = 1.29\times10^{-5}$ V $= 12.9\ \mu$V.</p>` },
-    { q: String.raw`What is the thermal noise power (dBm) in a 20 MHz Wi-Fi channel at 290 K?`, solution: String.raw`<p>$N = -174 + 10\log_{10}(20\times10^6)$.</p><p>$10\log_{10}(2\times10^7) = 10(7.301) = 73.0$ dB.</p><p>$N = -174 + 73 = -101$ dBm.</p>` },
-    { q: String.raw`A photodiode carries 1 mA DC. Find the shot-noise current in a 1 MHz bandwidth ($q=1.6\times10^{-19}$ C).`, solution: String.raw`<p>$\overline{i_n^2}=2qI_{DC}B = 2(1.6\times10^{-19})(10^{-3})(10^6) = 3.2\times10^{-16}\ \text{A}^2$.</p><p>$i_{rms}=\sqrt{3.2\times10^{-16}} = 1.79\times10^{-8}$ A $= 17.9$ nA.</p>` },
-    { q: String.raw`Convert a noise temperature of 75 K to a noise factor and noise figure.`, solution: String.raw`<p>$F = 1 + T_e/T_0 = 1 + 75/290 = 1.259$.</p><p>$NF = 10\log_{10}(1.259) = 1.0$ dB.</p>` },
-    { q: String.raw`A receiver has a 3 MHz bandwidth. If its input SNR must be at least 12 dB for the required BER, what is the minimum signal power at the antenna assuming a noiseless receiver at 290 K?`, solution: String.raw`<p>Noise floor $N = -174 + 10\log_{10}(3\times10^6) = -174 + 64.77 = -109.2$ dBm.</p><p>Minimum signal $S = N + \text{SNR} = -109.2 + 12 = -97.2$ dBm.</p><p>(A real receiver adds its noise figure to this floor.)</p>` }
+    { q: String.raw`Find the RMS thermal noise voltage across a 1 MΩ resistor at 300 K over a 10 kHz bandwidth.`, solution: String.raw`<p><b>Formula.</b> Nyquist's open-circuit thermal-noise voltage: $$ \overline{v_n^2} = 4kTRB, \qquad v_{rms} = \sqrt{\overline{v_n^2}} $$ where $k = 1.38\times10^{-23}$ J/K is Boltzmann's constant, $T$ the temperature (K), $R$ the resistance ($\Omega$), and $B$ the bandwidth (Hz).</p>
+<p><b>Substitute.</b> $$ \overline{v_n^2} = 4(1.38\times10^{-23})(300)(10^6)(10^4) $$</p>
+<p><b>Compute.</b> $4\times1.38\times3 = 16.56$ and the exponents sum to $-23+2+6+4 = -13$, giving $\overline{v_n^2} = 16.56\times10^{-13} = 1.656\times10^{-10}\ \text{V}^2$. Then $v_{rms} = \sqrt{1.656\times10^{-10}} = 1.29\times10^{-5}$ V $= 12.9\ \mu$V.</p>
+<p><b>Explanation.</b> Even a passive resistor sitting on the bench generates microvolts of noise — this is the fundamental floor a high-impedance sensor front-end must beat. Note the noise voltage scales as $\sqrt{R}$, which is why high-value resistors (megohms) are noisy and low-impedance nodes are quieter.</p>` },
+    { q: String.raw`What is the thermal noise power (dBm) in a 20 MHz Wi-Fi channel at 290 K?`, solution: String.raw`<p><b>Formula.</b> $$ N_{dBm} = -174 + 10\log_{10}(B_{Hz}) $$ where $-174$ dBm/Hz is the room-temperature ($T_0 = 290$ K) thermal noise density $kT_0$ and $B$ is the bandwidth in Hz.</p>
+<p><b>Substitute.</b> $$ N = -174 + 10\log_{10}(20\times10^6) $$</p>
+<p><b>Compute.</b> $10\log_{10}(2\times10^7) = 10(7.301) = 73.0$ dB, so $N = -174 + 73 = -101$ dBm.</p>
+<p><b>Explanation.</b> This $-101$ dBm is the noiseless-receiver floor for a 20 MHz channel; a real Wi-Fi front-end adds its noise figure (a few dB) on top. It anchors the sensitivity budget — any received signal must sit a required SNR above this to be demodulated.</p>` },
+    { q: String.raw`A photodiode carries 1 mA DC. Find the shot-noise current in a 1 MHz bandwidth ($q=1.6\times10^{-19}$ C).`, solution: String.raw`<p><b>Formula.</b> $$ \overline{i_n^2} = 2qI_{DC}B, \qquad i_{rms} = \sqrt{\overline{i_n^2}} $$ where $q = 1.6\times10^{-19}$ C is the electron charge, $I_{DC}$ the mean current, and $B$ the bandwidth.</p>
+<p><b>Substitute.</b> $$ \overline{i_n^2} = 2(1.6\times10^{-19})(10^{-3})(10^6) $$</p>
+<p><b>Compute.</b> $\overline{i_n^2} = 3.2\times10^{-16}\ \text{A}^2$, so $i_{rms} = \sqrt{3.2\times10^{-16}} = 1.79\times10^{-8}$ A $= 17.9$ nA.</p>
+<p><b>Explanation.</b> Shot noise grows with the DC current, so unlike thermal noise you cannot beat it by cooling — you must reduce the current or increase the signal. In photodetectors this sets the shot-noise-limited sensitivity that defines the best achievable SNR at a given optical power.</p>` },
+    { q: String.raw`Convert a noise temperature of 75 K to a noise factor and noise figure.`, solution: String.raw`<p><b>Formula.</b> $$ F = 1 + \frac{T_e}{T_0}, \qquad NF = 10\log_{10}F $$ where $T_e$ is the equivalent noise temperature, $T_0 = 290$ K the reference, $F$ the noise factor (linear), and $NF$ the noise figure (dB).</p>
+<p><b>Substitute.</b> $$ F = 1 + \frac{75}{290}, \qquad NF = 10\log_{10}(1.259) $$</p>
+<p><b>Compute.</b> $F = 1 + 0.259 = 1.259$; $NF = 10\log_{10}(1.259) = 1.0$ dB.</p>
+<p><b>Explanation.</b> A 75 K noise temperature corresponds to a very good 1.0 dB noise figure — the kind of number a decent LNA achieves. Engineers prefer $T_e$ for low-noise parts because "75 K" resolves differences that "1.0 dB" blurs; both describe the same added noise.</p>` },
+    { q: String.raw`A receiver has a 3 MHz bandwidth. If its input SNR must be at least 12 dB for the required BER, what is the minimum signal power at the antenna assuming a noiseless receiver at 290 K?`, solution: String.raw`<p><b>Formula.</b> $$ N = -174 + 10\log_{10}(B_{Hz}), \qquad S_{min} = N + \mathrm{SNR}_{min} $$ where $N$ is the thermal noise floor in the band, and $S_{min}$ the weakest signal that still meets the required SNR.</p>
+<p><b>Substitute.</b> $$ N = -174 + 10\log_{10}(3\times10^6), \qquad S_{min} = N + 12 $$</p>
+<p><b>Compute.</b> $10\log_{10}(3\times10^6) = 64.77$ dB, so $N = -174 + 64.77 = -109.2$ dBm; then $S_{min} = -109.2 + 12 = -97.2$ dBm.</p>
+<p><b>Explanation.</b> This is the best-case sensitivity — a perfect, noiseless receiver. A real receiver adds its noise figure directly to the $-109.2$ dBm floor, so every dB of NF costs a dB of sensitivity. The calculation shows why bandwidth discipline matters: halving $B$ would lower the floor by 3 dB and improve sensitivity by the same.</p>` }
   ],
   realWorld: String.raw`<p>Radio astronomy pushes noise engineering to its limit: receivers for facilities like ALMA and the Square Kilometre Array are cooled to a few kelvin so that $kTB$ shrinks enough to detect signals from galaxies billions of light-years away — signals whose total collected energy over decades of observation is less than that of a falling snowflake. Every kelvin of physical temperature in the front end is a measurable loss of scientific reach.</p>
 <p>In consumer electronics, the $-174$ dBm/Hz floor sets the hard limit on smartphone receiver sensitivity. Cellular standards specify reference sensitivity levels (e.g. around $-100$ dBm for LTE) computed directly from $kTB$ plus the modem's noise figure plus the required SNR. When you see a "bars" indicator, it is ultimately reporting how far your received signal sits above this thermodynamic floor.</p>`,
@@ -395,7 +469,8 @@ $$ P = \int_{-\infty}^{\infty} S_x(f)\,df $$
     },
     {
       h: 'Formal definition via a limit',
-      html: String.raw`<p>For a power signal we cannot Fourier-transform $x(t)$ directly, so we truncate it to a window of length $T$, transform that, normalize by $T$, and take the limit (and, for random signals, the expectation):</p>
+      html: String.raw`<div class="callout tip"><strong>Intuition first:</strong> A never-ending noise signal has infinite total energy, so its ordinary Fourier transform blows up. The fix is common sense: look at a finite window, measure the power in each frequency bin over that window, then let the window grow. Averaging over many such windows steadies the estimate. The limit below is just this "window, measure, average, repeat" recipe written formally.</div>
+<p>For a power signal we cannot Fourier-transform $x(t)$ directly, so we truncate it to a window of length $T$, transform that, normalize by $T$, and take the limit (and, for random signals, the expectation):</p>
 $$ S_x(f) = \lim_{T\to\infty} \frac{1}{T}\, E\big[\,|X_T(f)|^2\,\big] $$
 <p>where $X_T(f)$ is the Fourier transform of the windowed segment $x_T(t)$. The $1/T$ normalization converts energy in the window to power; the expectation averages over the ensemble of the random process. This is the periodogram in the limit — the theoretical basis for practical Welch/averaged-periodogram estimators.</p>`
     },
@@ -432,6 +507,16 @@ $$ S_y(f) = |H(f)|^2\, S_x(f) $$
     {
       h: 'One-sided vs two-sided and dB conventions',
       html: String.raw`<p>As with noise, PSD comes in two-sided ($S_x(f)$ over all $f$, symmetric for real signals) and one-sided ($G_x(f) = 2S_x(f)$ for $f\ge0$) forms. Total power is the same. Engineering practice uses one-sided when reporting instrument data (positive frequencies only) and two-sided in theoretical derivations. Log conventions: dBm/Hz for absolute power density, dBc/Hz for density relative to a carrier (used for phase noise), and dB/Hz generically.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<ul>
+<li><strong>What PSD is for.</strong> It describes how power is spread over frequency (W/Hz) for signals that have no ordinary Fourier transform; integrating it recovers total power.</li>
+<li><strong>The central bridge.</strong> Wiener–Khinchin makes PSD and autocorrelation a Fourier pair, so you can work in whichever domain — time or frequency — is easier and translate freely.</li>
+<li><strong>Two workhorse rules.</strong> White noise ↔ flat PSD (delta autocorrelation), and through an LTI filter the PSD scales by $|H(f)|^2$ — the basis of noise-bandwidth and matched-filter analysis.</li>
+<li><strong>Digital signal spectra.</strong> Random NRZ has a $\mathrm{sinc}^2$ PSD with nulls at multiples of the bit rate, explaining why raw data is wideband and why pulse shaping is needed.</li>
+<li><strong>Estimation in practice.</strong> The raw periodogram is too noisy; Welch/Bartlett averaging trades resolution for variance, and any instrument reading must be normalized to 1 Hz (mind the RBW) before comparing.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -480,6 +565,25 @@ $$ S_y(f) = |H(f)|^2\, S_x(f) $$
 <line x1="400" y1="160" x2="400" y2="165" stroke="#9aa7b5"/><text x="405" y="178" text-anchor="middle" fill="#9aa7b5" font-size="9">2/Tb</text>
 </g></svg>`,
       caption: 'PSD of a random NRZ binary stream: a sinc² shape with spectral nulls at integer multiples of the bit rate.'
+    },
+    {
+      title: String.raw`Welch PSD estimator chain`,
+      svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-psd" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<g fill="#e6edf3" font-size="10" text-anchor="middle">
+<rect x="8" y="55" width="86" height="44" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="51" y="74">Signal x(t)</text><text x="51" y="88" font-size="8" fill="#9aa7b5">segment</text>
+<rect x="118" y="55" width="86" height="44" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="161" y="74">Window</text><text x="161" y="88" font-size="8" fill="#9aa7b5">Hann, overlap</text>
+<rect x="228" y="55" width="86" height="44" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="271" y="78">FFT</text>
+<rect x="338" y="55" width="86" height="44" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="381" y="74">|X(f)|&#178;/T</text><text x="381" y="88" font-size="8" fill="#9aa7b5">periodogram</text>
+<rect x="448" y="55" width="86" height="44" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="491" y="74">Average</text><text x="491" y="88" font-size="8" fill="#9aa7b5">S_x(f) est.</text>
+<line x1="94" y1="77" x2="116" y2="77" stroke="#9aa7b5" marker-end="url(#arr3-psd)"/>
+<line x1="204" y1="77" x2="226" y2="77" stroke="#9aa7b5" marker-end="url(#arr3-psd)"/>
+<line x1="314" y1="77" x2="336" y2="77" stroke="#9aa7b5" marker-end="url(#arr3-psd)"/>
+<line x1="424" y1="77" x2="446" y2="77" stroke="#9aa7b5" marker-end="url(#arr3-psd)"/>
+<path d="M491,99 C491,125 271,125 271,101" fill="none" stroke="#9aa7b5" stroke-dasharray="3 3" marker-end="url(#arr3-psd)"/>
+<text x="381" y="140" font-size="8" fill="#9aa7b5">loop over segments &#8594; lower variance</text>
+</g></svg>`,
+      caption: String.raw`Welch estimator: window overlapping segments, square each FFT, then average periodograms to cut variance.`
     }
   ],
   equations: [
@@ -545,11 +649,26 @@ $$ S_y(f) = |H(f)|^2\, S_x(f) $$
     { q: String.raw`Which time-domain feature corresponds to a narrow (low-frequency) PSD?`, options: [ String.raw`rapid decorrelation`, String.raw`a broad autocorrelation`, String.raw`a delta autocorrelation`, String.raw`high amplitude` ], answer: 1, explain: String.raw`Slowly varying, highly correlated signals have broad $R_x$ and narrow spectra.` }
   ],
   numericals: [
-    { q: String.raw`White noise with two-sided PSD $N_0/2 = 10^{-20}$ W/Hz passes through an ideal bandpass filter of bandwidth 5 MHz (unity gain). Find the output noise power.`, solution: String.raw`<p>One-sided $N_0 = 2\times10^{-20}$ W/Hz. Output power $= N_0 B = 2\times10^{-20}\times5\times10^6 = 10^{-13}$ W.</p><p>In dBm: $10\log_{10}(10^{-13}/10^{-3}) = 10\log_{10}(10^{-10}) = -100$ dBm.</p>` },
-    { q: String.raw`A first-order RC lowpass has $|H(f)|^2 = 1/(1+(f/f_c)^2)$ with $f_c = 1$ MHz. Find its equivalent noise bandwidth.`, solution: String.raw`<p>$B_N = \int_0^\infty \frac{df}{1+(f/f_c)^2} = f_c\int_0^\infty\frac{dx}{1+x^2} = f_c\cdot\frac{\pi}{2}$.</p><p>$B_N = \frac{\pi}{2}\times1\ \text{MHz} = 1.571$ MHz.</p><p>The noise bandwidth of a one-pole filter is $\pi/2 \approx 1.57$ times its 3 dB bandwidth.</p>` },
-    { q: String.raw`A 2 Mbit/s polar NRZ signal has amplitude $A=1$ V over $50\,\Omega$. At what frequencies do the first two spectral nulls occur?`, solution: String.raw`<p>Bit period $T_b = 1/(2\times10^6) = 0.5\ \mu$s.</p><p>Nulls at $f=n/T_b = n\times2$ MHz.</p><p>First null: 2 MHz; second null: 4 MHz.</p>` },
-    { q: String.raw`A spectrum analyzer set to RBW = 100 kHz reads a noise floor of $-90$ dBm. What is the noise PSD in dBm/Hz?`, solution: String.raw`<p>Subtract $10\log_{10}(\text{RBW}) = 10\log_{10}(10^5) = 50$ dB.</p><p>PSD $= -90 - 50 = -140$ dBm/Hz.</p><p>(This is 34 dB above the ideal $-174$ floor, indicating instrument/front-end noise contributions.)</p>` },
-    { q: String.raw`A WSS process has autocorrelation $R_x(\tau) = 4e^{-2|\tau|}$. Find its PSD and total power.`, solution: String.raw`<p>The Fourier transform of $e^{-a|\tau|}$ is $\frac{2a}{a^2+(2\pi f)^2}$. With $a=2$: $S_x(f) = 4\cdot\frac{2(2)}{4+(2\pi f)^2} = \frac{16}{4+(2\pi f)^2}$.</p><p>Total power $= R_x(0) = 4e^0 = 4$ W (a Lorentzian PSD, characteristic of an exponentially correlated process).</p>` }
+    { q: String.raw`White noise with two-sided PSD $N_0/2 = 10^{-20}$ W/Hz passes through an ideal bandpass filter of bandwidth 5 MHz (unity gain). Find the output noise power.`, solution: String.raw`<p><b>Formula.</b> $$ N = N_0 B $$ where $N$ is the noise power in the passband, $N_0$ the one-sided PSD, and $B$ the filter bandwidth. The two-sided value $N_0/2$ must be doubled to get the one-sided $N_0$.</p>
+<p><b>Substitute.</b> One-sided $N_0 = 2\times(N_0/2) = 2\times10^{-20}$ W/Hz. $$ N = (2\times10^{-20})(5\times10^6) $$</p>
+<p><b>Compute.</b> $N = 10^{-13}$ W. In dBm: $10\log_{10}(10^{-13}/10^{-3}) = 10\log_{10}(10^{-10}) = -100$ dBm.</p>
+<p><b>Explanation.</b> The factor-of-two between one-sided and two-sided PSD is the classic 3 dB trap: forgetting it here would give $-103$ dBm, a real error in a link budget. Because the filter is white-noise-limited, output noise scales directly with bandwidth — narrow the filter and the floor drops proportionally.</p>` },
+    { q: String.raw`A first-order RC lowpass has $|H(f)|^2 = 1/(1+(f/f_c)^2)$ with $f_c = 1$ MHz. Find its equivalent noise bandwidth.`, solution: String.raw`<p><b>Formula.</b> With unity peak gain ($|H(0)|^2 = 1$), the equivalent noise bandwidth is $$ B_N = \int_0^\infty |H(f)|^2\,df = \int_0^\infty \frac{df}{1+(f/f_c)^2} $$ the width of a brick-wall filter passing the same white-noise power.</p>
+<p><b>Substitute.</b> Let $x = f/f_c$ so $df = f_c\,dx$: $$ B_N = f_c\int_0^\infty \frac{dx}{1+x^2} $$</p>
+<p><b>Compute.</b> $\int_0^\infty dx/(1+x^2) = [\arctan x]_0^\infty = \pi/2$, so $B_N = f_c\cdot\pi/2 = \frac{\pi}{2}\times 1\ \text{MHz} = 1.571$ MHz.</p>
+<p><b>Explanation.</b> A one-pole filter leaks noise through its gentle skirt, so it passes $\pi/2 \approx 1.57$ times more noise than its $-3$ dB bandwidth suggests. Using the 3 dB bandwidth instead of $B_N$ in a noise calculation would underestimate the noise power by about 2 dB.</p>` },
+    { q: String.raw`A 2 Mbit/s polar NRZ signal has amplitude $A=1$ V over $50\,\Omega$. At what frequencies do the first two spectral nulls occur?`, solution: String.raw`<p><b>Formula.</b> Polar NRZ has PSD $S_x(f) = A^2 T_b\,\mathrm{sinc}^2(fT_b)$, whose nulls fall where the sinc argument is an integer: $$ f_n = \frac{n}{T_b} = n R_b, \qquad T_b = \frac{1}{R_b} $$ where $T_b$ is the bit period and $R_b$ the bit rate.</p>
+<p><b>Substitute.</b> $$ T_b = \frac{1}{2\times10^6} = 0.5\ \mu\text{s}, \qquad f_n = n\times(2\times10^6) $$</p>
+<p><b>Compute.</b> First null ($n=1$): 2 MHz; second null ($n=2$): 4 MHz.</p>
+<p><b>Explanation.</b> The nulls sit at multiples of the bit rate, so the main lobe (0 to $R_b$) holds most of the energy but the sidelobes spill well beyond 2 MHz. This wide, slowly decaying spectrum is exactly why raw NRZ is bandwidth-hungry and why pulse shaping is applied to confine it. The $A=1$ V and $50\,\Omega$ set the absolute power level but do not move the null frequencies.</p>` },
+    { q: String.raw`A spectrum analyzer set to RBW = 100 kHz reads a noise floor of $-90$ dBm. What is the noise PSD in dBm/Hz?`, solution: String.raw`<p><b>Formula.</b> $$ \text{PSD}_{dBm/Hz} = P_{read} - 10\log_{10}(\text{RBW}_{Hz}) $$ normalizing the power measured in the resolution bandwidth down to a 1 Hz reference.</p>
+<p><b>Substitute.</b> $$ \text{PSD} = -90 - 10\log_{10}(100\times10^3) = -90 - 10\log_{10}(10^5) $$</p>
+<p><b>Compute.</b> $10\log_{10}(10^5) = 50$ dB, so PSD $= -90 - 50 = -140$ dBm/Hz.</p>
+<p><b>Explanation.</b> Normalizing to 1 Hz lets you compare against the ideal $-174$ dBm/Hz thermal floor; this reading sits 34 dB above it, revealing the analyzer's own front-end noise. Always ask "in what RBW?" before comparing noise numbers — the raw reading is meaningless without it.</p>` },
+    { q: String.raw`A WSS process has autocorrelation $R_x(\tau) = 4e^{-2|\tau|}$. Find its PSD and total power.`, solution: String.raw`<p><b>Formula.</b> By Wiener–Khinchin, $S_x(f) = \mathcal{F}\{R_x(\tau)\}$, and the standard pair is $$ \mathcal{F}\{e^{-a|\tau|}\} = \frac{2a}{a^2+(2\pi f)^2}, \qquad P = R_x(0) $$ where $P$ is the total power (the autocorrelation at zero lag).</p>
+<p><b>Substitute.</b> Here $R_x(\tau) = 4e^{-2|\tau|}$, so $a=2$: $$ S_x(f) = 4\cdot\frac{2(2)}{2^2+(2\pi f)^2}, \qquad P = 4e^{0} $$</p>
+<p><b>Compute.</b> $S_x(f) = \dfrac{16}{4+(2\pi f)^2}$ W/Hz (a Lorentzian), and total power $P = R_x(0) = 4$ W.</p>
+<p><b>Explanation.</b> The exponential autocorrelation means the signal decorrelates over a time scale $\sim 1/a$; its spectrum is a Lorentzian whose width is set by that same $a$. This exact shape describes RC-filtered noise and the line shape of many physical resonances — a slower decay (smaller $a$) gives a narrower spectrum, embodying the time–frequency duality of Wiener–Khinchin.</p>` }
   ],
   realWorld: String.raw`<p>Regulatory spectrum masks are specified entirely in PSD terms: the FCC and ETSI define maximum allowed power density (dBm/Hz or dBm in a reference bandwidth) at frequency offsets from a transmitter's center frequency. A Wi-Fi or 5G transmitter that fails its spectral emission mask — its measured PSD exceeding the template in the guard bands — cannot be certified, which is why pulse shaping and digital pre-distortion are essential to squeeze energy into the assigned channel.</p>
 <p>In vibration analysis, radar, and biomedical signal processing, the Welch PSD estimate is the everyday workhorse for finding hidden periodicities in noisy data — from detecting a failing bearing's characteristic frequency in an accelerometer trace to identifying brainwave bands in an EEG. The Wiener–Khinchin bridge lets engineers work in whichever domain — autocorrelation or spectrum — is more convenient for the problem at hand.</p>`,
@@ -562,7 +681,8 @@ $$ S_y(f) = |H(f)|^2\, S_x(f) $$
   tags: [ 'noise-floor', 'sensitivity', 'ktb', 'snr', 'sfdr', 'link-budget' ],
   summary: String.raw`The noise floor is the total noise power a receiver presents at its output, referenced to the input, setting the minimum detectable signal and thus receiver sensitivity.`,
   prerequisites: [ 'noise', 'psd', 'comm-basics' ],
-  intro: String.raw`<p>The <strong>noise floor</strong> is the aggregate power of all noise present in a system within a given bandwidth — the "grass" on a spectrum analyzer beneath which no signal can be seen. It begins with the irreducible thermal floor $kTB$ ($-174$ dBm/Hz) and rises by the receiver's own added noise (its noise figure) and any external noise entering the antenna. Any signal must poke above this floor by the required signal-to-noise ratio to be usefully recovered.</p>
+  intro: String.raw`<p>Why does this topic exist? Because before you can ask "will my receiver hear this signal?" you need a single number for how loud the background hiss is. The noise floor is that number. Without it, sensitivity, link budgets, and range are guesswork; with it, they become arithmetic. It turns the physics of noise into the one line every receiver design starts from.</p>
+<p>The <strong>noise floor</strong> is the aggregate power of all noise present in a system within a given bandwidth — the "grass" on a spectrum analyzer beneath which no signal can be seen. It begins with the irreducible thermal floor $kTB$ ($-174$ dBm/Hz) and rises by the receiver's own added noise (its noise figure) and any external noise entering the antenna. Any signal must poke above this floor by the required signal-to-noise ratio to be usefully recovered.</p>
 <p>Noise floor is the practical anchor of every sensitivity and link-budget calculation. It answers the question every RF engineer must answer: "What is the weakest signal my receiver can hear?" This topic assembles the pieces — thermal floor, bandwidth, noise figure, and required SNR — into the sensitivity equation, and distinguishes the true noise floor from related but different quantities like the analyzer's displayed average noise level and a converter's SFDR.</p>`,
   sections: [
     {
@@ -579,7 +699,8 @@ $$ N_{floor}\ [\text{dBm}] = -174 + 10\log_{10}(B) + NF $$`
     },
     {
       h: 'Sensitivity: the minimum detectable signal',
-      html: String.raw`<p>Receiver <strong>sensitivity</strong> is the weakest input signal that produces the minimum acceptable output SNR (or, equivalently, the required BER). It is the noise floor plus the required SNR:</p>
+      html: String.raw`<div class="callout tip"><strong>Intuition first:</strong> Picture the noise floor as the water level in a pool and your signal as a swimmer's head. To be "seen" (demodulated) the head must stick out of the water by a required margin — that margin is $\mathrm{SNR}_{min}$. Sensitivity is simply the water level plus that margin: lower the water (narrower band, better NF) or accept a smaller margin (coding gain) and you can hear fainter swimmers.</div>
+<p>Now that you have the effective floor, receiver <strong>sensitivity</strong> is the weakest input signal that produces the minimum acceptable output SNR (or, equivalently, the required BER). It is the noise floor plus the required SNR:</p>
 $$ S_{min}\ [\text{dBm}] = -174 + 10\log_{10}(B) + NF + \mathrm{SNR}_{min} $$
 <p>Each term is a lever. Reducing bandwidth to the signal's minimum, lowering the noise figure with a good LNA, and reducing the required SNR through coding gain all improve (lower) sensitivity. This four-term equation is arguably the most-used formula in receiver engineering.</p>
 <div class="callout"><strong>Worked intuition:</strong> A GPS receiver with $B\approx2$ MHz, $NF\approx2$ dB, needing $\mathrm{SNR}_{min}\approx-20$ dB (yes, negative — thanks to 43 dB of spreading processing gain) has $S_{min} = -174 + 63 + 2 - 20 = -129$ dBm. GPS signals arrive around $-130$ dBm, below the thermal floor in the occupied band — recoverable only because despreading collapses the bandwidth and lifts the signal.</div>`
@@ -607,6 +728,17 @@ $$ T_{sys} = T_A + T_e $$
     {
       h: 'SFDR and dynamic range',
       html: String.raw`<p>The <strong>spurious-free dynamic range</strong> (SFDR) is the ratio between a full-scale signal and the largest spur (harmonic or intermod product) — distinct from the noise floor, which is the random background. Together they bound the usable dynamic range: the noise floor limits how weak a signal you can detect; SFDR limits how strong an interferer you can tolerate before its spurs masquerade as signals. A receiver's total dynamic range is the span from the noise floor up to the compression/intermod ceiling.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<ul>
+<li><strong>How the floor is built.</strong> Start at thermal $-174$ dBm/Hz, add the bandwidth term $10\log_{10}B$, add the noise figure $NF$ — that sum is the effective noise floor.</li>
+<li><strong>The most-used receiver formula.</strong> Sensitivity $S_{min} = -174 + 10\log_{10}B + NF + \mathrm{SNR}_{min}$; each term is a lever you can pull.</li>
+<li><strong>Below-the-floor is not undetectable.</strong> Processing gain (spreading, integration) lets signals like GPS at $-130$ dBm be recovered because post-correlation SNR is what must meet the requirement.</li>
+<li><strong>External vs internal noise.</strong> Referred to the antenna, $T_{sys} = T_A + T_e$; below ~1 GHz or in cities the antenna's $T_A$ can dominate, making an ultra-low-NF LNA pointless.</li>
+<li><strong>Instrument and digital floors.</strong> DANL scales with RBW (normalize to 1 Hz); in ADCs, quantization gives $6.02N+1.76$ dB, oversampling adds $10\log_{10}(\mathrm{OSR})$, and jitter dominates at high IF.</li>
+<li><strong>Floor vs SFDR.</strong> The floor bounds weak-signal detection; SFDR bounds strong-interferer tolerance — together they set the usable dynamic range.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -714,11 +846,26 @@ $$ T_{sys} = T_A + T_e $$
     { q: String.raw`For high-IF sampling, the ADC noise floor is often dominated by:`, options: [ String.raw`quantization noise`, String.raw`clock jitter`, String.raw`thermal noise`, String.raw`DANL` ], answer: 1, explain: String.raw`Jitter noise scales with input frequency ($2\pi f_{in}\sigma_j$), dominating at high IF.` }
   ],
   numericals: [
-    { q: String.raw`An LTE receiver has B = 10 MHz, NF = 7 dB, and needs SNR_min = 2 dB. Compute its sensitivity.`, solution: String.raw`<p>Noise floor $= -174 + 10\log_{10}(10^7) + 7 = -174 + 70 + 7 = -97$ dBm.</p><p>Sensitivity $S_{min} = -97 + 2 = -95$ dBm.</p>` },
-    { q: String.raw`A GPS receiver: B = 2 MHz, NF = 2 dB, processing gain 43 dB, demod needs 6 dB post-correlation SNR. Find the minimum detectable signal.`, solution: String.raw`<p>Raw noise floor $= -174 + 10\log_{10}(2\times10^6) + 2 = -174 + 63 + 2 = -109$ dBm.</p><p>Required raw SNR $= 6 - 43 = -37$ dB (processing gain relaxes the requirement).</p><p>$S_{min} = -109 + (-37) = -146$ dBm.</p><p>This is why GPS works despite signals near $-130$ dBm.</p>` },
-    { q: String.raw`A satellite ground station has antenna noise temperature $T_A = 30$ K and receiver noise temperature $T_e = 45$ K. Find $T_{sys}$ and the noise power in 36 MHz.`, solution: String.raw`<p>$T_{sys} = 30 + 45 = 75$ K.</p><p>$N = kT_{sys}B = 1.38\times10^{-23}\times75\times36\times10^6 = 3.73\times10^{-14}$ W.</p><p>In dBm: $10\log_{10}(3.73\times10^{-14}/10^{-3}) = 10\log_{10}(3.73\times10^{-11}) = -104.3$ dBm.</p>` },
-    { q: String.raw`An ideal 14-bit ADC sampling at 100 MSPS is used to digitize a 1 MHz-wide signal. Find the effective in-band SNR including oversampling gain.`, solution: String.raw`<p>Nyquist-band SNR $= 6.02(14)+1.76 = 86.04$ dB.</p><p>OSR $= (f_s/2)/B = 50\ \text{MHz}/1\ \text{MHz} = 50$.</p><p>Processing gain $= 10\log_{10}(50) = 17.0$ dB.</p><p>Effective in-band SNR $= 86.04 + 17.0 = 103$ dB.</p>` },
-    { q: String.raw`A spectrum analyzer shows a device noise floor of $-95$ dBm at RBW = 30 kHz. Express the device PSD in dBm/Hz and compare to thermal.`, solution: String.raw`<p>Normalize: $-95 - 10\log_{10}(30\times10^3) = -95 - 44.77 = -139.8$ dBm/Hz.</p><p>Compared to $-174$ dBm/Hz thermal, the device is $34.2$ dB above the thermal floor — implying a large effective noise figure or added noise in the measurement path.</p>` }
+    { q: String.raw`An LTE receiver has B = 10 MHz, NF = 7 dB, and needs SNR_min = 2 dB. Compute its sensitivity.`, solution: String.raw`<p><b>Formula.</b> $$ S_{min} = -174 + 10\log_{10}(B_{Hz}) + NF + \mathrm{SNR}_{min} $$ the four-term sensitivity equation: thermal density, bandwidth, receiver noise figure, and required SNR.</p>
+<p><b>Substitute.</b> $$ S_{min} = -174 + 10\log_{10}(10^7) + 7 + 2 $$</p>
+<p><b>Compute.</b> $10\log_{10}(10^7) = 70$ dB, so the noise floor is $-174 + 70 + 7 = -97$ dBm, and $S_{min} = -97 + 2 = -95$ dBm.</p>
+<p><b>Explanation.</b> $-95$ dBm is roughly the reference sensitivity a real LTE handset must meet. Each term is a design lever: shrinking the band, improving the LNA's NF, or adding coding gain to relax $\mathrm{SNR}_{min}$ all push sensitivity lower and extend cell range.</p>` },
+    { q: String.raw`A GPS receiver: B = 2 MHz, NF = 2 dB, processing gain 43 dB, demod needs 6 dB post-correlation SNR. Find the minimum detectable signal.`, solution: String.raw`<p><b>Formula.</b> $$ N_{floor} = -174 + 10\log_{10}(B) + NF, \qquad S_{min} = N_{floor} + (\mathrm{SNR}_{demod} - G_p) $$ where $G_p$ is the despreading processing gain, which relaxes the raw SNR the front-end must deliver.</p>
+<p><b>Substitute.</b> $$ N_{floor} = -174 + 10\log_{10}(2\times10^6) + 2, \qquad S_{min} = N_{floor} + (6 - 43) $$</p>
+<p><b>Compute.</b> $10\log_{10}(2\times10^6) = 63$ dB, so $N_{floor} = -174 + 63 + 2 = -109$ dBm. Required raw SNR $= 6 - 43 = -37$ dB, giving $S_{min} = -109 + (-37) = -146$ dBm.</p>
+<p><b>Explanation.</b> The signal is allowed to sit 37 dB below the in-band noise floor because 43 dB of despreading gain lifts the post-correlation SNR to the 6 dB the demodulator needs. This is exactly why GPS works with signals near $-130$ dBm — well beneath the raw floor — and illustrates that "below the noise floor" is not the same as "undetectable."</p>` },
+    { q: String.raw`A satellite ground station has antenna noise temperature $T_A = 30$ K and receiver noise temperature $T_e = 45$ K. Find $T_{sys}$ and the noise power in 36 MHz.`, solution: String.raw`<p><b>Formula.</b> $$ T_{sys} = T_A + T_e, \qquad N = kT_{sys}B $$ where $T_A$ is what the antenna "sees," $T_e$ the receiver's equivalent noise temperature, $k = 1.38\times10^{-23}$ J/K, and $B$ the bandwidth.</p>
+<p><b>Substitute.</b> $$ T_{sys} = 30 + 45 = 75\ \text{K}, \qquad N = (1.38\times10^{-23})(75)(36\times10^6) $$</p>
+<p><b>Compute.</b> $N = 3.73\times10^{-14}$ W. In dBm: $10\log_{10}(3.73\times10^{-14}/10^{-3}) = 10\log_{10}(3.73\times10^{-11}) = -104.3$ dBm.</p>
+<p><b>Explanation.</b> Referring both contributions to the antenna via noise temperature makes them simply add, which is far cleaner than juggling noise figures here. A cold-sky $T_A$ of 30 K is what makes satellite downlinks viable — pointed at the warm ground, $T_A$ would be hundreds of kelvin and the floor much higher.</p>` },
+    { q: String.raw`An ideal 14-bit ADC sampling at 100 MSPS is used to digitize a 1 MHz-wide signal. Find the effective in-band SNR including oversampling gain.`, solution: String.raw`<p><b>Formula.</b> $$ \mathrm{SNR}_{Nyq} = 6.02N + 1.76\ \text{dB}, \quad \mathrm{OSR} = \frac{f_s/2}{B}, \quad \mathrm{SNR}_{eff} = \mathrm{SNR}_{Nyq} + 10\log_{10}(\mathrm{OSR}) $$ where $N$ is the bit depth, $\mathrm{OSR}$ the oversampling ratio, and the last term the oversampling processing gain.</p>
+<p><b>Substitute.</b> $$ \mathrm{SNR}_{Nyq} = 6.02(14)+1.76, \quad \mathrm{OSR} = \frac{50\ \text{MHz}}{1\ \text{MHz}} = 50, \quad \mathrm{SNR}_{eff} = 86.04 + 10\log_{10}(50) $$</p>
+<p><b>Compute.</b> $\mathrm{SNR}_{Nyq} = 86.04$ dB; $10\log_{10}(50) = 17.0$ dB; $\mathrm{SNR}_{eff} = 86.04 + 17.0 = 103$ dB.</p>
+<p><b>Explanation.</b> Sampling far faster than the signal needs spreads the fixed quantization noise across the whole 50 MHz Nyquist band, so only $1/50$ of it lands in the 1 MHz signal band — a free 17 dB of SNR. This oversampling gain is the principle sigma-delta converters push to the extreme to reach very high resolution.</p>` },
+    { q: String.raw`A spectrum analyzer shows a device noise floor of $-95$ dBm at RBW = 30 kHz. Express the device PSD in dBm/Hz and compare to thermal.`, solution: String.raw`<p><b>Formula.</b> $$ \text{PSD}_{dBm/Hz} = P_{read} - 10\log_{10}(\text{RBW}_{Hz}) $$ normalizing the measured power down to a 1 Hz reference so it can be compared to the $-174$ dBm/Hz thermal density.</p>
+<p><b>Substitute.</b> $$ \text{PSD} = -95 - 10\log_{10}(30\times10^3) $$</p>
+<p><b>Compute.</b> $10\log_{10}(30\times10^3) = 44.77$ dB, so PSD $= -95 - 44.77 = -139.8$ dBm/Hz. This is $-139.8 - (-174) = 34.2$ dB above the thermal floor.</p>
+<p><b>Explanation.</b> A device floor 34 dB above thermal implies a large effective noise figure or added noise somewhere in the measurement path — likely the analyzer's own front-end unless a preamp is used. This is why you check that the instrument's DANL sits well below the device under test before trusting the reading.</p>` }
   ],
   realWorld: String.raw`<p>Cellular base-station and handset compliance testing revolves around the noise floor. 3GPP reference-sensitivity tests inject a signal at the theoretical $S_{min}$ (computed from $kTB$ + NF + required SNR) and verify the throughput. A modem that fails by even 1 dB shrinks the effective cell radius by several percent, so RF teams fight for every fraction of a dB of noise figure in the LNA and every bit of bandwidth discipline in the filtering.</p>
 <p>In radar and electronic warfare, the noise floor and SFDR together define the receiver's ability to see a small target return in the presence of a huge nearby clutter or jammer signal. A wideband digital receiver may have a superb thermal noise floor but be limited by ADC spurs (SFDR), so designers dither, calibrate, and select converters specifically to push spurs below the noise floor across the operating band.</p>`,
@@ -756,7 +903,8 @@ $$ F = L \quad\Rightarrow\quad NF\ [\text{dB}] = L\ [\text{dB}] $$
     },
     {
       h: 'The Friis cascade formula',
-      html: String.raw`<p>For a cascade of stages with individual noise factors $F_1, F_2, F_3, \dots$ and available power gains $G_1, G_2, \dots$ (linear), the total noise factor is</p>
+      html: String.raw`<div class="callout tip"><strong>Intuition first:</strong> Imagine each stage shouting its own noise into the chain. A later stage's shout has to compete with the signal already amplified by everything before it — so the more gain sits in front of a stage, the quieter its shout sounds by comparison. That is the entire idea of the formula below: divide each stage's excess noise by the gain ahead of it, and the first stage, with nothing ahead of it, wins.</div>
+<p>For a cascade of stages with individual noise factors $F_1, F_2, F_3, \dots$ and available power gains $G_1, G_2, \dots$ (linear), the total noise factor is</p>
 $$ F_{total} = F_1 + \frac{F_2 - 1}{G_1} + \frac{F_3 - 1}{G_1 G_2} + \frac{F_4 - 1}{G_1 G_2 G_3} + \cdots $$
 <p>The structure is the whole lesson: each stage's <em>excess</em> noise ($F_i - 1$) is divided by the product of all gains preceding it. If the first stage has high gain, the second term shrinks, the third shrinks even more, and so on. The first stage therefore dominates the total.</p>
 <div class="callout"><strong>Design rule:</strong> Put a high-gain, low-NF amplifier first. Then $F_{total} \approx F_1$, and everything downstream — mixers, IF amps, filters, even a lossy ADC driver — contributes negligibly. This single principle shapes essentially every receiver architecture.</div>`
@@ -783,6 +931,17 @@ $$ T_e = \frac{T_h - Y\,T_c}{Y - 1} $$
 <li><strong>NF is defined at 290 K source.</strong> Antenna-referenced sensitivity uses $T_{sys}=T_A+T_e$, not NF directly, when $T_A \neq T_0$.</li>
 <li><strong>Cascade order matters for both NF and linearity.</strong> High front-end gain helps NF but hurts dynamic range (drives later stages into compression) — a fundamental trade-off.</li>
 <li><strong>NF applies to the whole bandwidth</strong>; spot-frequency NF can vary across the band.</li>
+</ul>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<ul>
+<li><strong>What NF measures.</strong> $F = \mathrm{SNR}_{in}/\mathrm{SNR}_{out}$ at a 290 K source; it is how much a stage degrades SNR, and $NF = 10\log_{10}F \ge 0$ dB.</li>
+<li><strong>Two languages, one thing.</strong> $F = 1 + T_e/T_0$ links noise factor and noise temperature; use temperature for very-low-noise parts where fractional dB hides big differences.</li>
+<li><strong>Passive loss is pure NF.</strong> A lossy component at $T_0$ has $NF = $ its loss in dB, so loss ahead of the LNA adds 1:1 to the system NF.</li>
+<li><strong>The Friis lesson.</strong> $F_{tot} = F_1 + (F_2-1)/G_1 + \cdots$: each stage's excess noise is divided by preceding gain, so a high-gain low-NF first stage sets the whole system.</li>
+<li><strong>The governing design rule.</strong> Put the LNA first and minimize everything before it — this single principle explains tower-top amplifiers and cryogenic front-ends.</li>
+<li><strong>Measuring it.</strong> The Y-factor method turns a hot/cold power ratio into $T_e$ and hence NF; mismatch and instrument noise are the main error sources.</li>
 </ul>`
     }
   ],
@@ -892,11 +1051,26 @@ $$ T_e = \frac{T_h - Y\,T_c}{Y - 1} $$
     { q: String.raw`Total NF of two identical 3 dB, 20 dB-gain stages is approximately:`, options: [ String.raw`3.0 dB`, String.raw`3.04 dB`, String.raw`6 dB`, String.raw`3.5 dB` ], answer: 1, explain: String.raw`$F=2$, $G=100$: $F_{tot}=2+(2-1)/100=2.01 \Rightarrow 10\log_{10}(2.01)=3.03$ dB.` }
   ],
   numericals: [
-    { q: String.raw`A receiver front end: LNA (NF=1.5 dB, G=20 dB), mixer (NF=8 dB, G=-6 dB), IF amp (NF=4 dB, G=30 dB). Find the total noise figure.`, solution: String.raw`<p>Convert: $F_1=10^{0.15}=1.413$, $G_1=100$; $F_2=10^{0.8}=6.31$, $G_2=10^{-0.6}=0.251$; $F_3=10^{0.4}=2.512$.</p><p>$F_{tot} = 1.413 + \frac{6.31-1}{100} + \frac{2.512-1}{100\times0.251}$.</p><p>$= 1.413 + 0.0531 + \frac{1.512}{25.1} = 1.413 + 0.0531 + 0.0602 = 1.526$.</p><p>$NF_{tot} = 10\log_{10}(1.526) = 1.84$ dB. The LNA dominates; the lossy mixer barely matters.</p>` },
-    { q: String.raw`The same chain but with a 2 dB feed cable BEFORE the LNA. Find the new total NF.`, solution: String.raw`<p>The cable is a passive stage: $F_0 = 10^{0.2}=1.585$, $G_0 = 10^{-0.2}=0.631$.</p><p>$F_{tot} = F_0 + \frac{F_{rest}-1}{G_0}$ where $F_{rest}=1.526$ from before.</p><p>$= 1.585 + \frac{1.526-1}{0.631} = 1.585 + 0.834 = 2.419$.</p><p>$NF = 10\log_{10}(2.419) = 3.84$ dB — exactly 2 dB worse. The cable loss added 1:1.</p>` },
-    { q: String.raw`Convert a noise figure of 0.35 dB to noise temperature.`, solution: String.raw`<p>$F = 10^{0.035} = 1.0839$.</p><p>$T_e = T_0(F-1) = 290(0.0839) = 24.3$ K.</p>` },
-    { q: String.raw`A Y-factor measurement gives Y = 6 dB using a noise source with $T_h = 10000$ K, $T_c = 290$ K. Find $T_e$ and NF.`, solution: String.raw`<p>$Y = 10^{0.6} = 3.981$.</p><p>$T_e = \frac{T_h - Y T_c}{Y-1} = \frac{10000 - 3.981(290)}{3.981-1} = \frac{10000-1154.5}{2.981} = \frac{8845.5}{2.981} = 2967$ K.</p><p>$F = 1 + 2967/290 = 11.23$; $NF = 10\log_{10}(11.23) = 10.5$ dB.</p>` },
-    { q: String.raw`A system needs total NF ≤ 2 dB. The LNA has NF = 1.2 dB. What minimum LNA gain keeps a following 12 dB-NF stage within budget?`, solution: String.raw`<p>$F_{tot}=2$ dB $=1.585$; $F_1=10^{0.12}=1.318$; $F_2=10^{1.2}=15.85$.</p><p>$F_{tot}=F_1+\frac{F_2-1}{G_1} \Rightarrow 1.585 = 1.318 + \frac{14.85}{G_1}$.</p><p>$\frac{14.85}{G_1}=0.267 \Rightarrow G_1 = 55.6 = 17.4$ dB minimum LNA gain.</p>` }
+    { q: String.raw`A receiver front end: LNA (NF=1.5 dB, G=20 dB), mixer (NF=8 dB, G=-6 dB), IF amp (NF=4 dB, G=30 dB). Find the total noise figure.`, solution: String.raw`<p><b>Formula.</b> Friis cascade in linear terms: $$ F_{tot} = F_1 + \frac{F_2-1}{G_1} + \frac{F_3-1}{G_1 G_2}, \qquad NF_{tot} = 10\log_{10}F_{tot} $$ where each $F_i = 10^{NF_i/10}$ and $G_i = 10^{G_{i,dB}/10}$.</p>
+<p><b>Substitute.</b> $F_1=10^{0.15}=1.413$, $G_1=100$; $F_2=10^{0.8}=6.31$, $G_2=10^{-0.6}=0.251$; $F_3=10^{0.4}=2.512$. $$ F_{tot} = 1.413 + \frac{6.31-1}{100} + \frac{2.512-1}{100\times0.251} $$</p>
+<p><b>Compute.</b> $= 1.413 + 0.0531 + \dfrac{1.512}{25.1} = 1.413 + 0.0531 + 0.0602 = 1.526$, so $NF_{tot} = 10\log_{10}(1.526) = 1.84$ dB.</p>
+<p><b>Explanation.</b> Despite the mixer's poor 8 dB NF, the 20 dB of LNA gain ahead of it divides its excess noise by 100, so the system NF lands just 0.34 dB above the LNA alone. This is the Friis lesson in action: get the first stage right and everything downstream is nearly irrelevant.</p>` },
+    { q: String.raw`The same chain but with a 2 dB feed cable BEFORE the LNA. Find the new total NF.`, solution: String.raw`<p><b>Formula.</b> A passive lossy stage has $F_0 = L$ and gain $G_0 = 1/L$. Prepending it via Friis: $$ F_{tot} = F_0 + \frac{F_{rest}-1}{G_0} $$ where $F_{rest}$ is the noise factor of the rest of the chain from the previous problem.</p>
+<p><b>Substitute.</b> Cable: $F_0 = 10^{0.2}=1.585$, $G_0 = 10^{-0.2}=0.631$; $F_{rest}=1.526$. $$ F_{tot} = 1.585 + \frac{1.526-1}{0.631} $$</p>
+<p><b>Compute.</b> $= 1.585 + 0.834 = 2.419$, so $NF = 10\log_{10}(2.419) = 3.84$ dB.</p>
+<p><b>Explanation.</b> The 1.84 dB chain became 3.84 dB — exactly 2 dB worse, matching the cable loss one-for-one. With no gain ahead of it to protect it, loss before the LNA adds directly to the system NF, which is precisely why base stations mount the LNA at the antenna and keep the feeder run behind it.</p>` },
+    { q: String.raw`Convert a noise figure of 0.35 dB to noise temperature.`, solution: String.raw`<p><b>Formula.</b> $$ F = 10^{NF/10}, \qquad T_e = T_0(F-1) $$ where $NF$ is the noise figure (dB), $F$ the noise factor (linear), $T_0 = 290$ K the reference, and $T_e$ the equivalent noise temperature.</p>
+<p><b>Substitute.</b> $$ F = 10^{0.35/10} = 10^{0.035}, \qquad T_e = 290(F-1) $$</p>
+<p><b>Compute.</b> $F = 1.0839$; $T_e = 290(0.0839) = 24.3$ K.</p>
+<p><b>Explanation.</b> A 0.35 dB NF is an excellent low-noise amplifier, and 24 K makes that concrete. Near 0 dB, fractions of a dB hide large fractional changes in added noise, so cryogenic and radio-astronomy front-ends are always specified in kelvin rather than dB.</p>` },
+    { q: String.raw`A Y-factor measurement gives Y = 6 dB using a noise source with $T_h = 10000$ K, $T_c = 290$ K. Find $T_e$ and NF.`, solution: String.raw`<p><b>Formula.</b> $$ T_e = \frac{T_h - Y\,T_c}{Y-1}, \qquad F = 1 + \frac{T_e}{T_0}, \qquad NF = 10\log_{10}F $$ where $Y = P_{hot}/P_{cold}$ (linear) is the measured power ratio and $T_h, T_c$ are the source hot/cold temperatures.</p>
+<p><b>Substitute.</b> $Y = 10^{6/10} = 3.981$. $$ T_e = \frac{10000 - 3.981(290)}{3.981-1} $$</p>
+<p><b>Compute.</b> $T_e = \dfrac{10000-1154.5}{2.981} = \dfrac{8845.5}{2.981} = 2967$ K; then $F = 1 + 2967/290 = 11.23$ and $NF = 10\log_{10}(11.23) = 10.5$ dB.</p>
+<p><b>Explanation.</b> The Y-factor turns two power readings (hot vs cold source) into the device's noise temperature. A larger $Y$ means a quieter device; this modest 6 dB $Y$ with a hot 10000 K source yields a fairly noisy 10.5 dB NF — sensible for something like a bare mixer. A higher-ENR source improves measurement resolution on low-noise devices.</p>` },
+    { q: String.raw`A system needs total NF ≤ 2 dB. The LNA has NF = 1.2 dB. What minimum LNA gain keeps a following 12 dB-NF stage within budget?`, solution: String.raw`<p><b>Formula.</b> Solve Friis for the first-stage gain: $$ F_{tot} = F_1 + \frac{F_2-1}{G_1} \ \Rightarrow\ G_1 = \frac{F_2-1}{F_{tot}-F_1} $$ with all quantities linear.</p>
+<p><b>Substitute.</b> $F_{tot}=10^{0.2}=1.585$; $F_1=10^{0.12}=1.318$; $F_2=10^{1.2}=15.85$. $$ 1.585 = 1.318 + \frac{15.85-1}{G_1} \ \Rightarrow\ G_1 = \frac{14.85}{1.585-1.318} $$</p>
+<p><b>Compute.</b> $\dfrac{14.85}{0.267} = 55.6$ (linear) $= 10\log_{10}(55.6) = 17.4$ dB minimum LNA gain.</p>
+<p><b>Explanation.</b> The LNA needs at least 17.4 dB of gain so its 100× division shrinks the noisy 12 dB stage's contribution to fit the 2 dB budget. This is the design flip-side of Friis: the first stage must supply enough gain, not just low noise, to shield the rest of the chain — the reason LNAs are specified with both.</p>` }
   ],
   realWorld: String.raw`<p>Cellular base stations place a tower-mounted amplifier (TMA/LNA) at the top of the mast, right at the antenna, precisely because of Friis: the long, lossy coaxial feeder run down the tower would otherwise add its several dB of loss directly to the system noise figure. By amplifying with a low-NF LNA before the cable, the feeder loss is divided by the LNA gain and becomes almost irrelevant — recovering coverage worth many decibels of link budget.</p>
 <p>Radio telescopes and deep-space ground stations (like NASA's Deep Space Network 70 m dishes) use cryogenically cooled HEMT LNAs with noise temperatures of just a few kelvin, reaching system noise figures a small fraction of a dB. At these levels every component ahead of the LNA — even the feed horn and window — is engineered and sometimes cooled to avoid adding noise, because the received signals from spacecraft billions of kilometres away leave zero margin to spare.</p>`,
@@ -921,7 +1095,8 @@ $$ \mathcal{L}(f) = 10\log_{10}\!\left(\frac{P_{SSB}(f_0+f,\ 1\,\text{Hz})}{P_{c
     },
     {
       h: "Leeson's model and the spectrum slopes",
-      html: String.raw`<p>Leeson's semi-empirical model captures the characteristic shape of an oscillator's phase-noise spectrum by combining the resonator's filtering, the amplifier noise figure, and the device's flicker noise:</p>
+      html: String.raw`<div class="callout tip"><strong>Intuition first:</strong> An oscillator is an amplifier with noise, wrapped in a feedback loop tuned by a resonator. Near the carrier, the resonator strongly reacts to phase perturbations, amplifying close-in noise; far from the carrier it stops helping and you just see the flat amplifier noise floor. Add the device's own $1/f$ flicker noise near DC and you get the characteristic staircase of slopes. Leeson's formula below is exactly this picture — resonator term times flicker term times a thermal floor.</div>
+<p>Leeson's semi-empirical model captures the characteristic shape of an oscillator's phase-noise spectrum by combining the resonator's filtering, the amplifier noise figure, and the device's flicker noise:</p>
 $$ \mathcal{L}(f) = 10\log_{10}\!\left[\frac{FkT}{2P_s}\left(1+\left(\frac{f_0}{2Q_L f}\right)^2\right)\left(1+\frac{f_c}{f}\right)\right] $$
 <p>where $F$ is the amplifier noise factor, $P_s$ the signal power at the sustaining stage, $Q_L$ the loaded quality factor, $f_0$ the carrier, and $f_c$ the flicker (1/f) corner. This produces the classic slope regions:</p>
 <table class="data">
@@ -956,6 +1131,17 @@ $$ \phi_{rms} = \sqrt{2\int_{f_1}^{f_2}\mathcal{L}(f)\,df}\ \ (\text{rad}), \qqu
       h: 'Measurement and mitigation',
       html: String.raw`<p><strong>Measurement:</strong> Direct spectrum-analyzer measurement works for moderate phase noise but is limited by the analyzer's own LO. Better methods use a phase-detector/PLL cross-correlation technique (two independent references, correlate to cancel instrument noise) — the basis of dedicated phase-noise analyzers reaching very low floors.</p>
 <p><strong>Mitigation:</strong> (1) Use the highest-Q resonator affordable; (2) maximize signal power $P_s$ in the sustaining stage (lowers the $FkT/2P_s$ term); (3) select low-flicker devices (SiGe, low $f_c$); (4) in a PLL, optimize the loop bandwidth — a wide loop lets the clean crystal reference suppress the noisy VCO close-in, while a narrow loop lets the VCO dominate far-out, so the crossover is chosen where reference and VCO noise are equal; (5) divide down from a low-noise high-frequency source (division reduces phase noise by $20\log_{10}N$ dB).</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<ul>
+<li><strong>What phase noise is.</strong> Random short-term phase jitter of $v(t)=A\cos(2\pi f_0 t + \phi(t))$, seen as skirts around the carrier and, in time, as jitter.</li>
+<li><strong>The metric.</strong> $\mathcal{L}(f)$ in dBc/Hz — noise in 1 Hz at offset $f$ relative to the carrier; small-angle, $\mathcal{L}(f) = \tfrac12 S_\phi(f)$.</li>
+<li><strong>The spectrum's shape.</strong> Leeson gives the $1/f^3$, $1/f^2$, $1/f$, flat slope regions, and close-in noise improves as $1/Q^2$ — why high-Q crystals win.</li>
+<li><strong>Time-domain equivalent.</strong> Integrate to $\phi_{rms} = \sqrt{2\int\mathcal{L}\,df}$, then $t_{jitter} = \phi_{rms}/(2\pi f_0)$; a good spot value can still hide bad integrated jitter.</li>
+<li><strong>Why systems care.</strong> Reciprocal mixing raises the floor near blockers, EVM $\approx\phi_{rms}$ caps modulation order, and OFDM suffers common phase error plus intercarrier interference.</li>
+<li><strong>Scaling and control.</strong> Multiplication degrades and division improves phase noise by $20\log_{10}N$; mitigate with high $Q$, high $P_s$, low flicker, and an optimized PLL loop bandwidth.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -1003,6 +1189,26 @@ $$ \phi_{rms} = \sqrt{2\int_{f_1}^{f_2}\mathcal{L}(f)\,df}\ \ (\text{rad}), \qqu
 <text x="410" y="175" text-anchor="middle" fill="#9aa7b5" font-size="8">f0</text>
 </g></svg>`,
       caption: 'Phase noise broadens the ideal spectral line into skirts of power around the carrier.'
+    },
+    {
+      title: String.raw`phase-noise measurement chain`,
+      svg: String.raw`<svg viewBox="0 0 540 175" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-phase-noise" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<g fill="#e6edf3" font-size="10" text-anchor="middle">
+<rect x="8" y="60" width="96" height="46" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="56" y="80">DUT osc.</text><text x="56" y="94" font-size="8" fill="#9aa7b5">f0 + noise</text>
+<rect x="128" y="60" width="96" height="46" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="176" y="80">Phase det.</text><text x="176" y="94" font-size="8" fill="#9aa7b5">vs ref (90&#176;)</text>
+<rect x="248" y="60" width="96" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="296" y="80">Cross-corr</text><text x="296" y="94" font-size="8" fill="#9aa7b5">2 refs, avg</text>
+<rect x="368" y="60" width="96" height="46" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="416" y="80">FFT / PSD</text><text x="416" y="94" font-size="8" fill="#9aa7b5">S_phi(f)</text>
+<rect x="468" y="60" width="64" height="46" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="500" y="80">L(f)</text><text x="500" y="94" font-size="8" fill="#9aa7b5">dBc/Hz</text>
+<line x1="104" y1="83" x2="126" y2="83" stroke="#9aa7b5" marker-end="url(#arr3-phase-noise)"/>
+<line x1="224" y1="83" x2="246" y2="83" stroke="#9aa7b5" marker-end="url(#arr3-phase-noise)"/>
+<line x1="344" y1="83" x2="366" y2="83" stroke="#9aa7b5" marker-end="url(#arr3-phase-noise)"/>
+<line x1="464" y1="83" x2="466" y2="83" stroke="#9aa7b5" marker-end="url(#arr3-phase-noise)"/>
+<rect x="128" y="20" width="96" height="26" rx="6" fill="#1c232e" stroke="#9aa7b5"/><text x="176" y="37" font-size="8" fill="#9aa7b5">clean reference</text>
+<line x1="176" y1="46" x2="176" y2="58" stroke="#9aa7b5" marker-end="url(#arr3-phase-noise)"/>
+<text x="270" y="140" font-size="8" fill="#9aa7b5">phase fluctuation &#8594; PSD &#8594; L(f) vs offset</text>
+</g></svg>`,
+      caption: String.raw`Measurement chain: mix the oscillator against a reference at quadrature, cross-correlate, and read L(f) versus offset.`
     }
   ],
   equations: [
@@ -1068,11 +1274,26 @@ $$ \phi_{rms} = \sqrt{2\int_{f_1}^{f_2}\mathcal{L}(f)\,df}\ \ (\text{rad}), \qqu
     { q: String.raw`In OFDM, intercarrier interference from phase noise is caused mainly by:`, options: [ String.raw`close-in phase noise`, String.raw`wider-offset phase noise breaking subcarrier orthogonality`, String.raw`the cyclic prefix`, String.raw`the FFT size only` ], answer: 1, explain: String.raw`Phase noise at offsets comparable to subcarrier spacing spreads energy into neighboring subcarriers (ICI).` }
   ],
   numericals: [
-    { q: String.raw`An oscillator has $\mathcal{L}(f) = -80$ dBc/Hz flat from 1 kHz to 100 kHz (approximating). Estimate the integrated RMS phase jitter over that band.`, solution: String.raw`<p>Linear $\mathcal{L} = 10^{-80/10} = 10^{-8}$ /Hz.</p><p>$\phi_{rms}^2 = 2\int_{10^3}^{10^5}\mathcal{L}\,df = 2(10^{-8})(10^5 - 10^3) = 2(10^{-8})(9.9\times10^4)$.</p><p>$= 2\times9.9\times10^{-4} = 1.98\times10^{-3}\ \text{rad}^2$.</p><p>$\phi_{rms} = \sqrt{1.98\times10^{-3}} = 0.0445$ rad $= 2.55^\circ$.</p>` },
-    { q: String.raw`Using the result above at a 10 GHz carrier, find the RMS time jitter.`, solution: String.raw`<p>$t_{jitter} = \phi_{rms}/(2\pi f_0) = 0.0445/(2\pi\times10^{10})$.</p><p>$= 0.0445/(6.283\times10^{10}) = 7.08\times10^{-13}$ s $= 0.71$ ps RMS.</p>` },
-    { q: String.raw`A 100 MHz reference has $\mathcal{L} = -150$ dBc/Hz at 10 kHz offset. It is multiplied to 10 GHz. What is the phase noise at 10 kHz offset (ideal multiplier)?`, solution: String.raw`<p>Multiplication factor $N = 10\,\text{GHz}/100\,\text{MHz} = 100$.</p><p>Degradation $= 20\log_{10}(100) = 40$ dB.</p><p>$\mathcal{L}_{out} = -150 + 40 = -110$ dBc/Hz at 10 kHz (ignoring added multiplier noise).</p>` },
-    { q: String.raw`A receiver sees a desired signal at -100 dBm and an interferer at -30 dBm offset 1 MHz away. If the LO phase noise at 1 MHz offset is -130 dBc/Hz and the channel bandwidth is 200 kHz, find the reciprocal-mixing noise power in the desired channel.`, solution: String.raw`<p>Reciprocal-mixed noise $= P_{interferer} + \mathcal{L}(f) + 10\log_{10}(B)$.</p><p>$= -30 + (-130) + 10\log_{10}(200\times10^3)$.</p><p>$= -30 - 130 + 53.0 = -107$ dBm.</p><p>This is only 7 dB below the -100 dBm desired signal, so it seriously degrades SNR — the link is phase-noise (reciprocal-mixing) limited, not thermal-limited.</p>` },
-    { q: String.raw`A 1024-QAM link requires total RMS EVM below 1.5%. If thermal noise already contributes 1.0% EVM, what is the maximum allowable phase-noise-induced RMS phase error (degrees)?`, solution: String.raw`<p>EVM contributions add in RMS (power): $\mathrm{EVM}_{tot}^2 = \mathrm{EVM}_{th}^2 + \mathrm{EVM}_{pn}^2$.</p><p>$\mathrm{EVM}_{pn} = \sqrt{1.5^2 - 1.0^2} = \sqrt{2.25 - 1.0} = \sqrt{1.25} = 1.118\%$.</p><p>For small angles $\mathrm{EVM}_{pn} \approx \phi_{rms}$ (in radians): $\phi_{rms} = 0.01118$ rad $= 0.64^\circ$.</p><p>So the synthesizer's integrated phase jitter must stay below about $0.64^\circ$ RMS.</p>` }
+    { q: String.raw`An oscillator has $\mathcal{L}(f) = -80$ dBc/Hz flat from 1 kHz to 100 kHz (approximating). Estimate the integrated RMS phase jitter over that band.`, solution: String.raw`<p><b>Formula.</b> $$ \phi_{rms} = \sqrt{2\int_{f_1}^{f_2}\mathcal{L}(f)\,df} $$ where $\mathcal{L}(f)$ is the linear (not dB) single-sideband phase noise; the factor 2 converts single-sideband to total phase power. For flat $\mathcal{L}$ the integral is just $\mathcal{L}\,(f_2-f_1)$.</p>
+<p><b>Substitute.</b> $\mathcal{L} = 10^{-80/10} = 10^{-8}$ /Hz. $$ \phi_{rms}^2 = 2(10^{-8})(10^5 - 10^3) = 2(10^{-8})(9.9\times10^4) $$</p>
+<p><b>Compute.</b> $\phi_{rms}^2 = 1.98\times10^{-3}\ \text{rad}^2$, so $\phi_{rms} = \sqrt{1.98\times10^{-3}} = 0.0445$ rad $= 2.55^\circ$.</p>
+<p><b>Explanation.</b> A single spot value like $-80$ dBc/Hz tells you little on its own; integrating over the offset band gives the RMS phase error that actually degrades a modulated link. At 2.55° RMS this oscillator is fine for low-order modulation but far too noisy for dense QAM, where budgets are a fraction of a degree.</p>` },
+    { q: String.raw`Using the result above at a 10 GHz carrier, find the RMS time jitter.`, solution: String.raw`<p><b>Formula.</b> $$ t_{jitter} = \frac{\phi_{rms}}{2\pi f_0} $$ where $\phi_{rms}$ is the integrated RMS phase (radians) and $f_0$ the carrier frequency, since one full cycle of $2\pi$ radians spans a period $1/f_0$.</p>
+<p><b>Substitute.</b> $$ t_{jitter} = \frac{0.0445}{2\pi\times10^{10}} = \frac{0.0445}{6.283\times10^{10}} $$</p>
+<p><b>Compute.</b> $t_{jitter} = 7.08\times10^{-13}$ s $= 0.71$ ps RMS.</p>
+<p><b>Explanation.</b> Sub-picosecond jitter is the natural currency for clocking high-speed data converters and serial links, where this timing uncertainty directly eats into the sampling aperture and timing margin. The same phase noise converts to smaller time jitter at higher carrier frequencies, which is why the relationship always carries $f_0$.</p>` },
+    { q: String.raw`A 100 MHz reference has $\mathcal{L} = -150$ dBc/Hz at 10 kHz offset. It is multiplied to 10 GHz. What is the phase noise at 10 kHz offset (ideal multiplier)?`, solution: String.raw`<p><b>Formula.</b> $$ N = \frac{f_{out}}{f_{in}}, \qquad \mathcal{L}_{out} = \mathcal{L}_{in} + 20\log_{10}(N) $$ where frequency multiplication by $N$ multiplies the phase by $N$, so phase-noise power rises by $N^2$, i.e. $20\log_{10}N$ dB.</p>
+<p><b>Substitute.</b> $$ N = \frac{10\ \text{GHz}}{100\ \text{MHz}} = 100, \qquad \mathcal{L}_{out} = -150 + 20\log_{10}(100) $$</p>
+<p><b>Compute.</b> $20\log_{10}(100) = 40$ dB, so $\mathcal{L}_{out} = -150 + 40 = -110$ dBc/Hz at 10 kHz offset (ideal multiplier).</p>
+<p><b>Explanation.</b> Multiplying up to reach high carrier frequencies inevitably raises phase noise by $20\log_{10}N$ — 40 dB here. This is the fundamental reason mmWave synthesizers struggle: a superb reference is degraded by large multiplication ratios, so the reference must be exceptionally clean to leave usable margin at the output.</p>` },
+    { q: String.raw`A receiver sees a desired signal at -100 dBm and an interferer at -30 dBm offset 1 MHz away. If the LO phase noise at 1 MHz offset is -130 dBc/Hz and the channel bandwidth is 200 kHz, find the reciprocal-mixing noise power in the desired channel.`, solution: String.raw`<p><b>Formula.</b> $$ P_{RM} = P_{int} + \mathcal{L}(f) + 10\log_{10}(B) $$ where $P_{int}$ is the interferer power (dBm), $\mathcal{L}(f)$ the LO phase noise at that offset (dBc/Hz), and $B$ the channel bandwidth — the interferer's power is convolved with the LO's per-Hz noise skirt and integrated over the channel.</p>
+<p><b>Substitute.</b> $$ P_{RM} = -30 + (-130) + 10\log_{10}(200\times10^3) $$</p>
+<p><b>Compute.</b> $10\log_{10}(2\times10^5) = 53.0$ dB, so $P_{RM} = -30 - 130 + 53.0 = -107$ dBm.</p>
+<p><b>Explanation.</b> This reciprocal-mixed noise sits only 7 dB below the $-100$ dBm wanted signal, so it dominates the thermal floor and cripples SNR. The link is phase-noise limited, not thermal limited — no amount of LNA improvement helps; only cleaner LO phase noise at the interferer's offset does. This is why blocking specs drive synthesizer phase-noise requirements.</p>` },
+    { q: String.raw`A 1024-QAM link requires total RMS EVM below 1.5%. If thermal noise already contributes 1.0% EVM, what is the maximum allowable phase-noise-induced RMS phase error (degrees)?`, solution: String.raw`<p><b>Formula.</b> Independent error sources add in power (RMS): $$ \mathrm{EVM}_{tot}^2 = \mathrm{EVM}_{th}^2 + \mathrm{EVM}_{pn}^2 \ \Rightarrow\ \mathrm{EVM}_{pn} = \sqrt{\mathrm{EVM}_{tot}^2 - \mathrm{EVM}_{th}^2} $$ and for small angles the phase-noise EVM equals the RMS phase error: $\mathrm{EVM}_{pn} \approx \phi_{rms}$ (radians).</p>
+<p><b>Substitute.</b> $$ \mathrm{EVM}_{pn} = \sqrt{1.5^2 - 1.0^2} = \sqrt{2.25 - 1.0} $$</p>
+<p><b>Compute.</b> $\mathrm{EVM}_{pn} = \sqrt{1.25} = 1.118\% = 0.01118$ rad. Converting: $\phi_{rms} = 0.01118\times(180/\pi) = 0.64^\circ$.</p>
+<p><b>Explanation.</b> The synthesizer's integrated phase jitter must stay below about $0.64^\circ$ RMS — an extremely tight budget that dense 1024-QAM demands. Because thermal noise already spends most of the EVM allowance, phase noise, not SNR, becomes the binding constraint that decides whether the top modulation order is usable at all.</p>` }
   ],
   realWorld: String.raw`<p>In modern cellular and Wi-Fi radios, phase noise is often the gatekeeper for the highest modulation orders. When 5G NR or Wi-Fi 7 advertise 1024-QAM or 4096-QAM, achieving them in practice hinges on synthesizer phase noise: the constellation points are so tightly packed that even a fraction of a degree of RMS phase error collapses the link. RF vendors publish integrated phase-jitter specs precisely because they, not thermal SNR, determine whether the top MCS levels are usable — especially at mmWave, where reference phase noise is multiplied up by large factors.</p>
 <p>In radar and electronic warfare, phase noise limits the detection of slow-moving targets. A target's Doppler return sits close to the huge stationary-clutter return; if the transmitter/LO phase-noise skirt at that Doppler offset exceeds the target return, the target is buried. This is why coherent radars use ultra-low-phase-noise sources (often oven-controlled crystal oscillators multiplied with careful filtering, or sapphire-loaded cavity oscillators) — the achievable sub-clutter visibility is set directly by $\mathcal{L}(f)$ at the Doppler offsets of interest.</p>`,

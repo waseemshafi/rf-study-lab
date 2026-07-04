@@ -6,7 +6,7 @@ CONTENT.topics.push(
     category: 'Interfaces & Protocols',
     tags: ['rs232', 'serial', 'single-ended', 'uart', 'tia-232', 'async', '8n1', 'point-to-point'],
     summary: String.raw`RS-232 (TIA/EIA-232) is a single-ended, bipolar-voltage, point-to-point asynchronous serial interface that swings roughly $\pm 3$ to $\pm 15$ V about a common ground, reaching about 15 m at rates up to ~115–230 kbps using NRZ 8N1 framing.`,
-    diagram: { svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+    diagram: [{ svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-rs232" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="20" y="55" width="150" height="110" rx="6" fill="#1c232e" stroke="#4dabf7"/>
 <text x="95" y="80" fill="#e6edf3" text-anchor="middle" font-weight="bold">DTE (PC)</text>
@@ -24,8 +24,53 @@ CONTENT.topics.push(
 <text x="270" y="145" fill="#9aa7b5" text-anchor="middle" font-size="10">GND (common return)</text>
 <text x="270" y="200" fill="#9aa7b5" text-anchor="middle" font-size="10">single-ended, referenced to shared ground &#183; point-to-point</text>
 </svg>`, caption: String.raw`RS-232: two devices (DTE&#8596;DCE) linked point-to-point by single-ended TxD/RxD/RTS/CTS lines all referenced to one shared GND.` },
+      { title: String.raw`UART internals: parallel byte to serial frame`, svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-rs232" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="20" y="30" width="120" height="70" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="80" y="55" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Tx holding reg</text>
+<text x="80" y="72" fill="#9aa7b5" text-anchor="middle" font-size="9">parallel byte D7..D0</text>
+<text x="80" y="88" fill="#63e6be" text-anchor="middle" font-size="9">8 bits wide</text>
+<rect x="210" y="30" width="130" height="70" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="275" y="55" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Shift register</text>
+<text x="275" y="72" fill="#9aa7b5" text-anchor="middle" font-size="9">LSB-first, 1 bit/clk</text>
+<text x="275" y="88" fill="#9aa7b5" text-anchor="middle" font-size="9">out the serial pin</text>
+<rect x="210" y="130" width="130" height="52" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="275" y="152" fill="#e6edf3" text-anchor="middle" font-size="11">Baud generator</text>
+<text x="275" y="168" fill="#9aa7b5" text-anchor="middle" font-size="9">f_clk / (16&#215;N)</text>
+<rect x="410" y="30" width="115" height="70" rx="6" fill="#1c232e" stroke="#b197fc"/>
+<text x="467" y="55" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Level shifter</text>
+<text x="467" y="72" fill="#9aa7b5" text-anchor="middle" font-size="9">TTL &#8594; &#177;V</text>
+<text x="467" y="88" fill="#63e6be" text-anchor="middle" font-size="9">MAX232</text>
+<line x1="140" y1="65" x2="210" y2="65" stroke="#9aa7b5" marker-end="url(#arr2-rs232)"/>
+<text x="175" y="58" fill="#9aa7b5" text-anchor="middle" font-size="9">load</text>
+<line x1="340" y1="65" x2="410" y2="65" stroke="#9aa7b5" marker-end="url(#arr2-rs232)"/>
+<text x="375" y="58" fill="#9aa7b5" text-anchor="middle" font-size="9">serial</text>
+<line x1="275" y1="130" x2="275" y2="100" stroke="#ffa94d" marker-end="url(#arr2-rs232)"/>
+<text x="330" y="120" fill="#ffa94d" text-anchor="middle" font-size="9">clocks shifts</text>
+<rect x="20" y="205" width="505" height="34" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="272" y="220" fill="#e6edf3" text-anchor="middle" font-size="10">on the wire: START(0) &#183; D0 D1 D2 D3 D4 D5 D6 D7 &#183; [PAR] &#183; STOP(1)</text>
+<text x="272" y="233" fill="#9aa7b5" text-anchor="middle" font-size="9">10 bit-times for 8N1; idle line = MARK (&#8722;V)</text>
+</svg>`, caption: String.raw`UART transmit path: a parallel byte is loaded into a shift register, clocked out LSB-first at the baud rate (f_clk/16N), wrapped in start/data/parity/stop bits, and level-shifted to &#177;V by a MAX232-class driver.` },
+      { title: String.raw`RTS/CTS hardware flow-control handshake`, svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-rs232" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="30" y="55" width="150" height="100" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="105" y="82" fill="#e6edf3" text-anchor="middle" font-weight="bold">Sender</text>
+<text x="105" y="100" fill="#9aa7b5" text-anchor="middle" font-size="9">wants to transmit</text>
+<rect x="360" y="55" width="150" height="100" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="435" y="82" fill="#e6edf3" text-anchor="middle" font-weight="bold">Receiver</text>
+<text x="435" y="100" fill="#9aa7b5" text-anchor="middle" font-size="9">buffer may fill</text>
+<line x1="180" y1="78" x2="360" y2="78" stroke="#ffa94d" marker-end="url(#arr3-rs232)"/>
+<text x="270" y="72" fill="#ffa94d" text-anchor="middle" font-size="10">1. RTS: &#8220;may I send?&#8221;</text>
+<line x1="360" y1="105" x2="180" y2="105" stroke="#63e6be" marker-end="url(#arr3-rs232)"/>
+<text x="270" y="99" fill="#63e6be" text-anchor="middle" font-size="10">2. CTS asserted: &#8220;go&#8221;</text>
+<line x1="180" y1="130" x2="360" y2="130" stroke="#4dabf7" marker-end="url(#arr3-rs232)"/>
+<text x="270" y="124" fill="#4dabf7" text-anchor="middle" font-size="10">3. TxD data flows</text>
+<text x="270" y="150" fill="#9aa7b5" text-anchor="middle" font-size="9">4. buffer full &#8594; CTS de-asserted &#8594; sender pauses (loop)</text>
+<text x="270" y="185" fill="#9aa7b5" text-anchor="middle" font-size="10">CTS low throttles the sender; CTS high resumes it &#8212; closed-loop backpressure</text>
+</svg>`, caption: String.raw`RTS/CTS handshake loop: the sender raises RTS, waits for the receiver to assert CTS, then streams data; when the receiver's buffer fills it drops CTS to pause the sender, forming a closed flow-control loop.` }],
     prerequisites: ['comm-basics', 'noise', 'bandwidth'],
-    intro: String.raw`<p><strong>RS-232</strong> — formally <strong>TIA/EIA-232-F</strong> (originally EIA RS-232-C, and internationally aligned with ITU-T V.24/V.28) — is the oldest and most familiar of the serial-line standards. It was defined in the 1960s to connect <em>Data Terminal Equipment (DTE)</em> such as a terminal or PC to <em>Data Communication Equipment (DCE)</em> such as a modem. Almost every microcontroller UART, PC COM port, industrial console, GPS module, and lab instrument has spoken RS-232 at some point.</p>
+    intro: String.raw`<p><strong>Why RS-232 exists.</strong> In the 1960s a terminal and a modem from different manufacturers had no agreed way to exchange serial bits: what voltage means a "1", which wire carries data, how the two ends signal "ready" and "go." Every vendor pairing needed a custom cable and custom electronics. RS-232 solved that by <em>standardising the electrical interface and the wiring</em> — fixed voltage levels, named signal lines, and a common connector — so any conforming terminal could be plugged into any conforming modem and simply work. That interoperability, not raw performance, is the problem RS-232 was invented to solve, and it is why the standard still shows up wherever two boxes need a dependable short serial link.</p>
+<p><strong>RS-232</strong> — formally <strong>TIA/EIA-232-F</strong> (originally EIA RS-232-C, and internationally aligned with ITU-T V.24/V.28) — is the oldest and most familiar of the serial-line standards. It was defined in the 1960s to connect <em>Data Terminal Equipment (DTE)</em> such as a terminal or PC to <em>Data Communication Equipment (DCE)</em> such as a modem. Almost every microcontroller UART, PC COM port, industrial console, GPS module, and lab instrument has spoken RS-232 at some point.</p>
 <p>Three properties define RS-232 and explain both its ubiquity and its limits. First, it is <strong>single-ended</strong>: each signal is one wire referenced to a shared ground, so noise picked up on the wire is measured directly against that ground with no cancellation. Second, it uses <strong>large bipolar voltages</strong> (nominally $\pm 5$ to $\pm 12$ V in practice, legal from $\pm 3$ up to $\pm 15$ V) with an unusual <em>inverted</em> logic convention. Third, it is fundamentally a <strong>point-to-point, full-duplex</strong> link between exactly two devices — there is no bus, no addressing, and no arbitration. These choices make RS-232 trivially simple and robust for a short cable to one peer, but they cap its speed, its reach, and its ability to network many nodes.</p>`,
     sections: [
       {
@@ -135,6 +180,18 @@ CONTENT.topics.push(
 <tr><td>Max rate</td><td>~115–230 kbps</td><td>10 Mbps @ 12 m</td><td>10 Mbps @ 12 m</td><td>Gbps</td></tr>
 <tr><td>Standard</td><td>TIA-232</td><td>TIA-422</td><td>TIA-485</td><td>TIA/EIA-644</td></tr>
 </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">Pull the pieces together: RS-232 trades speed and reach for dead-simple, guaranteed interoperability over a short two-device link.</div>
+<ul>
+<li><strong>It is single-ended and bipolar.</strong> Each signal is one wire measured against a shared ground, swinging $\pm 5$–$15$ V with <em>inverted</em> logic (MARK/idle negative, SPACE positive) and a $\pm 3$ V forbidden zone.</li>
+<li><strong>The big voltage is its only noise defence.</strong> With no common-mode rejection, RS-232 relies purely on a large swing over a short cable — which is also what limits speed and distance (~2500 pF ⇒ ~15 m).</li>
+<li><strong>Framing is 8N1 = 10 bits per byte.</strong> Start + 8 data (LSB first) + stop gives 80% efficiency; the receiver has no clock wire, so it oversamples (16×) and re-syncs on every start bit.</li>
+<li><strong>Both ends must be preset.</strong> Baud, format, and parity are agreed in advance — no auto-negotiation — and the clock-mismatch budget is only ~$\pm 2\%$.</li>
+<li><strong>Topology is point-to-point, full-duplex.</strong> Exactly two devices; connecting two DTEs needs a null-modem crossover, and flow control is RTS/CTS (hardware) or XON/XOFF (software).</li>
+<li><strong>Know when to leave it.</strong> For distance, noise immunity, or many nodes, step up to the differential standards (RS-422/485) or to LVDS/USB/Ethernet for speed.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -226,11 +283,26 @@ $$L_{\max} = \frac{C_{\max}}{C'}.$$
       { q: String.raw`An RS-232 BREAK condition is:`, options: [String.raw`A single stop bit`, String.raw`A continuous SPACE held longer than one character time`, String.raw`A parity error`, String.raw`A negative-voltage idle`], answer: 1, explain: String.raw`BREAK holds the SPACE (logic 0) level past where a stop-bit MARK should appear, so the receiver sees a framing error with all-zero data — an out-of-band attention/wake signal.` }
     ],
     numericals: [
-      { q: String.raw`At 19200 baud with 8N1 framing, how long does it take to transmit a 100-byte message, and what is the effective payload throughput?`, solution: String.raw`Bits per frame $= 10$ (8N1). Bits on wire $= 100 \times 10 = 1000$. Time $= 1000 / 19200 = 52.08$ ms. Effective payload throughput $= \eta R_b = 0.8 \times 19200 = 15360$ bit/s $= 1920$ bytes/s. Check: $100\ \text{bytes} / 1920\ \text{B/s} = 52.08$ ms — consistent.` },
-      { q: String.raw`A link uses 115200 baud, 8E1 (8 data, even parity, 1 stop). Find the frame length, efficiency, and payload rate.`, solution: String.raw`Frame $= 1 + 8 + 1 + 1 = 11$ bits. Efficiency $\eta = 8/11 = 0.727 = 72.7\%$. Payload rate $= 0.727 \times 115200 = 83{,}782$ bit/s $\approx 83.8$ kbit/s $\approx 10.5$ kB/s. The parity bit costs ~7 percentage points of efficiency versus 8N1.` },
-      { q: String.raw`Cable capacitance is 45 pF/m. What is the theoretical maximum length under the 2500 pF limit, ignoring slew and ground offset?`, solution: String.raw`$L_{\max} = C_{\max}/C' = 2500\ \text{pF} / 45\ \text{pF/m} = 55.6$ m. This is optimistic; the practical figure is ~15 m once slew rate, ground-potential difference, and design margin are included.` },
-      { q: String.raw`A transmitter runs at exactly 9600 baud; a receiver's clock is 3% fast. Using 8N1, will the stop bit still be sampled correctly?`, solution: String.raw`The last (stop) bit is sampled at bit index ~9.5 from the start edge (mid of the 10th bit). A 3% clock error accumulates to $0.03 \times 9.5 = 0.285$ bit by then. The mid-bit sample tolerates up to $\pm 0.5$ bit of drift before it slides into an adjacent bit, so $0.285 < 0.5$ — it still works, though margin is tight. Beyond ~5% total the stop bit would be mis-sampled and a framing error would occur.` },
-      { q: String.raw`How many 256-byte packets per second can a 57600 baud, 8N1 link carry at 100% utilisation?`, solution: String.raw`Bits per packet $= 256 \times 10 = 2560$. Packets/s $= 57600 / 2560 = 22.5$ packets/s. Equivalently payload rate $= 0.8 \times 57600 = 46080$ bit/s $= 5760$ B/s, and $5760/256 = 22.5$ packets/s — consistent.` }
+      { q: String.raw`At 19200 baud with 8N1 framing, how long does it take to transmit a 100-byte message, and what is the effective payload throughput?`, solution: String.raw`<p><b>Formula.</b> Total transmit time is the on-wire bit count divided by the baud rate, and effective payload rate is the framing efficiency times the baud rate: $$t = \frac{N_{\text{bytes}}\,N_{\text{frame}}}{R_b}, \qquad R_{\text{data}} = \eta\,R_b = \frac{N_d}{N_{\text{frame}}}\,R_b$$ where $N_{\text{bytes}}$ is the message length, $N_{\text{frame}}=10$ bits per 8N1 character, $R_b$ the baud rate, $N_d=8$ data bits, and $\eta$ the efficiency.</p>
+<p><b>Substitute.</b> $$t = \frac{100 \times 10}{19200}, \qquad R_{\text{data}} = \frac{8}{10}\times 19200$$</p>
+<p><b>Compute.</b> On-wire bits $=100\times10 = 1000$; $t = 1000/19200 = 0.05208\ \text{s} = 52.08$ ms. Payload rate $= 0.8\times19200 = 15360$ bit/s $= 1920$ bytes/s.</p>
+<p><b>Explanation.</b> A 100-byte message clears in about 52 ms at 19.2 kbaud. Cross-check: $100\ \text{bytes}/1920\ \text{B/s} = 52.08$ ms — the two routes agree. The 80% efficiency (2 of every 10 bits are start/stop overhead) is why the payload rate sits below the raw baud.</p>` },
+      { q: String.raw`A link uses 115200 baud, 8E1 (8 data, even parity, 1 stop). Find the frame length, efficiency, and payload rate.`, solution: String.raw`<p><b>Formula.</b> $$N_{\text{frame}} = 1 + N_d + N_p + N_s, \qquad \eta = \frac{N_d}{N_{\text{frame}}}, \qquad R_{\text{data}} = \eta\,R_b$$ with start bit $=1$, data $N_d$, parity $N_p$, stop $N_s$, baud $R_b$.</p>
+<p><b>Substitute.</b> $$N_{\text{frame}} = 1 + 8 + 1 + 1, \qquad \eta = \frac{8}{11}, \qquad R_{\text{data}} = \frac{8}{11}\times 115200$$</p>
+<p><b>Compute.</b> $N_{\text{frame}} = 11$ bits. $\eta = 8/11 = 0.7273 = 72.7\%$. $R_{\text{data}} = 0.7273\times115200 = 83{,}782$ bit/s $\approx 83.8$ kbit/s $\approx 10.5$ kB/s.</p>
+<p><b>Explanation.</b> Adding the parity bit stretches the frame from 10 to 11 bits, dropping efficiency from 80% to 72.7% — about a 7-percentage-point cost. Sanity check: $83.8/115.2 = 0.727$, matching $\eta$, confirming the parity overhead directly scales the payload rate.</p>` },
+      { q: String.raw`Cable capacitance is 45 pF/m. What is the theoretical maximum length under the 2500 pF limit, ignoring slew and ground offset?`, solution: String.raw`<p><b>Formula.</b> $$L_{\max} = \frac{C_{\max}}{C'}$$ where $C_{\max}=2500$ pF is the EIA-232 total-load-capacitance limit and $C'$ is the per-metre cable capacitance.</p>
+<p><b>Substitute.</b> $$L_{\max} = \frac{2500\ \text{pF}}{45\ \text{pF/m}}$$</p>
+<p><b>Compute.</b> $$L_{\max} = 55.6\ \text{m}.$$</p>
+<p><b>Explanation.</b> Purely on the capacitance budget the cable could reach ~56 m, but the quoted practical limit is ~15 m once slew-rate rounding, ground-potential offset, and margin are folded in. Sanity check: lower-capacitance cable (e.g. 25 pF/m) would give 100 m — confirming capacitance, not a fixed distance, is the true ceiling.</p>` },
+      { q: String.raw`A transmitter runs at exactly 9600 baud; a receiver's clock is 3% fast. Using 8N1, will the stop bit still be sampled correctly?`, solution: String.raw`<p><b>Formula.</b> The accumulated timing error at the last sampled bit must stay under half a bit: $$\Delta = \varepsilon \cdot n_{\text{last}} < 0.5\ \text{bit}$$ where $\varepsilon$ is the fractional clock error and $n_{\text{last}}$ the sample index (in bit-times) of the stop bit measured from the start edge.</p>
+<p><b>Substitute.</b> The stop bit of a 10-bit 8N1 frame is sampled at its centre, $n_{\text{last}} \approx 9.5$ bit-times. $$\Delta = 0.03 \times 9.5$$</p>
+<p><b>Compute.</b> $$\Delta = 0.285\ \text{bit} < 0.5\ \text{bit}.$$</p>
+<p><b>Explanation.</b> The drift reaches only 0.285 of a bit by the stop bit, comfortably inside the $\pm0.5$-bit mid-sample window, so the frame decodes correctly (margin is tight). Sanity check: the error hits 0.5 bit at $\varepsilon = 0.5/9.5 \approx 5.3\%$, consistent with the usual "~5% total budget" rule beyond which framing errors appear.</p>` },
+      { q: String.raw`How many 256-byte packets per second can a 57600 baud, 8N1 link carry at 100% utilisation?`, solution: String.raw`<p><b>Formula.</b> $$P = \frac{R_b}{N_{\text{bytes}}\,N_{\text{frame}}}$$ where $R_b$ is the baud rate, $N_{\text{bytes}}$ the packet length, and $N_{\text{frame}}=10$ bits per 8N1 character.</p>
+<p><b>Substitute.</b> $$P = \frac{57600}{256 \times 10}$$</p>
+<p><b>Compute.</b> Bits per packet $= 256\times10 = 2560$; $P = 57600/2560 = 22.5$ packets/s.</p>
+<p><b>Explanation.</b> The line sustains 22.5 full 256-byte packets each second. Cross-check via payload rate: $0.8\times57600 = 46080$ bit/s $= 5760$ B/s, and $5760/256 = 22.5$ packets/s — the two methods agree, confirming the arithmetic.</p>` }
     ],
     realWorld: String.raw`<p>RS-232 remains the default "get me a console" interface across embedded and industrial gear decades after its heyday. Nearly every router, switch, PDU, and server BMC has a serial console port for out-of-band recovery when the network is down. GPS/GNSS modules stream NMEA sentences over a 3-wire RS-232 (or TTL-serial) link at 4800–115200 baud. Bench instruments, older CNC machines, point-of-sale scanners, and RFID readers still ship RS-232 ports, and USB-to-serial adapters (FTDI, CP210x, CH340) keep it alive on modern laptops that dropped the physical DE-9. On microcontrollers the same UART speaks logic-level ("TTL") serial for debug, converted to true $\pm$ RS-232 by a MAX232-class transceiver only when a real cable to a PC COM port is needed. Its persistent limitations — ~15 m reach, single peer, no noise cancellation — are exactly what drive designers to RS-422/485 for factory-floor distances and multidrop networks, and to LVDS/USB/Ethernet for high speed.</p>`,
     related: ['rs422', 'rs485', 'lvds', 'comm-basics']
@@ -241,7 +313,7 @@ $$L_{\max} = \frac{C_{\max}}{C'}.$$
     category: 'Interfaces & Protocols',
     tags: ['rs422', 'differential', 'balanced', 'tia-422', 'multidrop', 'point-to-point', 'twisted-pair', 'long-distance'],
     summary: String.raw`RS-422 (TIA/EIA-422) is a balanced differential interface with one driver and up to ten receivers, spanning ~1200 m at 100 kbps or 10 Mbps at ~12 m, using $\pm 2$–$6$ V differential levels over terminated twisted pair for excellent common-mode noise rejection.`,
-    diagram: { svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+    diagram: [{ svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-rs422" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="18" y="80" width="90" height="60" rx="6" fill="#1c232e" stroke="#4dabf7"/>
 <text x="63" y="106" fill="#e6edf3" text-anchor="middle" font-weight="bold">Driver</text>
@@ -265,8 +337,30 @@ $$L_{\max} = \frac{C_{\max}}{C'}.$$
 <line x1="425" y1="122" x2="425" y2="160" stroke="#9aa7b5" marker-end="url(#arr-rs422)"/>
 <text x="270" y="224" fill="#9aa7b5" text-anchor="middle" font-size="10">one driver broadcasts to up to 10 receivers; termination at the far end</text>
 </svg>`, caption: String.raw`RS-422: a single differential driver feeds a twisted A/B pair broadcasting to up to 10 receivers, with far-end termination R&#7734;&#8776;Z&#8320;.` },
+      { title: String.raw`Differential noise-rejection mechanism`, svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-rs422" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="20" y="70" width="90" height="90" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="65" y="112" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Driver</text>
+<text x="65" y="128" fill="#9aa7b5" text-anchor="middle" font-size="9">V_B, V_A</text>
+<rect x="410" y="70" width="110" height="90" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="465" y="105" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Receiver</text>
+<text x="465" y="122" fill="#9aa7b5" text-anchor="middle" font-size="9">subtracts:</text>
+<text x="465" y="138" fill="#63e6be" text-anchor="middle" font-size="10">V_B &#8722; V_A</text>
+<line x1="110" y1="92" x2="410" y2="92" stroke="#63e6be" stroke-width="2"/>
+<text x="250" y="86" fill="#63e6be" text-anchor="middle" font-size="10">B: signal +s, noise +n</text>
+<line x1="110" y1="140" x2="410" y2="140" stroke="#ffa94d" stroke-width="2"/>
+<text x="250" y="156" fill="#ffa94d" text-anchor="middle" font-size="10">A: signal &#8722;s, noise +n</text>
+<line x1="150" y1="60" x2="370" y2="60" stroke="#b197fc" stroke-dasharray="4 3"/>
+<text x="260" y="52" fill="#b197fc" text-anchor="middle" font-size="9">EMI couples equally (+n) onto BOTH wires</text>
+<line x1="200" y1="55" x2="200" y2="88" stroke="#b197fc" marker-end="url(#arr2-rs422)"/>
+<line x1="320" y1="55" x2="320" y2="88" stroke="#b197fc" marker-end="url(#arr2-rs422)"/>
+<rect x="60" y="190" width="420" height="48" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="270" y="209" fill="#e6edf3" text-anchor="middle" font-size="10">(+s+n) &#8722; (&#8722;s+n) = 2s &#8212; noise n cancels, signal DOUBLES</text>
+<text x="270" y="227" fill="#9aa7b5" text-anchor="middle" font-size="9">common-mode n rejected; differential 2s survives &#8594; 1200 m reach</text>
+</svg>`, caption: String.raw`Noise rejection: interference couples equally (+n) onto both wires, so the receiver's subtraction (V_B&#8722;V_A) cancels the common-mode noise while the wanted differential signal adds to 2s.` }],
     prerequisites: ['rs232', 'noise', 'comm-basics'],
-    intro: String.raw`<p><strong>RS-422</strong> — formally <strong>TIA/EIA-422-B</strong> (ITU-T V.11) — is the differential answer to RS-232's distance and noise limitations. Instead of one wire against ground, RS-422 sends each signal as the <em>difference between two wires</em> (a balanced pair, labelled A/− and B/+). The receiver looks only at the <strong>voltage difference</strong> $V_{AB}$ between the two wires, ignoring whatever noise or ground shift they share in common. This single change — from single-ended to <em>balanced differential</em> — is what lets RS-422 run kilometres and megabits where RS-232 runs metres and kilobits.</p>
+    intro: String.raw`<p><strong>Why RS-422 exists.</strong> RS-232 works beautifully across a short cable but falls apart over distance: single-ended signalling has no way to reject noise or a ground-potential shift between two chassis, so a long run in a noisy factory turns data into garbage. The problem RS-422 solves is <em>carrying serial data reliably over long, electrically hostile cable</em>. Its answer is to stop measuring one wire against ground and instead send each bit as the <em>difference between two wires</em>, so that whatever noise or ground shift both wires pick up together simply cancels at the receiver. That one change buys kilometres of reach and megabits of speed where RS-232 managed metres and kilobits.</p>
+<p><strong>RS-422</strong> — formally <strong>TIA/EIA-422-B</strong> (ITU-T V.11) — is the differential answer to RS-232's distance and noise limitations. Instead of one wire against ground, RS-422 sends each signal as the <em>difference between two wires</em> (a balanced pair, labelled A/− and B/+). The receiver looks only at the <strong>voltage difference</strong> $V_{AB}$ between the two wires, ignoring whatever noise or ground shift they share in common. This single change — from single-ended to <em>balanced differential</em> — is what lets RS-422 run kilometres and megabits where RS-232 runs metres and kilobits.</p>
 <p>RS-422 keeps a familiar link shape: it is essentially <strong>point-to-point or one-driver multidrop</strong>. There is exactly one driver on a bus, but up to <strong>ten receivers</strong> may listen. It is typically wired full-duplex using two pairs (one per direction). Compared to its close sibling RS-485, RS-422 does not support multiple drivers/true bus arbitration — its driver is always enabled — which makes it simpler but non-networking.</p>`,
     sections: [
       {
@@ -346,6 +440,18 @@ $$L_{\max} = \frac{C_{\max}}{C'}.$$
 <tr><td>Max distance / rate</td><td>15 m / 115 kbps</td><td>1200 m / 10 Mbps@12m</td><td>1200 m / 10 Mbps@12m</td><td>~10 m / Gbps</td></tr>
 <tr><td>Standard</td><td>TIA-232</td><td>TIA-422 (V.11)</td><td>TIA-485</td><td>TIA/EIA-644</td></tr>
 </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">One idea does all the heavy lifting: send the signal as a <em>difference</em> between two wires, and the receiver can throw away everything the two wires share — noise, ground shift, interference.</div>
+<ul>
+<li><strong>Balanced differential is the whole trick.</strong> The receiver decides on $V_B - V_A$; noise couples equally onto both wires (common-mode) and subtracts out, while the wanted difference survives — the mechanism behind RS-422's kilometre reach.</li>
+<li><strong>The margin is enormous.</strong> A $\ge \pm 2$ V driver into a $\pm 200$ mV receiver threshold is a 10:1 (20 dB) margin, so the signal can lose a factor of ten to cable attenuation and still be read.</li>
+<li><strong>It is one driver, up to ten receivers.</strong> A broadcast multidrop, <em>not</em> a multi-master bus — the driver is always on. The ten-receiver limit is just $4\,\text{k}\Omega/10 = 400\ \Omega$ still meeting spec.</li>
+<li><strong>Long lines are transmission lines.</strong> Terminate the far (receiving) end with $R_T \approx Z_0$ (100–120 Ω) whenever the cable is electrically long, and add fail-safe bias so an open/cut link idles at a valid mark.</li>
+<li><strong>It is a drop-in electrical upgrade from RS-232.</strong> Same async UART framing; swap only the transceiver and use twisted pair to gain distance and noise immunity — no software change.</li>
+<li><strong>When you need many talkers, move to RS-485.</strong> RS-422's single always-on driver cannot arbitrate a shared bus; RS-485 adds the tristate driver that does.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -436,11 +542,26 @@ $$t_{pd} = \frac{L}{v} = \frac{L\sqrt{\varepsilon_r}}{c}.$$
       { q: String.raw`RS-422 fail-safe bias resistors are added mainly to:`, options: [String.raw`Increase the data rate`, String.raw`Force a valid idle/mark state if the link is open, cut, or unpowered`, String.raw`Terminate the transmission line`, String.raw`Widen the common-mode range`], answer: 1, explain: String.raw`A pull-up on B and pull-down on A (or an internal open-input fail-safe) hold a defined mark so a floating receiver input does not chatter on noise; termination is a separate resistor.` }
     ],
     numericals: [
-      { q: String.raw`An RS-422 driver guarantees $\pm 2.0$ V into the load. The cable attenuates the differential signal by 15 dB. Does the signal still exceed the $\pm 200$ mV receiver threshold?`, solution: String.raw`15 dB = a voltage factor of $10^{15/20} = 5.62$. Received amplitude $= 2.0 / 5.62 = 0.356$ V $= 356$ mV. Since $356\ \text{mV} > 200\ \text{mV}$, yes — the link works with ~5 dB (a factor $356/200 = 1.78$) of margin to spare.` },
-      { q: String.raw`Twelve RS-422 receivers (each 4 kΩ) are placed on one driver. What is the parallel load, and can a driver rated to hold $\pm 2$ V into 400 Ω still meet spec?`, solution: String.raw`Parallel resistance $= 4000/12 = 333\ \Omega$. This is below the 400 Ω the driver is guaranteed to hold at $\pm 2$ V, so the differential output would sag below $\pm 2$ V — out of spec. The standard's 10-receiver limit ($4000/10 = 400\ \Omega$) is the maximum; 12 is too many.` },
-      { q: String.raw`A 600 m RS-422 cable has velocity factor 0.66. Find the one-way propagation delay and comment on whether termination is needed at 5 Mbps.`, solution: String.raw`$v = 0.66 \times 3\times 10^8 = 1.98\times 10^8$ m/s. $t_{pd} = 600 / 1.98\times 10^8 = 3.03\ \mu\text{s}$. Bit time at 5 Mbps $= 200$ ns. Since the one-way delay ($3.03\ \mu$s) is ~15 bit-times — far larger than the rise time — the cable is very "electrically long" and reflections would corrupt data. Termination at the far end is essential.` },
-      { q: String.raw`Using the rate × length $\approx 10^8$ bit·m/s rule, estimate the maximum data rate over 300 m of RS-422 cable.`, solution: String.raw`$R_{\max} \approx (10^8\ \text{bit·m/s}) / 300\ \text{m} = 3.3\times 10^5 = 333$ kbps. This sits sensibly between the anchor points (1 Mbps @ ~120 m and 100 kbps @ ~1200 m).` },
-      { q: String.raw`Two RS-422 chassis have grounds differing by 5 V, and interference adds a 3 V common-mode transient. Is the link within its common-mode range?`, solution: String.raw`Total common-mode = 5 V (ground offset) + 3 V (transient) = 8 V. The receiver's range is $-7$ to $+7$ V, so 8 V <em>exceeds</em> the range — the link may fail on that transient. RS-485 (range $-7$ to $+12$ V) would tolerate it. This shows why ground-offset budgeting matters.` }
+      { q: String.raw`An RS-422 driver guarantees $\pm 2.0$ V into the load. The cable attenuates the differential signal by 15 dB. Does the signal still exceed the $\pm 200$ mV receiver threshold?`, solution: String.raw`<p><b>Formula.</b> An attenuation of $A$ dB scales the amplitude by a voltage factor $$k = 10^{A/20}, \qquad V_{\text{rx}} = \frac{V_{\text{od}}}{k}$$ where $V_{\text{od}}$ is the driver differential output and $V_{\text{rx}}$ the received amplitude.</p>
+<p><b>Substitute.</b> $$k = 10^{15/20}, \qquad V_{\text{rx}} = \frac{2.0\ \text{V}}{k}$$</p>
+<p><b>Compute.</b> $k = 10^{0.75} = 5.62$. $V_{\text{rx}} = 2.0/5.62 = 0.356\ \text{V} = 356$ mV.</p>
+<p><b>Explanation.</b> At 356 mV the signal clears the 200 mV threshold, so the link works — with a factor $356/200 = 1.78$ (about 5 dB) of headroom left. This illustrates why RS-422's 10:1 (20 dB) design margin lets it tolerate long, lossy cable that single-ended RS-232 could not.</p>` },
+      { q: String.raw`Twelve RS-422 receivers (each 4 kΩ) are placed on one driver. What is the parallel load, and can a driver rated to hold $\pm 2$ V into 400 Ω still meet spec?`, solution: String.raw`<p><b>Formula.</b> $N$ equal receivers of input resistance $R_{\text{in}}$ present a parallel load $$R_{\text{par}} = \frac{R_{\text{in}}}{N},$$ which must stay at or above the driver's minimum load $R_{\text{load,min}}$ for the $\pm2$ V output to hold.</p>
+<p><b>Substitute.</b> $$R_{\text{par}} = \frac{4000\ \Omega}{12}, \qquad \text{compare with } R_{\text{load,min}} = 400\ \Omega$$</p>
+<p><b>Compute.</b> $R_{\text{par}} = 333\ \Omega < 400\ \Omega$.</p>
+<p><b>Explanation.</b> Twelve receivers pull the parallel load to 333 Ω, below the 400 Ω the driver can sustain at $\pm2$ V, so the differential output sags out of spec. The 10-receiver limit is exactly where $4000/10 = 400\ \Omega$ is reached — confirming why "one driver, ten receivers" is the ceiling and 12 is too many.</p>` },
+      { q: String.raw`A 600 m RS-422 cable has velocity factor 0.66. Find the one-way propagation delay and comment on whether termination is needed at 5 Mbps.`, solution: String.raw`<p><b>Formula.</b> $$v = \text{VF}\cdot c, \qquad t_{pd} = \frac{L}{v}, \qquad T_b = \frac{1}{R_b}$$ where VF is the velocity factor, $c=3\times10^8$ m/s, $L$ the length, and $T_b$ the bit time at rate $R_b$.</p>
+<p><b>Substitute.</b> $$v = 0.66\times 3\times10^8, \qquad t_{pd} = \frac{600}{v}, \qquad T_b = \frac{1}{5\times10^6}$$</p>
+<p><b>Compute.</b> $v = 1.98\times10^8$ m/s. $t_{pd} = 600/1.98\times10^8 = 3.03\ \mu\text{s}$. $T_b = 200$ ns.</p>
+<p><b>Explanation.</b> The one-way delay (3.03 µs) is about 15 bit-times — far longer than a bit period, so the cable is very "electrically long" and an unterminated far end would reflect edges into later bits. Termination matched to $Z_0$ at the receiving end is essential here.</p>` },
+      { q: String.raw`Using the rate × length $\approx 10^8$ bit·m/s rule, estimate the maximum data rate over 300 m of RS-422 cable.`, solution: String.raw`<p><b>Formula.</b> $$R_{\max} \approx \frac{(R_b \cdot L)_{\text{const}}}{L}$$ where $(R_b\cdot L)_{\text{const}}\approx10^8$ bit·m/s is the roughly constant rate–length product and $L$ the cable length.</p>
+<p><b>Substitute.</b> $$R_{\max} \approx \frac{10^8\ \text{bit·m/s}}{300\ \text{m}}$$</p>
+<p><b>Compute.</b> $$R_{\max} \approx 3.3\times10^5\ \text{bit/s} = 333\ \text{kbps}.$$</p>
+<p><b>Explanation.</b> About 333 kbps is the practical ceiling at 300 m. It sits sensibly between the standard anchor points (≈1 Mbps at ~120 m and 100 kbps at ~1200 m), confirming the inverse rate–length relationship: shorten the cable and the rate rises proportionally.</p>` },
+      { q: String.raw`Two RS-422 chassis have grounds differing by 5 V, and interference adds a 3 V common-mode transient. Is the link within its common-mode range?`, solution: String.raw`<p><b>Formula.</b> The total common-mode voltage the receiver sees is the sum of contributions, which must lie inside the receiver's common-mode window: $$V_{\text{cm}} = V_{\text{gnd}} + V_{\text{noise}}, \qquad -7\ \text{V} \le V_{\text{cm}} \le +7\ \text{V (RS-422)}$$</p>
+<p><b>Substitute.</b> $$V_{\text{cm}} = 5\ \text{V} + 3\ \text{V}$$</p>
+<p><b>Compute.</b> $$V_{\text{cm}} = 8\ \text{V} > 7\ \text{V}.$$</p>
+<p><b>Explanation.</b> At 8 V the common-mode exceeds RS-422's $\pm7$ V range, so the link may fail during that transient. RS-485's wider $-7$ to $+12$ V window would absorb it — which is precisely why plants with large, noisy ground offsets specify RS-485. The takeaway: budget ground offset plus noise against the receiver's CM range.</p>` }
     ],
     realWorld: String.raw`<p>RS-422 is the quiet workhorse of long-haul industrial and instrumentation serial links. Incremental and absolute encoders on servo motors almost universally output differential RS-422 quadrature (A/A̅, B/B̅, Z/Z̅) so the position signal survives the electrically noisy environment of a motor cabinet and a multi-metre cable run to the drive. Broadcast facilities use RS-422 for VTR/camera control and for distributing SMPTE/EBU timecode. Factory PLCs, CNC machines, and marine/avionics data buses lean on RS-422 for reliable point-to-point links out to a kilometre where RS-232 would fail. Classic Apple Macintosh serial ports were RS-422, and many "industrial RS-232" products are internally RS-422/485 with converters. Because the framing is identical to RS-232, upgrading a design for distance and noise immunity is often just a transceiver swap (e.g. a DS26LS31/32 driver/receiver pair) plus twisted-pair cabling and a termination resistor — no software change. When an application needs many talkers on one shared bus rather than one broadcaster, engineers step up to RS-485.</p>`,
     related: ['rs232', 'rs485', 'lvds', 'noise']
@@ -451,7 +572,7 @@ $$t_{pd} = \frac{L}{v} = \frac{L\sqrt{\varepsilon_r}}{c}.$$
     category: 'Interfaces & Protocols',
     tags: ['rs485', 'differential', 'multidrop', 'bus', 'tia-485', 'half-duplex', 'unit-load', 'modbus', 'tristate'],
     summary: String.raw`RS-485 (TIA/EIA-485) is a balanced differential multidrop bus supporting up to 32 unit loads (256 with fractional-load transceivers) of tristate-able drivers and receivers, half- or full-duplex, reaching ~1200 m at 100 kbps or 10 Mbps at ~12 m over a $120\,\Omega$-terminated twisted pair.`,
-    diagram: { svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+    diagram: [{ svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-rs485" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <line x1="55" y1="78" x2="485" y2="78" stroke="#63e6be"/>
 <line x1="55" y1="98" x2="485" y2="98" stroke="#ffa94d"/>
@@ -474,8 +595,55 @@ $$t_{pd} = \frac{L}{v} = \frac{L\sqrt{\varepsilon_r}}{c}.$$
 <line x1="430" y1="98" x2="430" y2="125" stroke="#9aa7b5" marker-end="url(#arr-rs485)"/>
 <text x="270" y="200" fill="#9aa7b5" text-anchor="middle" font-size="10">many tri-state transceivers share one bus, 120&#937; both ends; half-duplex turn-taking</text>
 </svg>`, caption: String.raw`RS-485: multiple tri-state (DE) transceivers hang off one 2-wire differential bus terminated 120&#937; at both ends, taking turns half-duplex.` },
+      { title: String.raw`Bus turnaround: driver-enable timing`, svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-rs485" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<line x1="30" y1="45" x2="510" y2="45" stroke="#9aa7b5"/>
+<text x="270" y="38" fill="#9aa7b5" text-anchor="middle" font-size="10">shared A/B bus &#8212; only ONE driver active at a time</text>
+<rect x="30" y="70" width="140" height="70" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="100" y="94" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Master</text>
+<text x="100" y="111" fill="#63e6be" text-anchor="middle" font-size="9">DE active: polls</text>
+<text x="100" y="126" fill="#9aa7b5" text-anchor="middle" font-size="9">&#8220;RT2, report?&#8221;</text>
+<rect x="200" y="70" width="140" height="70" rx="6" fill="#1c232e" stroke="#9aa7b5"/>
+<text x="270" y="94" fill="#e6edf3" text-anchor="middle" font-size="11">Slave 1</text>
+<text x="270" y="111" fill="#ffa94d" text-anchor="middle" font-size="9">DE tri-state (Z)</text>
+<text x="270" y="126" fill="#9aa7b5" text-anchor="middle" font-size="9">listening</text>
+<rect x="370" y="70" width="140" height="70" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="440" y="94" fill="#e6edf3" text-anchor="middle" font-size="11">Slave 2</text>
+<text x="440" y="111" fill="#63e6be" text-anchor="middle" font-size="9">DE active: responds</text>
+<text x="440" y="126" fill="#9aa7b5" text-anchor="middle" font-size="9">after turnaround</text>
+<line x1="100" y1="70" x2="100" y2="45" stroke="#4dabf7" marker-end="url(#arr2-rs485)"/>
+<line x1="440" y1="45" x2="440" y2="70" stroke="#63e6be" marker-end="url(#arr2-rs485)"/>
+<rect x="30" y="165" width="480" height="70" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="270" y="185" fill="#e6edf3" text-anchor="middle" font-size="10">turnaround sequence (2-wire half-duplex):</text>
+<text x="270" y="202" fill="#9aa7b5" text-anchor="middle" font-size="9">1. master asserts DE, sends poll &#183; 2. master tri-states after last stop bit</text>
+<text x="270" y="218" fill="#9aa7b5" text-anchor="middle" font-size="9">3. line settles (t_turn) &#183; 4. slave asserts DE, sends status &#183; 5. slave tri-states</text>
+<text x="270" y="231" fill="#ffa94d" text-anchor="middle" font-size="9">tri-state too early = clipped byte; too late = collision</text>
+</svg>`, caption: String.raw`Bus turnaround: exactly one driver enables its DE at a time. The master polls, tri-states after its final stop bit, the line settles, then the addressed slave enables DE and responds &#8212; mistimed DE clips a byte or collides.` },
+      { title: String.raw`Fail-safe biasing network`, svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-rs485" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="220" y="20" width="100" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="270" y="40" fill="#e6edf3" text-anchor="middle" font-size="11">Vcc</text>
+<line x1="70" y1="95" x2="470" y2="95" stroke="#63e6be" stroke-width="2"/>
+<text x="120" y="88" fill="#63e6be" text-anchor="middle" font-size="10">B (+)</text>
+<line x1="70" y1="150" x2="470" y2="150" stroke="#ffa94d" stroke-width="2"/>
+<text x="120" y="168" fill="#ffa94d" text-anchor="middle" font-size="10">A (&#8722;)</text>
+<line x1="270" y1="50" x2="270" y2="95" stroke="#b197fc"/>
+<rect x="255" y="58" width="30" height="14" rx="3" fill="#1c232e" stroke="#b197fc"/>
+<text x="330" y="70" fill="#b197fc" text-anchor="middle" font-size="9">pull-up ~560&#937; &#8594; B high</text>
+<line x1="270" y1="150" x2="270" y2="195" stroke="#b197fc"/>
+<rect x="255" y="168" width="30" height="14" rx="3" fill="#1c232e" stroke="#b197fc"/>
+<text x="330" y="192" fill="#b197fc" text-anchor="middle" font-size="9">pull-down ~560&#937; &#8594; A low</text>
+<line x1="220" y1="205" x2="320" y2="205" stroke="#9aa7b5"/>
+<text x="270" y="220" fill="#9aa7b5" text-anchor="middle" font-size="10">GND</text>
+<rect x="60" y="80" width="20" height="85" rx="3" fill="#1c232e" stroke="#b197fc"/>
+<text x="45" y="60" fill="#b197fc" text-anchor="middle" font-size="9">120&#937;</text>
+<rect x="460" y="80" width="20" height="85" rx="3" fill="#1c232e" stroke="#b197fc"/>
+<text x="495" y="60" fill="#b197fc" text-anchor="middle" font-size="9">120&#937;</text>
+<text x="270" y="120" fill="#e6edf3" text-anchor="middle" font-size="10">all drivers tri-stated &#8594; bias holds V_B &gt; V_A (valid idle/mark)</text>
+</svg>`, caption: String.raw`Fail-safe bias network: a pull-up on B and pull-down on A gently force V_B &gt; V_A when every driver is tri-stated, so an idle (floating) bus reads as a valid mark instead of chattering across the &#177;200 mV threshold; the two 120&#937; terminators sit at the bus ends.` }],
     prerequisites: ['rs422', 'rs232', 'noise'],
-    intro: String.raw`<p><strong>RS-485</strong> — formally <strong>TIA/EIA-485-A</strong> — is the networking-capable big brother of RS-422. It keeps the same balanced-differential electrical philosophy (decide on $V_B - V_A$, reject common-mode) but adds the one ingredient RS-422 lacks: <strong>multiple drivers can share the same bus</strong>. Each driver has a <strong>tristate (high-impedance) disabled state</strong>, so many nodes can take turns transmitting on a single twisted pair — a true <em>multidrop, multi-master bus</em>.</p>
+    intro: String.raw`<p><strong>Why RS-485 exists.</strong> RS-422 gave industry long-reach, noise-immune differential links — but only <em>one</em> device could ever drive the wire. A factory or building, though, has dozens of sensors, drives, and controllers that all need to share information over a single cheap cable run. Wiring a separate RS-422 link to each would be a rat's nest. The problem RS-485 solves is <em>letting many devices share one bus and take turns transmitting</em>: it keeps RS-422's differential electrical layer but adds a tristate (high-impedance) driver so that every node can electrically "let go" of the wire when it is not its turn. That single addition turns a point-to-point link into a true multidrop, multi-master network — the backbone of industrial fieldbuses.</p>
+<p><strong>RS-485</strong> — formally <strong>TIA/EIA-485-A</strong> — is the networking-capable big brother of RS-422. It keeps the same balanced-differential electrical philosophy (decide on $V_B - V_A$, reject common-mode) but adds the one ingredient RS-422 lacks: <strong>multiple drivers can share the same bus</strong>. Each driver has a <strong>tristate (high-impedance) disabled state</strong>, so many nodes can take turns transmitting on a single twisted pair — a true <em>multidrop, multi-master bus</em>.</p>
 <p>This makes RS-485 the backbone of industrial fieldbus networking: <strong>Modbus RTU, PROFIBUS, DMX512</strong> (stage lighting), BACnet MS/TP, and countless proprietary sensor networks all ride on RS-485. Its defining specs are the ability to hang <strong>up to 32 "unit loads"</strong> on the bus (extendable to 128 or 256 with fractional-unit-load transceivers), a wide <strong>$-7$ V to $+12$ V common-mode range</strong>, half- or full-duplex operation, and the familiar RS-422 rate/length envelope of 10 Mbps at 12 m down to 100 kbps at 1200 m.</p>`,
     sections: [
       {
@@ -568,6 +736,18 @@ $$t_{pd} = \frac{L}{v} = \frac{L\sqrt{\varepsilon_r}}{c}.$$
 <tr><td>Distance / rate</td><td>15 m / 115 kbps</td><td>1200 m / 10 Mbps@12m</td><td>1200 m / 10 Mbps@12m</td><td>~10 m / Gbps</td></tr>
 <tr><td>Standard</td><td>TIA-232</td><td>TIA-422</td><td>TIA-485</td><td>TIA-644</td></tr>
 </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">RS-485 = RS-422's differential physics + one tristate driver, and almost everything else follows from making a <em>shared</em> bus work.</div>
+<ul>
+<li><strong>Tristate drivers make it a bus.</strong> Each driver can go high-impedance, so many nodes hang off one pair and take turns — a true multidrop, multi-master network, unlike RS-422's single always-on driver.</li>
+<li><strong>Loading is counted in unit loads.</strong> A standard driver holds 32 UL (1 UL ≈ 12 kΩ); fractional-UL parts (1/8 UL ≈ 96 kΩ) extend the count to $32/0.125 = 256$ devices.</li>
+<li><strong>Sharing a wire needs discipline.</strong> Terminate 120 Ω at <em>both</em> ends of a daisy-chained backbone (never a star), and add fail-safe bias so an idle bus with all drivers tristated still reads a valid mark.</li>
+<li><strong>Half-duplex costs turnaround.</strong> A node asserts DE, sends, then must tristate promptly — too early clips a byte, too late collides; the settling delay is real overhead on long buses.</li>
+<li><strong>RS-485 is only the electrical layer.</strong> Addressing and arbitration come from a higher protocol (Modbus RTU, PROFIBUS, DMX512, BACnet MS/TP) carried as ordinary async UART frames.</li>
+<li><strong>Wider common mode, same rate–length envelope.</strong> The $-7$ to $+12$ V range tolerates big plant ground offsets; reach still runs 10 Mbps @ ~12 m down to 100 kbps @ ~1200 m, extended by repeaters.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -655,11 +835,26 @@ $$t_{\text{turn}} \ge 2\,t_{pd} + t_{\text{driver}}.$$
       { q: String.raw`To extend an RS-485 network beyond one 32-UL / 1200 m segment you use:`, options: [String.raw`A longer terminator`, String.raw`A repeater (starts a fresh segment)`, String.raw`Higher voltage`, String.raw`A star hub`], answer: 1, explain: String.raw`A repeater regenerates the signal and resets the unit-load and length budget for a new segment.` }
     ],
     numericals: [
-      { q: String.raw`An RS-485 bus uses transceivers rated at 1/4 unit load. How many can share one segment, and what is each device's approximate input impedance?`, solution: String.raw`Max devices $= 32 / 0.25 = 128$. Since 1 UL ≈ 12 kΩ, a 1/4-UL device has ~$4\times$ that impedance $\approx 48$ kΩ, so it loads the driver 1/4 as much — allowing 4× the standard 32 nodes.` },
-      { q: String.raw`Compute the driver load for a bus with two 120 Ω terminators and 32 receivers of 12 kΩ each. How much current must the driver source to hold $\pm 1.5$ V?`, solution: String.raw`Conductance: terminators $2/120 = 16.67$ mS; receivers $32/12000 = 2.67$ mS; total $19.34$ mS ⇒ $R_{\text{bus}} = 51.7\ \Omega$. Current to hold 1.5 V (differential, driver drives half each side, but taking the full swing across the load): $I = 1.5 / 51.7 = 29$ mA. Well within a standard RS-485 driver's ~60 mA capability. The two terminators dominate the load, not the 32 receivers.` },
-      { q: String.raw`Using the rate × length ≈ $1.2\times 10^8$ bit·m/s rule, what is the maximum data rate on a 500 m RS-485 cable?`, solution: String.raw`$R_{\max} \approx 1.2\times 10^8 / 500 = 2.4\times 10^5 = 240$ kbps. In practice engineers would pick a standard rate at or below this, e.g. 187.5 kbps (a common PROFIBUS rate) or 115.2 kbps for margin.` },
-      { q: String.raw`A 1200 m half-duplex RS-485 bus runs at 100 kbps (velocity $2\times 10^8$ m/s). Estimate the turnaround delay and express it in bit-times.`, solution: String.raw`One-way $t_{pd} = 1200 / 2\times 10^8 = 6\ \mu\text{s}$; round trip $2 t_{pd} = 12\ \mu\text{s}$. Add ~3 µs transceiver enable/disable ⇒ $t_{\text{turn}} \approx 15\ \mu\text{s}$. Bit time at 100 kbps $= 10\ \mu\text{s}$, so turnaround $\approx 1.5$ bit-times — significant overhead when polling many short frames.` },
-      { q: String.raw`A plant has nodes whose grounds vary by up to 9 V, plus 2 V of induced common-mode noise. Is RS-485 within its common-mode range? Would RS-422 survive?`, solution: String.raw`Worst-case common-mode $= 9 + 2 = 11$ V. RS-485 range is $-7$ to $+12$ V, so 11 V is within range — RS-485 works. RS-422's range is only $-7$ to $+7$ V, so 11 V would exceed it and the link could fail. This is precisely why RS-485 widened the common-mode range for large multidrop plants.` }
+      { q: String.raw`An RS-485 bus uses transceivers rated at 1/4 unit load. How many can share one segment, and what is each device's approximate input impedance?`, solution: String.raw`<p><b>Formula.</b> $$N_{\text{dev}} = \frac{N_{\text{UL,max}}}{u}, \qquad R_{\text{in}} = \frac{R_{\text{1UL}}}{u}$$ where $N_{\text{UL,max}}=32$ is the driver's unit-load budget, $u$ the per-device unit-load fraction, and $R_{\text{1UL}}\approx12\ \text{k}\Omega$ the one-UL input impedance.</p>
+<p><b>Substitute.</b> $$N_{\text{dev}} = \frac{32}{0.25}, \qquad R_{\text{in}} = \frac{12\ \text{k}\Omega}{0.25}$$</p>
+<p><b>Compute.</b> $N_{\text{dev}} = 128$ devices; $R_{\text{in}} = 48\ \text{k}\Omega$.</p>
+<p><b>Explanation.</b> A 1/4-UL transceiver has 4× the input impedance (48 kΩ), so it loads the driver one-quarter as much and 4× as many can share the bus (128 vs 32). This is the general mechanism by which fractional-UL parts extend node count without violating the driver's current budget.</p>` },
+      { q: String.raw`Compute the driver load for a bus with two 120 Ω terminators and 32 receivers of 12 kΩ each. How much current must the driver source to hold $\pm 1.5$ V?`, solution: String.raw`<p><b>Formula.</b> Parallel elements add in conductance: $$\frac{1}{R_{\text{bus}}} = \frac{2}{R_T} + \frac{N}{R_{\text{in}}}, \qquad I = \frac{V_{\text{od}}}{R_{\text{bus}}}$$ with two terminators $R_T=120\ \Omega$, $N=32$ receivers of $R_{\text{in}}=12\ \text{k}\Omega$, and target output $V_{\text{od}}=1.5$ V.</p>
+<p><b>Substitute.</b> $$\frac{1}{R_{\text{bus}}} = \frac{2}{120} + \frac{32}{12000}, \qquad I = \frac{1.5}{R_{\text{bus}}}$$</p>
+<p><b>Compute.</b> Terminators $= 16.67$ mS; receivers $= 2.67$ mS; total $= 19.34$ mS $\Rightarrow R_{\text{bus}} = 51.7\ \Omega$. $I = 1.5/51.7 = 29$ mA.</p>
+<p><b>Explanation.</b> The driver need only source ~29 mA, well within a standard RS-485 driver's ~60 mA capability. Notice the two terminators (16.67 mS) dominate over all 32 receivers (2.67 mS) — the reason receiver count barely stresses the driver and termination is the real load.</p>` },
+      { q: String.raw`Using the rate × length ≈ $1.2\times 10^8$ bit·m/s rule, what is the maximum data rate on a 500 m RS-485 cable?`, solution: String.raw`<p><b>Formula.</b> $$R_{\max} \approx \frac{(R_b\cdot L)_{\text{const}}}{L}$$ where $(R_b\cdot L)_{\text{const}}\approx1.2\times10^8$ bit·m/s is the RS-485 rate–length product and $L$ the length.</p>
+<p><b>Substitute.</b> $$R_{\max} \approx \frac{1.2\times10^8}{500}$$</p>
+<p><b>Compute.</b> $$R_{\max} \approx 2.4\times10^5\ \text{bit/s} = 240\ \text{kbps}.$$</p>
+<p><b>Explanation.</b> The cable supports up to ~240 kbps at 500 m. In practice engineers pick a standard rate at or below this — e.g. 187.5 kbps (a common PROFIBUS rate) or 115.2 kbps for margin — since real multidrop buses derate further for stubs, loading, and turnaround.</p>` },
+      { q: String.raw`A 1200 m half-duplex RS-485 bus runs at 100 kbps (velocity $2\times 10^8$ m/s). Estimate the turnaround delay and express it in bit-times.`, solution: String.raw`<p><b>Formula.</b> $$t_{pd} = \frac{L}{v}, \qquad t_{\text{turn}} \ge 2\,t_{pd} + t_{\text{driver}}, \qquad n = \frac{t_{\text{turn}}}{T_b}$$ where $t_{pd}$ is one-way delay, $t_{\text{driver}}$ the transceiver enable/disable time, and $T_b=1/R_b$ the bit time.</p>
+<p><b>Substitute.</b> $$t_{pd} = \frac{1200}{2\times10^8}, \qquad t_{\text{turn}} = 2t_{pd} + 3\ \mu\text{s}, \qquad n = \frac{t_{\text{turn}}}{10\ \mu\text{s}}$$</p>
+<p><b>Compute.</b> $t_{pd} = 6\ \mu\text{s}$; $2t_{pd} = 12\ \mu\text{s}$; $t_{\text{turn}} \approx 12 + 3 = 15\ \mu\text{s}$. Bit time $T_b = 1/10^5 = 10\ \mu\text{s}$, so $n = 15/10 = 1.5$ bit-times.</p>
+<p><b>Explanation.</b> Each direction change costs ~1.5 bit-times of dead air. When a master polls many short frames this turnaround overhead accumulates and cuts throughput — the reason half-duplex RS-485 firmware must tri-state promptly but not early, and why long buses favour fewer, longer messages.</p>` },
+      { q: String.raw`A plant has nodes whose grounds vary by up to 9 V, plus 2 V of induced common-mode noise. Is RS-485 within its common-mode range? Would RS-422 survive?`, solution: String.raw`<p><b>Formula.</b> $$V_{\text{cm}} = V_{\text{gnd}} + V_{\text{noise}}, \qquad V_{\text{cm}} \le V_{\text{cm,max}}$$ compared against RS-485's $+12$ V and RS-422's $+7$ V upper limits.</p>
+<p><b>Substitute.</b> $$V_{\text{cm}} = 9\ \text{V} + 2\ \text{V}$$</p>
+<p><b>Compute.</b> $V_{\text{cm}} = 11$ V. RS-485: $11 < 12$ V (in range). RS-422: $11 > 7$ V (out of range).</p>
+<p><b>Explanation.</b> RS-485 survives the 11 V common-mode; RS-422 would not. This is exactly why RS-485 widened the common-mode window to $-7\ldots+12$ V: large multidrop plants accumulate big ground offsets, and the extra headroom keeps a scattered bus reliable.</p>` }
     ],
     realWorld: String.raw`<p>RS-485 is the dominant physical layer of industrial and building networks. <strong>Modbus RTU</strong> — the lingua franca of PLCs, VFDs, power meters, and sensors — runs on 2-wire half-duplex RS-485, typically at 9600–115200 baud over daisy-chained shielded twisted pair with 120 Ω terminators at each end and fail-safe bias resistors. <strong>PROFIBUS DP</strong> pushes RS-485 to 12 Mbps over short segments in automotive and process plants. <strong>DMX512</strong> stage-lighting control is RS-485 at 250 kbps, and its historical 32-fixture-per-"universe" limit is a direct consequence of the 32-unit-load rule. <strong>BACnet MS/TP</strong> networks HVAC and building controllers, and solar inverters, EV chargers, and battery-management systems widely use RS-485 for their comms bus. The recurring field problems are all about the physical layer: missing or doubled termination, star wiring instead of daisy-chain, no fail-safe bias (bus floats and drops offline), and firmware that tristates the driver too early and clips the last byte, or too late and collides with the next talker. When a design needs more than 32 loads it moves to 1/8-UL transceivers (up to 256) or inserts repeaters; when it needs gigabit rates over a backplane it moves to LVDS or high-speed serial instead.</p>`,
     related: ['rs422', 'rs232', 'lvds', 'noise']
@@ -670,7 +865,7 @@ $$t_{\text{turn}} \ge 2\,t_{pd} + t_{\text{driver}}.$$
     category: 'Interfaces & Protocols',
     tags: ['lvds', 'differential', 'current-mode', 'tia-644', 'high-speed', 'fpd-link', 'serdes', 'low-power', 'displays'],
     summary: String.raw`LVDS (Low-Voltage Differential Signaling, TIA/EIA-644) is a current-mode differential interface with a ~350 mV swing on a $100\,\Omega$-terminated pair about a ~1.2 V common mode, delivering gigabit rates at very low power and low EMI over short point-to-point links (displays, FPD-Link, camera links, backplanes).`,
-    diagram: { svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+    diagram: [{ svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-lvds" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="20" y="75" width="120" height="70" rx="6" fill="#1c232e" stroke="#4dabf7"/>
 <text x="80" y="103" fill="#e6edf3" text-anchor="middle" font-weight="bold">Driver</text>
@@ -688,8 +883,52 @@ $$t_{\text{turn}} \ge 2\,t_{pd} + t_{\text{driver}}.$$
 <text x="270" y="180" fill="#e6edf3" text-anchor="middle" font-size="10">3.5 mA &#215; 100 &#937; = 350 mV across the termination</text>
 <text x="270" y="198" fill="#9aa7b5" text-anchor="middle" font-size="10">point-to-point SerDes; low swing &#8594; low power, low EMI</text>
 </svg>`, caption: String.raw`LVDS: a ~3.5 mA current-mode driver steers current down a 100&#937; differential pair, developing ~350 mV across the receiver-end termination (point-to-point).` },
+      { title: String.raw`Current-steering detail: 3.5 mA to &#177;350 mV`, svg: String.raw`<svg viewBox="0 0 540 240" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-lvds" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="30" y="60" width="120" height="120" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="90" y="88" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Current source</text>
+<text x="90" y="106" fill="#63e6be" text-anchor="middle" font-size="10">3.5 mA (constant)</text>
+<text x="90" y="128" fill="#9aa7b5" text-anchor="middle" font-size="9">4 switches steer</text>
+<text x="90" y="143" fill="#9aa7b5" text-anchor="middle" font-size="9">DIRECTION only</text>
+<text x="90" y="165" fill="#ffa94d" text-anchor="middle" font-size="9">supply I &#8776; const</text>
+<line x1="150" y1="90" x2="400" y2="90" stroke="#63e6be" stroke-width="2" marker-end="url(#arr2-lvds)"/>
+<text x="270" y="83" fill="#63e6be" text-anchor="middle" font-size="9">out on + wire</text>
+<line x1="400" y1="150" x2="150" y2="150" stroke="#ffa94d" stroke-width="2" marker-end="url(#arr2-lvds)"/>
+<text x="270" y="166" fill="#ffa94d" text-anchor="middle" font-size="9">return on &#8722; wire (equal/opposite)</text>
+<rect x="395" y="85" width="24" height="70" rx="3" fill="#1c232e" stroke="#b197fc"/>
+<text x="430" y="124" fill="#b197fc" text-anchor="middle" font-size="10">100&#937;</text>
+<rect x="455" y="70" width="70" height="100" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="490" y="112" fill="#e6edf3" text-anchor="middle" font-size="10">Rx</text>
+<text x="490" y="128" fill="#9aa7b5" text-anchor="middle" font-size="9">comp.</text>
+<rect x="60" y="195" width="430" height="38" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="275" y="213" fill="#e6edf3" text-anchor="middle" font-size="10">V = I&#215;R = 3.5 mA &#215; 100&#937; = &#177;350 mV across the termination</text>
+<text x="275" y="227" fill="#9aa7b5" text-anchor="middle" font-size="9">constant current, only its path flips &#8594; low supply noise, low EMI</text>
+</svg>`, caption: String.raw`Current-steering: a constant 3.5 mA is steered down the + wire and back the &#8722; wire (direction flips per bit); across the 100&#937; termination it develops &#177;350 mV by Ohm's law. Because the magnitude is constant and the two currents are equal/opposite, supply noise and EMI stay very low.` },
+      { title: String.raw`SerDes chain: parallel to LVDS lanes and back`, svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-lvds" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="20" y="65" width="90" height="70" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="65" y="93" fill="#e6edf3" text-anchor="middle" font-size="10">Parallel</text>
+<text x="65" y="109" fill="#9aa7b5" text-anchor="middle" font-size="9">wide bus</text>
+<rect x="140" y="65" width="90" height="70" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="185" y="93" fill="#e6edf3" text-anchor="middle" font-size="10">Serializer</text>
+<text x="185" y="109" fill="#9aa7b5" text-anchor="middle" font-size="9">7:1 / 8b10b</text>
+<rect x="310" y="65" width="90" height="70" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="355" y="93" fill="#e6edf3" text-anchor="middle" font-size="10">Deserializer</text>
+<text x="355" y="109" fill="#9aa7b5" text-anchor="middle" font-size="9">CDR / PLL</text>
+<rect x="430" y="65" width="90" height="70" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="475" y="93" fill="#e6edf3" text-anchor="middle" font-size="10">Parallel</text>
+<text x="475" y="109" fill="#9aa7b5" text-anchor="middle" font-size="9">recovered</text>
+<line x1="110" y1="100" x2="140" y2="100" stroke="#9aa7b5" marker-end="url(#arr3-lvds)"/>
+<line x1="230" y1="88" x2="310" y2="88" stroke="#63e6be" stroke-width="2" marker-end="url(#arr3-lvds)"/>
+<line x1="230" y1="100" x2="310" y2="100" stroke="#63e6be" stroke-width="2" marker-end="url(#arr3-lvds)"/>
+<line x1="230" y1="112" x2="310" y2="112" stroke="#ffa94d" stroke-width="2" marker-end="url(#arr3-lvds)"/>
+<text x="270" y="78" fill="#9aa7b5" text-anchor="middle" font-size="9">few LVDS lanes + clk pair</text>
+<line x1="400" y1="100" x2="430" y2="100" stroke="#9aa7b5" marker-end="url(#arr3-lvds)"/>
+<text x="270" y="160" fill="#9aa7b5" text-anchor="middle" font-size="10">a wide slow bus becomes a few fast 350 mV pairs, then is rebuilt at the far end</text>
+</svg>`, caption: String.raw`SerDes chain: a wide parallel bus is serialised (7:1 or 8b/10b) onto a few high-speed 350 mV LVDS lanes plus a clock pair, then a CDR/PLL deserialiser rebuilds the parallel word at the receiver &#8212; how one thin cable carries a whole panel.` }],
     prerequisites: ['rs422', 'noise', 'bandwidth'],
-    intro: String.raw`<p><strong>LVDS (Low-Voltage Differential Signaling)</strong> — standardised as <strong>TIA/EIA-644(-A)</strong> and, for the ANSI multipoint variant, IEEE 1596.3 (SCI-LVDS) — is the go-to interface when you need <em>gigabit-class speed at very low power and low EMI</em> over a short distance. Where RS-422/485 optimise for <em>distance and robustness</em> with volt-level swings, LVDS optimises for <em>speed and efficiency</em> with a tiny <strong>~350 mV</strong> differential swing.</p>
+    intro: String.raw`<p><strong>Why LVDS exists.</strong> By the 1990s systems needed to move a <em>lot</em> of data quickly across a short distance — pixels to a laptop panel, samples from a fast ADC to an FPGA — and the old ways were failing. Wide parallel buses burned pins and power and radiated badly; large-swing signalling (even differential RS-422) was too slow and too power-hungry to run at gigabit rates across dozens of lanes without cooking the power budget or failing EMC tests. LVDS solves this by shrinking the signal to a tiny <strong>~350 mV</strong> swing and driving it with a <em>constant current</em> instead of a switching voltage. Small, constant, and differential means fast edges, very low power, and almost no radiated noise — exactly what a dense, high-speed, short-reach link needs.</p>
+<p><strong>LVDS (Low-Voltage Differential Signaling)</strong> — standardised as <strong>TIA/EIA-644(-A)</strong> and, for the ANSI multipoint variant, IEEE 1596.3 (SCI-LVDS) — is the go-to interface when you need <em>gigabit-class speed at very low power and low EMI</em> over a short distance. Where RS-422/485 optimise for <em>distance and robustness</em> with volt-level swings, LVDS optimises for <em>speed and efficiency</em> with a tiny <strong>~350 mV</strong> differential swing.</p>
 <p>Two ideas define LVDS. First, it is <strong>current-mode</strong>: instead of switching a voltage, the driver steers a nearly constant <strong>~3.5 mA</strong> current through the two wires in one direction or the other, and that current develops the signal across a <strong>100 Ω termination resistor at the receiver</strong> ($V = IR$). Because the current is roughly constant and just changes direction, the power drawn from the supply barely changes with data, and the two wires' currents are equal-and-opposite, so <strong>near-zero net (common-mode) current flows</strong> — which is why LVDS radiates so little EMI and sips power. Second, the low ~350 mV swing about a low ~1.2 V common mode lets edges be fast and the logic run at gigabit rates while staying quiet. LVDS underlies laptop/TV display links (FPD-Link, "LVDS panels"), Camera Link, and countless chip-to-chip and backplane SerDes.</p>`,
     sections: [
       {
@@ -773,6 +1012,18 @@ $$t_{\text{turn}} \ge 2\,t_{pd} + t_{\text{driver}}.$$
 <tr><td>Power / EMI</td><td>high V, moderate</td><td>moderate</td><td>moderate</td><td><strong>very low / very low</strong></td></tr>
 <tr><td>Standard</td><td>TIA-232</td><td>TIA-422</td><td>TIA-485</td><td>TIA-644 (M-LVDS: TIA-899)</td></tr>
 </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">LVDS sits in the opposite corner from RS-422/485: it trades reach away to buy gigabit speed, tiny power, and very low EMI — and the current-mode driver is what makes all three happen at once.</div>
+<ul>
+<li><strong>It is current-mode, not voltage-mode.</strong> A constant ~3.5 mA is steered through the pair; the signal is $V = IR = 3.5\,\text{mA}\times100\,\Omega = 350$ mV developed across the receiver's termination — remove the resistor and there is no signal.</li>
+<li><strong>Constant current buys low power and low EMI.</strong> The magnitude never changes (only its direction), so supply current is steady and the equal/opposite wire currents give near-zero common-mode current — fields cancel, ~1.2 mW/pair.</li>
+<li><strong>Small swing means fast, but fragile.</strong> A 350 mV swing slews quickly (gigabit rates) but leaves little margin, so LVDS is short-reach (a few m to ~10 m) with a narrow common-mode range (~0–2.4 V) that cannot span big chassis offsets.</li>
+<li><strong>Termination is exact and mandatory.</strong> One 100 Ω resistor right at the receiver both matches $Z_0$ (zero reflection) and creates the voltage — 120 Ω would mismatch and reflect.</li>
+<li><strong>Real links add a SerDes.</strong> LVDS is only the electrical layer; a serializer/deserializer with a forwarded clock (FPD-Link, Camera Link) or embedded clock + 8b/10b carries the actual data, and pairs must be length-matched to hold skew to picoseconds.</li>
+<li><strong>The family scales.</strong> M-LVDS/Bus-LVDS add multipoint backplanes; SLVS drops the swing further for mobile/MIPI lanes — same current-steered differential idea, rescaled.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -868,11 +1119,26 @@ $$t_{\text{skew}} = \frac{\Delta L}{v} < \frac{1}{2}\,\text{UI} = \frac{1}{2 R_b
       { q: String.raw`LVDS receiver fail-safe circuitry ensures that:`, options: [String.raw`The swing rises to 700 mV`, String.raw`An open, shorted, or undriven input yields a defined output (usually high)`, String.raw`The termination is removed`, String.raw`The common-mode range widens to $\pm 7$ V`], answer: 1, explain: String.raw`With only a 350 mV swing and a few-tens-of-mV threshold, a floating lane would chatter; fail-safe forces a known logic level when the input is invalid.` }
     ],
     numericals: [
-      { q: String.raw`An LVDS driver sources 3.5 mA into a 100 Ω termination. Find the differential swing, peak-to-peak swing, and margin over a $\pm 100$ mV receiver threshold.`, solution: String.raw`$V_{\text{od}} = IR = 3.5\ \text{mA} \times 100\ \Omega = 350$ mV. Peak-to-peak (current reverses) $= 2 \times 350 = 700$ mV. Margin over threshold $= 350 - 100 = 250$ mV, i.e. the signal is 3.5× the receiver's minimum — robust.` },
-      { q: String.raw`A design uses a 3.7 mA driver into a 100 Ω load. What is $V_{\text{od}}$, and is it within the 250–450 mV LVDS spec?`, solution: String.raw`$V_{\text{od}} = 3.7\ \text{mA} \times 100\ \Omega = 370$ mV. Since $250 \le 370 \le 450$ mV, it is within the TIA-644 output range. (If the termination were mistakenly 120 Ω, $V_{\text{od}} = 3.7 \times 120 = 444$ mV — still just in range but with a reflection mismatch.)` },
-      { q: String.raw`Compute the per-pair load power for an LVDS link, and compare to an RS-422 driver delivering 2 V into a 100 Ω differential load.`, solution: String.raw`LVDS: $P = I^2 R = (3.5\ \text{mA})^2 \times 100 = 1.2$ mW. RS-422: $P = V^2/R = (2)^2 / 100 = 40$ mW. LVDS uses ~1/33 of the load power — the basis of its power advantage in high-lane-count systems.` },
-      { q: String.raw`A 1.5 Gbps LVDS link runs on PCB traces with velocity 6 ps/mm. To keep intra-pair skew below 1/10 of a UI, what is the maximum + / − length mismatch?`, solution: String.raw`UI $= 1/1.5\times 10^9 = 0.667$ ns $= 667$ ps. Skew budget $= 667/10 = 66.7$ ps. Length mismatch $\Delta L = t_{\text{skew}}/(\text{6 ps/mm}) = 66.7/6 = 11.1$ mm. So match the + and − traces to within ~11 mm (designers typically target a few mm for margin).` },
-      { q: String.raw`Verify that the differential impedance seen by the driver equals the termination. If the pair is 100 Ω differential and terminated in 100 Ω, what fraction of an incident edge reflects?`, solution: String.raw`Reflection coefficient $\Gamma = (R_L - Z_0)/(R_L + Z_0) = (100 - 100)/(100 + 100) = 0$. Zero reflection — the matched 100 Ω termination absorbs the edge completely, keeping the eye clean. This is why the exact 100 Ω value (not 120 Ω) matters for LVDS.` }
+      { q: String.raw`An LVDS driver sources 3.5 mA into a 100 Ω termination. Find the differential swing, peak-to-peak swing, and margin over a $\pm 100$ mV receiver threshold.`, solution: String.raw`<p><b>Formula.</b> $$V_{\text{od}} = I_{\text{source}}\,R_{\text{term}}, \qquad V_{pp} = 2V_{\text{od}}, \qquad M = V_{\text{od}} - V_{\text{th}}$$ where $I_{\text{source}}$ is the steered current, $R_{\text{term}}$ the termination, and $V_{\text{th}}$ the receiver threshold.</p>
+<p><b>Substitute.</b> $$V_{\text{od}} = 3.5\ \text{mA}\times100\ \Omega, \qquad V_{pp} = 2\times350\ \text{mV}, \qquad M = 350 - 100$$</p>
+<p><b>Compute.</b> $V_{\text{od}} = 350$ mV; $V_{pp} = 700$ mV; $M = 250$ mV.</p>
+<p><b>Explanation.</b> The 350 mV swing sits 250 mV above the 100 mV threshold — a 3.5:1 margin, robust for a short link. The peak-to-peak is 700 mV because switching the bit reverses the current direction, giving $\pm350$ mV.</p>` },
+      { q: String.raw`A design uses a 3.7 mA driver into a 100 Ω load. What is $V_{\text{od}}$, and is it within the 250–450 mV LVDS spec?`, solution: String.raw`<p><b>Formula.</b> $$V_{\text{od}} = I_{\text{source}}\,R_{\text{term}}, \qquad 250\ \text{mV} \le V_{\text{od}} \le 450\ \text{mV (TIA-644)}$$</p>
+<p><b>Substitute.</b> $$V_{\text{od}} = 3.7\ \text{mA}\times100\ \Omega$$</p>
+<p><b>Compute.</b> $V_{\text{od}} = 370$ mV, and $250 \le 370 \le 450$ mV.</p>
+<p><b>Explanation.</b> At 370 mV the output is comfortably inside the TIA-644 window. Note the sensitivity to termination: a mistaken 120 Ω would give $3.7\times120 = 444$ mV — still just in range but now impedance-mismatched, so reflections would degrade the eye. The exact 100 Ω value matters in a current-mode link.</p>` },
+      { q: String.raw`Compute the per-pair load power for an LVDS link, and compare to an RS-422 driver delivering 2 V into a 100 Ω differential load.`, solution: String.raw`<p><b>Formula.</b> Power dissipated in the termination is $$P = I^2 R = \frac{V^2}{R}$$ (use current form for the LVDS current-mode driver, voltage form for the RS-422 voltage driver).</p>
+<p><b>Substitute.</b> $$P_{\text{LVDS}} = (3.5\ \text{mA})^2\times100\ \Omega, \qquad P_{422} = \frac{(2\ \text{V})^2}{100\ \Omega}$$</p>
+<p><b>Compute.</b> $P_{\text{LVDS}} = 1.225\times10^{-5}\times100 = 1.2$ mW; $P_{422} = 4/100 = 40$ mW.</p>
+<p><b>Explanation.</b> LVDS burns ~1.2 mW per pair versus ~40 mW for RS-422 — about 1/33 the load power. In a device with dozens of gigabit lanes that ratio dominates the power and thermal budget, which is why LVDS displaced volt-swing signalling for dense, high-lane-count links.</p>` },
+      { q: String.raw`A 1.5 Gbps LVDS link runs on PCB traces with velocity 6 ps/mm. To keep intra-pair skew below 1/10 of a UI, what is the maximum + / − length mismatch?`, solution: String.raw`<p><b>Formula.</b> $$\text{UI} = \frac{1}{R_b}, \qquad t_{\text{skew}} = \frac{\text{UI}}{10}, \qquad \Delta L = \frac{t_{\text{skew}}}{\tau}$$ where $R_b$ is the bit rate, UI the unit interval, and $\tau = 6$ ps/mm the trace delay per length.</p>
+<p><b>Substitute.</b> $$\text{UI} = \frac{1}{1.5\times10^9}, \qquad t_{\text{skew}} = \frac{\text{UI}}{10}, \qquad \Delta L = \frac{t_{\text{skew}}}{6\ \text{ps/mm}}$$</p>
+<p><b>Compute.</b> UI $= 0.667$ ns $= 667$ ps; $t_{\text{skew}} = 66.7$ ps; $\Delta L = 66.7/6 = 11.1$ mm.</p>
+<p><b>Explanation.</b> The + and − traces must match to within ~11 mm to hold skew under 1/10 UI; designers usually target a few mm for margin. This shows why gigabit LVDS demands length-matched routing — higher $R_b$ shrinks the UI and the allowable mismatch together.</p>` },
+      { q: String.raw`Verify that the differential impedance seen by the driver equals the termination. If the pair is 100 Ω differential and terminated in 100 Ω, what fraction of an incident edge reflects?`, solution: String.raw`<p><b>Formula.</b> The reflection coefficient at a load $R_L$ on a line of impedance $Z_0$ is $$\Gamma = \frac{R_L - Z_0}{R_L + Z_0}$$ and the reflected fraction of the edge amplitude is $|\Gamma|$.</p>
+<p><b>Substitute.</b> $$\Gamma = \frac{100 - 100}{100 + 100}$$</p>
+<p><b>Compute.</b> $\Gamma = 0/200 = 0$.</p>
+<p><b>Explanation.</b> With a perfectly matched 100 Ω termination none of the edge reflects, so the eye stays clean. If the termination were 120 Ω, $\Gamma = 20/220 \approx 0.09$, so about 9% reflects and degrades the signal, which is why LVDS specifies 100 Ω exactly, not RS-485's 120 Ω.</p>` }
     ],
     realWorld: String.raw`<p>LVDS is everywhere data has to move fast on a short wire without burning power or radiating. The screen you are reading this on very likely uses an <strong>LVDS/FPD-Link</strong> panel interface: a serializer near the GPU turns parallel RGB pixels into a few gigabit LVDS pairs plus a clock pair running to the display's deserializer, which is why laptops can drive high-resolution panels through a thin hinge cable. <strong>Camera Link</strong> and related machine-vision links carry sensor data to frame grabbers over LVDS. Inside RF and instrumentation systems, high-speed <strong>ADCs and DACs</strong> (and the <strong>JESD204</strong> converter-to-FPGA links) use LVDS or its descendants to stream gigasamples per second to the FPGA fabric — the AD9361 and RFSoC data paths, for example, rely on such differential lanes. Backplanes and board-to-board links in telecom and networking gear use LVDS/BLVDS/M-LVDS for clock and data distribution. The recurring engineering discipline is signal integrity: impedance-controlled ~100 Ω differential routing, tight intra-pair length matching to hold skew to a few picoseconds, and one precise 100 Ω termination right at the receiver. When a design instead needs kilometre reach or a large multidrop field network, engineers step back down to RS-422/485; LVDS deliberately trades that reach away for speed, low power, and low EMI.</p>`,
     related: ['rs422', 'rs485', 'rs232', 'adc']

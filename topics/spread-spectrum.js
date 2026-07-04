@@ -7,7 +7,8 @@ CONTENT.topics.push(
     tags: ['DSSS', 'CDMA', 'processing gain', 'spreading', 'GPS', 'RAKE', 'jamming'],
     summary: String.raw`Direct-sequence spread spectrum multiplies the data by a high-rate pseudorandom chip sequence, widening the bandwidth to trade spectral occupancy for processing gain, low probability of intercept, and multiple-access capability.`,
     prerequisites: ['bpsk', 'psd', 'noise-floor', 'matched-filter'],
-    intro: String.raw`<p>Direct-Sequence Spread Spectrum (DSSS) deliberately spreads a narrowband data signal over a much wider bandwidth by modulating each data symbol with a fast pseudo-noise (PN) <em>chip</em> sequence. The receiver, knowing the same PN code, <em>despreads</em> the signal, collapsing the wanted signal back to its original narrow bandwidth while simultaneously spreading any interferer that was not coded the same way. This asymmetry is the origin of DSSS's celebrated properties: <strong>processing gain</strong>, <strong>low probability of intercept/detection (LPI/LPD)</strong>, <strong>anti-jam (AJ) margin</strong>, and <strong>code-division multiple access (CDMA)</strong>. GPS, IS-95/CDMA2000, WCDMA, and Zigbee are all DSSS systems, and GPS famously arrives roughly 20-30 dB <em>below</em> the thermal noise floor yet is recovered by despreading.</p>`,
+    intro: String.raw`<p><strong>Why DSSS exists.</strong> Ordinary narrowband radio has three chronic problems: it is easy to detect, easy to jam, and it lets only one user occupy a channel at a time. DSSS was invented to attack all three at once. The trick is counter-intuitive — you deliberately make the signal <em>wider</em> in bandwidth than the data needs, seemingly wasting spectrum. But that same widening is what buries the signal below the noise (hard to detect), dilutes any jammer (hard to jam), and lets many coded users overlap in the same band (multiple access). The rest of this topic is really one idea seen from these different angles.</p>
+    <p>Direct-Sequence Spread Spectrum (DSSS) deliberately spreads a narrowband data signal over a much wider bandwidth by modulating each data symbol with a fast pseudo-noise (PN) <em>chip</em> sequence. The receiver, knowing the same PN code, <em>despreads</em> the signal, collapsing the wanted signal back to its original narrow bandwidth while simultaneously spreading any interferer that was not coded the same way. This asymmetry is the origin of DSSS's celebrated properties: <strong>processing gain</strong>, <strong>low probability of intercept/detection (LPI/LPD)</strong>, <strong>anti-jam (AJ) margin</strong>, and <strong>code-division multiple access (CDMA)</strong>. GPS, IS-95/CDMA2000, WCDMA, and Zigbee are all DSSS systems, and GPS famously arrives roughly 20-30 dB <em>below</em> the thermal noise floor yet is recovered by despreading.</p>`,
     sections: [
       {
         h: 'Chips versus bits: the two clocks',
@@ -76,6 +77,18 @@ CONTENT.topics.push(
           <li><strong>Finite code cross-correlation</strong> sets the CDMA capacity and the near-far sensitivity.</li>
           <li><strong>Bandwidth cost:</strong> DSSS demands wide RF front ends, fast ADCs, and precise chip timing — expensive versus narrowband for the same data rate.</li>
         </ul>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">Tie it together: one operation — multiply by a fast known code — buys hiding, anti-jam, and multiple access simultaneously.</div>
+        <ul>
+          <li><strong>Two clocks, one signal:</strong> the fast chip rate $R_c$ sets the bandwidth and the slow bit rate $R_b$ carries the information; their ratio $N=R_c/R_b$ is the spreading factor.</li>
+          <li><strong>Despreading is correlation:</strong> multiplying by the aligned replica works because $c(t)c(t)=1$; anything uncoded (noise, jammer, other users) instead gets spread and averaged away.</li>
+          <li><strong>Processing gain $G_p=10\log_{10}N$</strong> lowers transmitted PSD (LPI) and, after despreading, raises SINR by $N$ — but it is interference margin, not free thermal-noise $E_b/N_0$.</li>
+          <li><strong>Jam margin</strong> $M_j=G_p-(E_b/N_0)_{req}-L_{sys}$ tells you how much stronger a jammer can be and still lose.</li>
+          <li><strong>CDMA and its cost:</strong> distinct codes let many users overlap, limited by cross-correlation, the near-far problem (needs power control), and cured/enhanced by RAKE combining and long codes.</li>
+          <li><strong>GPS is the extreme case:</strong> a 1023-chip code recovers a signal 20–30 dB below the noise floor — pure correlation gain.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -126,6 +139,36 @@ CONTENT.topics.push(
           <text x="400" y="112" fill="#ff6b6b" font-size="9">jammer spread out</text>
         </svg>`,
         caption: 'Spreading lowers signal PSD (LPI). Despreading re-concentrates the wanted signal while a narrowband jammer is spread across the chip bandwidth and rejected.'
+      },
+      {
+        title: String.raw`Full DSSS transmit/receive chain`,
+        svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+          <rect x="0" y="0" width="540" height="250" fill="#1c232e"/>
+          <text x="270" y="18" fill="#e6edf3" font-size="13" text-anchor="middle">DSSS tx/rx chain: spread, channel, despread, integrate</text>
+          <text x="20" y="55" fill="#9aa7b5" font-size="10">data d(t)</text>
+          <circle cx="90" cy="70" r="11" fill="none" stroke="#ffa94d" stroke-width="1.5"/><text x="90" y="75" fill="#ffa94d" font-size="13" text-anchor="middle">×</text>
+          <rect x="30" y="95" width="70" height="26" fill="none" stroke="#b197fc" stroke-width="1.5"/><text x="65" y="112" fill="#e6edf3" font-size="9" text-anchor="middle">PN c(t)</text>
+          <rect x="140" y="57" width="66" height="28" fill="none" stroke="#4dabf7" stroke-width="1.5"/><text x="173" y="75" fill="#e6edf3" font-size="9" text-anchor="middle">BPSK mod</text>
+          <rect x="238" y="57" width="70" height="28" fill="none" stroke="#9aa7b5" stroke-width="1.5"/><text x="273" y="71" fill="#e6edf3" font-size="9" text-anchor="middle">channel</text><text x="273" y="82" fill="#9aa7b5" font-size="8" text-anchor="middle">+noise/jam</text>
+          <rect x="340" y="57" width="66" height="28" fill="none" stroke="#4dabf7" stroke-width="1.5"/><text x="373" y="75" fill="#e6edf3" font-size="9" text-anchor="middle">BPSK demod</text>
+          <circle cx="452" cy="71" r="11" fill="none" stroke="#ffa94d" stroke-width="1.5"/><text x="452" y="76" fill="#ffa94d" font-size="13" text-anchor="middle">×</text>
+          <rect x="392" y="150" width="120" height="28" fill="none" stroke="#b197fc" stroke-width="1.5"/><text x="452" y="168" fill="#e6edf3" font-size="9" text-anchor="middle">aligned PN c(t)</text>
+          <rect x="330" y="180" width="120" height="30" fill="none" stroke="#63e6be" stroke-width="1.5"/><text x="390" y="199" fill="#e6edf3" font-size="9" text-anchor="middle">integrate over Tb</text>
+          <text x="290" y="205" fill="#9aa7b5" font-size="10" text-anchor="end">d&#770;</text>
+          <line x1="70" y1="55" x2="79" y2="63" stroke="#9aa7b5" marker-end="url(#arr3-dsss)"/>
+          <line x1="65" y1="95" x2="87" y2="82" stroke="#9aa7b5" marker-end="url(#arr3-dsss)"/>
+          <line x1="101" y1="70" x2="140" y2="70" stroke="#9aa7b5" marker-end="url(#arr3-dsss)"/>
+          <line x1="206" y1="71" x2="238" y2="71" stroke="#9aa7b5" marker-end="url(#arr3-dsss)"/>
+          <line x1="308" y1="71" x2="340" y2="71" stroke="#9aa7b5" marker-end="url(#arr3-dsss)"/>
+          <line x1="406" y1="71" x2="441" y2="71" stroke="#9aa7b5" marker-end="url(#arr3-dsss)"/>
+          <line x1="452" y1="150" x2="452" y2="83" stroke="#9aa7b5" marker-end="url(#arr3-dsss)"/>
+          <line x1="452" y1="82" x2="452" y2="180" stroke="#9aa7b5"/>
+          <line x1="452" y1="195" x2="290" y2="195" stroke="#9aa7b5" marker-end="url(#arr3-dsss)"/>
+          <text x="115" y="52" fill="#63e6be" font-size="8">spread s=d·c</text>
+          <text x="410" y="52" fill="#63e6be" font-size="8">despread</text>
+          <defs><marker id="arr3-dsss" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#9aa7b5"/></marker></defs>
+        </svg>`,
+        caption: 'End-to-end DSSS: data is multiplied by the PN code and BPSK-modulated; after the noisy/jammed channel the receiver despreads with the time-aligned PN replica and integrates over each bit period to recover the estimate.'
       }
     ],
     equations: [
@@ -196,12 +239,30 @@ CONTENT.topics.push(
       { q: String.raw`If code timing is off by half a chip, the correlator output:`, options: [String.raw`is unchanged`, String.raw`doubles`, String.raw`collapses toward zero`, String.raw`increases by 3 dB`], answer: 2, explain: String.raw`The autocorrelation triangle is only $\pm T_c$ wide.` }
     ],
     numericals: [
-      { q: String.raw`A DSSS link has $R_c = 4.096$ Mcps and $R_b = 16$ kbps. Find $N$ and $G_p$ in dB.`, solution: String.raw`$N = 4.096\times10^6 / 16\times10^3 = 256$. $G_p = 10\log_{10}256 = 24.1$ dB.` },
-      { q: String.raw`Required $E_b/N_0 = 8$ dB, $G_p = 27$ dB, implementation loss 3 dB. What is the jam margin, and by how much can a jammer exceed the signal?`, solution: String.raw`$M_j = 27 - 8 - 3 = 16$ dB. A jammer up to 16 dB stronger than the signal still allows the link to close.` },
-      { q: String.raw`A CDMA cell needs $E_b/N_0 = 7$ dB (numeric 5.01) and uses spreading factor $N=128$. Estimate single-cell pole capacity.`, solution: String.raw`$K \approx 1 + N/(E_b/N_0) = 1 + 128/5.01 \approx 1 + 25.5 \approx 26$ users (before voice-activity and sectorization gains).` },
-      { q: String.raw`GPS C/A: chip rate 1.023 Mcps, code period 1 ms. How many chips per period and what is the per-period processing gain in dB?`, solution: String.raw`Chips $= 1.023\times10^6 \times 10^{-3} = 1023$. $G_p = 10\log_{10}1023 = 30.1$ dB.` },
-      { q: String.raw`A tone jammer has power 20 dB above the DSSS signal at the antenna. With $G_p = 30$ dB and required $E_b/N_0 = 10$ dB, does the link close (ignore losses)?`, solution: String.raw`Effective post-despread jammer-to-signal $= 20 - 30 = -10$ dB (signal 10 dB above spread jammer). Since required is 10 dB and remaining margin equals exactly 10 dB, it just closes with zero margin. Any loss breaks it.` },
-      { q: String.raw`Resolve multipath: chip rate 3.84 Mcps. What path delay difference can a RAKE resolve, and what distance does that correspond to?`, solution: String.raw`$T_c = 1/3.84\times10^6 = 260$ ns. Light travels $c\cdot T_c = 3\times10^8 \times 260\times10^{-9} \approx 78$ m, so paths differing by more than ~78 m are resolvable.` }
+      { q: String.raw`A DSSS link has $R_c = 4.096$ Mcps and $R_b = 16$ kbps. Find $N$ and $G_p$ in dB.`, solution: String.raw`<p><b>Formula.</b> $$ N = \frac{R_c}{R_b}, \qquad G_p[\text{dB}] = 10\log_{10} N, $$ where $R_c$ is the chip rate (chips/s), $R_b$ the data rate (bits/s), $N$ the spreading factor, and $G_p$ the processing gain.</p>
+        <p><b>Substitute.</b> $$ N = \frac{4.096\times10^6}{16\times10^3}, \qquad G_p = 10\log_{10}(256). $$</p>
+        <p><b>Compute.</b> $N = 256$; $G_p = 10\times 2.408 = 24.1$ dB.</p>
+        <p><b>Explanation.</b> Each data bit is spread over 256 chips, so the transmitted bandwidth is 256 times the data bandwidth and the receiver gains 24.1 dB of interference suppression on despreading. Sanity check: $256 = 2^8$, and $10\log_{10}2\approx3$ dB, so $8\times3\approx24$ dB — consistent.</p>` },
+      { q: String.raw`Required $E_b/N_0 = 8$ dB, $G_p = 27$ dB, implementation loss 3 dB. What is the jam margin, and by how much can a jammer exceed the signal?`, solution: String.raw`<p><b>Formula.</b> $$ M_j = G_p - \left(\frac{E_b}{N_0}\right)_{req} - L_{sys}\ \ [\text{dB}], $$ where $M_j$ is the jamming margin, $G_p$ the processing gain, $(E_b/N_0)_{req}$ the demod requirement, and $L_{sys}$ implementation loss (all dB).</p>
+        <p><b>Substitute.</b> $$ M_j = 27 - 8 - 3. $$</p>
+        <p><b>Compute.</b> $M_j = 16$ dB.</p>
+        <p><b>Explanation.</b> A jammer can be up to 16 dB stronger than the signal at the receiver and the link still closes. This is the usable slice of processing gain left after paying the demod requirement and losses — it quantifies anti-jam robustness directly.</p>` },
+      { q: String.raw`A CDMA cell needs $E_b/N_0 = 7$ dB (numeric 5.01) and uses spreading factor $N=128$. Estimate single-cell pole capacity.`, solution: String.raw`<p><b>Formula.</b> $$ K \approx 1 + \frac{G_p}{(E_b/N_0)_{req}}, $$ where $K$ is the number of equal-power users, $G_p=N$ the numeric spreading factor, and $(E_b/N_0)_{req}$ the numeric (linear) demod requirement.</p>
+        <p><b>Substitute.</b> $$ K \approx 1 + \frac{128}{5.01}. $$</p>
+        <p><b>Compute.</b> $128/5.01 = 25.5$, so $K \approx 1 + 25.5 = 26.5 \approx 26$ users.</p>
+        <p><b>Explanation.</b> The desired user tolerates about 25 equal-power interferers, each suppressed by the spreading factor, before its $E_b/N_0$ falls below requirement. This is the interference-limited pole capacity; voice activity and sectorization multiply it further in real systems.</p>` },
+      { q: String.raw`GPS C/A: chip rate 1.023 Mcps, code period 1 ms. How many chips per period and what is the per-period processing gain in dB?`, solution: String.raw`<p><b>Formula.</b> $$ L = R_c\,T_{code}, \qquad G_p[\text{dB}] = 10\log_{10} L, $$ where $L$ is chips per code period, $R_c$ the chip rate, and $T_{code}$ the code period.</p>
+        <p><b>Substitute.</b> $$ L = 1.023\times10^6 \times 10^{-3}, \qquad G_p = 10\log_{10}(1023). $$</p>
+        <p><b>Compute.</b> $L = 1023$ chips; $G_p = 10\times 3.010 = 30.1$ dB.</p>
+        <p><b>Explanation.</b> Correlating over the full 1023-chip code period yields about 30 dB of gain, which is why a GPS C/A signal buried 20–30 dB below the noise floor becomes demodulable. Note $1023 = 2^{10}-1$, the length of a degree-10 m-sequence.</p>` },
+      { q: String.raw`A tone jammer has power 20 dB above the DSSS signal at the antenna. With $G_p = 30$ dB and required $E_b/N_0 = 10$ dB, does the link close (ignore losses)?`, solution: String.raw`<p><b>Formula.</b> $$ \left(\frac{E_b}{N_0}\right)_{avail} = G_p - (J/S), \qquad \text{link closes if } \left(\frac{E_b}{N_0}\right)_{avail} \ge \left(\frac{E_b}{N_0}\right)_{req}, $$ where $J/S$ is the jammer-to-signal ratio at the antenna (dB).</p>
+        <p><b>Substitute.</b> $$ \left(\frac{E_b}{N_0}\right)_{avail} = 30 - 20 = 10\ \text{dB}, \qquad \text{compare with } 10\ \text{dB}. $$</p>
+        <p><b>Compute.</b> Available $= 10$ dB, required $= 10$ dB, so margin $= 10 - 10 = 0$ dB.</p>
+        <p><b>Explanation.</b> The link just closes with exactly zero margin: the 30 dB of gain covers the 20 dB jammer and leaves precisely the 10 dB the demodulator needs. Any implementation loss or fade would break it, so in practice you would want headroom.</p>` },
+      { q: String.raw`Resolve multipath: chip rate 3.84 Mcps. What path delay difference can a RAKE resolve, and what distance does that correspond to?`, solution: String.raw`<p><b>Formula.</b> $$ T_c = \frac{1}{R_c}, \qquad d = c\,T_c, $$ where $T_c$ is the chip duration, $R_c$ the chip rate, $c=3\times10^8$ m/s, and $d$ the resolvable path-length difference.</p>
+        <p><b>Substitute.</b> $$ T_c = \frac{1}{3.84\times10^6}, \qquad d = 3\times10^8 \times 260\times10^{-9}. $$</p>
+        <p><b>Compute.</b> $T_c = 260$ ns; $d = 78$ m.</p>
+        <p><b>Explanation.</b> A RAKE finger can separate multipath components whose arrival times differ by more than one chip (~260 ns), i.e. path lengths differing by more than ~78 m. Wider chip rates give finer resolution, turning delay spread into diversity rather than fading.</p>` }
     ],
     realWorld: String.raw`<p>DSSS underpins GPS (Gold-coded CDMA below the noise floor), IS-95/CDMA2000 and WCDMA cellular (soft handoff and RAKE combining), IEEE 802.15.4/Zigbee (11-chip Barker-like spreading), and military tactical links needing LPI/AJ. The RAKE receiver and fast closed-loop power control were the enabling innovations that let CDMA cellular scale. GPS demonstrates the extreme: recovering a signal 20-30 dB beneath thermal noise purely through correlation gain.</p>`,
     related: ['pn-codes', 'gold-code', 'frequency-hopping', 'bpsk', 'matched-filter']
@@ -213,7 +274,8 @@ CONTENT.topics.push(
     tags: ['FHSS', 'dwell', 'hop set', 'fast hopping', 'slow hopping', 'anti-jam', 'Bluetooth'],
     summary: String.raw`Frequency-hopping spread spectrum rapidly changes the carrier frequency according to a pseudorandom hop pattern, spreading energy over a wide band in time and evading narrowband and partial-band jammers.`,
     prerequisites: ['dsss', 'pn-codes', 'psd', 'bpsk'],
-    intro: String.raw`<p>Frequency-Hopping Spread Spectrum (FHSS) achieves bandwidth expansion not by continuous multiplication (as in DSSS) but by hopping the carrier among many frequencies in a pseudorandom sequence known to both transmitter and receiver. At any instant the signal is narrowband, but averaged over time it occupies the whole hop band. FHSS is prized for anti-jam robustness (a jammer must cover many channels or predict the hops), for graceful coexistence (Bluetooth's adaptive hopping dodges Wi-Fi), and for avoiding the strict chip-level synchronization DSSS demands. This topic covers fast vs slow hopping, dwell time, the hop set, processing gain, partial-band jamming, adaptive hopping, and a head-to-head comparison with DSSS.</p>`,
+    intro: String.raw`<p><strong>Why frequency hopping exists.</strong> DSSS spreads a signal by making it instantaneously wide, which demands a wide, fast, expensive receiver and razor-sharp chip timing. Frequency hopping reaches a similar goal by a completely different route: stay narrowband at every instant, but keep <em>moving</em> the narrow signal around a wide band on a secret schedule. A jammer that does not know the schedule cannot follow you; a listener sees only brief flashes scattered across the band. Because only one narrow channel is used at a time, the radio hardware stays simple and the timing tolerance is loose — you only have to agree on <em>which channel next</em>, not on individual chips. That trade — agility and simplicity instead of instantaneous width — is the reason FHSS exists.</p>
+    <p>Frequency-Hopping Spread Spectrum (FHSS) achieves bandwidth expansion not by continuous multiplication (as in DSSS) but by hopping the carrier among many frequencies in a pseudorandom sequence known to both transmitter and receiver. At any instant the signal is narrowband, but averaged over time it occupies the whole hop band. FHSS is prized for anti-jam robustness (a jammer must cover many channels or predict the hops), for graceful coexistence (Bluetooth's adaptive hopping dodges Wi-Fi), and for avoiding the strict chip-level synchronization DSSS demands. This topic covers fast vs slow hopping, dwell time, the hop set, processing gain, partial-band jamming, adaptive hopping, and a head-to-head comparison with DSSS.</p>`,
     sections: [
       {
         h: 'The hopping mechanism and hop set',
@@ -283,6 +345,17 @@ CONTENT.topics.push(
           <li><strong>Collisions</strong> in unslotted FH networks (two users hop to the same channel) require FEC/retransmission.</li>
           <li><strong>Hop sequence secrecy</strong> is the AJ foundation — a predicted sequence is fully jammable.</li>
         </ul>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">Core idea: narrowband at every instant, wideband over time — spreading is done by motion, not by width.</div>
+        <ul>
+          <li><strong>The hop machine:</strong> a PN sequence drives a synthesizer through a hop set of $M$ channels, spending a dwell $T_d=1/R_h$ on each.</li>
+          <li><strong>Fast vs slow</strong> is set by $R_h$ versus the symbol rate $R_s$: fast hopping ($R_h>R_s$) spreads one symbol over $L=R_h/R_s$ hops for diversity; slow hopping ($R_h<R_s$) sends several symbols per hop and leans on FEC.</li>
+          <li><strong>Processing gain $\approx M$</strong>, the number of channels — decoupled from the hop rate, unlike DSSS.</li>
+          <li><strong>The real threats are partial-band and follower jamming;</strong> FEC + interleaving handles the former, and short dwells (fast hopping) outrun the latter.</li>
+          <li><strong>Practical wins:</strong> looser (hop-timing) synchronization, mild near-far behavior, and adaptive hopping (AFH) for coexistence — at the cost of non-coherent detection and synthesizer settling overhead.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -343,6 +416,28 @@ CONTENT.topics.push(
           <defs><marker id="arr-fh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#9aa7b5"/></marker></defs>
         </svg>`,
         caption: 'The PN code steps the synthesizer through the hop set; the modulated data is mixed onto the current hop frequency.'
+      },
+      {
+        title: String.raw`Partial-band jammer hit probability`,
+        svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+          <rect x="0" y="0" width="540" height="230" fill="#1c232e"/>
+          <text x="270" y="18" fill="#e6edf3" font-size="13" text-anchor="middle">Jammer hit probability and its recovery path</text>
+          <rect x="20" y="50" width="96" height="34" fill="none" stroke="#4dabf7" stroke-width="1.5"/><text x="68" y="64" fill="#e6edf3" font-size="9" text-anchor="middle">M hop</text><text x="68" y="76" fill="#e6edf3" font-size="9" text-anchor="middle">channels</text>
+          <rect x="150" y="50" width="110" height="34" fill="none" stroke="#ff6b6b" stroke-width="1.5"/><text x="205" y="64" fill="#e6edf3" font-size="9" text-anchor="middle">jammer covers</text><text x="205" y="76" fill="#e6edf3" font-size="9" text-anchor="middle">Wj = ρ·Wss</text>
+          <circle cx="320" cy="67" r="18" fill="none" stroke="#ffa94d" stroke-width="1.5"/><text x="320" y="65" fill="#ffa94d" font-size="9" text-anchor="middle">Phit</text><text x="320" y="76" fill="#ffa94d" font-size="9" text-anchor="middle">= ρ</text>
+          <rect x="380" y="50" width="130" height="34" fill="none" stroke="#b197fc" stroke-width="1.5"/><text x="445" y="64" fill="#e6edf3" font-size="9" text-anchor="middle">fraction ρ of hops</text><text x="445" y="76" fill="#e6edf3" font-size="9" text-anchor="middle">corrupted</text>
+          <rect x="200" y="140" width="140" height="34" fill="none" stroke="#63e6be" stroke-width="1.5"/><text x="270" y="154" fill="#e6edf3" font-size="9" text-anchor="middle">FEC + interleaving</text><text x="270" y="166" fill="#e6edf3" font-size="9" text-anchor="middle">recovers hits</text>
+          <rect x="380" y="140" width="130" height="34" fill="none" stroke="#4dabf7" stroke-width="1.5"/><text x="445" y="161" fill="#e6edf3" font-size="9" text-anchor="middle">clean data out</text>
+          <line x1="116" y1="67" x2="150" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fh)"/>
+          <line x1="260" y1="67" x2="302" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fh)"/>
+          <line x1="338" y1="67" x2="380" y2="67" stroke="#9aa7b5" marker-end="url(#arr3-fh)"/>
+          <line x1="445" y1="84" x2="445" y2="140" stroke="#9aa7b5" marker-end="url(#arr3-fh)"/>
+          <line x1="380" y1="157" x2="340" y2="157" stroke="#9aa7b5" marker-end="url(#arr3-fh)"/>
+          <line x1="270" y1="140" x2="270" y2="115" stroke="#9aa7b5"/><line x1="270" y1="115" x2="445" y2="115" stroke="#9aa7b5"/>
+          <text x="60" y="205" fill="#9aa7b5" font-size="9">Random hop lands in the jammed band with probability ρ = Wj / Wss; the rest of the block survives.</text>
+          <defs><marker id="arr3-fh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#9aa7b5"/></marker></defs>
+        </svg>`,
+        caption: 'A partial-band jammer occupying a fraction ρ of the hop band corrupts each random hop with probability Phit = ρ; FEC plus interleaving repairs that fraction of hits so the recovered data stays clean.'
       }
     ],
     equations: [
@@ -406,12 +501,30 @@ CONTENT.topics.push(
       { q: String.raw`Which system is a classic FHSS example?`, options: [String.raw`GPS`, String.raw`WCDMA`, String.raw`Bluetooth`, String.raw`Zigbee`], answer: 2, explain: String.raw`Bluetooth hops; GPS/WCDMA/Zigbee are DSSS.` }
     ],
     numericals: [
-      { q: String.raw`A FHSS system has 512 channels of 25 kHz each. Find total spread bandwidth and processing gain in dB.`, solution: String.raw`$W_{ss}=512\times25\text{ kHz}=12.8$ MHz. $G_p=10\log_{10}512=27.1$ dB.` },
-      { q: String.raw`Hop rate 5000 hops/s. Symbol rate 1000 sym/s. Is this fast or slow hopping, and how many hops per symbol?`, solution: String.raw`$R_h>R_s$ so fast hopping. Hops per symbol $L=R_h/R_s=5000/1000=5$.` },
-      { q: String.raw`A follower jammer needs 300 us to detect and 200 us to retune; propagation adds 50 us. What maximum dwell defeats it?`, solution: String.raw`Total latency $=300+200+50=550$ us. Choose $T_d<550$ us (e.g. 500 us) so the signal hops away first.` },
-      { q: String.raw`Bluetooth classic: 79 channels, 1600 hops/s. Processing gain and dwell?`, solution: String.raw`$G_p=10\log_{10}79\approx19.0$ dB; $T_d=1/1600=625$ us.` },
-      { q: String.raw`A partial-band jammer covers 8 of 64 channels. What is the per-hop hit probability?`, solution: String.raw`$P_{hit}=\rho=8/64=0.125$ (12.5% of hops corrupted, to be recovered by FEC).` },
-      { q: String.raw`Synthesizer settles in 50 us. At 2000 hops/s, what fraction of each dwell is wasted as guard time?`, solution: String.raw`$T_d=1/2000=500$ us. Wasted fraction $=50/500=10\%$.` }
+      { q: String.raw`A FHSS system has 512 channels of 25 kHz each. Find total spread bandwidth and processing gain in dB.`, solution: String.raw`<p><b>Formula.</b> $$ W_{ss} = M\,\Delta f, \qquad G_p[\text{dB}] = 10\log_{10} M, $$ where $M$ is the number of hop channels, $\Delta f$ the channel spacing, $W_{ss}$ the total hopped bandwidth, and $G_p$ the processing gain.</p>
+        <p><b>Substitute.</b> $$ W_{ss} = 512 \times 25\ \text{kHz}, \qquad G_p = 10\log_{10}(512). $$</p>
+        <p><b>Compute.</b> $W_{ss} = 12800$ kHz $= 12.8$ MHz; $G_p = 10\times 2.709 = 27.1$ dB.</p>
+        <p><b>Explanation.</b> The signal is narrowband (25 kHz) at any instant but averages over 12.8 MHz, giving 27.1 dB of anti-jam gain equal to the number of channels. Sanity check: $512 = 2^9$, so $G_p \approx 9\times3 = 27$ dB.</p>` },
+      { q: String.raw`Hop rate 5000 hops/s. Symbol rate 1000 sym/s. Is this fast or slow hopping, and how many hops per symbol?`, solution: String.raw`<p><b>Formula.</b> $$ L = \frac{R_h}{R_s}, \qquad \text{fast if } R_h > R_s,\ \text{slow if } R_h < R_s, $$ where $R_h$ is the hop rate, $R_s$ the symbol rate, and $L$ the number of hops per symbol.</p>
+        <p><b>Substitute.</b> $$ L = \frac{5000}{1000}. $$</p>
+        <p><b>Compute.</b> $L = 5$ hops per symbol; since $R_h > R_s$ this is fast hopping.</p>
+        <p><b>Explanation.</b> Each symbol is spread across 5 different frequencies, giving frequency diversity within one symbol so a jammer must corrupt several hops to destroy it. The cost is a fast, agile synthesizer and non-coherent combining.</p>` },
+      { q: String.raw`A follower jammer needs 300 us to detect and 200 us to retune; propagation adds 50 us. What maximum dwell defeats it?`, solution: String.raw`<p><b>Formula.</b> $$ T_d < \tau_{detect} + \tau_{retune} + \tau_{prop}, $$ where $T_d$ is the dwell time and the right side is the follower jammer's total detect-plus-retune-plus-propagation latency.</p>
+        <p><b>Substitute.</b> $$ T_d < 300 + 200 + 50\ \ [\mu s]. $$</p>
+        <p><b>Compute.</b> Total latency $= 550$ $\mu$s, so choose $T_d < 550$ $\mu$s (e.g. 500 $\mu$s).</p>
+        <p><b>Explanation.</b> If the dwell is shorter than the jammer's reaction time, the signal has already hopped to a new frequency before the jammer's energy arrives, defeating the attack. This is why fast hopping with short dwells is inherently anti-jam against follower (repeat) jammers.</p>` },
+      { q: String.raw`Bluetooth classic: 79 channels, 1600 hops/s. Processing gain and dwell?`, solution: String.raw`<p><b>Formula.</b> $$ G_p[\text{dB}] = 10\log_{10} M, \qquad T_d = \frac{1}{R_h}, $$ where $M$ is the channel count, $R_h$ the hop rate, and $T_d$ the dwell (time per hop).</p>
+        <p><b>Substitute.</b> $$ G_p = 10\log_{10}(79), \qquad T_d = \frac{1}{1600}. $$</p>
+        <p><b>Compute.</b> $G_p = 10\times 1.898 = 19.0$ dB; $T_d = 625\times10^{-6}$ s $= 625$ $\mu$s.</p>
+        <p><b>Explanation.</b> The 79-channel hop set yields a modest 19 dB of gain and a 625 $\mu$s slot — the familiar Bluetooth timing. This gain is smaller than typical DSSS, so Bluetooth leans on adaptive hopping and coding rather than raw processing gain.</p>` },
+      { q: String.raw`A partial-band jammer covers 8 of 64 channels. What is the per-hop hit probability?`, solution: String.raw`<p><b>Formula.</b> $$ P_{hit} = \rho = \frac{W_j}{W_{ss}} = \frac{M_j}{M}, $$ where $\rho$ is the jammed fraction of the band, $M_j$ the number of jammed channels, and $M$ the total channels.</p>
+        <p><b>Substitute.</b> $$ P_{hit} = \frac{8}{64}. $$</p>
+        <p><b>Compute.</b> $P_{hit} = 0.125$ (12.5%).</p>
+        <p><b>Explanation.</b> On average one hop in eight lands in the jammed sub-band and is corrupted; FEC with interleaving is then relied upon to recover that 12.5% of hits. A smart jammer chooses $\rho$ to maximize damage, which is exactly why coding is essential in FHSS.</p>` },
+      { q: String.raw`Synthesizer settles in 50 us. At 2000 hops/s, what fraction of each dwell is wasted as guard time?`, solution: String.raw`<p><b>Formula.</b> $$ T_d = \frac{1}{R_h}, \qquad \text{waste fraction} = \frac{\tau_{settle}}{T_d}, $$ where $\tau_{settle}$ is the synthesizer settling time, $R_h$ the hop rate, and $T_d$ the dwell.</p>
+        <p><b>Substitute.</b> $$ T_d = \frac{1}{2000}, \qquad \text{waste} = \frac{50\ \mu s}{500\ \mu s}. $$</p>
+        <p><b>Compute.</b> $T_d = 500$ $\mu$s; waste fraction $= 0.10 = 10\%$.</p>
+        <p><b>Explanation.</b> One tenth of each dwell is dead guard time while the synthesizer retunes. As hop rate rises the dwell shrinks toward the fixed settling time, so this overhead grows and ultimately caps the practical hop rate.</p>` }
     ],
     realWorld: String.raw`<p>FHSS is the heart of Bluetooth (79 channels, adaptive hopping to dodge Wi-Fi), military tactical radios such as SINCGARS and HAVE QUICK (anti-jam voice/data), and legacy 802.11 FHSS. Its resistance to follower and partial-band jamming, plus looser synchronization and mild near-far behavior, make it attractive where agility and coexistence matter more than raw multipath resolution. Adaptive hopping is a key enabler of Bluetooth's survival in the congested 2.4 GHz ISM band.</p>`,
     related: ['dsss', 'pn-codes', 'fec', 'bpsk', 'psd']
@@ -423,7 +536,8 @@ CONTENT.topics.push(
     tags: ['PN', 'm-sequence', 'LFSR', 'primitive polynomial', 'autocorrelation', 'maximal length'],
     summary: String.raw`Maximal-length sequences (m-sequences) are pseudorandom binary codes generated by a linear-feedback shift register with a primitive polynomial, achieving period $2^n-1$ and near-ideal two-valued autocorrelation.`,
     prerequisites: ['dsss', 'comm-basics'],
-    intro: String.raw`<p>Pseudo-noise (PN) codes are deterministic binary sequences that <em>look</em> random (flat spectrum, balanced, noise-like autocorrelation) yet are reproducible at both transmitter and receiver — exactly what spread spectrum needs. The workhorse PN code is the <strong>maximal-length sequence</strong> ("m-sequence"), produced by a linear-feedback shift register (LFSR) whose feedback taps correspond to a <strong>primitive polynomial</strong>. m-sequences have period $2^n-1$ for an $n$-stage register, satisfy Golomb's randomness postulates (balance, run, and two-valued autocorrelation), and are the building blocks of Gold and Kasami code families. Their one weakness — poor mutual cross-correlation — motivates Gold codes for CDMA.</p>`,
+    intro: String.raw`<p><strong>Why PN codes exist.</strong> Spread spectrum needs a spreading sequence with two properties that seem to conflict: it must look as random as noise (so it spreads energy evenly and hides the signal), yet it must be exactly reproducible at the receiver (so the receiver can despread it). True random noise fails the second test — you could never regenerate it. PN codes resolve the paradox: they are generated by a tiny deterministic circuit, so both ends produce the identical sequence, while statistically they mimic a coin-flip stream. This topic is about the most important such code, the m-sequence, and why its razor-sharp autocorrelation makes it the natural choice for synchronization.</p>
+    <p>Pseudo-noise (PN) codes are deterministic binary sequences that <em>look</em> random (flat spectrum, balanced, noise-like autocorrelation) yet are reproducible at both transmitter and receiver — exactly what spread spectrum needs. The workhorse PN code is the <strong>maximal-length sequence</strong> ("m-sequence"), produced by a linear-feedback shift register (LFSR) whose feedback taps correspond to a <strong>primitive polynomial</strong>. m-sequences have period $2^n-1$ for an $n$-stage register, satisfy Golomb's randomness postulates (balance, run, and two-valued autocorrelation), and are the building blocks of Gold and Kasami code families. Their one weakness — poor mutual cross-correlation — motivates Gold codes for CDMA.</p>`,
     sections: [
       {
         h: 'The LFSR and maximal length',
@@ -481,6 +595,17 @@ CONTENT.topics.push(
           <li><strong>Gold codes</strong> and <strong>Kasami codes</strong> are engineered from m-sequences to bound cross-correlation to small three-valued (Gold) or few-valued (Kasami) sets — trading a slightly worse autocorrelation for controlled, low cross-correlation and large family sizes.</li>
         </ul>
         <div class="callout">m-sequence: best autocorrelation, worst cross-correlation. Gold code: slightly worse autocorrelation, bounded low cross-correlation and huge family. Pick per application.</div>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">One-line summary: a small LFSR with the right taps manufactures a noise-like yet reproducible code with a thumbtack autocorrelation.</div>
+        <ul>
+          <li><strong>Generation:</strong> an $n$-stage LFSR with feedback taps forming a <em>primitive</em> polynomial cycles through all $2^n-1$ nonzero states, giving period $L=2^n-1$ (the all-zero state is excluded because it is absorbing).</li>
+          <li><strong>Randomness (Golomb):</strong> balance ($2^{n-1}$ ones, one more than zeros), the run distribution, and two-valued autocorrelation are what make it look like noise.</li>
+          <li><strong>Two-valued autocorrelation:</strong> peak 1 at zero shift, $-1/L$ everywhere else — the sharp peak is why m-sequences are ideal for synchronization and ranging.</li>
+          <li><strong>Counting and sizing:</strong> there are $\phi(2^n-1)/n$ distinct m-sequences, and a target period needs $n\ge\lceil\log_2(L_{req}+1)\rceil$ stages.</li>
+          <li><strong>The catch:</strong> mutual cross-correlation is large and unbounded, so raw m-sequences are poor CDMA address codes — motivating Gold and Kasami families.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -599,12 +724,30 @@ CONTENT.topics.push(
       { q: String.raw`The autocorrelation "thumbtack" is valuable because it enables:`, options: [String.raw`higher data rate`, String.raw`clean synchronization/acquisition`, String.raw`coherent combining`, String.raw`lower power`], answer: 1, explain: String.raw`A single sharp peak locks code phase.` }
     ],
     numericals: [
-      { q: String.raw`For $n=10$, find the period, the number of 1s and 0s per period.`, solution: String.raw`$L=2^{10}-1=1023$. Ones $=2^9=512$; zeros $=512-1=511$.` },
-      { q: String.raw`What is the smallest LFSR that gives a period of at least 65000?`, solution: String.raw`Need $2^n-1\ge65000\Rightarrow n\ge\log_2(65001)=15.99\Rightarrow n=16$, giving $2^{16}-1=65535$.` },
-      { q: String.raw`Give the normalized off-peak autocorrelation for a degree-7 m-sequence.`, solution: String.raw`$L=2^7-1=127$; off-peak $=-1/127\approx-0.0079$, essentially noise-like.` },
-      { q: String.raw`How many distinct m-sequences exist for $n=6$?`, solution: String.raw`$L=63=3^2\cdot7$; $\phi(63)=63(1-1/3)(1-1/7)=63\cdot\tfrac23\cdot\tfrac67=36$. $N=36/6=6$ sequences.` },
-      { q: String.raw`An m-sequence chips at 5 Mcps with $n=10$. What is the code period in time?`, solution: String.raw`$L=1023$ chips; period $=1023/5\times10^6=204.6$ us.` },
-      { q: String.raw`For a degree-12 m-sequence, give the longest runs of 1s and 0s.`, solution: String.raw`Longest run of 1s $=n=12$; longest run of 0s $=n-1=11$.` }
+      { q: String.raw`For $n=10$, find the period, the number of 1s and 0s per period.`, solution: String.raw`<p><b>Formula.</b> $$ L = 2^n - 1, \qquad N_1 = 2^{n-1}, \qquad N_0 = 2^{n-1} - 1, $$ where $L$ is the m-sequence period, $N_1$ the number of ones and $N_0$ the number of zeros per period.</p>
+        <p><b>Substitute.</b> $$ L = 2^{10} - 1, \qquad N_1 = 2^9, \qquad N_0 = 2^9 - 1. $$</p>
+        <p><b>Compute.</b> $L = 1023$; $N_1 = 512$; $N_0 = 511$.</p>
+        <p><b>Explanation.</b> There is exactly one more 1 than 0 (the balance property), because every nonzero 10-bit state appears once and the excluded all-zero state would have contributed the missing 0. This near-balance is why the sequence looks noise-like with a nearly flat spectrum.</p>` },
+      { q: String.raw`What is the smallest LFSR that gives a period of at least 65000?`, solution: String.raw`<p><b>Formula.</b> $$ n \ge \lceil \log_2(L_{req} + 1) \rceil, \qquad L = 2^n - 1, $$ where $L_{req}$ is the required period and $n$ the register length.</p>
+        <p><b>Substitute.</b> $$ n \ge \log_2(65000 + 1) = \log_2(65001). $$</p>
+        <p><b>Compute.</b> $\log_2(65001) = 15.99$, so round up to $n = 16$, giving $L = 2^{16} - 1 = 65535$.</p>
+        <p><b>Explanation.</b> A 15-stage register only reaches $2^{15}-1 = 32767 < 65000$, so 16 stages are needed; 16 stages comfortably exceed the target at 65535. The ceiling reflects that register length is an integer.</p>` },
+      { q: String.raw`Give the normalized off-peak autocorrelation for a degree-7 m-sequence.`, solution: String.raw`<p><b>Formula.</b> $$ L = 2^n - 1, \qquad R(\tau\neq 0) = -\frac{1}{L}, $$ where $L$ is the period and $R$ the normalized periodic autocorrelation at any nonzero shift.</p>
+        <p><b>Substitute.</b> $$ L = 2^7 - 1, \qquad R = -\frac{1}{127}. $$</p>
+        <p><b>Compute.</b> $L = 127$; $R = -0.0079$.</p>
+        <p><b>Explanation.</b> The off-peak level of $-0.0079$ is essentially zero next to the peak of 1, giving the thumbtack autocorrelation prized for synchronization. Longer sequences push this even closer to zero.</p>` },
+      { q: String.raw`How many distinct m-sequences exist for $n=6$?`, solution: String.raw`<p><b>Formula.</b> $$ N_{seq} = \frac{\phi(2^n - 1)}{n}, \qquad \phi(N) = N\prod_{p\mid N}\left(1 - \tfrac1p\right), $$ where $\phi$ is Euler's totient and $N_{seq}$ the number of distinct m-sequences (equal to the number of degree-$n$ primitive polynomials).</p>
+        <p><b>Substitute.</b> $$ L = 2^6 - 1 = 63 = 3^2\cdot 7, \qquad \phi(63) = 63\left(1-\tfrac13\right)\left(1-\tfrac17\right), \qquad N_{seq} = \frac{\phi(63)}{6}. $$</p>
+        <p><b>Compute.</b> $\phi(63) = 63\cdot\tfrac23\cdot\tfrac67 = 36$; $N_{seq} = 36/6 = 6$ sequences.</p>
+        <p><b>Explanation.</b> Only 6 maximal-length codes of period 63 exist — far too few to serve as distinct CDMA user addresses, which is exactly the shortage that motivates Gold codes.</p>` },
+      { q: String.raw`An m-sequence chips at 5 Mcps with $n=10$. What is the code period in time?`, solution: String.raw`<p><b>Formula.</b> $$ L = 2^n - 1, \qquad T_{period} = \frac{L}{R_c}, $$ where $L$ is the code length in chips, $R_c$ the chip rate, and $T_{period}$ the time to run one full period.</p>
+        <p><b>Substitute.</b> $$ L = 2^{10} - 1 = 1023, \qquad T_{period} = \frac{1023}{5\times10^6}. $$</p>
+        <p><b>Compute.</b> $T_{period} = 2.046\times10^{-4}$ s $= 204.6$ $\mu$s.</p>
+        <p><b>Explanation.</b> The code repeats every 204.6 $\mu$s, which sets how often the correlator sees a fresh full-period peak and bounds the acquisition search window. Faster chipping shortens this period proportionally.</p>` },
+      { q: String.raw`For a degree-12 m-sequence, give the longest runs of 1s and 0s.`, solution: String.raw`<p><b>Formula.</b> $$ \text{max run of 1s} = n, \qquad \text{max run of 0s} = n - 1, $$ where $n$ is the register length.</p>
+        <p><b>Substitute.</b> $$ \text{max run of 1s} = 12, \qquad \text{max run of 0s} = 12 - 1. $$</p>
+        <p><b>Compute.</b> Longest run of 1s $= 12$; longest run of 0s $= 11$.</p>
+        <p><b>Explanation.</b> A run of twelve 1s corresponds to the all-ones state occurring once per period, but a run of twelve 0s would require the forbidden all-zero state, so zero-runs top out one shorter. This asymmetry is a fingerprint of maximal-length sequences.</p>` }
     ],
     realWorld: String.raw`<p>m-sequences appear everywhere: GPS uses degree-10 LFSRs (period 1023) to build the C/A Gold codes; scramblers and BER test patterns (PRBS-7, PRBS-15, PRBS-23, PRBS-31) are m-sequences used to stress serial links; radar and channel-sounding use their thumbtack autocorrelation for ranging. Their linear structure (predictable from $2n$ output bits via Berlekamp-Massey) means they are not cryptographically secure — a caution for secure systems, which layer nonlinear combiners on top.</p>`,
     related: ['gold-code', 'dsss', 'frequency-hopping', 'comm-basics']
@@ -616,7 +759,8 @@ CONTENT.topics.push(
     tags: ['Gold code', 'preferred pair', 'cross-correlation', 'CDMA', 'GPS PRN', 'code family'],
     summary: String.raw`Gold codes are large families of spreading sequences formed by XOR-ing shifted preferred pairs of m-sequences, offering a huge code set with bounded three-valued cross-correlation ideal for CDMA.`,
     prerequisites: ['pn-codes', 'dsss'],
-    intro: String.raw`<p>m-sequences have superb autocorrelation but too few members and unbounded cross-correlation to serve as CDMA address codes. <strong>Gold codes</strong> solve this: by XOR-ing two carefully chosen ("preferred pair") m-sequences at every relative shift, Robert Gold showed one obtains a family of $2^n+1$ sequences whose mutual cross-correlation is bounded to just three values. This large, well-behaved family is exactly what CDMA and GPS need to keep many users mutually distinguishable. The trade is slightly degraded autocorrelation (Gold codes are not maximal-length so their autocorrelation is no longer strictly two-valued), accepted in exchange for controlled cross-correlation and family size.</p>`,
+    intro: String.raw`<p><strong>Why Gold codes exist.</strong> CDMA hands every user a different code and lets them all transmit at once; the receiver picks out its user by correlating against that user's code. This only works if any two codes are nearly "invisible" to each other — low cross-correlation — and if there are enough distinct codes to go around. m-sequences ace the first job for a single user (their autocorrelation is ideal) but flunk the multi-user test: there are very few of them and pairs can correlate strongly. Gold codes are the engineered answer that trades a touch of autocorrelation quality for a huge family of mutually quiet codes.</p>
+    <p>m-sequences have superb autocorrelation but too few members and unbounded cross-correlation to serve as CDMA address codes. <strong>Gold codes</strong> solve this: by XOR-ing two carefully chosen ("preferred pair") m-sequences at every relative shift, Robert Gold showed one obtains a family of $2^n+1$ sequences whose mutual cross-correlation is bounded to just three values. This large, well-behaved family is exactly what CDMA and GPS need to keep many users mutually distinguishable. The trade is slightly degraded autocorrelation (Gold codes are not maximal-length so their autocorrelation is no longer strictly two-valued), accepted in exchange for controlled cross-correlation and family size.</p>`,
     sections: [
       {
         h: 'Construction from a preferred pair',
@@ -668,6 +812,18 @@ CONTENT.topics.push(
           <li>Each of the ~32 active satellites uses a distinct PRN (different G2 tap pair / shift).</li>
           <li>Bounded cross-correlation lets all satellites share the L1 carrier (CDMA) without mutual capture.</li>
           <li>The code repeats every 1 ms (1023 chips at 1.023 Mcps), which sets acquisition search granularity.</li>
+        </ul>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">Big picture: Gold codes buy CDMA a large family of codes with a hard, predictable ceiling on mutual interference.</div>
+        <ul>
+          <li><strong>Construction:</strong> XOR one m-sequence $u$ with every cyclic shift of a preferred-pair partner $v$; picking the shift $k$ selects one of $2^n+1$ codes.</li>
+          <li><strong>Preferred pairs matter:</strong> only pairs satisfying the conditions on $n$ (not divisible by 4) and a specific decimation give the bounded three-valued cross-correlation.</li>
+          <li><strong>Three-valued cross-correlation</strong> $\{-1,-t(n),t(n)-2\}$ with $t(n)=1+2^{\lfloor(n+2)/2\rfloor}$ caps how much one user can interfere with another.</li>
+          <li><strong>The trade:</strong> non-parent Gold codes are not maximal-length, so autocorrelation gains sidelobes — a small price for family size and bounded cross-correlation.</li>
+          <li><strong>Bigger is cleaner:</strong> normalized cross-correlation $t(n)/L\sim\sqrt{2/L}$ shrinks with length, so longer codes serve more users with less mutual interference.</li>
+          <li><strong>GPS is the flagship:</strong> a length-1023 ($n=10$) Gold code with $t=65$ gives each satellite a distinct PRN sharing one L1 carrier.</li>
         </ul>`
       }
     ],
@@ -779,12 +935,30 @@ CONTENT.topics.push(
       { q: String.raw`The two parent m-sequences of a Gold family:`, options: [String.raw`are excluded`, String.raw`are usually counted in the $2^n+1$`, String.raw`have zero autocorrelation`, String.raw`must be identical`], answer: 1, explain: String.raw`Family size $2^n-1$ shifts $+2$ parents.` }
     ],
     numericals: [
-      { q: String.raw`Compute the Gold family size and $t(n)$ for $n=9$.`, solution: String.raw`Family size $=2^9+1=513$. $t(9)=1+2^{\lfloor11/2\rfloor}=1+2^5=33$; values $\{-1,-33,31\}$.` },
-      { q: String.raw`For GPS ($n=10$), give the normalized worst-case cross-correlation.`, solution: String.raw`$t=65$, $L=1023$; normalized $=65/1023\approx0.0635$, about $-24$ dB relative to the autopeak.` },
-      { q: String.raw`How many Gold codes of length 31 exist, and what is their peak cross-correlation?`, solution: String.raw`$n=5$: family $=2^5+1=33$ codes; $t(5)=9$, so peak cross-correlation magnitude is 9 (normalized $9/31\approx0.29$).` },
-      { q: String.raw`A CDMA system needs at least 200 distinct address codes. What minimum $n$ gives enough Gold codes?`, solution: String.raw`Need $2^n+1\ge200\Rightarrow 2^n\ge199\Rightarrow n\ge8$ (gives $257$). $n=8$.` },
-      { q: String.raw`For $n=11$, find $t(n)$ and the three cross-correlation values.`, solution: String.raw`$t(11)=1+2^{\lfloor13/2\rfloor}=1+2^6=65$; values $\{-1,-65,63\}$.` },
-      { q: String.raw`Two Gold codes of length 1023 are correlated; the result reads $-65$. Is this expected, and what does it mean?`, solution: String.raw`Yes — $-65$ is one of the allowed three values ($\{-1,-65,63\}$ for $n=10$), representing the worst-case bounded interference between the two users.` }
+      { q: String.raw`Compute the Gold family size and $t(n)$ for $n=9$.`, solution: String.raw`<p><b>Formula.</b> $$ N_{Gold} = 2^n + 1, \qquad t(n) = 1 + 2^{\lfloor (n+2)/2 \rfloor}, $$ where $N_{Gold}$ is the family size and $t(n)$ sets the peak of the three-valued cross-correlation set $\{-1,-t,t-2\}$.</p>
+        <p><b>Substitute.</b> $$ N_{Gold} = 2^9 + 1, \qquad t(9) = 1 + 2^{\lfloor 11/2 \rfloor} = 1 + 2^5. $$</p>
+        <p><b>Compute.</b> $N_{Gold} = 513$; $t(9) = 1 + 32 = 33$, giving values $\{-1, -33, 31\}$.</p>
+        <p><b>Explanation.</b> A single preferred pair yields 513 usable spreading codes — vastly more than the handful of length-511 m-sequences — with cross-correlation capped at magnitude 33. That combination of large family and bounded interference is precisely what CDMA needs.</p>` },
+      { q: String.raw`For GPS ($n=10$), give the normalized worst-case cross-correlation.`, solution: String.raw`<p><b>Formula.</b> $$ t(n) = 1 + 2^{\lfloor (n+2)/2 \rfloor}, \qquad \theta_{norm} = \frac{t(n)}{L}, \qquad \theta_{dB} = 20\log_{10}\theta_{norm}, $$ where $L = 2^n - 1$ and $\theta_{norm}$ is the peak cross-correlation relative to the autopeak.</p>
+        <p><b>Substitute.</b> $$ t(10) = 1 + 2^6 = 65, \qquad L = 1023, \qquad \theta_{norm} = \frac{65}{1023}. $$</p>
+        <p><b>Compute.</b> $\theta_{norm} = 0.0635$; $\theta_{dB} = 20\log_{10}(0.0635) \approx -24$ dB.</p>
+        <p><b>Explanation.</b> The worst mutual interference between two GPS PRNs is about 24 dB below their own correlation peak — low enough that dozens of satellites share the L1 carrier without one capturing another. Longer codes would push this even lower.</p>` },
+      { q: String.raw`How many Gold codes of length 31 exist, and what is their peak cross-correlation?`, solution: String.raw`<p><b>Formula.</b> $$ L = 2^n - 1, \qquad N_{Gold} = 2^n + 1, \qquad t(n) = 1 + 2^{\lfloor (n+2)/2 \rfloor}, $$ with normalized peak $t(n)/L$.</p>
+        <p><b>Substitute.</b> $$ L = 31 \Rightarrow n = 5, \qquad N_{Gold} = 2^5 + 1, \qquad t(5) = 1 + 2^{\lfloor 7/2 \rfloor} = 1 + 2^3. $$</p>
+        <p><b>Compute.</b> $N_{Gold} = 33$ codes; $t(5) = 9$; normalized peak $= 9/31 \approx 0.29$.</p>
+        <p><b>Explanation.</b> Short Gold codes have relatively high cross-correlation (0.29, only about $-11$ dB), so few-user or short-code systems suffer more multiple-access interference. This is why practical CDMA uses long codes where $t(n)/L$ is small.</p>` },
+      { q: String.raw`A CDMA system needs at least 200 distinct address codes. What minimum $n$ gives enough Gold codes?`, solution: String.raw`<p><b>Formula.</b> $$ N_{Gold} = 2^n + 1 \ge N_{req} \quad\Rightarrow\quad n \ge \log_2(N_{req} - 1), $$ where $N_{req}$ is the number of required codes.</p>
+        <p><b>Substitute.</b> $$ 2^n + 1 \ge 200 \quad\Rightarrow\quad 2^n \ge 199 \quad\Rightarrow\quad n \ge \log_2(199) = 7.64. $$</p>
+        <p><b>Compute.</b> Round up to $n = 8$, giving $N_{Gold} = 2^8 + 1 = 257 \ge 200$.</p>
+        <p><b>Explanation.</b> A degree-7 family provides only $129 < 200$ codes, so 8 stages are required; degree 8 comfortably supplies 257 addresses. Larger $n$ also lowers normalized cross-correlation, a double benefit for capacity.</p>` },
+      { q: String.raw`For $n=11$, find $t(n)$ and the three cross-correlation values.`, solution: String.raw`<p><b>Formula.</b> $$ t(n) = 1 + 2^{\lfloor (n+2)/2 \rfloor}, \qquad \theta_{cross} \in \{-1,\ -t(n),\ t(n)-2\}, $$ where $\theta_{cross}$ is the (un-normalized) cross-correlation.</p>
+        <p><b>Substitute.</b> $$ t(11) = 1 + 2^{\lfloor 13/2 \rfloor} = 1 + 2^6. $$</p>
+        <p><b>Compute.</b> $t(11) = 65$; the three values are $\{-1, -65, 63\}$.</p>
+        <p><b>Explanation.</b> Note $n=11$ (odd) and $n=10$ (even) both give $t=65$ because the floor of $(n+2)/2$ lands on 6 in each case. So the length-2047 and length-1023 families share the same peak magnitude, but the longer code has smaller normalized cross-correlation.</p>` },
+      { q: String.raw`Two Gold codes of length 1023 are correlated; the result reads $-65$. Is this expected, and what does it mean?`, solution: String.raw`<p><b>Formula.</b> $$ L = 1023 \Rightarrow n = 10, \qquad t(10) = 1 + 2^6 = 65, \qquad \theta_{cross} \in \{-1,\ -t,\ t-2\} = \{-1,\ -65,\ 63\}. $$</p>
+        <p><b>Substitute.</b> Check whether $-65$ is a member of $\{-1, -65, 63\}$.</p>
+        <p><b>Compute.</b> Yes — $-65 = -t(10)$ is exactly the negative-peak member of the three-valued set.</p>
+        <p><b>Explanation.</b> The reading is expected and represents the worst-case bounded interference between these two users; the guarantee that cross-correlation can never exceed magnitude 65 is the whole reason Gold codes are used for CDMA. Relative to the autopeak of 1023 it is about $-24$ dB down.</p>` }
     ],
     realWorld: String.raw`<p>Gold codes are the address scheme of GPS (37 C/A PRNs of length 1023) and appear in WCDMA scrambling (18-bit Gold codes truncated to a 38400-chip radio frame) and other CDMA systems. Their bounded three-valued cross-correlation is what lets dozens of satellites or users share one carrier without one signal capturing another. Kasami sequences push cross-correlation even lower (the Welch/Sidelnikov bound) at the cost of smaller families, and are used where the tightest isolation is required.</p>`,
     related: ['pn-codes', 'dsss', 'frequency-hopping']
@@ -796,7 +970,8 @@ CONTENT.topics.push(
     tags: ['FEC', 'code rate', 'Hamming distance', 'coding gain', 'block code', 'convolutional', 'LDPC', 'Turbo', 'interleaving'],
     summary: String.raw`Forward error correction adds structured redundancy so the receiver can detect and correct errors without retransmission, trading bandwidth/rate for coding gain that pushes performance toward the Shannon limit.`,
     prerequisites: ['bpsk', 'noise', 'comm-basics'],
-    intro: String.raw`<p>Forward Error Correction (FEC) adds carefully structured redundant bits at the transmitter so the receiver can correct channel errors on its own, with no feedback or retransmission. The cost is a lower information rate (or more bandwidth) — the code rate $R=k/n<1$; the reward is <strong>coding gain</strong>: the same bit-error rate at a lower $E_b/N_0$, sometimes several dB, worth enormous power or range in a link budget. FEC ranges from simple block codes (Hamming, BCH, Reed-Solomon) through convolutional codes (Viterbi-decoded) to capacity-approaching Turbo and LDPC codes that operate within a fraction of a dB of the Shannon limit. This topic develops code rate, Hamming/minimum distance, error-correcting capability, the code families, coding gain, interleaving, and concatenation.</p>`,
+    intro: String.raw`<p><strong>Why FEC exists.</strong> Every real channel corrupts bits, and the naive fix — ask the sender to retransmit whatever arrived wrong — fails whenever feedback is slow, unavailable, or the link is one-way. A deep-space probe cannot wait an hour for a "please repeat"; a broadcast has no back-channel at all. FEC solves this by sending the redundancy <em>up front</em>: extra structured bits travel alongside the data so the receiver can reconstruct the original entirely on its own. You pay in rate or bandwidth, but you gain "coding gain" — the same reliability at far less transmit power, which in a link budget is worth its weight in gold.</p>
+    <p>Forward Error Correction (FEC) adds carefully structured redundant bits at the transmitter so the receiver can correct channel errors on its own, with no feedback or retransmission. The cost is a lower information rate (or more bandwidth) — the code rate $R=k/n<1$; the reward is <strong>coding gain</strong>: the same bit-error rate at a lower $E_b/N_0$, sometimes several dB, worth enormous power or range in a link budget. FEC ranges from simple block codes (Hamming, BCH, Reed-Solomon) through convolutional codes (Viterbi-decoded) to capacity-approaching Turbo and LDPC codes that operate within a fraction of a dB of the Shannon limit. This topic develops code rate, Hamming/minimum distance, error-correcting capability, the code families, coding gain, interleaving, and concatenation.</p>`,
     sections: [
       {
         h: 'Code rate and redundancy',
@@ -861,6 +1036,18 @@ CONTENT.topics.push(
           <li><strong>Hard-decision</strong> decoding uses only the demodulator's 1/0 output.</li>
           <li><strong>Soft-decision</strong> decoding uses the analog confidence (log-likelihood) of each bit, gaining roughly <strong>2 dB</strong> over hard decisions — the reason modern decoders (Viterbi soft, Turbo, LDPC) are soft-input.</li>
         </ul>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">Essence: spend rate to buy distance between codewords; that distance becomes coding gain in the link budget.</div>
+        <ul>
+          <li><strong>Rate $R=k/n$</strong> is the throughput lever; bandwidth expansion for fixed data rate is $1/R$. Lower rate means more protection but more overhead.</li>
+          <li><strong>Minimum distance $d_{min}$ is king:</strong> it corrects $t=\lfloor(d_{min}-1)/2\rfloor$ errors and detects up to $d_{min}-1$, because non-overlapping decoding spheres need $d_{min}\ge2t+1$.</li>
+          <li><strong>Three families:</strong> block (fixed blocks; RS excels on bursts), convolutional (memory, Viterbi-decoded), and iterative Turbo/LDPC (soft, near-Shannon).</li>
+          <li><strong>Coding gain</strong> is the dB reduction in required $E_b/N_0$ at a target BER; the absolute floor is the Shannon limit $E_b/N_0=\ln2=-1.59$ dB.</li>
+          <li><strong>Two force-multipliers:</strong> interleaving turns bursts into scattered errors, and soft-decision decoding adds about 2 dB over hard decisions.</li>
+          <li><strong>Concatenation</strong> (outer RS + interleaver + inner convolutional) combines burst and random-error strength — the classic deep-space and broadcast scheme.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -908,6 +1095,26 @@ CONTENT.topics.push(
           <text x="300" y="132" fill="#ffa94d" font-size="10">coding gain (dB)</text>
         </svg>`,
         caption: 'At a fixed BER the coded curve sits to the left of the uncoded curve; the horizontal gap is the coding gain in dB.'
+      },
+      {
+        title: String.raw`FEC code taxonomy`,
+        svg: String.raw`<svg viewBox="0 0 540 240" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+          <rect x="0" y="0" width="540" height="240" fill="#1c232e"/>
+          <text x="270" y="18" fill="#e6edf3" font-size="13" text-anchor="middle">FEC code families</text>
+          <rect x="205" y="34" width="130" height="30" fill="none" stroke="#e6edf3" stroke-width="1.5"/><text x="270" y="53" fill="#e6edf3" font-size="10" text-anchor="middle">FEC codes</text>
+          <rect x="20" y="110" width="150" height="46" fill="none" stroke="#4dabf7" stroke-width="1.5"/><text x="95" y="128" fill="#4dabf7" font-size="10" text-anchor="middle">Block</text><text x="95" y="143" fill="#9aa7b5" font-size="8" text-anchor="middle">Hamming, BCH, RS</text>
+          <rect x="195" y="110" width="150" height="46" fill="none" stroke="#63e6be" stroke-width="1.5"/><text x="270" y="128" fill="#63e6be" font-size="10" text-anchor="middle">Convolutional</text><text x="270" y="143" fill="#9aa7b5" font-size="8" text-anchor="middle">R=1/2 K=7, Viterbi</text>
+          <rect x="370" y="110" width="150" height="46" fill="none" stroke="#b197fc" stroke-width="1.5"/><text x="445" y="128" fill="#b197fc" font-size="10" text-anchor="middle">Iterative</text><text x="445" y="143" fill="#9aa7b5" font-size="8" text-anchor="middle">Turbo, LDPC</text>
+          <line x1="270" y1="64" x2="95" y2="110" stroke="#9aa7b5" marker-end="url(#arr3-fec)"/>
+          <line x1="270" y1="64" x2="270" y2="110" stroke="#9aa7b5" marker-end="url(#arr3-fec)"/>
+          <line x1="270" y1="64" x2="445" y2="110" stroke="#9aa7b5" marker-end="url(#arr3-fec)"/>
+          <text x="95" y="180" fill="#9aa7b5" font-size="8" text-anchor="middle">fixed (n,k) blocks</text>
+          <text x="270" y="180" fill="#9aa7b5" font-size="8" text-anchor="middle">memory, constraint length K</text>
+          <text x="445" y="180" fill="#9aa7b5" font-size="8" text-anchor="middle">soft iterative, near Shannon</text>
+          <text x="270" y="215" fill="#9aa7b5" font-size="9" text-anchor="middle">Left to right: rising complexity and coding gain (toward the −1.59 dB limit).</text>
+          <defs><marker id="arr3-fec" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#9aa7b5"/></marker></defs>
+        </svg>`,
+        caption: 'The three FEC families: block codes on fixed (n,k) blocks, convolutional codes with shift-register memory (Viterbi-decoded), and iterative Turbo/LDPC codes whose soft belief-propagation decoding approaches the Shannon limit.'
       }
     ],
     equations: [
@@ -971,12 +1178,30 @@ CONTENT.topics.push(
       { q: String.raw`A single-error-correcting Hamming code has $d_{min}$:`, options: [String.raw`2`, String.raw`3`, String.raw`4`, String.raw`5`], answer: 1, explain: String.raw`$d_{min}=3\Rightarrow t=1$.` }
     ],
     numericals: [
-      { q: String.raw`A (255,223) Reed-Solomon code (bytes). Find the code rate and number of correctable symbol errors.`, solution: String.raw`$R=223/255\approx0.875$. Parity symbols $n-k=32$; RS corrects $t=(n-k)/2=16$ symbol errors.` },
-      { q: String.raw`A block code has $d_{min}=9$. How many errors can it correct and detect?`, solution: String.raw`Correct $t=\lfloor(9-1)/2\rfloor=4$. Detect up to $d_{min}-1=8$ errors.` },
-      { q: String.raw`Uncoded BPSK needs 9.6 dB $E_b/N_0$ for BER $10^{-5}$; a coded system needs 4.4 dB. What is the coding gain?`, solution: String.raw`$G_{code}=9.6-4.4=5.2$ dB.` },
-      { q: String.raw`Estimate asymptotic hard-decision gain of a rate-1/2 code with $d_{min}=10$.`, solution: String.raw`$G_a\approx10\log_{10}(R\,d_{min})=10\log_{10}(0.5\times10)=10\log_{10}5=7.0$ dB (soft adds ~2 dB more, ideal).` },
-      { q: String.raw`A channel has bursts up to 200 bits. Design a block interleaver depth for a code correcting isolated errors only.`, solution: String.raw`Choose interleaver depth $D>200$ so a 200-bit burst spreads to at most one error per codeword; e.g. $D=256$ rows. Cost: latency proportional to $D\times$ block length.` },
-      { q: String.raw`Shannon capacity of a 20 MHz channel at SNR 30 dB (1000 linear).`, solution: String.raw`$C=B\log_2(1+\mathrm{SNR})=20\times10^6\log_2(1001)\approx20\times10^6\times9.97\approx199$ Mbps.` }
+      { q: String.raw`A (255,223) Reed-Solomon code (bytes). Find the code rate and number of correctable symbol errors.`, solution: String.raw`<p><b>Formula.</b> $$ R = \frac{k}{n}, \qquad t = \frac{n-k}{2}, $$ where $(n,k)$ are the coded and information symbol counts, $R$ the code rate, and $t$ the number of correctable symbol errors (RS is maximum-distance-separable, so $d_{min}=n-k+1$).</p>
+        <p><b>Substitute.</b> $$ R = \frac{223}{255}, \qquad t = \frac{255-223}{2}. $$</p>
+        <p><b>Compute.</b> $R = 0.875$; parity symbols $n-k = 32$; $t = 16$ symbol errors.</p>
+        <p><b>Explanation.</b> This classic code spends 32 parity bytes to correct any 16 corrupted bytes per 255-byte block while keeping 87.5% throughput. Because it works on whole symbols, a single burst that damages many bits within one byte still costs only one symbol — ideal against bursts.</p>` },
+      { q: String.raw`A block code has $d_{min}=9$. How many errors can it correct and detect?`, solution: String.raw`<p><b>Formula.</b> $$ t = \left\lfloor \frac{d_{min}-1}{2} \right\rfloor, \qquad e_{detect} = d_{min} - 1, $$ where $t$ is the correctable and $e_{detect}$ the detectable error count.</p>
+        <p><b>Substitute.</b> $$ t = \left\lfloor \frac{9-1}{2} \right\rfloor, \qquad e_{detect} = 9 - 1. $$</p>
+        <p><b>Compute.</b> $t = \lfloor 4 \rfloor = 4$ correctable; $e_{detect} = 8$ detectable.</p>
+        <p><b>Explanation.</b> Decoding spheres of radius 4 around each codeword stay disjoint since $d_{min}=9\ge 2\cdot4+1$. If used purely for detection the code catches any pattern of up to 8 errors; correction is the more demanding task, hence the smaller number.</p>` },
+      { q: String.raw`Uncoded BPSK needs 9.6 dB $E_b/N_0$ for BER $10^{-5}$; a coded system needs 4.4 dB. What is the coding gain?`, solution: String.raw`<p><b>Formula.</b> $$ G_{code} = \left(\frac{E_b}{N_0}\right)_{uncoded} - \left(\frac{E_b}{N_0}\right)_{coded}\ \ [\text{dB, at equal BER}], $$ the horizontal gap between the coded and uncoded BER curves.</p>
+        <p><b>Substitute.</b> $$ G_{code} = 9.6 - 4.4. $$</p>
+        <p><b>Compute.</b> $G_{code} = 5.2$ dB.</p>
+        <p><b>Explanation.</b> The code buys 5.2 dB of "free" power in the link budget for the same error rate — enough to nearly quadruple range or shrink the amplifier. This is a typical figure for a good convolutional code with soft-decision decoding.</p>` },
+      { q: String.raw`Estimate asymptotic hard-decision gain of a rate-1/2 code with $d_{min}=10$.`, solution: String.raw`<p><b>Formula.</b> $$ G_a \approx 10\log_{10}(R\,d_{min})\ \ [\text{dB}], $$ where $R$ is the code rate and $d_{min}$ the minimum distance; soft decision adds roughly 2 dB more.</p>
+        <p><b>Substitute.</b> $$ G_a \approx 10\log_{10}(0.5 \times 10) = 10\log_{10}(5). $$</p>
+        <p><b>Compute.</b> $G_a = 10 \times 0.699 = 7.0$ dB (hard decision); soft decision $\approx 9$ dB.</p>
+        <p><b>Explanation.</b> The gain rises with the product $R\,d_{min}$, so both keeping the rate up and pushing $d_{min}$ large matter. This asymptotic value is optimistic — realized gain at practical BER is a bit lower — but it captures the right scaling.</p>` },
+      { q: String.raw`A channel has bursts up to 200 bits. Design a block interleaver depth for a code correcting isolated errors only.`, solution: String.raw`<p><b>Formula.</b> $$ D > B_{max}, \qquad \text{latency} \propto D \times (\text{block length}), $$ where $D$ is the interleaver depth (number of rows) and $B_{max}$ the longest expected burst.</p>
+        <p><b>Substitute.</b> $$ D > 200 \quad\Rightarrow\quad \text{choose } D = 256. $$</p>
+        <p><b>Compute.</b> With $D = 256$ rows, a 200-bit burst is spread so that no codeword receives more than one erroneous bit.</p>
+        <p><b>Explanation.</b> Writing by rows and reading by columns scatters consecutive channel errors across many codewords, converting an uncorrectable burst into isolated single errors the code can fix. The price is latency proportional to the interleaver span, so depth is a delay-versus-robustness trade.</p>` },
+      { q: String.raw`Shannon capacity of a 20 MHz channel at SNR 30 dB (1000 linear).`, solution: String.raw`<p><b>Formula.</b> $$ C = B\log_2\!\left(1 + \frac{S}{N}\right), $$ where $C$ is the capacity (bits/s), $B$ the bandwidth, and $S/N$ the linear signal-to-noise ratio.</p>
+        <p><b>Substitute.</b> $$ C = 20\times10^6 \times \log_2(1 + 1000) = 20\times10^6 \times \log_2(1001). $$</p>
+        <p><b>Compute.</b> $\log_2(1001) = 9.97$; $C = 20\times10^6 \times 9.97 \approx 1.99\times10^8 \approx 199$ Mbps.</p>
+        <p><b>Explanation.</b> No code can reliably exceed 199 Mbps on this channel; real systems reach a fraction of it. The 30 dB SNR contributes almost 10 bits/s per Hz, illustrating how capacity grows only logarithmically with SNR but linearly with bandwidth.</p>` }
     ],
     realWorld: String.raw`<p>FEC is universal: Reed-Solomon protects CDs, DVDs, QR codes, and DVB; convolutional + Viterbi ran GSM, satellite, and deep-space links (Voyager used RS+convolutional concatenation); Turbo codes power 3G/4G data; LDPC dominates Wi-Fi 6, DVB-S2, and 5G data channels, operating within ~0.5 dB of Shannon. In spread spectrum, FEC + interleaving is the standard defense against partial-band and pulsed jamming, and the coding gain is a headline term in every modern link budget.</p>`,
     related: ['viterbi', 'bpsk', 'noise', 'link-budget']
@@ -988,7 +1213,8 @@ CONTENT.topics.push(
     tags: ['Viterbi', 'trellis', 'MLSE', 'ACS', 'soft decision', 'traceback', 'convolutional'],
     summary: String.raw`The Viterbi algorithm performs maximum-likelihood sequence estimation of a convolutional code by walking a trellis with add-compare-select operations and traceback, giving optimal decoding at complexity exponential in constraint length.`,
     prerequisites: ['fec', 'bpsk', 'matched-filter'],
-    intro: String.raw`<p>The Viterbi algorithm is the optimal (maximum-likelihood) decoder for convolutional codes and, more generally, for any finite-state Markov process observed in noise — it solves the Maximum-Likelihood Sequence Estimation (MLSE) problem efficiently. Instead of enumerating all $2^{kL}$ possible transmitted sequences, it exploits the trellis structure so that at each step only one survivor path per state need be retained, via the <strong>add-compare-select (ACS)</strong> recursion. This makes decoding cost <em>linear in sequence length</em> and only exponential in the (small) constraint length. Viterbi decoding underlies GSM, satellite, Wi-Fi legacy modes, and deep-space telemetry, and its soft-decision form buys about 2 dB over hard decisions. This topic covers the trellis, state count, branch/path metrics, ACS, hard vs soft decisions, traceback depth, optimality, and complexity.</p>`,
+    intro: String.raw`<p><strong>Why the Viterbi algorithm exists.</strong> A convolutional code has memory, so the "best guess" for the transmitted message is the whole <em>sequence</em> of bits that is jointly most likely — not each bit decided in isolation. But checking every candidate sequence is hopeless: for a length-$N$ message there are $2^N$ possibilities, astronomically many. Viterbi's insight is that the code's finite memory lets you throw away most candidates early without ever losing the winner. By keeping just one best path into each state, the impossible $2^N$ search collapses to a modest, repeatable per-step computation. That is why a genuinely optimal decoder became practical enough to sit in billions of phones and satellites.</p>
+    <p>The Viterbi algorithm is the optimal (maximum-likelihood) decoder for convolutional codes and, more generally, for any finite-state Markov process observed in noise — it solves the Maximum-Likelihood Sequence Estimation (MLSE) problem efficiently. Instead of enumerating all $2^{kL}$ possible transmitted sequences, it exploits the trellis structure so that at each step only one survivor path per state need be retained, via the <strong>add-compare-select (ACS)</strong> recursion. This makes decoding cost <em>linear in sequence length</em> and only exponential in the (small) constraint length. Viterbi decoding underlies GSM, satellite, Wi-Fi legacy modes, and deep-space telemetry, and its soft-decision form buys about 2 dB over hard decisions. This topic covers the trellis, state count, branch/path metrics, ACS, hard vs soft decisions, traceback depth, optimality, and complexity.</p>`,
     sections: [
       {
         h: 'Convolutional encoder and state',
@@ -1048,6 +1274,18 @@ CONTENT.topics.push(
           <li>Memory scales as (states) $\times$ (traceback depth): $2^{K-1}\times L_{tb}$.</li>
         </ul>
         <div class="callout">Doubling $K$ squares the state count; going from $K=7$ (64 states) to $K=9$ (256 states) is a 4x hardware jump for ~1 dB more gain — diminishing returns drive the choice of $K=7$ as the sweet spot.</div>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">In one sentence: keep the single best path into each state, and an impossible $2^N$ search becomes a cheap repeated ACS step.</div>
+        <ul>
+          <li><strong>The trellis</strong> unrolls the encoder's $2^{K-1}$ states over time; every valid coded sequence is one path, and decoding is finding the most likely path.</li>
+          <li><strong>Metrics:</strong> branch metrics measure disagreement with the received symbol (Hamming for hard, Euclidean/correlation for soft); path metrics accumulate them, and the ML path minimizes the total.</li>
+          <li><strong>ACS is the engine:</strong> Add-Compare-Select keeps exactly one survivor per state, which is what tames the exponential path count — the key idea of the whole algorithm.</li>
+          <li><strong>Traceback depth $\approx5K$</strong> delays the decision until survivors merge, trading a little latency for near-optimal BER.</li>
+          <li><strong>Optimality and cost:</strong> Viterbi is MLSE-optimal; complexity is $\mathcal{O}(N\,2^{K-1})$ — linear in length, exponential in $K$ — which caps practical $K$ around 7–9.</li>
+          <li><strong>Soft decision adds ~2 dB</strong>, and the related BCJR/MAP algorithm supplies the soft outputs used inside Turbo decoders.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -1177,12 +1415,30 @@ CONTENT.topics.push(
       { q: String.raw`Each state in a rate-1/n trellis has how many incoming branches?`, options: [String.raw`1`, String.raw`2`, String.raw`4`, String.raw`$2^{K-1}$`], answer: 1, explain: String.raw`Two predecessors (input 0 or 1).` }
     ],
     numericals: [
-      { q: String.raw`A convolutional code has constraint length $K=9$. How many trellis states and ACS operations per bit (rate-1/n)?`, solution: String.raw`States $=2^{8}=256$. ACS ops/bit $\approx2\cdot256=512$.` },
-      { q: String.raw`Choose a traceback depth for a $K=5$ code.`, solution: String.raw`$L_{tb}\approx5K=25$ bits (commonly rounded to ~24-32).` },
-      { q: String.raw`A $K=7$ Viterbi decoder runs at 10 Mbit/s output. Estimate ACS operations per second.`, solution: String.raw`ACS/bit $\approx2\cdot2^{6}=128$. Rate $=128\times10\times10^6=1.28\times10^9$ ACS ops/s (1.28 GACS/s).` },
-      { q: String.raw`Compare the state count and memory (states x traceback) for $K=5$ vs $K=7$ (use $L_{tb}=5K$).`, solution: String.raw`$K=5$: $16$ states, $L_{tb}=25$, memory $\propto16\times25=400$. $K=7$: $64$ states, $L_{tb}=35$, memory $\propto64\times35=2240$ — about 5.6x more.` },
-      { q: String.raw`A soft-decision decoder quantizes to 3 bits. How many soft levels, and roughly what fraction of the ideal 2 dB soft gain is retained?`, solution: String.raw`$2^3=8$ levels. 3-bit (8-level) soft decision typically recovers about 0.25 dB short of ideal, i.e. most of the ~2 dB gain.` },
-      { q: String.raw`For a rate-1/2, $K=7$ code, how many output bits and branch labels exist per trellis stage, and how many total branches?`, solution: String.raw`Each branch emits $n=2$ output bits. States $=64$, each with 2 outgoing branches, so $64\times2=128$ branches per stage.` }
+      { q: String.raw`A convolutional code has constraint length $K=9$. How many trellis states and ACS operations per bit (rate-1/n)?`, solution: String.raw`<p><b>Formula.</b> $$ N_{states} = 2^{K-1}, \qquad \text{ops/bit} \approx 2\cdot 2^{K-1} = 2^K, $$ where $K$ is the constraint length; each state needs two adds and one compare per bit.</p>
+        <p><b>Substitute.</b> $$ N_{states} = 2^{9-1} = 2^8, \qquad \text{ops/bit} \approx 2\times 256. $$</p>
+        <p><b>Compute.</b> $N_{states} = 256$; ACS ops/bit $\approx 512$.</p>
+        <p><b>Explanation.</b> Each of the 256 states runs one add-compare-select per decoded bit. Note this is exponential in $K$: raising $K$ from 7 to 9 quadruples the states, which is why hardware Viterbi rarely goes much beyond $K=9$.</p>` },
+      { q: String.raw`Choose a traceback depth for a $K=5$ code.`, solution: String.raw`<p><b>Formula.</b> $$ L_{tb} \approx 5K \quad (\text{range } 4\text{–}6K), $$ where $L_{tb}$ is the traceback (decision) depth in bits and $K$ the constraint length.</p>
+        <p><b>Substitute.</b> $$ L_{tb} \approx 5 \times 5. $$</p>
+        <p><b>Compute.</b> $L_{tb} \approx 25$ bits (commonly rounded to ~24–32).</p>
+        <p><b>Explanation.</b> Survivor paths merge to a common history after a few constraint lengths, so delaying the decision by about 25 bits makes it effectively optimal. Deeper traceback only adds latency and memory without meaningful BER improvement.</p>` },
+      { q: String.raw`A $K=7$ Viterbi decoder runs at 10 Mbit/s output. Estimate ACS operations per second.`, solution: String.raw`<p><b>Formula.</b> $$ \text{ACS/s} = (\text{ops/bit}) \times R_b, \qquad \text{ops/bit} \approx 2\cdot 2^{K-1} = 2^K, $$ where $R_b$ is the decoded bit rate.</p>
+        <p><b>Substitute.</b> $$ \text{ops/bit} = 2\cdot 2^6 = 128, \qquad \text{ACS/s} = 128 \times 10\times10^6. $$</p>
+        <p><b>Compute.</b> $\text{ACS/s} = 1.28\times10^9$ (1.28 GACS/s).</p>
+        <p><b>Explanation.</b> Even a modest 10 Mbit/s $K=7$ decoder demands over a billion add-compare-select operations per second, showing why these are pipelined in dedicated hardware. Throughput scales linearly with bit rate but jumps with $2^K$ if $K$ grows.</p>` },
+      { q: String.raw`Compare the state count and memory (states x traceback) for $K=5$ vs $K=7$ (use $L_{tb}=5K$).`, solution: String.raw`<p><b>Formula.</b> $$ N_{states} = 2^{K-1}, \qquad \text{memory} \propto N_{states}\times L_{tb} = 2^{K-1}\times 5K. $$</p>
+        <p><b>Substitute.</b> $$ K=5:\ 2^4 \times 25, \qquad K=7:\ 2^6 \times 35. $$</p>
+        <p><b>Compute.</b> $K=5$: 16 states, memory $\propto 16\times 25 = 400$. $K=7$: 64 states, memory $\propto 64\times 35 = 2240$. Ratio $= 2240/400 = 5.6\times$.</p>
+        <p><b>Explanation.</b> Going from $K=5$ to $K=7$ costs about 5.6 times the survivor memory (4x from states, 1.4x from deeper traceback) in exchange for a couple of dB more coding gain. This diminishing-returns trade is why $K=7$ is the industry sweet spot.</p>` },
+      { q: String.raw`A soft-decision decoder quantizes to 3 bits. How many soft levels, and roughly what fraction of the ideal 2 dB soft gain is retained?`, solution: String.raw`<p><b>Formula.</b> $$ \text{levels} = 2^q, $$ where $q$ is the number of soft-decision quantization bits; soft decision gains about 2 dB over hard decision in the ideal (infinite-level) limit.</p>
+        <p><b>Substitute.</b> $$ \text{levels} = 2^3. $$</p>
+        <p><b>Compute.</b> $2^3 = 8$ levels; 8-level quantization falls only ~0.25 dB short of ideal, retaining most of the ~2 dB gain.</p>
+        <p><b>Explanation.</b> Three bits of soft information capture nearly all the benefit of full analog confidences, which is why 8-level (3-bit) soft metrics are a standard, cost-effective choice. Hard decision (1 bit) would forfeit the full ~2 dB.</p>` },
+      { q: String.raw`For a rate-1/2, $K=7$ code, how many output bits and branch labels exist per trellis stage, and how many total branches?`, solution: String.raw`<p><b>Formula.</b> $$ n_{out} = n\ (\text{for rate } k/n), \qquad N_{branches} = N_{states}\times 2 = 2^{K-1}\times 2, $$ where each state has two outgoing branches (input 0 or 1) in a rate-$1/n$ code.</p>
+        <p><b>Substitute.</b> $$ n_{out} = 2, \qquad N_{states} = 2^{7-1} = 64, \qquad N_{branches} = 64\times 2. $$</p>
+        <p><b>Compute.</b> Each branch emits $n = 2$ output bits; $N_{branches} = 128$ branches per stage.</p>
+        <p><b>Explanation.</b> The 128 branches per stage carry the four possible 2-bit labels (00, 01, 10, 11), and the ACS engine evaluates all of them once per decoded bit. This branch count, not the sequence length, is what sets the decoder's per-step workload.</p>` }
     ],
     realWorld: String.raw`<p>Viterbi decoding is one of the most widely deployed algorithms in engineering: GSM voice, IS-95/CDMA, satellite and deep-space telemetry (often as the inner decoder in an RS-concatenated scheme), legacy 802.11a/g, and disk read channels (as MLSE equalizers) all rely on it. Its soft-decision form is standard, and its trellis/ACS structure generalizes to equalization (MLSE against ISI) and to the BCJR component of Turbo decoders. The rate-1/2, K=7 (133,171) code remains a de facto reference. Modern high-throughput links have largely shifted the heaviest lifting to LDPC/Turbo, but Viterbi endures wherever moderate gain, low latency, and simple hardware are the priority.</p>`,
     related: ['fec', 'bpsk', 'matched-filter', 'dsss']

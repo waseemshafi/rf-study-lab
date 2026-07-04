@@ -7,7 +7,8 @@ CONTENT.topics.push(
     tags: ['modulation', 'psk', 'coherent-detection', 'ber', 'digital-comm', 'constellation'],
     summary: String.raw`Binary Phase-Shift Keying maps one bit per symbol to antipodal signals separated by 180 degrees, achieving the optimal BER of $Q(\sqrt{2E_b/N_0})$ for coherent detection over the AWGN channel.`,
     prerequisites: ['comm-basics', 'noise', 'matched-filter'],
-    intro: String.raw`<p>Binary Phase-Shift Keying (BPSK) is the simplest and most robust member of the phase-modulation family. Each transmitted symbol carries a single bit, encoded as one of two carrier phases separated by 180 degrees. Because the two signal points are <em>antipodal</em> (maximally separated for a given energy), BPSK is the most power-efficient binary signaling scheme in additive white Gaussian noise (AWGN): no binary scheme achieves a lower bit-error rate at the same $E_b/N_0$.</p>
+    intro: String.raw`<p><strong>Why does BPSK exist?</strong> Every digital link faces one non-negotiable question: given a fixed amount of energy per bit and a noisy channel, how reliably can we tell a "1" from a "0"? BPSK is the answer that squeezes the maximum possible reliability out of a single bit. By placing the two possible signals as far apart as physics allows for a given energy, it minimizes the chance that noise flips one into the other — so when a link is starved for power (a satellite whisper from Saturn, a GPS signal below the noise floor), BPSK is the modulation you reach for first. Everything more sophisticated is built by stacking or subdividing this one idea.</p>
+<p>Binary Phase-Shift Keying (BPSK) is the simplest and most robust member of the phase-modulation family. Each transmitted symbol carries a single bit, encoded as one of two carrier phases separated by 180 degrees. Because the two signal points are <em>antipodal</em> (maximally separated for a given energy), BPSK is the most power-efficient binary signaling scheme in additive white Gaussian noise (AWGN): no binary scheme achieves a lower bit-error rate at the same $E_b/N_0$.</p>
 <p>BPSK is the workhorse of low-SNR, robustness-critical links: satellite command channels, deep-space telemetry, GPS/GNSS spreading, IEEE 802.11 lowest-rate modes, and the acquisition preambles of countless systems. Understanding BPSK deeply — its signal geometry, its matched-filter receiver, its exact BER, and its sensitivity to carrier phase — is the foundation for every higher-order modulation (QPSK, 16-QAM) and for spread spectrum.</p>`,
     sections: [
       {
@@ -94,6 +95,18 @@ CONTENT.topics.push(
 <tr><td>DBPSK</td><td>1</td><td>$\tfrac12 e^{-E_b/N_0}$</td><td>~10.5 dB</td></tr>
 <tr><td>Coherent BFSK</td><td>1</td><td>$Q(\sqrt{E_b/N_0})$</td><td>12.6 dB</td></tr>
 </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<p>Pulling the pieces together, after this topic you should be able to explain and use the following:</p>
+<ul>
+<li><strong>The geometry:</strong> BPSK is two antipodal points at $\pm\sqrt{E_b}$ on a single axis; the $2\sqrt{E_b}$ separation is the largest possible for that energy, which is <em>why</em> it is the optimal binary scheme.</li>
+<li><strong>The receiver:</strong> a matched filter / correlator followed by a zero-threshold decision is optimal, and its single scalar output is a sufficient statistic — nothing better exists in AWGN.</li>
+<li><strong>The performance law:</strong> $P_b=Q(\sqrt{2E_b/N_0})$, reaching $10^{-5}$ near $9.6$ dB, with the steep waterfall meaning ~1 dB buys about a decade of BER.</li>
+<li><strong>The fragilities:</strong> a phase error $\theta$ scales amplitude by $\cos\theta$, and carrier recovery carries an inherent $180^\circ$ ambiguity resolved by differential encoding or a known preamble.</li>
+<li><strong>The context:</strong> QPSK matches BPSK's BER at twice the spectral efficiency; unshaped BPSK is constant-envelope and PA-friendly, while RRC shaping trims bandwidth to $R_b(1+\alpha)$.</li>
+<li><strong>The engineering takeaway:</strong> choose BPSK when link margin is scarce and robustness matters more than throughput.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -145,6 +158,32 @@ CONTENT.topics.push(
 <text x="360" y="150" fill="#ffa94d" font-size="12">DBPSK (~1 dB worse)</text>
 </svg>`,
         caption: 'BER waterfall: BPSK vs DBPSK. The ~1 dB horizontal gap is the price of non-coherent differential detection.'
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 190" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+<defs><marker id="arr2-bpsk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="0" y="0" width="540" height="190" fill="#1c232e"/>
+<text x="20" y="24" fill="#e6edf3" font-size="13">Coherent BPSK receiver chain</text>
+<text x="15" y="86" fill="#9aa7b5" font-size="11">$y(t)$</text>
+<line x1="45" y1="90" x2="80" y2="90" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-bpsk)"/>
+<circle cx="100" cy="90" r="18" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+<text x="93" y="95" fill="#e6edf3" font-size="15">$\times$</text>
+<rect x="55" y="135" width="90" height="32" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+<text x="66" y="155" fill="#e6edf3" font-size="10">$\cos 2\pi f_c t$</text>
+<line x1="100" y1="135" x2="100" y2="108" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-bpsk)"/>
+<line x1="118" y1="90" x2="185" y2="90" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-bpsk)"/>
+<rect x="185" y="68" width="95" height="44" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+<text x="198" y="88" fill="#e6edf3" font-size="12">$\int_0^{T_b}dt$</text>
+<text x="205" y="104" fill="#9aa7b5" font-size="10">integrate</text>
+<line x1="280" y1="90" x2="330" y2="90" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-bpsk)"/>
+<circle cx="350" cy="90" r="4" fill="#b197fc"/>
+<text x="315" y="74" fill="#9aa7b5" font-size="10">sample $t=T_b$</text>
+<line x1="354" y1="90" x2="410" y2="90" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-bpsk)"/>
+<rect x="410" y="68" width="110" height="44" fill="#1c232e" stroke="#ff6b6b" stroke-width="1.5"/>
+<text x="424" y="84" fill="#e6edf3" font-size="11">decide $r\gtrless 0$</text>
+<text x="440" y="102" fill="#63e6be" font-size="11">bit out</text>
+</svg>`,
+        caption: 'Coherent BPSK receiver: multiply by the recovered carrier, integrate over the symbol, sample, then threshold at zero. Carrier recovery must supply the reference phase.'
       }
     ],
     equations: [
@@ -219,27 +258,45 @@ CONTENT.topics.push(
     numericals: [
       {
         q: String.raw`A coherent BPSK link operates at $E_b/N_0 = 7$ dB. Estimate the BER.`,
-        solution: String.raw`<p>Convert: $E_b/N_0 = 10^{0.7} \approx 5.01$. Argument $=\sqrt{2\times5.01}=\sqrt{10.02}=3.166$. BER $=Q(3.166)$. From tables $Q(3.17)\approx 7.6\times10^{-4}$. So <strong>BER $\approx 8\times10^{-4}$</strong>.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$P_b = Q\!\left(\sqrt{\tfrac{2E_b}{N_0}}\right)$$ where $P_b$ is the bit-error probability, $E_b/N_0$ the energy-per-bit to noise-density ratio, and $Q(\cdot)$ the Gaussian tail.</p>
+<p><b>Substitute.</b> Convert dB to linear: $E_b/N_0 = 10^{7/10}=10^{0.7}\approx 5.01$. Then $P_b = Q\!\left(\sqrt{2\times5.01}\right)=Q\!\left(\sqrt{10.02}\right)$.</p>
+<p><b>Compute.</b> $\sqrt{10.02}=3.166$, so $P_b = Q(3.166)$. From the Gaussian tail, $Q(3.17)\approx 7.7\times10^{-4}$, giving <strong>BER $\approx 8\times10^{-4}$</strong> (dimensionless).</p>
+<p><b>Explanation.</b> At 7 dB the link sits on the steep part of the waterfall, well above the $\sim9.6$ dB needed for $10^{-5}$; an engineer reads this as "usable but marginal", typically requiring coding to reach a service-grade BER.</p>`
       },
       {
         q: String.raw`What $E_b/N_0$ (in dB) is required for BPSK to achieve BER $=10^{-6}$?`,
-        solution: String.raw`<p>Need $Q(x)=10^{-6}\Rightarrow x\approx 4.75$. Then $2E_b/N_0 = x^2 = 22.56$, so $E_b/N_0 = 11.28$ (linear) $= 10\log_{10}(11.28)=\mathbf{10.5\ dB}$.</p>`
+        solution: String.raw`<p><b>Formula.</b> Invert $$P_b = Q\!\left(\sqrt{\tfrac{2E_b}{N_0}}\right)\;\Rightarrow\;\frac{E_b}{N_0}=\frac{\big[Q^{-1}(P_b)\big]^2}{2}$$ with $Q^{-1}$ the inverse Gaussian tail.</p>
+<p><b>Substitute.</b> For $P_b=10^{-6}$, $Q^{-1}(10^{-6})\approx 4.75$, so $E_b/N_0 = (4.75)^2/2 = 22.56/2$.</p>
+<p><b>Compute.</b> $E_b/N_0 = 11.28$ (linear) $=10\log_{10}(11.28)=\mathbf{10.5\ dB}$.</p>
+<p><b>Explanation.</b> Each decade lower in target BER costs only about a decibel more $E_b/N_0$ here — the hallmark of the Q-function's steep tail — which is why tightening a spec from $10^{-5}$ to $10^{-6}$ is cheap in link margin.</p>`
       },
       {
         q: String.raw`A BPSK receiver has a residual carrier phase error of $25^\circ$. By how many dB does the effective $E_b/N_0$ drop?`,
-        solution: String.raw`<p>Loss $=-20\log_{10}(\cos 25^\circ) = -20\log_{10}(0.9063) = -20(-0.0427) = \mathbf{0.85\ dB}$. Small but not negligible near threshold.</p>`
+        solution: String.raw`<p><b>Formula.</b> A phase error $\theta$ scales the correlator amplitude by $\cos\theta$, so the SNR loss is $$L_{\text{dB}} = -20\log_{10}(\cos\theta).$$</p>
+<p><b>Substitute.</b> $L_{\text{dB}} = -20\log_{10}(\cos 25^\circ) = -20\log_{10}(0.9063)$.</p>
+<p><b>Compute.</b> $\log_{10}(0.9063)=-0.0427$, so $L_{\text{dB}} = -20(-0.0427)=\mathbf{0.85\ dB}$.</p>
+<p><b>Explanation.</b> Under a degree of imperfect carrier recovery the penalty is small, but near the BER threshold even 0.85 dB visibly worsens the error rate — hence the value of tight carrier-tracking loops in coherent receivers.</p>`
       },
       {
         q: String.raw`A BPSK signal has bit rate $R_b = 2$ Mbit/s. Find the null-to-null RF bandwidth with rectangular pulses, and the occupied bandwidth with RRC roll-off $\alpha=0.35$.`,
-        solution: String.raw`<p>Rectangular: null-to-null $=2R_b = 4$ MHz. RRC: occupied $=R_b(1+\alpha)=2(1.35)=\mathbf{2.7\ MHz}$ — much tighter, motivating pulse shaping.</p>`
+        solution: String.raw`<p><b>Formula.</b> Rectangular BPSK has null-to-null bandwidth $B_{\text{null}} = 2R_b$; RRC-shaped BPSK occupies $B_{\text{RRC}} = R_b(1+\alpha)$, where $R_b$ is the bit rate and $\alpha$ the roll-off.</p>
+<p><b>Substitute.</b> $B_{\text{null}} = 2\times 2\ \text{MHz}$ and $B_{\text{RRC}} = 2\times(1+0.35)\ \text{MHz}$.</p>
+<p><b>Compute.</b> $B_{\text{null}} = \mathbf{4\ MHz}$; $B_{\text{RRC}} = 2\times1.35 = \mathbf{2.7\ MHz}$.</p>
+<p><b>Explanation.</b> Shaping cuts the occupied bandwidth from 4 MHz to 2.7 MHz — about a third narrower — which is exactly why real systems never send raw rectangular pulses: spectrum is scarce and neighbouring channels must be protected.</p>`
       },
       {
         q: String.raw`Given noise PSD $N_0/2 = 10^{-10}$ W/Hz and required BER $=10^{-5}$ (so $E_b/N_0=9.6$ dB $=9.12$ linear), find the minimum $E_b$.`,
-        solution: String.raw`<p>$N_0 = 2\times10^{-10}=2\times10^{-10}$ W/Hz. $E_b = 9.12\times N_0 = 9.12\times2\times10^{-10}= \mathbf{1.82\times10^{-9}}$ J/bit.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$E_b = \left(\frac{E_b}{N_0}\right)_{\text{lin}}\! \cdot N_0,\qquad N_0 = 2\times\frac{N_0}{2}$$ with $E_b$ the energy per bit and $N_0$ the one-sided noise density.</p>
+<p><b>Substitute.</b> $N_0 = 2\times10^{-10}$ W/Hz. $E_b = 9.12\times(2\times10^{-10})$.</p>
+<p><b>Compute.</b> $E_b = 18.24\times10^{-10} = \mathbf{1.82\times10^{-9}}$ J/bit.</p>
+<p><b>Explanation.</b> This is the minimum received energy each bit must carry to hit $10^{-5}$; multiplied by the bit rate it sets the required received power, tying the abstract $E_b/N_0$ spec directly into a link budget.</p>`
       },
       {
         q: String.raw`Two systems: BPSK and coherent BFSK, both at BER $=10^{-5}$. What is the BPSK power advantage?`,
-        solution: String.raw`<p>BPSK needs $E_b/N_0=9.6$ dB; coherent BFSK $=Q(\sqrt{E_b/N_0})$ needs $12.6$ dB. Advantage $=12.6-9.6=\mathbf{3\ dB}$ — the factor-2 in the BPSK argument.</p>`
+        solution: String.raw`<p><b>Formula.</b> BPSK needs the $E_b/N_0$ solving $Q(\sqrt{2E_b/N_0})=10^{-5}$; coherent BFSK (orthogonal) needs $Q(\sqrt{E_b/N_0})=10^{-5}$. The advantage is the dB difference of the two required ratios.</p>
+<p><b>Substitute.</b> BPSK requires $E_b/N_0 = 9.6$ dB; coherent BFSK requires $12.6$ dB. Advantage $= 12.6 - 9.6$.</p>
+<p><b>Compute.</b> Advantage $=\mathbf{3\ dB}$.</p>
+<p><b>Explanation.</b> The 3 dB is exactly the factor-2 inside BPSK's Q-argument ($2E_b/N_0$ vs $E_b/N_0$): antipodal signalling doubles the effective decision distance, so BPSK reaches the same BER at half the energy per bit.</p>`
       }
     ],
     realWorld: String.raw`<p>BPSK dominates wherever link margin is scarce. GPS L1 C/A code is BPSK-spread at 1.023 Mchip/s; the very low received SNR (below the noise floor) is why BPSK's power efficiency matters. Deep-space missions (Voyager, Mars landers) use BPSK/QPSK with strong FEC because every dB of $E_b/N_0$ translates into antenna size or transmit power at planetary distances.</p>
@@ -271,7 +328,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Differentially-Coherent Detection',
-        html: String.raw`<p>The optimum non-coherent DBPSK receiver correlates the current symbol with the <em>previous</em> symbol and examines the sign of the real part:</p>
+        html: String.raw`<p><em>Intuition first:</em> if you cannot measure phase against an absolute reference, measure it against something you already have — the previous symbol. Whatever unknown phase the channel added is (almost) the same on both symbols, so comparing them cancels it out, the way two clocks running equally fast can still measure elapsed time even if neither shows the true hour. The math below just makes "compare to the previous symbol" precise.</p>
+<p>The optimum non-coherent DBPSK receiver correlates the current symbol with the <em>previous</em> symbol and examines the sign of the real part:</p>
 <p>$$z_k = \operatorname{Re}\{\,r_k\, r_{k-1}^{*}\,\}.$$</p>
 <p>Write the received complex baseband symbols as $r_k = \sqrt{E_b}\,e^{j\theta_k}e^{j\phi}+n_k$, where $\phi$ is the unknown constant channel phase. Then</p>
 <p>$$r_k r_{k-1}^* \approx E_b\,e^{j(\theta_k-\theta_{k-1})} + (\text{noise terms}).$$</p>
@@ -314,6 +372,17 @@ CONTENT.topics.push(
         html: String.raw`<p>Because differential detection multiplies $r_k$ by $r_{k-1}^*$, a constant carrier <em>frequency</em> error $\Delta f$ produces a phase rotation $2\pi\Delta f T_s$ per symbol that appears directly on the decision axis. Unlike a static phase, this does not cancel. The decision variable rotates, and BER degrades roughly as if the effective SNR were scaled by $\cos^2(2\pi\Delta f T_s)$. Systems therefore still need coarse frequency correction (an AFC/FLL) even though they skip fine phase recovery.</p>
 <p>Practical DBPSK also spreads a single deep fade or click into two bit errors; concatenation with FEC (which sees paired errors) benefits from interleaving. DBPSK's spectrum, envelope, and bandwidth are essentially identical to BPSK's — the difference is entirely in the encoder/decoder, not the RF waveform.</p>
 <div class="callout"><strong>Rule of thumb:</strong> keep $|\Delta f|\,T_s < 0.01$ for negligible differential-detection loss.</div>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<p>By the end of this topic the following should feel natural:</p>
+<ul>
+<li><strong>The core trick:</strong> data lives in the phase <em>transition</em> ($c_k=d_k\oplus c_{k-1}$), so any constant channel phase — including a $180^\circ$ inversion — cancels between adjacent symbols.</li>
+<li><strong>The receiver:</strong> $z_k=\operatorname{Re}\{r_k r_{k-1}^*\}$ needs only a one-symbol delay and a complex multiply, with no carrier PLL — the whole appeal of DBPSK.</li>
+<li><strong>The cost:</strong> a closed-form BER of $\tfrac12 e^{-E_b/N_0}$, about 1 dB worse than coherent BPSK because the phase reference is a noisy symbol, plus error propagation over symbol pairs.</li>
+<li><strong>The blind spot:</strong> a <em>frequency</em> offset rotates the decision by $2\pi\Delta f T_s$ and does NOT cancel, so coarse AFC is still required (keep $|\Delta f|T_s<0.01$).</li>
+<li><strong>The choice:</strong> prefer DBPSK for frequency-hopping, fast-fading, or low-cost radios; prefer coherent BPSK when a stable reference is available and every dB counts.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -374,6 +443,32 @@ CONTENT.topics.push(
 <text x="205" y="130" fill="#9aa7b5" font-size="9">phase $\pi$</text>
 </svg>`,
         caption: 'Data "1" keeps the phase (green, no transition); data "0" flips it by 180 degrees (orange transition). The receiver reads transitions, immune to a constant offset.'
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+<defs><marker id="arr2-dbpsk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="0" y="0" width="540" height="180" fill="#1c232e"/>
+<text x="20" y="24" fill="#e6edf3" font-size="13">Differential encoder (transmitter)</text>
+<text x="20" y="86" fill="#9aa7b5" font-size="11">$d_k$ in</text>
+<line x1="55" y1="90" x2="110" y2="90" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-dbpsk)"/>
+<circle cx="130" cy="90" r="18" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+<text x="122" y="95" fill="#e6edf3" font-size="14">$\oplus$</text>
+<line x1="148" y1="90" x2="255" y2="90" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-dbpsk)"/>
+<text x="180" y="82" fill="#9aa7b5" font-size="10">$c_k$</text>
+<rect x="255" y="70" width="95" height="40" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+<text x="266" y="88" fill="#e6edf3" font-size="10">BPSK map</text>
+<text x="270" y="103" fill="#9aa7b5" font-size="10">$\theta_k$</text>
+<line x1="350" y1="90" x2="420" y2="90" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-dbpsk)"/>
+<text x="430" y="94" fill="#63e6be" font-size="11">to channel</text>
+<rect x="90" y="140" width="80" height="30" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+<text x="103" y="160" fill="#e6edf3" font-size="10">delay $T_s$</text>
+<line x1="200" y1="90" x2="200" y2="155" stroke="#9aa7b5" stroke-width="1.2"/>
+<line x1="200" y1="155" x2="170" y2="155" stroke="#9aa7b5" stroke-width="1.2" marker-end="url(#arr2-dbpsk)"/>
+<line x1="90" y1="155" x2="60" y2="155" stroke="#9aa7b5" stroke-width="1.2"/>
+<line x1="60" y1="155" x2="60" y2="98" stroke="#9aa7b5" stroke-width="1.2" marker-end="url(#arr2-dbpsk)"/>
+<text x="205" y="150" fill="#9aa7b5" font-size="10">$c_{k-1}$</text>
+</svg>`,
+        caption: 'Differential encoder: XOR the data bit with the previous encoded bit ($c_k=d_k\\oplus c_{k-1}$) via a one-symbol feedback delay, then BPSK-map. Data now lives in phase transitions.'
       }
     ],
     equations: [
@@ -442,27 +537,45 @@ CONTENT.topics.push(
     numericals: [
       {
         q: String.raw`Compute DBPSK BER at $E_b/N_0 = 8$ dB.`,
-        solution: String.raw`<p>$E_b/N_0=10^{0.8}=6.31$. $P_b=\tfrac12 e^{-6.31}=\tfrac12(1.81\times10^{-3})=\mathbf{9.0\times10^{-4}}$.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$P_b = \tfrac12\,e^{-E_b/N_0}$$ the differentially-coherent DBPSK bit-error probability, with $E_b/N_0$ in linear units.</p>
+<p><b>Substitute.</b> $E_b/N_0 = 10^{8/10}=10^{0.8}=6.31$, so $P_b = \tfrac12\,e^{-6.31}$.</p>
+<p><b>Compute.</b> $e^{-6.31}=1.81\times10^{-3}$, hence $P_b = \tfrac12(1.81\times10^{-3}) = \mathbf{9.0\times10^{-4}}$.</p>
+<p><b>Explanation.</b> Sanity check: coherent BPSK at the same 8 dB gives $\approx 1.9\times10^{-4}$, so DBPSK is a few times worse — the expected ~1 dB penalty for using a noisy previous symbol as the phase reference instead of a clean carrier.</p>`
       },
       {
         q: String.raw`What $E_b/N_0$ (dB) does DBPSK need for BER $=10^{-4}$?`,
-        solution: String.raw`<p>$\tfrac12 e^{-\gamma}=10^{-4}\Rightarrow e^{-\gamma}=2\times10^{-4}\Rightarrow \gamma=\ln(5000)=8.52$ (linear) $=10\log_{10}(8.52)=\mathbf{9.3\ dB}$.</p>`
+        solution: String.raw`<p><b>Formula.</b> Invert $P_b=\tfrac12 e^{-\gamma}$: $$\gamma = \ln\!\left(\frac{1}{2P_b}\right),\qquad \gamma_{\text{dB}}=10\log_{10}\gamma$$ with $\gamma=E_b/N_0$.</p>
+<p><b>Substitute.</b> $\gamma = \ln\!\left(\frac{1}{2\times10^{-4}}\right)=\ln(5000)$.</p>
+<p><b>Compute.</b> $\gamma = 8.52$ (linear) $=10\log_{10}(8.52)=\mathbf{9.3\ dB}$.</p>
+<p><b>Explanation.</b> This is the DBPSK operating point for a $10^{-4}$ service; comparing it to the BPSK requirement (next problem) quantifies the cost of dropping the carrier PLL.</p>`
       },
       {
         q: String.raw`Coherent BPSK needs $E_b/N_0=8.4$ dB for BER $=10^{-4}$. Find the DBPSK penalty at this target using the previous result.`,
-        solution: String.raw`<p>DBPSK needs 9.3 dB, BPSK 8.4 dB. Penalty $=9.3-8.4=\mathbf{0.9\ dB}$ — the ~1 dB rule.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$\Delta_{\text{dB}} = \left(\frac{E_b}{N_0}\right)_{\text{DBPSK,dB}} - \left(\frac{E_b}{N_0}\right)_{\text{BPSK,dB}}$$ the horizontal gap between the two BER curves at a fixed target.</p>
+<p><b>Substitute.</b> $\Delta_{\text{dB}} = 9.3 - 8.4$.</p>
+<p><b>Compute.</b> $\Delta_{\text{dB}} = \mathbf{0.9\ dB}$.</p>
+<p><b>Explanation.</b> Just under 1 dB, matching the celebrated "~1 dB DBPSK penalty" rule of thumb; an engineer trades this modest margin for a receiver that needs only a delay-and-multiply, no carrier recovery.</p>`
       },
       {
         q: String.raw`A DBPSK system runs at symbol rate $R_s=1$ Msym/s with a carrier frequency offset $\Delta f = 2$ kHz. Find the per-symbol phase rotation and comment.`,
-        solution: String.raw`<p>$T_s=1\,\mu s$. $\Phi=2\pi\Delta f T_s=2\pi(2000)(10^{-6})=0.01257$ rad $=0.72^\circ$. Since $\Delta f T_s=0.002<0.01$, the loss is negligible — good margin.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$\Phi = 2\pi\,\Delta f\,T_s,\qquad T_s = 1/R_s$$ the phase the offset accumulates between adjacent symbols, which does NOT cancel in differential detection.</p>
+<p><b>Substitute.</b> $T_s = 1/(1\times10^6)=1\ \mu\text{s}$. $\Phi = 2\pi(2000)(10^{-6})$.</p>
+<p><b>Compute.</b> $\Phi = 0.01257$ rad $= 0.72^\circ$; the normalized offset $\Delta f\,T_s = 0.002$.</p>
+<p><b>Explanation.</b> Since $\Delta f\,T_s = 0.002 < 0.01$ (the rule-of-thumb threshold), the rotation is tiny and the detection loss is negligible — this link has comfortable frequency-offset margin.</p>`
       },
       {
         q: String.raw`If the offset rose to $\Delta f=20$ kHz at the same rate, what is the rotation, and the approximate SNR scaling?`,
-        solution: String.raw`<p>$\Phi=2\pi(20000)(10^{-6})=0.1257$ rad $=7.2^\circ$. SNR scale $\approx\cos^2(7.2^\circ)=0.984$, i.e. a $-0.07$ dB loss — still small but starting to matter; larger offsets demand AFC.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$\Phi = 2\pi\,\Delta f\,T_s,\qquad \text{SNR scale} \approx \cos^2\Phi$$ the rotation and its effective SNR degradation on the decision axis.</p>
+<p><b>Substitute.</b> $\Phi = 2\pi(20000)(10^{-6})$; then evaluate $\cos^2\Phi$.</p>
+<p><b>Compute.</b> $\Phi = 0.1257$ rad $= 7.2^\circ$; $\cos^2(7.2^\circ)=0.984$, i.e. a loss of $10\log_{10}(0.984)=\mathbf{-0.07\ dB}$.</p>
+<p><b>Explanation.</b> A tenfold larger offset still costs only ~0.07 dB, but the loss grows with $\Delta f\,T_s$; beyond this an automatic frequency control (AFC/FLL) loop becomes necessary to keep the decision axis aligned.</p>`
       },
       {
         q: String.raw`Compare DBPSK ($\tfrac12 e^{-\gamma}$) and BPSK ($Q(\sqrt{2\gamma})$) at $\gamma=12$ dB (linear 15.85). Which penalty do you observe?`,
-        solution: String.raw`<p>DBPSK: $\tfrac12 e^{-15.85}=\tfrac12(1.31\times10^{-7})=6.5\times10^{-8}$. BPSK: $Q(\sqrt{31.7})=Q(5.63)\approx 9\times10^{-9}$. Ratio ~7; the penalty exceeds 1 dB at high SNR because the exponential tail decays slower than the Q-function tail.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$P_b^{\text{DBPSK}}=\tfrac12 e^{-\gamma},\qquad P_b^{\text{BPSK}}=Q\!\left(\sqrt{2\gamma}\right),\qquad \gamma=E_b/N_0.$$</p>
+<p><b>Substitute.</b> $\gamma = 10^{12/10}=15.85$. DBPSK: $\tfrac12 e^{-15.85}$; BPSK: $Q(\sqrt{31.7})=Q(5.63)$.</p>
+<p><b>Compute.</b> DBPSK $=\tfrac12(1.31\times10^{-7})=6.5\times10^{-8}$; BPSK $\approx 9\times10^{-9}$. Ratio $\approx 7$.</p>
+<p><b>Explanation.</b> At high SNR the DBPSK/BPSK gap exceeds 1 dB because the exponential tail decays more slowly than the Gaussian $Q$ tail; the ~1 dB rule is a mid-SNR approximation and pessimistic to quote at very low BER.</p>`
       }
     ],
     realWorld: String.raw`<p>DBPSK is widely used where carrier recovery is impractical or wasteful. IEEE 802.11 (legacy 1 Mbit/s) uses DBPSK with Barker spreading precisely so cheap receivers avoid a full carrier PLL. Bluetooth's Enhanced Data Rate (EDR) uses $\pi/4$-DQPSK and 8-DPSK — differential variants for the same reason. Many frequency-hopping military and IoT radios adopt differential PSK because each hop lands on a new frequency with unknown phase; differential detection works immediately without re-locking a carrier loop.</p>
@@ -476,7 +589,8 @@ CONTENT.topics.push(
     tags: ['detection', 'matched-filter', 'correlator', 'snr', 'cauchy-schwarz', 'pulse-shaping'],
     summary: String.raw`The matched filter $h(t)=s(T-t)$ maximizes the sampled signal-to-noise ratio in AWGN to $2E/N_0$, provably optimal by the Cauchy-Schwarz inequality, and is realized identically by a correlator.`,
     prerequisites: ['comm-basics', 'noise', 'psd'],
-    intro: String.raw`<p>The matched filter is the single most important structure in digital receiver design. Given a known signal pulse $s(t)$ buried in additive white Gaussian noise, it is the linear time-invariant filter that maximizes the signal-to-noise ratio at a specific sampling instant. Because SNR at the decision point dictates error probability, the matched filter minimizes the bit-error rate for every linear modulation — BPSK, QPSK, PAM, QAM — over the AWGN channel.</p>
+    intro: String.raw`<p><strong>Why does the matched filter exist?</strong> A receiver knows the <em>shape</em> of the pulse it is looking for — it just doesn't know whether a "1" or a "0" was sent, and noise is smearing everything. The natural question is: of all possible ways to process the received waveform before deciding, which one gives the cleanest look at the signal? The matched filter is the provably best answer. It is what you get when you ask "how do I weight the incoming samples to line them up perfectly with the pulse I expect, so the signal adds up coherently while noise partly cancels?" Because error probability is set entirely by the SNR at the decision instant, winning this one optimization wins the whole detection problem.</p>
+<p>The matched filter is the single most important structure in digital receiver design. Given a known signal pulse $s(t)$ buried in additive white Gaussian noise, it is the linear time-invariant filter that maximizes the signal-to-noise ratio at a specific sampling instant. Because SNR at the decision point dictates error probability, the matched filter minimizes the bit-error rate for every linear modulation — BPSK, QPSK, PAM, QAM — over the AWGN channel.</p>
 <p>Its impulse response is simply the time-reversed, delayed copy of the pulse: $h(t)=s(T-t)$. Equivalently, the matched filter is a <em>correlator</em> that computes $\int_0^T y(t)s(t)\,dt$. Understanding why this maximizes SNR (via Cauchy-Schwarz), how it whitens the decision, why it produces a sufficient statistic, and how it connects to pulse shaping (RRC) and to spread-spectrum despreading is essential exam material and everyday engineering.</p>`,
     sections: [
       {
@@ -489,7 +603,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Derivation via Cauchy-Schwarz',
-        html: String.raw`<p>Work in the frequency domain. Let $S(f)$ and $H(f)$ be the transforms of $s$ and $h$. The signal sample is $s_o(T)=\int H(f)S(f)e^{j2\pi fT}\,df$ and the output noise power is $E[n_o^2]=\tfrac{N_0}{2}\int|H(f)|^2\,df$. Thus</p>
+        html: String.raw`<p><em>The idea before the algebra:</em> Cauchy-Schwarz is the mathematical statement of "two vectors give the biggest dot product when they point the same way." Here the two "vectors" are the filter's frequency response and the signal's spectrum; the SNR is maximized precisely when the filter is aligned with (proportional to the conjugate of) the signal. So the optimal filter is the one shaped like the signal itself — which is exactly what "matched" means. The steps below turn that geometric intuition into the bound $2E/N_0$.</p>
+<p>Work in the frequency domain. Let $S(f)$ and $H(f)$ be the transforms of $s$ and $h$. The signal sample is $s_o(T)=\int H(f)S(f)e^{j2\pi fT}\,df$ and the output noise power is $E[n_o^2]=\tfrac{N_0}{2}\int|H(f)|^2\,df$. Thus</p>
 <p>$$\mathrm{SNR}=\frac{\left|\int H(f)S(f)e^{j2\pi fT}\,df\right|^2}{\tfrac{N_0}{2}\int|H(f)|^2\,df}.$$</p>
 <p>Apply the Cauchy-Schwarz inequality to the numerator: $\left|\int H\cdot (Se^{j2\pi fT})\,df\right|^2 \le \int|H|^2\,df\cdot\int|S|^2\,df$. Substituting,</p>
 <p>$$\mathrm{SNR}\le\frac{\int|H|^2\,df\cdot\int|S|^2\,df}{\tfrac{N_0}{2}\int|H|^2\,df}=\frac{\int|S(f)|^2\,df}{N_0/2}=\frac{2E}{N_0}.$$</p>
@@ -542,6 +657,18 @@ CONTENT.topics.push(
 <li><strong>Multipath:</strong> the channel convolves the pulse; the RAKE receiver in spread spectrum is a bank of matched filters (fingers) aligned to each multipath delay, coherently combining energy.</li>
 </ul>
 <p>In spread spectrum, correlating against the PN code is exactly matched filtering to the spreading waveform, producing processing gain $=10\log_{10}(N)$ dB for a length-$N$ code — the despread SNR gain is a direct consequence of the $2E/N_0$ result applied to the long chip sequence.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<p>This topic gives you the receiver backbone that every other modulation topic assumes. You should now be able to say:</p>
+<ul>
+<li><strong>The filter:</strong> $h(t)=s(T-t)$ is the pulse flipped and delayed; sampling its output at $t=T$ reads off the autocorrelation peak, equal to the energy $E$.</li>
+<li><strong>The guarantee:</strong> it maximizes sampled SNR to $2E/N_0$ (Cauchy-Schwarz), depending only on energy and $N_0$ — <em>not</em> pulse shape — and its output is a sufficient statistic.</li>
+<li><strong>The two faces:</strong> matched filter and correlator ($\int_0^T y\,s\,dt$) are the same operation; pick whichever suits the hardware.</li>
+<li><strong>The link to shaping:</strong> splitting a raised cosine into RRC at both ends achieves matched reception <em>and</em> zero ISI simultaneously — the reason RRC appears in nearly every modem.</li>
+<li><strong>The extensions:</strong> whiten-then-match for colored noise, a RAKE (bank of matched filters) for multipath, and PN-code correlation for spread-spectrum processing gain $10\log_{10}N$.</li>
+<li><strong>Why it minimizes BER:</strong> maximizing decision-instant SNR directly minimizes the Gaussian error probability.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -598,6 +725,38 @@ CONTENT.topics.push(
 <text x="400" y="150" fill="#63e6be" font-size="10">output = autocorrelation</text>
 </svg>`,
         caption: 'The matched filter output is the pulse autocorrelation; its peak (value E) occurs exactly at the sampling instant t=T.'
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+<defs><marker id="arr2-matched-filter" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="0" y="0" width="540" height="210" fill="#1c232e"/>
+<text x="20" y="22" fill="#e6edf3" font-size="13">Two equivalent implementations</text>
+<text x="20" y="52" fill="#4dabf7" font-size="11">(a) Correlator</text>
+<line x1="20" y1="80" x2="55" y2="80" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-matched-filter)"/>
+<circle cx="72" cy="80" r="15" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+<text x="66" y="85" fill="#e6edf3" font-size="13">$\times$</text>
+<rect x="45" y="105" width="60" height="26" fill="#1c232e" stroke="#63e6be" stroke-width="1.3"/>
+<text x="54" y="122" fill="#e6edf3" font-size="9">$s(t)$</text>
+<line x1="72" y1="105" x2="72" y2="95" stroke="#9aa7b5" stroke-width="1.3" marker-end="url(#arr2-matched-filter)"/>
+<line x1="88" y1="80" x2="130" y2="80" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-matched-filter)"/>
+<rect x="130" y="62" width="70" height="36" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+<text x="140" y="84" fill="#e6edf3" font-size="11">$\int_0^T dt$</text>
+<line x1="200" y1="80" x2="240" y2="80" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-matched-filter)"/>
+<text x="245" y="84" fill="#b197fc" font-size="10">sample @T</text>
+<text x="20" y="152" fill="#4dabf7" font-size="11">(b) Matched filter</text>
+<line x1="20" y1="178" x2="70" y2="178" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-matched-filter)"/>
+<rect x="70" y="160" width="120" height="36" fill="#1c232e" stroke="#ff6b6b" stroke-width="1.5"/>
+<text x="82" y="182" fill="#e6edf3" font-size="10">$h(t)=s(T-t)$</text>
+<line x1="190" y1="178" x2="240" y2="178" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-matched-filter)"/>
+<text x="245" y="182" fill="#b197fc" font-size="10">sample @T</text>
+<line x1="330" y1="40" x2="330" y2="200" stroke="#9aa7b5" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="355" y="110" fill="#63e6be" font-size="12">Identical</text>
+<text x="355" y="128" fill="#63e6be" font-size="12">output at</text>
+<text x="355" y="146" fill="#63e6be" font-size="12">$t=T$:</text>
+<text x="355" y="168" fill="#e6edf3" font-size="12">$\int_0^T y\,s\,dt$</text>
+<text x="360" y="188" fill="#9aa7b5" font-size="10">(sufficient stat.)</text>
+</svg>`,
+        caption: 'Correlator (multiply-by-replica then integrate) and matched filter (LTI filter h(t)=s(T-t)) produce the identical sampled statistic at t=T. They are two realisations of the same optimal receiver.'
       }
     ],
     equations: [
@@ -670,27 +829,45 @@ CONTENT.topics.push(
     numericals: [
       {
         q: String.raw`A rectangular pulse has amplitude $A=2$ V over $T=1$ ms. Find its energy $E$ and the matched-filter max SNR if $N_0/2=10^{-3}$ V$^2$/Hz.`,
-        solution: String.raw`<p>$E=A^2T=4\times10^{-3}=4\times10^{-3}$ J (units V$^2\cdot$s). $N_0=2\times10^{-3}$. $\mathrm{SNR}_{\max}=2E/N_0=2(4\times10^{-3})/(2\times10^{-3})=\mathbf{4}$ (i.e. $6.0$ dB).</p>`
+        solution: String.raw`<p><b>Formula.</b> $$E = A^2 T,\qquad \mathrm{SNR}_{\max} = \frac{2E}{N_0}$$ with $E$ the pulse energy, $A$ its amplitude, $T$ its duration, and $N_0$ the one-sided noise density.</p>
+<p><b>Substitute.</b> $E = (2)^2(1\times10^{-3})$; $N_0 = 2\times(N_0/2)=2\times10^{-3}$. $\mathrm{SNR}_{\max}=\dfrac{2(4\times10^{-3})}{2\times10^{-3}}$.</p>
+<p><b>Compute.</b> $E = 4\times10^{-3}$ J (V$^2\cdot$s); $\mathrm{SNR}_{\max}=\mathbf{4}$, i.e. $10\log_{10}4 = 6.0$ dB.</p>
+<p><b>Explanation.</b> The matched filter extracts the full $2E/N_0$; a 6 dB output SNR is what sets the achievable BER, and it depends only on the energy $A^2T$ — trading amplitude for duration at constant energy leaves it unchanged.</p>`
       },
       {
         q: String.raw`Two pulses have the same energy but different shapes (one rectangular, one triangular). Compare their matched-filter output SNR.`,
-        solution: String.raw`<p>Since $\mathrm{SNR}_{\max}=2E/N_0$ depends ONLY on energy, both give the <strong>same SNR</strong>. Shape affects bandwidth and ISI, not the peak SNR.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$\mathrm{SNR}_{\max} = \frac{2E}{N_0}$$ — a function of pulse energy $E$ and noise density $N_0$ only, with no dependence on pulse shape.</p>
+<p><b>Substitute.</b> Both pulses have identical $E$ and see the same $N_0$, so each yields $2E/N_0$.</p>
+<p><b>Compute.</b> The two output SNRs are <strong>equal</strong>.</p>
+<p><b>Explanation.</b> This is the key result of matched-filter theory: shape governs bandwidth and ISI behaviour but not peak detection SNR. An engineer picks the shape for spectral/timing reasons, confident the noise immunity at the sampler is fixed by energy alone.</p>`
       },
       {
         q: String.raw`An RRC filter has roll-off $\alpha=0.25$ and symbol rate $R_s=5$ MSym/s. Find the occupied bandwidth.`,
-        solution: String.raw`<p>Occupied BW $=R_s(1+\alpha)=5(1.25)=\mathbf{6.25\ MHz}$. The matched RRC at the receiver adds no extra bandwidth.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$B = R_s(1+\alpha)$$ the occupied (passband) bandwidth of an RRC-shaped signal, with $R_s$ the symbol rate and $\alpha$ the roll-off.</p>
+<p><b>Substitute.</b> $B = (5\ \text{MSym/s})(1+0.25)$.</p>
+<p><b>Compute.</b> $B = 5\times1.25 = \mathbf{6.25\ MHz}$.</p>
+<p><b>Explanation.</b> The receiver's matched RRC has the same passband, so it adds no bandwidth; the 25% excess over the $R_s=5$ MHz Nyquist minimum is the price paid for realizable filters and timing robustness.</p>`
       },
       {
         q: String.raw`A DSSS system uses a length $N=127$ code. What processing gain (dB) does the correlator (matched filter) provide?`,
-        solution: String.raw`<p>$G_p=10\log_{10}127=\mathbf{21.0\ dB}$. The despread SNR improves by this amount over the chip-rate SNR.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$G_p = 10\log_{10} N$$ the spread-spectrum processing gain for a length-$N$ PN code, obtained by matched-filtering (despreading) against the code.</p>
+<p><b>Substitute.</b> $G_p = 10\log_{10}(127)$.</p>
+<p><b>Compute.</b> $G_p = \mathbf{21.0\ dB}$.</p>
+<p><b>Explanation.</b> Correlating over 127 chips sums the signal coherently while noise adds incoherently, lifting the despread SNR by 21 dB — the mechanism that lets DSSS signals be recovered from beneath the noise floor.</p>`
       },
       {
         q: String.raw`A pulse of energy $E=5\times10^{-9}$ J is received in noise with $N_0=10^{-9}$ W/Hz. Find the matched-filter output SNR in dB.`,
-        solution: String.raw`<p>$\mathrm{SNR}=2E/N_0=2(5\times10^{-9})/10^{-9}=10$. In dB: $10\log_{10}10=\mathbf{10\ dB}$.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$\mathrm{SNR}_{\max} = \frac{2E}{N_0}$$ with $E$ the received pulse energy and $N_0$ the one-sided noise density.</p>
+<p><b>Substitute.</b> $\mathrm{SNR}_{\max} = \dfrac{2(5\times10^{-9})}{10^{-9}}$.</p>
+<p><b>Compute.</b> $\mathrm{SNR}_{\max} = 10$; in dB, $10\log_{10}10 = \mathbf{10\ dB}$.</p>
+<p><b>Explanation.</b> A 10 dB sampled SNR comfortably supports low-BER BPSK detection; because the result is $2E/N_0$, raising the energy per symbol (e.g. by longer integration) is the direct lever on detection reliability.</p>`
       },
       {
         q: String.raw`If timing is off such that the sample sits where the triangular autocorrelation has fallen to 80% of its peak, estimate the SNR loss in dB.`,
-        solution: String.raw`<p>Signal amplitude scales by 0.8, so signal power by $0.8^2=0.64$. Loss $=10\log_{10}(0.64)=\mathbf{-1.94\ dB}$ (plus added ISI). Precise timing clearly matters.</p>`
+        solution: String.raw`<p><b>Formula.</b> A timing offset scales the signal amplitude by the normalized autocorrelation $\rho$, so power scales by $\rho^2$ and the loss is $$L_{\text{dB}} = 10\log_{10}(\rho^2)=20\log_{10}\rho.$$</p>
+<p><b>Substitute.</b> $\rho = 0.8$, so $L_{\text{dB}} = 20\log_{10}(0.8)=10\log_{10}(0.64)$.</p>
+<p><b>Compute.</b> $L_{\text{dB}} = \mathbf{-1.94\ dB}$ (plus additional ISI not counted here).</p>
+<p><b>Explanation.</b> Sampling only slightly off the autocorrelation peak already costs ~2 dB, showing why symbol-timing recovery is as critical as carrier recovery — the matched-filter advantage is realized only at the exact peak instant.</p>`
       }
     ],
     realWorld: String.raw`<p>Every practical digital receiver — from a Wi-Fi chipset to a GPS front end to a 5G modem — contains matched filtering, usually as a root-raised-cosine receive filter that is the mirror of the transmitter's RRC. This single structure simultaneously limits bandwidth, enforces zero ISI at the sampler, and maximizes SNR, which is why it is nearly universal.</p>
@@ -704,7 +881,8 @@ CONTENT.topics.push(
     tags: ['evm', 'modulation-quality', 'iq', 'snr', 'impairments', 'transmitter-test'],
     summary: String.raw`EVM measures the RMS distance between received and ideal constellation symbols normalized to reference power, quantifying total modulation impairment and mapping directly to SNR via $\mathrm{SNR}_{dB}\approx -20\log_{10}(\mathrm{EVM})$.`,
     prerequisites: ['bpsk', 'noise', 'comm-basics'],
-    intro: String.raw`<p>Error Vector Magnitude (EVM) is the standard figure of merit for the quality of a digitally modulated signal. It captures, in a single number, how far the received (or transmitted) constellation symbols deviate from their ideal locations. Because that deviation aggregates every impairment — thermal noise, phase noise, I/Q imbalance, carrier leakage, power-amplifier nonlinearity, quantization — EVM is the go-to metric for transmitter conformance tests, receiver characterization, and end-to-end link diagnosis.</p>
+    intro: String.raw`<p><strong>Why does EVM exist?</strong> A modern transmitter can fail in a dozen subtle ways at once — a little phase noise here, some amplifier compression there, a touch of I/Q imbalance — and BER alone won't tell you a signal is degrading until it is nearly broken, and even then it takes billions of bits to measure. Engineers needed a single, fast, sensitive number that answers "how clean is this modulation, really?" and points toward <em>what</em> is wrong. EVM is that number: it looks at where each symbol actually landed versus where it should have, and the size <em>and direction</em> of that miss both diagnoses the impairment and predicts the BER — long before the link fails.</p>
+<p>Error Vector Magnitude (EVM) is the standard figure of merit for the quality of a digitally modulated signal. It captures, in a single number, how far the received (or transmitted) constellation symbols deviate from their ideal locations. Because that deviation aggregates every impairment — thermal noise, phase noise, I/Q imbalance, carrier leakage, power-amplifier nonlinearity, quantization — EVM is the go-to metric for transmitter conformance tests, receiver characterization, and end-to-end link diagnosis.</p>
 <p>EVM is powerful because it is both intuitive (a picture of a fuzzy constellation) and rigorously tied to performance: under the assumption that the residual error is Gaussian and noise-like, EVM maps directly to an effective SNR, which in turn bounds the achievable BER for a given modulation order. Higher-order constellations (64-QAM, 256-QAM) pack points closer together and therefore demand much smaller EVM than robust schemes like BPSK.</p>`,
     sections: [
       {
@@ -778,6 +956,18 @@ CONTENT.topics.push(
 <li><strong>Averaging length:</strong> too few symbols gives a noisy EVM estimate; standards specify minimum symbol counts.</li>
 <li><strong>Filtering/reference:</strong> use the correct measurement (matched) filter and constellation reference, or EVM is meaningless.</li>
 </ul>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<p>After this topic, EVM should be both a number you can compute and a diagnostic you can read:</p>
+<ul>
+<li><strong>The definition:</strong> EVM is the RMS error vector $\mathbf e=\mathbf r-\mathbf s$ normalized to reference power — always state whether that reference is average or peak.</li>
+<li><strong>The SNR bridge:</strong> for noise-like errors $\mathrm{EVM}^2=1/\mathrm{SNR}$, so $\mathrm{SNR}_{dB}\approx-20\log_{10}(\mathrm{EVM})$; 10% ↔ 20 dB, 1% ↔ 40 dB.</li>
+<li><strong>The BER link:</strong> that effective SNR feeds the standard $M$-QAM/PSK Q-function, making EVM a fast proxy for a BER measurement.</li>
+<li><strong>The order hierarchy:</strong> each step up in constellation density roughly halves the tolerable EVM, which is why 256-QAM demands ~2% where QPSK tolerates ~17.5%.</li>
+<li><strong>The fingerprints:</strong> round cloud = noise, ellipse = gain imbalance, sheared grid = quadrature error, off-center = LO leakage, tangential smear = phase noise, warped outer points = PA compression.</li>
+<li><strong>The measurement caveats:</strong> analyzers remove allowed impairments first, and instrument noise adds in power ($\mathrm{EVM}_{\text{true}}^2\approx\mathrm{EVM}_{\text{meas}}^2-\mathrm{EVM}_{\text{inst}}^2$).</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -832,6 +1022,30 @@ CONTENT.topics.push(
 <text x="-45" y="55" fill="#9aa7b5" font-size="10">phase noise smear</text></g>
 </svg>`,
         caption: 'Distinct impairment fingerprints: additive noise (round cloud), I/Q gain imbalance (ellipse), quadrature error (sheared grid), phase noise (tangential arc smear).'
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+<defs><marker id="arr2-evm" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="0" y="0" width="540" height="170" fill="#1c232e"/>
+<text x="20" y="24" fill="#e6edf3" font-size="13">EVM measurement chain</text>
+<rect x="15" y="55" width="90" height="44" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+<text x="28" y="75" fill="#e6edf3" font-size="10">demod rx</text>
+<text x="30" y="90" fill="#9aa7b5" font-size="10">$\mathbf r_k$</text>
+<line x1="105" y1="77" x2="150" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-evm)"/>
+<rect x="150" y="55" width="95" height="44" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+<text x="160" y="72" fill="#e6edf3" font-size="10">ideal ref</text>
+<text x="163" y="90" fill="#9aa7b5" font-size="10">$\mathbf s_k$ (slice)</text>
+<line x1="245" y1="77" x2="290" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-evm)"/>
+<rect x="290" y="55" width="100" height="44" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+<text x="300" y="72" fill="#e6edf3" font-size="10">error vector</text>
+<text x="300" y="90" fill="#9aa7b5" font-size="10">$\mathbf e_k=\mathbf r_k-\mathbf s_k$</text>
+<line x1="390" y1="77" x2="435" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-evm)"/>
+<rect x="435" y="55" width="95" height="44" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+<text x="448" y="72" fill="#e6edf3" font-size="10">RMS / norm</text>
+<text x="452" y="90" fill="#63e6be" font-size="10">EVM %</text>
+<text x="270" y="135" fill="#9aa7b5" font-size="11">$\mathrm{EVM}=\sqrt{\overline{|\mathbf e_k|^2}/\overline{|\mathbf s_k|^2}}$</text>
+</svg>`,
+        caption: 'EVM measurement chain: demodulate to recover measured symbols, find the ideal reference for each, form the error vector, then RMS-average and normalise to reference power.'
       }
     ],
     equations: [
@@ -899,27 +1113,45 @@ CONTENT.topics.push(
     numericals: [
       {
         q: String.raw`A 64-QAM transmitter measures EVM = 2.5%. Estimate the equivalent SNR in dB.`,
-        solution: String.raw`<p>$\mathrm{SNR}_{dB}=-20\log_{10}(0.025)=-20(-1.602)=\mathbf{32.0\ dB}$. Comfortably above the ~22 dB (8% EVM) 64-QAM requirement.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$\mathrm{SNR}_{dB} \approx -20\log_{10}(\mathrm{EVM}_{\text{rms}})$$ valid when the error vector is noise-like; $\mathrm{EVM}_{\text{rms}}$ is a fraction (not percent).</p>
+<p><b>Substitute.</b> $\mathrm{EVM}_{\text{rms}} = 0.025$, so $\mathrm{SNR}_{dB} = -20\log_{10}(0.025)$.</p>
+<p><b>Compute.</b> $\log_{10}(0.025)=-1.602$, giving $\mathrm{SNR}_{dB} = -20(-1.602) = \mathbf{32.0\ dB}$.</p>
+<p><b>Explanation.</b> This sits comfortably above the ~22 dB (8% EVM) a 64-QAM signal needs, so the transmitter has healthy modulation-quality margin — an engineer reads it as "passing with room to spare".</p>`
       },
       {
         q: String.raw`A link needs 30 dB SNR. What maximum EVM (%) is allowed (noise-like errors)?`,
-        solution: String.raw`<p>$\mathrm{EVM}=10^{-\mathrm{SNR}_{dB}/20}=10^{-30/20}=10^{-1.5}=0.0316=\mathbf{3.16\%}$.</p>`
+        solution: String.raw`<p><b>Formula.</b> Invert the EVM–SNR rule: $$\mathrm{EVM}_{\text{rms}} = 10^{-\mathrm{SNR}_{dB}/20}.$$</p>
+<p><b>Substitute.</b> $\mathrm{EVM}_{\text{rms}} = 10^{-30/20}=10^{-1.5}$.</p>
+<p><b>Compute.</b> $\mathrm{EVM}_{\text{rms}} = 0.0316 = \mathbf{3.16\%}$.</p>
+<p><b>Explanation.</b> To keep 30 dB of effective SNR the total residual error must stay under 3.16% RMS; this is how a standards body turns an SNR/BER target into a concrete transmitter EVM limit.</p>`
       },
       {
         q: String.raw`Instrument residual EVM is 1.0%; measured DUT EVM is 2.2%. Find the true DUT EVM.`,
-        solution: String.raw`<p>$\mathrm{EVM}_{true}=\sqrt{2.2^2-1.0^2}=\sqrt{4.84-1.0}=\sqrt{3.84}=\mathbf{1.96\%}$. The instrument was inflating the reading.</p>`
+        solution: String.raw`<p><b>Formula.</b> Uncorrelated error powers add, so they subtract when de-embedding: $$\mathrm{EVM}_{\text{true}} = \sqrt{\mathrm{EVM}_{\text{meas}}^2 - \mathrm{EVM}_{\text{inst}}^2}.$$</p>
+<p><b>Substitute.</b> $\mathrm{EVM}_{\text{true}} = \sqrt{(2.2)^2 - (1.0)^2}=\sqrt{4.84 - 1.0}$.</p>
+<p><b>Compute.</b> $\mathrm{EVM}_{\text{true}} = \sqrt{3.84} = \mathbf{1.96\%}$.</p>
+<p><b>Explanation.</b> The analyzer's own 1% noise inflated the reading from 1.96% to 2.2%; de-embedding matters most when the DUT approaches the instrument's residual, otherwise you fail good parts.</p>`
       },
       {
         q: String.raw`Given error vectors with RMS magnitude 0.08 V and reference RMS symbol magnitude 1.0 V, compute EVM (%) and dB.`,
-        solution: String.raw`<p>$\mathrm{EVM}=0.08/1.0=0.08=\mathbf{8\%}$. In dB: $20\log_{10}(0.08)=\mathbf{-21.9\ dB}$. This is around the 64-QAM limit.</p>`
+        solution: String.raw`<p><b>Formula.</b> $$\mathrm{EVM}_{\text{rms}} = \frac{|\mathbf e|_{\text{rms}}}{|\mathbf s|_{\text{ref}}},\qquad \mathrm{EVM}_{dB}=20\log_{10}(\mathrm{EVM}_{\text{rms}}).$$</p>
+<p><b>Substitute.</b> $\mathrm{EVM}_{\text{rms}} = 0.08/1.0$; then $\mathrm{EVM}_{dB}=20\log_{10}(0.08)$.</p>
+<p><b>Compute.</b> $\mathrm{EVM}_{\text{rms}} = 0.08 = \mathbf{8\%}$; $\mathrm{EVM}_{dB} = \mathbf{-21.9\ dB}$.</p>
+<p><b>Explanation.</b> 8% EVM is right at the typical 64-QAM limit (~22 dB effective SNR), so this signal would just barely qualify for 64-QAM but not for anything denser.</p>`
       },
       {
         q: String.raw`A symbol has ideal magnitude 1.0 and a phase error of $3^\circ$ with negligible magnitude error. What is that symbol's error-vector magnitude and its EVM contribution?`,
-        solution: String.raw`<p>Perpendicular error $=|\mathbf s|\sin\phi=1.0\times\sin 3^\circ=0.0523$. So this symbol contributes an error magnitude of $\mathbf{0.0523}$ (≈5.2% if reference is 1.0). Phase noise dominated.</p>`
+        solution: String.raw`<p><b>Formula.</b> With negligible magnitude error, the error vector is the tangential (phase) component: $$|\mathbf e| = |\mathbf s|\sin\phi$$ for reference magnitude $|\mathbf s|$ and phase error $\phi$.</p>
+<p><b>Substitute.</b> $|\mathbf e| = 1.0\times\sin 3^\circ$.</p>
+<p><b>Compute.</b> $|\mathbf e| = 1.0\times 0.0523 = \mathbf{0.0523}$ ($\approx 5.2\%$ of the reference).</p>
+<p><b>Explanation.</b> A mere $3^\circ$ of phase error already produces ~5% EVM, illustrating why phase noise and residual carrier error dominate the EVM budget of high-order QAM far more than amplitude errors do.</p>`
       },
       {
         q: String.raw`A 256-QAM standard allows -34 dB EVM. Convert to percent and to an equivalent SNR.`,
-        solution: String.raw`<p>Percent: $10^{-34/20}=10^{-1.7}=0.0200=\mathbf{2.0\%}$. Equivalent SNR $=-(-34)=\mathbf{34\ dB}$ (since SNR$_{dB}=-$EVM$_{dB}$).</p>`
+        solution: String.raw`<p><b>Formula.</b> $$\mathrm{EVM}_{\text{rms}} = 10^{\mathrm{EVM}_{dB}/20},\qquad \mathrm{SNR}_{dB} \approx -\mathrm{EVM}_{dB}.$$</p>
+<p><b>Substitute.</b> $\mathrm{EVM}_{\text{rms}} = 10^{-34/20}=10^{-1.7}$; $\mathrm{SNR}_{dB} = -(-34)$.</p>
+<p><b>Compute.</b> $\mathrm{EVM}_{\text{rms}} = 0.0200 = \mathbf{2.0\%}$; $\mathrm{SNR}_{dB} = \mathbf{34\ dB}$.</p>
+<p><b>Explanation.</b> 256-QAM's dense grid demands ~2% EVM / 34 dB SNR — roughly halving the tolerable EVM of 64-QAM — which is why it forces stringent phase-noise and PA-linearity budgets in the transmitter.</p>`
       }
     ],
     realWorld: String.raw`<p>EVM is the primary transmitter-conformance metric in essentially every modern wireless standard. 3GPP LTE and 5G NR specify maximum EVM per modulation (e.g., ~17.5% for QPSK down to ~3.5% for 256-QAM), and a base station or handset that exceeds the limit fails certification. IEEE 802.11ax/be push to 1024-QAM and 4096-QAM, demanding EVM below ~1.8% and ~1%, which in turn forces stringent phase-noise, I/Q-calibration, and PA-linearization budgets.</p>

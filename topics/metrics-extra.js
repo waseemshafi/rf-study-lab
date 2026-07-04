@@ -6,7 +6,9 @@ CONTENT.topics.push(
   category: 'Spread Spectrum & Coding',
   tags: [ String.raw`spread spectrum`, String.raw`DSSS`, String.raw`correlation`, String.raw`SNR`, String.raw`pulse compression`, String.raw`GPS` ],
   summary: String.raw`Processing gain is the ratio of spread (transmitted) bandwidth to information bandwidth, quantifying how much despreading correlation raises the post-correlator SNR of a spread-spectrum or matched-filter receiver.`,
-  diagram: {
+  diagram: [
+    {
+    title: String.raw`Despreading correlator lifts SNR by Gp`,
     svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-processing-gain" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <text x="60" y="52" fill="#e6edf3" text-anchor="middle">spread signal</text>
@@ -23,7 +25,61 @@ CONTENT.topics.push(
   <text x="270" y="138" fill="#b197fc" text-anchor="middle">G_p = W/R = R_c/R_b = N ; (S/N)_out = G_p (S/N)_in</text>
 </svg>`,
     caption: String.raw`Despreading the wideband signal against a PN replica collapses it coherently, lifting output SNR by the processing gain Gp.`
-  },
+    },
+    {
+    title: String.raw`Spectrum chain: spread, jam, despread, filter`,
+    svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">
+  <defs><marker id="arr2-processing-gain" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="14" y="26" width="150" height="86" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="89" y="44" fill="#e6edf3" text-anchor="middle">1. narrow data</text>
+  <rect x="80" y="62" width="18" height="40" fill="#4dabf7" opacity="0.85"/>
+  <text x="89" y="108" fill="#9aa7b5" text-anchor="middle">bandwidth R_b</text>
+  <line x1="164" y1="69" x2="196" y2="69" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-processing-gain)"/>
+  <rect x="198" y="26" width="150" height="86" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="273" y="44" fill="#e6edf3" text-anchor="middle">2. spread wide</text>
+  <rect x="216" y="88" width="114" height="14" fill="#63e6be" opacity="0.7"/>
+  <text x="273" y="108" fill="#9aa7b5" text-anchor="middle">bandwidth W = R_c</text>
+  <line x1="348" y1="69" x2="380" y2="69" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-processing-gain)"/>
+  <rect x="382" y="26" width="150" height="86" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="457" y="44" fill="#e6edf3" text-anchor="middle">3. + jammer tone</text>
+  <rect x="400" y="88" width="114" height="14" fill="#63e6be" opacity="0.6"/>
+  <rect x="452" y="58" width="10" height="44" fill="#ffa94d"/>
+  <text x="457" y="108" fill="#ffa94d" text-anchor="middle">strong CW jammer</text>
+  <line x1="273" y1="130" x2="273" y2="150" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-processing-gain)"/>
+  <rect x="90" y="152" width="200" height="82" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+  <text x="190" y="170" fill="#e6edf3" text-anchor="middle">4. despread &#215; c(t)</text>
+  <rect x="176" y="184" width="18" height="40" fill="#4dabf7" opacity="0.85"/>
+  <rect x="108" y="212" width="164" height="10" fill="#ffa94d" opacity="0.7"/>
+  <text x="190" y="232" fill="#9aa7b5" text-anchor="middle">data collapses, jammer spreads</text>
+  <line x1="290" y1="193" x2="322" y2="193" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-processing-gain)"/>
+  <rect x="324" y="152" width="200" height="82" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="424" y="170" fill="#e6edf3" text-anchor="middle">5. narrowband LPF</text>
+  <rect x="410" y="184" width="18" height="40" fill="#4dabf7" opacity="0.85"/>
+  <text x="424" y="232" fill="#63e6be" text-anchor="middle">keeps data, rejects jammer</text>
+</svg>`,
+    caption: String.raw`The spectrum picture: narrow data is spread to W, a jammer is added in-band, despreading collapses the data back to R_b while spreading the jammer, and a narrow filter keeps the wanted signal and rejects most jammer power.`
+    },
+    {
+    title: String.raw`Processing-gain budget (chip/bit ratio in dB)`,
+    svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr3-processing-gain" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="20" y="40" width="120" height="46" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="80" y="60" fill="#e6edf3" text-anchor="middle">chip rate R_c</text>
+  <text x="80" y="78" fill="#9aa7b5" text-anchor="middle">1.023 Mcps</text>
+  <text x="160" y="68" fill="#e6edf3" text-anchor="middle">&#247;</text>
+  <rect x="182" y="40" width="120" height="46" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="242" y="60" fill="#e6edf3" text-anchor="middle">bit rate R_b</text>
+  <text x="242" y="78" fill="#9aa7b5" text-anchor="middle">50 bps</text>
+  <line x1="304" y1="63" x2="336" y2="63" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr3-processing-gain)"/>
+  <rect x="338" y="40" width="120" height="46" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="398" y="60" fill="#63e6be" text-anchor="middle">G_p = N</text>
+  <text x="398" y="78" fill="#9aa7b5" text-anchor="middle">= 20460</text>
+  <text x="270" y="122" fill="#b197fc" text-anchor="middle">10 log10(R_c / R_b) = 10 log10(20460)</text>
+  <text x="270" y="146" fill="#63e6be" text-anchor="middle">&#8776; 43 dB of processing gain</text>
+</svg>`,
+    caption: String.raw`Processing gain as a simple dB budget: divide chip rate by bit rate to get N, then take 10 log10 — GPS C/A gives about 43 dB, enough to work below the noise floor.`
+    }
+  ],
   prerequisites: [ 'dsss', 'correlation', 'matched-filter', 'eb-no' ],
   intro: String.raw`<p>Spread-spectrum systems deliberately occupy a bandwidth far larger than the information rate requires. That seems wasteful until you see what the receiver gets for it: <strong>processing gain</strong> $G_p$. When the receiver correlates the wideband received signal against a synchronized replica of the spreading code, the wanted signal collapses (despreads) back to its narrow information bandwidth and adds up <em>coherently</em>, while noise, interference and jamming — uncorrelated with the code — spread out and add up <em>incoherently</em>. The result is that the signal-to-noise ratio at the correlator output is higher than at its input by the factor $G_p$.</p>
 <p>Processing gain is the single number that underpins the three headline benefits of spread spectrum: interference (and jam) rejection, low probability of intercept, and multiple access (CDMA). It is also, mathematically, the same integration/correlation gain that a matched filter delivers and that a radar earns from pulse compression. Master $G_p$ and a large part of spread-spectrum, radar and communications theory becomes one idea seen from different angles.</p>`,
@@ -40,7 +96,7 @@ CONTENT.topics.push(
     },
     {
       h: 'Why despreading raises SNR: coherent vs incoherent addition',
-      html: String.raw`<p>Consider a DSSS BPSK link. The transmitter sends $s(t)=d(t)c(t)$ where $d(t)\in\{\pm1\}$ is data and $c(t)\in\{\pm1\}$ is the spreading (PN) code at the chip rate. The channel adds noise/interference $n(t)$. The receiver multiplies by a synchronized code replica $c(t)$ and integrates over one bit:</p>
+      html: String.raw`<p>Before the algebra, the intuition: picture a crowd all told to shout your name in perfect unison (the wanted signal, locked to the code) while everyone else shouts random words (the interference, uncorrelated). The synchronized shout grows far faster than the random babble — that lockstep build-up is exactly what despreading exploits. Now the mechanism precisely. Consider a DSSS BPSK link. The transmitter sends $s(t)=d(t)c(t)$ where $d(t)\in\{\pm1\}$ is data and $c(t)\in\{\pm1\}$ is the spreading (PN) code at the chip rate. The channel adds noise/interference $n(t)$. The receiver multiplies by a synchronized code replica $c(t)$ and integrates over one bit:</p>
       <p>$$y = \int_0^{T_b} r(t)\,c(t)\,dt = \int_0^{T_b} d(t)\,\underbrace{c^2(t)}_{=1}\,dt + \int_0^{T_b} n(t)\,c(t)\,dt.$$</p>
       <p>Because $c^2(t)=1$, the <strong>signal term despreads perfectly</strong> and integrates coherently to $\pm T_b$ (amplitude grows linearly with integration time). The <strong>noise/interference term</strong> is multiplied by the pseudo-random $\pm1$ code, which whitens/spreads it; its integral grows only as $\sqrt{T_b}$ (random-walk / incoherent addition). Signal power therefore grows as $T_b^2$ while noise power grows as $T_b$, so the SNR grows linearly with the integration time — i.e. with the number of chips $N$. That factor is exactly $G_p$:</p>
       <p>$$\left(\frac{S}{N}\right)_{\text{out}} = G_p \left(\frac{S}{N}\right)_{\text{in}}.$$</p>
@@ -99,6 +155,18 @@ CONTENT.topics.push(
       html: String.raw`<p>GPS C/A code: chip rate $R_c=1.023\times10^6$ chips/s, navigation data rate $R_b=50$ bits/s.</p>
       <p>$$G_p=\frac{R_c}{R_b}=\frac{1.023\times10^6}{50}=20460 \;\Rightarrow\; 10\log_{10}(20460)\approx 43.1\ \text{dB}.$$</p>
       <p>That 43 dB is why a GPS signal that arrives about 20&ndash;30 dB <em>below</em> the thermal noise floor at the antenna can still be demodulated after despreading. It also explains GPS's vulnerability: a relatively modest jammer that overcomes 43 dB of gain can deny the signal, which is why P(Y) (10× longer effective code / higher chip rate) and M-code exist.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<div class="callout tip"><p>Pulling the thread together — the ideas that should now feel like one:</p>
+      <ul>
+        <li><strong>What processing gain is:</strong> the bandwidth (or rate) ratio $G_p=W/R=R_c/R_b=N$, the number of chips per bit, expressed in dB as $10\log_{10}$ of that ratio.</li>
+        <li><strong>Why despreading works:</strong> the wanted signal correlates with the code and adds coherently (power $\propto T^2$), while interference stays uncorrelated and adds incoherently (power $\propto T$), so output SNR beats input SNR by exactly $G_p$.</li>
+        <li><strong>The unifying picture:</strong> $G_p$ is a time-bandwidth product $TW$ — the same integration gain a matched filter and a radar pulse-compressor earn; DSSS, CDMA, and chirp radar are one idea in different clothes.</li>
+        <li><strong>What it does NOT do:</strong> it does not lower the $E_b/N_0$ you need against white noise (that is coding gain); it buys interference/jam rejection, LPI, and multiple access.</li>
+        <li><strong>Where it fails:</strong> against interference correlated with your code (a repeater/follower jammer), $G_p$ evaporates — hence fast hopping and code security.</li>
+        <li><strong>How to budget it:</strong> pick $G_p$ from the anti-jam or multi-access requirement, realise it with a chip rate (+3 dB per doubling), and pay the cost in bandwidth, sample rate, and acquisition time.</li>
+      </ul></div>`
     }
   ],
   keyPoints: [
@@ -178,13 +246,13 @@ CONTENT.topics.push(
     { q: String.raw`The reduced transmitted power spectral density of a spread signal primarily provides:`, options: [ String.raw`Higher data rate`, String.raw`Low probability of intercept/detection`, String.raw`Lower required $E_b/N_0$`, String.raw`Immunity to multipath` ], answer: 1, explain: String.raw`Spreading lowers PSD by $G_p$, letting the signal hide under the noise floor of unintended receivers — LPI/LPD.` }
   ],
   numericals: [
-    { q: String.raw`A DSSS link uses a PN code of length $N=1023$ chips per data bit. (a) What is the processing gain in dB? (b) If the input $S/N$ at the correlator is $-8$ dB, what is the output $S/N$?`, solution: String.raw`(a) $G_p=N=1023 \Rightarrow 10\log_{10}(1023)=30.1$ dB. (b) $(S/N)_{out}=(S/N)_{in}+G_p=-8+30.1=+22.1$ dB. The signal starts below its own noise and ends comfortably above threshold.` },
-    { q: String.raw`A system must transmit 9600 bps and needs at least 25 dB of processing gain. What minimum chip rate is required?`, solution: String.raw`$G_p=25\text{ dB}=10^{2.5}=316.2$. Required $R_c=G_p\cdot R_b=316.2\times9600\approx3.04\times10^6$ chips/s. So a chip rate of at least $\approx3.04$ Mcps is needed (occupying $\approx3$ MHz for BPSK chips).` },
-    { q: String.raw`GPS P(Y) uses a chip rate of 10.23 Mcps carrying 50 bps navigation data. Compare its processing gain to C/A (1.023 Mcps, 50 bps).`, solution: String.raw`P(Y): $G_p=10.23\text{M}/50=204600\Rightarrow 10\log_{10}(204600)=53.1$ dB. C/A: $20460\Rightarrow43.1$ dB. P(Y) has exactly 10 dB more processing gain (the chip rate is 10×), giving it correspondingly greater jam resistance.` },
-    { q: String.raw`A CDMA system has processing gain 21 dB and each user requires $E_b/N_0=7$ dB. Estimate the single-cell user capacity.`, solution: String.raw`$G_p=10^{2.1}=125.9$; $(E_b/N_0)_{req}=10^{0.7}=5.01$. $K\approx1+G_p/(E_b/N_0)=1+125.9/5.01=1+25.1\approx26$ users. Voice-activity ($\times\sim2$) and sectorization would raise this in practice.` },
-    { q: String.raw`A chirp radar pulse is 50 µs long and sweeps 2 MHz. (a) Find the pulse-compression (processing) gain. (b) What is the compressed pulse width and range resolution?`, solution: String.raw`(a) $G_p=\tau B=(50\times10^{-6})(2\times10^6)=100\Rightarrow20$ dB. (b) Compressed width $\approx1/B=0.5$ µs; range resolution $\Delta R=c/(2B)=3\times10^8/(4\times10^6)=75$ m. The 50 µs uncompressed pulse would give 7.5 km resolution — pulse compression improves it 100×.` },
-    { q: String.raw`A jammer produces $-10$ dB signal-to-jammer ratio at the receiver input. The demodulator needs $+10$ dB $S/N$ to work. What processing gain is required, and what chip rate if the data rate is 1 Mbps?`, solution: String.raw`Required $G_p=(S/N)_{req}-(S/J)_{in}=10-(-10)=20$ dB $=100$. Chip rate $R_c=G_p\cdot R_b=100\times1\times10^6=100$ Mcps. (In practice you would also subtract implementation losses, reducing usable margin.)` },
-    { q: String.raw`A DSSS receiver integrates for $T_b=1$ ms over a signal of bandwidth $W=5$ MHz. What is the processing gain, and how many chips per bit does that imply if chips fill the bandwidth?`, solution: String.raw`$G_p=TW=(1\times10^{-3})(5\times10^6)=5000\Rightarrow37$ dB. With chip rate $\approx W=5$ Mcps, chips per bit $N=R_c T_b=(5\times10^6)(1\times10^{-3})=5000$, matching $G_p$.` }
+    { q: String.raw`A DSSS link uses a PN code of length $N=1023$ chips per data bit. (a) What is the processing gain in dB? (b) If the input $S/N$ at the correlator is $-8$ dB, what is the output $S/N$?`, solution: String.raw`<p><b>Formula.</b> For DSSS the processing gain equals the chips-per-bit spreading factor, and the correlator multiplies the input SNR by it: $$G_p[\mathrm{dB}]=10\log_{10}N,\qquad \left(\tfrac{S}{N}\right)_{out}=\left(\tfrac{S}{N}\right)_{in}+G_p\ [\mathrm{dB}].$$ Here $N$ is the code length (chips per bit), and the SNRs are in-band ratios at the correlator input and output.</p><p><b>Substitute.</b> $G_p=10\log_{10}(1023)$ and $(S/N)_{out}=-8\ \mathrm{dB}+G_p$.</p><p><b>Compute.</b> $10\log_{10}(1023)=30.1$ dB. Then $(S/N)_{out}=-8+30.1=+22.1$ dB.</p><p><b>Explanation.</b> The signal enters 8 dB below its own noise yet leaves 22 dB above it — despreading buys the full 30 dB. This is the mechanism that lets spread-spectrum links operate under the noise floor.</p>` },
+    { q: String.raw`A system must transmit 9600 bps and needs at least 25 dB of processing gain. What minimum chip rate is required?`, solution: String.raw`<p><b>Formula.</b> Processing gain is the chip-to-bit rate ratio, so the required chip rate is $$R_c=G_p\cdot R_b,\qquad G_p=10^{G_p[\mathrm{dB}]/10},$$ where $R_b$ is the data rate and $G_p$ the linear spreading factor.</p><p><b>Substitute.</b> $G_p=10^{25/10}=10^{2.5}$ and $R_c=10^{2.5}\times 9600$.</p><p><b>Compute.</b> $10^{2.5}=316.2$, so $R_c=316.2\times9600=3.04\times10^{6}$ chips/s $\approx 3.04$ Mcps.</p><p><b>Explanation.</b> Meeting a 25 dB gain target with a 9.6 kbps stream forces a roughly 3 Mcps chip rate, occupying about 3 MHz for BPSK chips. Gain is bought purely with bandwidth — the sanity check is that 316 chips per bit gives $10\log_{10}316\approx25$ dB.</p>` },
+    { q: String.raw`GPS P(Y) uses a chip rate of 10.23 Mcps carrying 50 bps navigation data. Compare its processing gain to C/A (1.023 Mcps, 50 bps).`, solution: String.raw`<p><b>Formula.</b> $$G_p[\mathrm{dB}]=10\log_{10}\!\frac{R_c}{R_b},$$ with $R_c$ the chip rate and $R_b$ the data rate; the difference between two waveforms is $10\log_{10}(R_{c1}/R_{c2})$ when $R_b$ is common.</p><p><b>Substitute.</b> P(Y): $10\log_{10}(10.23\times10^6/50)$. C/A: $10\log_{10}(1.023\times10^6/50)$.</p><p><b>Compute.</b> P(Y): $10.23\text{M}/50=204600\Rightarrow10\log_{10}(204600)=53.1$ dB. C/A: $1.023\text{M}/50=20460\Rightarrow43.1$ dB. Difference $=10\log_{10}(10)=10$ dB.</p><p><b>Explanation.</b> P(Y) has exactly 10 dB more processing gain because its chip rate is 10× higher at the same data rate, so it tolerates a jammer 10 dB stronger — the reason the encrypted military code is far harder to jam than civilian C/A.</p>` },
+    { q: String.raw`A CDMA system has processing gain 21 dB and each user requires $E_b/N_0=7$ dB. Estimate the single-cell user capacity.`, solution: String.raw`<p><b>Formula.</b> With $K$ equal-power users each despreader suppresses the other $K-1$ by $G_p$, giving $$K\approx 1+\frac{G_p}{(E_b/N_0)_{req}},$$ all quantities in linear ratio.</p><p><b>Substitute.</b> $G_p=10^{21/10}$, $(E_b/N_0)_{req}=10^{7/10}$, so $K\approx1+10^{2.1}/10^{0.7}$.</p><p><b>Compute.</b> $G_p=125.9$; $(E_b/N_0)_{req}=5.01$. $K\approx1+125.9/5.01=1+25.1\approx26$ users.</p><p><b>Explanation.</b> About 26 simultaneous users share the cell before interference chokes the link. Voice-activity gating (~×2) and sectorization multiply this in real networks, so this is a conservative floor — capacity scales directly with processing gain.</p>` },
+    { q: String.raw`A chirp radar pulse is 50 µs long and sweeps 2 MHz. (a) Find the pulse-compression (processing) gain. (b) What is the compressed pulse width and range resolution?`, solution: String.raw`<p><b>Formula.</b> Pulse-compression gain is the time-bandwidth product; the compressed width and range resolution follow from the swept bandwidth: $$G_p=\tau B,\qquad \tau_{comp}\approx\frac{1}{B},\qquad \Delta R=\frac{c}{2B},$$ where $\tau$ is pulse duration, $B$ the swept bandwidth, $c$ the speed of light.</p><p><b>Substitute.</b> $G_p=(50\times10^{-6})(2\times10^{6})$; $\tau_{comp}=1/(2\times10^{6})$; $\Delta R=3\times10^{8}/(2\times2\times10^{6})$.</p><p><b>Compute.</b> (a) $G_p=100\Rightarrow20$ dB. (b) $\tau_{comp}=0.5$ µs; $\Delta R=3\times10^{8}/(4\times10^{6})=75$ m.</p><p><b>Explanation.</b> The matched filter compresses the 50 µs pulse 100× to 0.5 µs, turning a 7.5 km uncompressed resolution into 75 m — the same TW product that gives spread spectrum its gain, here buying range resolution.</p>` },
+    { q: String.raw`A jammer produces $-10$ dB signal-to-jammer ratio at the receiver input. The demodulator needs $+10$ dB $S/N$ to work. What processing gain is required, and what chip rate if the data rate is 1 Mbps?`, solution: String.raw`<p><b>Formula.</b> Despreading raises the signal-to-jammer ratio by $G_p$, so to clear the demodulator: $$(S/J)_{in}+G_p\ge (S/N)_{req}\ \Rightarrow\ G_p=(S/N)_{req}-(S/J)_{in},\qquad R_c=G_p\cdot R_b.$$</p><p><b>Substitute.</b> $G_p=10\ \mathrm{dB}-(-10\ \mathrm{dB})$; then $R_c=10^{G_p/10}\times1\times10^{6}$.</p><p><b>Compute.</b> $G_p=20$ dB $=100$ (linear). $R_c=100\times1\times10^{6}=100\times10^{6}=100$ Mcps.</p><p><b>Explanation.</b> Overcoming a jammer 10 dB stronger than the signal while still needing +10 dB SNR demands 20 dB of gain and a 100 Mcps chip rate. Real designs also subtract implementation loss, so you would specify a little more gain than this ideal figure.</p>` },
+    { q: String.raw`A DSSS receiver integrates for $T_b=1$ ms over a signal of bandwidth $W=5$ MHz. What is the processing gain, and how many chips per bit does that imply if chips fill the bandwidth?`, solution: String.raw`<p><b>Formula.</b> Processing gain is the time-bandwidth product of the coherent window, and chips per bit is chip rate times bit period: $$G_p=T_bW,\qquad N=R_c T_b\ \text{with}\ R_c\approx W.$$</p><p><b>Substitute.</b> $G_p=(1\times10^{-3})(5\times10^{6})$; $N=(5\times10^{6})(1\times10^{-3})$.</p><p><b>Compute.</b> $G_p=5000\Rightarrow10\log_{10}(5000)=37$ dB. $N=5000$ chips per bit.</p><p><b>Explanation.</b> Both routes give 5000, confirming $G_p=TW=N$: integrating 1 ms over 5 MHz processes 5000 independent chips, and the chip-count and TW-product definitions must agree. That is the unifying view of processing gain as a matched-filter integration gain.</p>` }
   ],
   realWorld: String.raw`<p>Processing gain is the design lever behind GPS/GNSS (43 dB for C/A lets receivers work below the noise floor), CDMA cellular (IS-95, CDMA2000, WCDMA) where it sets capacity and enables soft handover, Wi-Fi's original 802.11 DSSS/11b Barker and CCK modes, Bluetooth and military SINCGARS/Have Quick (via frequency hopping), and virtually all radar through pulse compression. In defence systems it is the first line of anti-jam defence, quantified downstream as jamming margin. Engineers trade it against spectrum, sample-rate and correlator complexity — every extra 3 dB of gain doubles the chip rate and the bandwidth you must digitize.</p>`,
   related: [ 'dsss', 'jamming-margin', 'frequency-hopping', 'matched-filter', 'correlation', 'pn-codes', 'gold-code', 'eb-no' ]
@@ -195,7 +263,9 @@ CONTENT.topics.push(
   category: 'Spread Spectrum & Coding',
   tags: [ String.raw`anti-jam`, String.raw`spread spectrum`, String.raw`processing gain`, String.raw`electronic warfare`, String.raw`J/S`, String.raw`frequency hopping` ],
   summary: String.raw`Jamming margin is the amount by which a jammer can exceed the wanted signal at the receiver input before a spread-spectrum link fails, equal to the processing gain minus implementation losses minus the demodulator's required SNR.`,
-  diagram: {
+  diagram: [
+    {
+    title: String.raw`Margin = Gp minus SNRreq minus Lsys`,
     svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-jamming-margin" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <line x1="40" y1="150" x2="510" y2="150" stroke="#9aa7b5" stroke-width="1"/>
@@ -216,7 +286,50 @@ CONTENT.topics.push(
   <text x="270" y="20" fill="#b197fc" text-anchor="middle">M_j = G_p &#8722; L_sys &#8722; (S/N)_req = (J/S)_max</text>
 </svg>`,
     caption: String.raw`Jamming margin is what remains of processing gain after subtracting the required SNR and implementation loss.`
-  },
+    },
+    {
+    title: String.raw`Jammer-vs-link scenario: J/S at the antenna`,
+    svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">
+  <defs><marker id="arr2-jamming-margin" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="16" y="30" width="96" height="42" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="64" y="48" fill="#e6edf3" text-anchor="middle">wanted Tx</text>
+  <text x="64" y="64" fill="#9aa7b5" text-anchor="middle">signal S</text>
+  <rect x="16" y="140" width="96" height="42" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="64" y="158" fill="#e6edf3" text-anchor="middle">jammer</text>
+  <text x="64" y="174" fill="#9aa7b5" text-anchor="middle">power J</text>
+  <line x1="112" y1="54" x2="222" y2="94" stroke="#4dabf7" stroke-width="1.5" marker-end="url(#arr2-jamming-margin)"/>
+  <line x1="112" y1="160" x2="222" y2="118" stroke="#ffa94d" stroke-width="1.5" marker-end="url(#arr2-jamming-margin)"/>
+  <rect x="224" y="86" width="120" height="42" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="284" y="104" fill="#e6edf3" text-anchor="middle">victim Rx</text>
+  <text x="284" y="120" fill="#f783ac" text-anchor="middle">J/S at antenna</text>
+  <line x1="344" y1="107" x2="376" y2="107" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-jamming-margin)"/>
+  <rect x="378" y="86" width="146" height="42" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+  <text x="451" y="104" fill="#e6edf3" text-anchor="middle">after despread</text>
+  <text x="451" y="120" fill="#63e6be" text-anchor="middle">J/S &#8722; G_p</text>
+  <text x="270" y="200" fill="#9aa7b5" text-anchor="middle">link survives while (J/S) &#8722; G_p &lt; &#8722;(S/N)_req &#8722; L_sys, i.e. J/S &lt; M_j</text>
+</svg>`,
+    caption: String.raw`Geometry sets the jammer-to-signal ratio at the antenna; despreading subtracts Gp from it, and the link survives only while the residual clears the demodulator requirement — equivalently J/S below the margin Mj.`
+    },
+    {
+    title: String.raw`Margin waterfall: Gp down to Mj`,
+    svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">
+  <line x1="60" y1="30" x2="60" y2="180" stroke="#9aa7b5" stroke-width="1"/>
+  <line x1="60" y1="180" x2="516" y2="180" stroke="#9aa7b5" stroke-width="1"/>
+  <text x="30" y="105" fill="#9aa7b5" text-anchor="middle" transform="rotate(-90 30 105)">dB</text>
+  <rect x="80" y="40" width="90" height="140" fill="#4dabf7" opacity="0.85"/>
+  <text x="125" y="34" fill="#4dabf7" text-anchor="middle">G_p 30</text>
+  <rect x="196" y="40" width="90" height="46" fill="#ffa94d" opacity="0.85"/>
+  <text x="241" y="34" fill="#ffa94d" text-anchor="middle">&#8722; SNR_req 10</text>
+  <text x="241" y="68" fill="#0b0f14" text-anchor="middle">10</text>
+  <rect x="312" y="86" width="90" height="18" fill="#f783ac" opacity="0.85"/>
+  <text x="357" y="78" fill="#f783ac" text-anchor="middle">&#8722; L_sys 2</text>
+  <rect x="428" y="104" width="90" height="76" fill="#63e6be" opacity="0.9"/>
+  <text x="473" y="98" fill="#63e6be" text-anchor="middle">M_j 18</text>
+  <text x="288" y="205" fill="#b197fc" text-anchor="middle">30 &#8722; 10 &#8722; 2 = 18 dB of jamming margin (max tolerable J/S)</text>
+</svg>`,
+    caption: String.raw`Waterfall of the margin equation: start from Gp, subtract the required SNR and the implementation loss, and the remaining bar is the jamming margin Mj — the largest J/S the link can absorb.`
+    }
+  ],
   prerequisites: [ 'processing-gain', 'dsss', 'eb-no', 'frequency-hopping' ],
   intro: String.raw`<p>Processing gain tells you how much a spread-spectrum receiver suppresses interference. <strong>Jamming margin</strong> $M_j$ turns that into an operational number: how much stronger than your signal can a jammer be at the antenna and still leave the link working? It is the anti-jam <em>headroom</em> — the difference between the interference rejection you bought (processing gain, less real-world losses) and the signal quality your demodulator actually demands.</p>
 <p>Jamming margin is the currency of electronic-warfare link design. A radio might advertise 30 dB of processing gain, but after subtracting a couple of dB of implementation loss and the 10 dB of SNR the modem needs, the jammer can only be about 18 dB stronger than the signal before the link breaks. Understanding exactly what goes into $M_j$ — and how the jammer-to-signal ratio at the receiver is set by transmit powers, ranges and antenna gains — lets you predict burn-through, size a jammer, or specify an anti-jam waveform.</p>`,
@@ -296,6 +409,18 @@ CONTENT.topics.push(
         <li><strong>Processing gain vanishes against correlated jamming.</strong> A repeater jammer that reproduces your code is not suppressed; $M_j$ overstates protection unless you hop faster than the jammer can respond.</li>
         <li><strong>Bandwidth definitions matter.</strong> Use the same bandwidth convention for $G_p$ as your reference; $R_c/R_b$ is safest.</li>
       </ul>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<div class="callout tip"><p>The core takeaways, in order of how you would use them:</p>
+      <ul>
+        <li><strong>The equation:</strong> $M_j=G_p-L_{sys}-(S/N)_{req}$ — jamming margin is processing gain minus implementation loss minus the demodulator's required SNR, all in dB.</li>
+        <li><strong>What it means physically:</strong> $M_j$ is the maximum jammer-to-signal ratio $(J/S)_{max}$ the link tolerates at the antenna; exceed it and you get burn-through (link failure).</li>
+        <li><strong>Margin is not gain:</strong> a 30 dB $G_p$ radio might have only ~18 dB of margin — always subtract both the loss and the required SNR.</li>
+        <li><strong>Geometry decides the outcome:</strong> the actual $J/S$ comes from transmit powers, antenna gains, and range ratio $(R_S/R_J)^n$; halving the jammer's range adds ~6 dB.</li>
+        <li><strong>Levers to widen margin:</strong> more $G_p$ (bandwidth), FEC coding gain (throughput), antenna nulling (often the biggest win), and interleaving+hopping against partial-band/pulsed/follower jammers.</li>
+        <li><strong>The caveat:</strong> raw $M_j$ assumes an uncorrelated broadband jammer; smart jammers force you to restore effective margin with coding, nulling, and fast hopping.</li>
+      </ul></div>`
     }
   ],
   keyPoints: [
@@ -375,14 +500,14 @@ CONTENT.topics.push(
     { q: String.raw`Doubling the chip rate at fixed data rate changes jamming margin (all else equal) by:`, options: [ String.raw`$-3$ dB`, String.raw`$0$ dB`, String.raw`$+3$ dB`, String.raw`$+6$ dB` ], answer: 2, explain: String.raw`$G_p$ rises 3 dB, so $M_j$ rises 3 dB — at the cost of doubling occupied bandwidth.` }
   ],
   numericals: [
-    { q: String.raw`A DSSS link has chip rate 10 Mcps and data rate 10 kbps. Implementation loss is 2 dB and the demodulator needs 9 dB SNR. Find (a) $G_p$ and (b) the jamming margin.`, solution: String.raw`(a) $G_p=R_c/R_b=10\times10^6/10\times10^3=1000\Rightarrow30$ dB. (b) $M_j=G_p-L_{sys}-(S/N)_{req}=30-2-9=19$ dB. The link tolerates a jammer up to 19 dB stronger than the signal at the input.` },
-    { q: String.raw`A jammer transmits 100 W into an omni antenna at 5 km from a receiver; the wanted transmitter sends 10 W into a 10 dBi antenna at 20 km. Both links are free space at the same frequency; receive antenna is omni toward both. (a) Compute $J/S$. (b) If $M_j=25$ dB, does the link survive?`, solution: String.raw`EIRP jammer $=10\log_{10}(100)+0=20$ dBW. EIRP signal $=10\log_{10}(10)+10=20$ dBW. Equal EIRP, so the difference is only geometry: $(R_S/R_J)^2=(20/5)^2=16\Rightarrow 10\log_{10}16=12$ dB in the jammer's favour. So $J/S=+12$ dB. (b) $12\ \text{dB}<25\ \text{dB}=M_j$, so the link survives with 13 dB of headroom.` },
-    { q: String.raw`Required jamming margin is 30 dB. The modem needs $E_b/N_0=6$ dB with a rate-1/2 code giving 5 dB coding gain, and there is 2 dB implementation loss. What raw (uncoded) processing gain must the waveform provide? (Take $(S/N)_{req}$ as the coded requirement.)`, solution: String.raw`Coded requirement $(S/N)_{req}=E_b/N_0-G_{coding}=6-5=1$ dB (effective). $G_p=M_j+L_{sys}+(S/N)_{req}=30+2+1=33$ dB. So the spreading waveform needs 33 dB of processing gain ($\approx2000\times$).` },
-    { q: String.raw`A frequency-hopping radio hops over 1000 channels each 25 kHz wide (25 MHz total) carrying 16 kbps. Implementation loss 2 dB, required SNR 10 dB. Find $G_p$ and $M_j$ against a full-band jammer.`, solution: String.raw`$G_p\approx N_{hop}=$ total hop BW / channel BW $=25\text{ MHz}/25\text{ kHz}=1000\Rightarrow30$ dB (equivalently the jammer's power is split 1000 ways). $M_j=30-2-10=18$ dB against a jammer forced to cover the whole band.` },
-    { q: String.raw`A GPS C/A receiver ($G_p=43$ dB) has 3 dB implementation loss and needs 6 dB $(S/N)_{req}$. A jammer produces $J/S=40$ dB at the antenna. Does GPS survive, and by how much?`, solution: String.raw`$M_j=43-3-6=34$ dB. Actual $J/S=40$ dB $>34$ dB, so the jammer burns through by $40-34=6$ dB — GPS is denied. This is why anti-jam adaptive antennas (CRPA) and higher-gain military codes are used.` },
-    { q: String.raw`You must raise a link's jamming margin from 15 dB to 24 dB. You can add processing gain (bandwidth cost) or FEC (throughput cost). If FEC provides 6 dB of coding gain, how much extra processing gain (and chip-rate factor) is still needed?`, solution: String.raw`Need $+9$ dB total. FEC supplies 6 dB, leaving $+3$ dB from processing gain. $+3$ dB means doubling the chip rate ($\times2$), doubling occupied bandwidth. Combined: FEC (6 dB) + 2× chip rate (3 dB) = 9 dB, reaching 24 dB.` },
-    { q: String.raw`A partial-band jammer concentrates its power into 10% of a 20 MHz spread band. Compared with barrage jamming, by how many dB is its in-band power spectral density higher, and what is the qualitative effect on margin?`, solution: String.raw`Concentrating the same power into $\rho=0.1$ of the band raises in-band PSD by $10\log_{10}(1/0.1)=10$ dB. Qualitatively it defeats 10 dB of the raw margin for the hops it hits; without FEC + interleaving the effective margin drops sharply, which is why anti-jam FH always uses coding.` },
-    { q: String.raw`A link has $G_p=27$ dB and 2 dB implementation loss. Two candidate modems need $(S/N)_{req}$ of 12 dB (uncoded) and 4 dB (with FEC). Compare their jamming margins and the tolerable jammer-power ratio.`, solution: String.raw`Uncoded: $M_j=27-2-12=13$ dB $\Rightarrow$ tolerates $J/S$ up to $\times20$. Coded: $M_j=27-2-4=21$ dB $\Rightarrow$ tolerates $J/S$ up to $\times126$. The FEC modem withstands a jammer roughly $6.3\times$ (8 dB) more powerful, at the cost of throughput/bandwidth.` }
+    { q: String.raw`A DSSS link has chip rate 10 Mcps and data rate 10 kbps. Implementation loss is 2 dB and the demodulator needs 9 dB SNR. Find (a) $G_p$ and (b) the jamming margin.`, solution: String.raw`<p><b>Formula.</b> $$G_p[\mathrm{dB}]=10\log_{10}\frac{R_c}{R_b},\qquad M_j=G_p-L_{sys}-\left(\frac{S}{N}\right)_{req},$$ where $L_{sys}$ is implementation loss and $(S/N)_{req}$ the demodulator requirement, all in dB.</p><p><b>Substitute.</b> $G_p=10\log_{10}(10\times10^{6}/10\times10^{3})$; $M_j=G_p-2-9$.</p><p><b>Compute.</b> (a) $R_c/R_b=1000\Rightarrow G_p=30$ dB. (b) $M_j=30-2-9=19$ dB.</p><p><b>Explanation.</b> The link tolerates a jammer up to 19 dB stronger than the signal at the antenna. Note $M_j$ is 11 dB below the raw 30 dB gain — both subtractions matter, a common exam trap.</p>` },
+    { q: String.raw`A jammer transmits 100 W into an omni antenna at 5 km from a receiver; the wanted transmitter sends 10 W into a 10 dBi antenna at 20 km. Both links are free space at the same frequency; receive antenna is omni toward both. (a) Compute $J/S$. (b) If $M_j=25$ dB, does the link survive?`, solution: String.raw`<p><b>Formula.</b> With free-space paths and equal receive gain toward both sources, $$\frac{J}{S}=\frac{\mathrm{EIRP}_J}{\mathrm{EIRP}_S}\left(\frac{R_S}{R_J}\right)^2,\quad \mathrm{EIRP}=P+G,$$ and the link survives while $J/S<M_j$ (all in dB).</p><p><b>Substitute.</b> $\mathrm{EIRP}_J=10\log_{10}(100)+0$; $\mathrm{EIRP}_S=10\log_{10}(10)+10$; geometry term $=20\log_{10}(20/5)$.</p><p><b>Compute.</b> $\mathrm{EIRP}_J=20$ dBW; $\mathrm{EIRP}_S=20$ dBW (equal). Geometry: $(20/5)^2=16\Rightarrow10\log_{10}16=12$ dB in the jammer's favour, so $J/S=+12$ dB. (b) $12\ \mathrm{dB}<25\ \mathrm{dB}=M_j$, so the link survives with 13 dB of headroom.</p><p><b>Explanation.</b> Even with identical EIRP, the jammer's 4× closer range gives it a 12 dB edge — but the 25 dB margin absorbs it. Halving the jammer's range again would add another 6 dB, showing how quickly geometry erodes anti-jam headroom.</p>` },
+    { q: String.raw`Required jamming margin is 30 dB. The modem needs $E_b/N_0=6$ dB with a rate-1/2 code giving 5 dB coding gain, and there is 2 dB implementation loss. What raw (uncoded) processing gain must the waveform provide? (Take $(S/N)_{req}$ as the coded requirement.)`, solution: String.raw`<p><b>Formula.</b> Coding gain lowers the effective SNR requirement, then invert the margin equation for $G_p$: $$\left(\frac{S}{N}\right)_{req}=\frac{E_b}{N_0}-G_{coding},\qquad G_p=M_j+L_{sys}+\left(\frac{S}{N}\right)_{req}.$$</p><p><b>Substitute.</b> $(S/N)_{req}=6-5$; $G_p=30+2+(6-5)$.</p><p><b>Compute.</b> $(S/N)_{req}=1$ dB (effective). $G_p=30+2+1=33$ dB, i.e. $10^{3.3}\approx2000\times$.</p><p><b>Explanation.</b> The waveform must supply 33 dB of spreading gain. Because coding contributed 5 dB toward the requirement, the raw gain needed is 5 dB lower than it would be uncoded — coding gain and processing gain simply add in the anti-jam budget.</p>` },
+    { q: String.raw`A frequency-hopping radio hops over 1000 channels each 25 kHz wide (25 MHz total) carrying 16 kbps. Implementation loss 2 dB, required SNR 10 dB. Find $G_p$ and $M_j$ against a full-band jammer.`, solution: String.raw`<p><b>Formula.</b> For FHSS the effective processing gain is the number of hop channels, and margin follows the standard form: $$G_p\approx N_{hop}=\frac{B_{hop}}{B_{ch}},\qquad M_j=G_p-L_{sys}-\left(\frac{S}{N}\right)_{req},$$ with $B_{hop}$ the total hop bandwidth and $B_{ch}$ the instantaneous channel width.</p><p><b>Substitute.</b> $G_p=25\ \mathrm{MHz}/25\ \mathrm{kHz}$; $M_j=G_p[\mathrm{dB}]-2-10$.</p><p><b>Compute.</b> $N_{hop}=1000\Rightarrow G_p=30$ dB. $M_j=30-2-10=18$ dB.</p><p><b>Explanation.</b> A full-band jammer must split its power across 1000 channels, so only $1/1000$ hits any hop — that is the 30 dB gain, leaving 18 dB of margin. The 16 kbps data rate does not enter directly here because gain comes from hop-channel count, not chip-to-bit ratio.</p>` },
+    { q: String.raw`A GPS C/A receiver ($G_p=43$ dB) has 3 dB implementation loss and needs 6 dB $(S/N)_{req}$. A jammer produces $J/S=40$ dB at the antenna. Does GPS survive, and by how much?`, solution: String.raw`<p><b>Formula.</b> $$M_j=G_p-L_{sys}-\left(\frac{S}{N}\right)_{req};\quad\text{link fails (burn-through) when } (J/S)_{actual}>M_j.$$</p><p><b>Substitute.</b> $M_j=43-3-6$; compare with $J/S=40$ dB.</p><p><b>Compute.</b> $M_j=34$ dB. Since $40>34$, the jammer burns through by $40-34=6$ dB.</p><p><b>Explanation.</b> GPS is denied by 6 dB — even 43 dB of processing gain yields only 34 dB of usable margin. This quantifies civilian GPS's well-known fragility and motivates controlled-reception-pattern antennas (CRPA nulling) and higher-rate M-code.</p>` },
+    { q: String.raw`You must raise a link's jamming margin from 15 dB to 24 dB. You can add processing gain (bandwidth cost) or FEC (throughput cost). If FEC provides 6 dB of coding gain, how much extra processing gain (and chip-rate factor) is still needed?`, solution: String.raw`<p><b>Formula.</b> Margin adds linearly in dB from coding gain and processing gain: $$\Delta M_j=G_{coding}+\Delta G_p,\qquad \Delta G_p=10\log_{10}\!\left(\frac{R_{c,new}}{R_{c,old}}\right).$$</p><p><b>Substitute.</b> Required $\Delta M_j=24-15=9$ dB. With $G_{coding}=6$ dB, $\Delta G_p=9-6=3$ dB, so $R_{c,new}/R_{c,old}=10^{3/10}$.</p><p><b>Compute.</b> $\Delta G_p=3$ dB $\Rightarrow$ chip-rate factor $=10^{0.3}\approx2$ (double the chip rate, doubling bandwidth).</p><p><b>Explanation.</b> FEC covers 6 of the 9 dB for free of bandwidth, and a 2× chip rate supplies the last 3 dB. Splitting the requirement between coding (throughput cost) and spreading (bandwidth cost) is the everyday anti-jam design trade.</p>` },
+    { q: String.raw`A partial-band jammer concentrates its power into 10% of a 20 MHz spread band. Compared with barrage jamming, by how many dB is its in-band power spectral density higher, and what is the qualitative effect on margin?`, solution: String.raw`<p><b>Formula.</b> Concentrating a fixed power into a fraction $\rho$ of the band raises its in-band power spectral density by $$\Delta\mathrm{PSD}=10\log_{10}\frac{1}{\rho}.$$</p><p><b>Substitute.</b> $\rho=0.1$, so $\Delta\mathrm{PSD}=10\log_{10}(1/0.1)$.</p><p><b>Compute.</b> $\Delta\mathrm{PSD}=10\log_{10}(10)=10$ dB.</p><p><b>Explanation.</b> By focusing into 10% of the band the jammer is 10 dB more damaging on the hops it covers, eating 10 dB of raw margin there. Interleaving plus FEC turns those hard-hit hops into correctable erasures, which is why anti-jam frequency-hopping systems always pair spreading with coding.</p>` },
+    { q: String.raw`A link has $G_p=27$ dB and 2 dB implementation loss. Two candidate modems need $(S/N)_{req}$ of 12 dB (uncoded) and 4 dB (with FEC). Compare their jamming margins and the tolerable jammer-power ratio.`, solution: String.raw`<p><b>Formula.</b> $$M_j=G_p-L_{sys}-\left(\frac{S}{N}\right)_{req},\qquad (J/S)_{max,linear}=10^{M_j/10}.$$</p><p><b>Substitute.</b> Uncoded: $M_j=27-2-12$. Coded: $M_j=27-2-4$.</p><p><b>Compute.</b> Uncoded $M_j=13$ dB $\Rightarrow 10^{1.3}\approx20\times$. Coded $M_j=21$ dB $\Rightarrow10^{2.1}\approx126\times$. Advantage $=21-13=8$ dB $\Rightarrow\approx6.3\times$.</p><p><b>Explanation.</b> The FEC modem's 8 dB lower SNR requirement translates dB-for-dB into 8 dB more margin, letting it survive a jammer roughly 6.3× more powerful — bought with coding overhead rather than extra bandwidth.</p>` }
   ],
   realWorld: String.raw`<p>Jamming margin is the headline anti-jam spec of tactical and satellite communications: military SATCOM (protected waveforms like the Advanced EHF / MILSTAR MDR), Link-16 (frequency-hopped, error-coded), SINCGARS and HAVE QUICK combat radios, and GPS M-code all quote or engineer to a jamming margin. It explains why civilian GPS (~34-36 dB margin) is jammed by cheap handheld devices while military M-code and controlled-reception-pattern antennas add tens of dB more. In commercial spread spectrum (Bluetooth adaptive hopping, LoRa chirp spread spectrum, CDMA cellular) the same equation governs coexistence and interference robustness rather than deliberate jamming. Whenever a system must survive hostile or crowded spectrum, its designers trade chip rate, hop count, FEC and antenna nulling to hit a target $M_j$.</p>`,
   related: [ 'processing-gain', 'dsss', 'frequency-hopping', 'fec', 'viterbi', 'eb-no', 'link-budget' ]
@@ -393,7 +518,9 @@ CONTENT.topics.push(
   category: 'RF Link & Metrics',
   tags: [ String.raw`sensitivity`, String.raw`noise floor`, String.raw`noise figure`, String.raw`MDS`, String.raw`link budget`, String.raw`Eb/N0` ],
   summary: String.raw`Receiver sensitivity is the minimum input signal power (in dBm) that delivers the required signal quality, equal to the thermal noise floor plus noise figure plus the required SNR in the signal bandwidth.`,
-  diagram: {
+  diagram: [
+    {
+    title: String.raw`Stacking floor + NF + SNRreq = Smin`,
     svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-sensitivity" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <rect x="14" y="42" width="118" height="42" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
@@ -414,7 +541,52 @@ CONTENT.topics.push(
   <text x="270" y="120" fill="#b197fc" text-anchor="middle">S_min = &#8722;174 + 10log10(B) + NF + (S/N)_req</text>
 </svg>`,
     caption: String.raw`Stacking the kTB thermal floor, the noise figure and the required SNR gives receiver sensitivity in dBm.`
-  },
+    },
+    {
+    title: String.raw`Receiver noise chain: antenna to Smin`,
+    svg: String.raw`<svg viewBox="0 0 540 190" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">
+  <defs><marker id="arr2-sensitivity" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="14" y="40" width="96" height="44" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="62" y="58" fill="#e6edf3" text-anchor="middle">antenna</text>
+  <text x="62" y="74" fill="#9aa7b5" text-anchor="middle">kTB floor</text>
+  <line x1="110" y1="62" x2="140" y2="62" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-sensitivity)"/>
+  <rect x="142" y="40" width="96" height="44" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="190" y="58" fill="#e6edf3" text-anchor="middle">LNA / NF</text>
+  <text x="190" y="74" fill="#9aa7b5" text-anchor="middle">adds noise</text>
+  <line x1="238" y1="62" x2="268" y2="62" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-sensitivity)"/>
+  <rect x="270" y="40" width="110" height="44" rx="6" fill="#1c232e" stroke="#f783ac" stroke-width="1.5"/>
+  <text x="325" y="58" fill="#e6edf3" text-anchor="middle">demod</text>
+  <text x="325" y="74" fill="#9aa7b5" text-anchor="middle">needs (S/N)_req</text>
+  <line x1="380" y1="62" x2="410" y2="62" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-sensitivity)"/>
+  <rect x="412" y="40" width="112" height="44" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="468" y="58" fill="#63e6be" text-anchor="middle">S_min</text>
+  <text x="468" y="74" fill="#9aa7b5" text-anchor="middle">min input dBm</text>
+  <text x="270" y="122" fill="#9aa7b5" text-anchor="middle">first LNA dominates NF (Friis); each dB of front-end loss adds ~1 dB NF</text>
+  <text x="270" y="150" fill="#b197fc" text-anchor="middle">MDS = &#8722;174 + 10logB + NF  (0 dB SNR);  S_min = MDS + (S/N)_req</text>
+</svg>`,
+    caption: String.raw`The physical noise chain: the antenna delivers the kTB floor, the LNA adds its noise figure to set the noise floor (MDS), and the demodulator's required SNR on top gives Smin.`
+    },
+    {
+    title: String.raw`Range implication: Smin sets max path loss`,
+    svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">
+  <defs><marker id="arr3-sensitivity" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="16" y="40" width="110" height="46" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="71" y="60" fill="#63e6be" text-anchor="middle">S_min</text>
+  <text x="71" y="78" fill="#9aa7b5" text-anchor="middle">e.g. &#8722;100 dBm</text>
+  <line x1="126" y1="63" x2="158" y2="63" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr3-sensitivity)"/>
+  <rect x="160" y="40" width="150" height="46" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="235" y="60" fill="#e6edf3" text-anchor="middle">max path loss</text>
+  <text x="235" y="78" fill="#9aa7b5" text-anchor="middle">EIRP+G_rx&#8722;M&#8722;S_min</text>
+  <line x1="310" y1="63" x2="342" y2="63" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr3-sensitivity)"/>
+  <rect x="344" y="40" width="180" height="46" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="434" y="60" fill="#e6edf3" text-anchor="middle">max range</text>
+  <text x="434" y="78" fill="#9aa7b5" text-anchor="middle">via path-loss model</text>
+  <text x="270" y="122" fill="#b197fc" text-anchor="middle">10 dB better S_min &#8594; 10 dB more allowable loss</text>
+  <text x="270" y="146" fill="#63e6be" text-anchor="middle">&#8776; 3&#215; the free-space range (20 log10 3 &#8776; 9.5 dB)</text>
+</svg>`,
+    caption: String.raw`Sensitivity is the receive anchor of range: a lower Smin allows more path loss, which through the propagation model buys distance — 10 dB of sensitivity roughly triples free-space range.`
+    }
+  ],
   prerequisites: [ 'noise-floor', 'noise-figure', 'eb-no', 'ber' ],
   intro: String.raw`<p><strong>Receiver sensitivity</strong> answers the most practical question in radio: how weak a signal can this receiver still decode? Expressed as a power in dBm, it is the input level at which the demodulator just meets its target performance — a specified BER, packet error rate, or SNR. Everything above sensitivity works; everything below it fails. Sensitivity, together with transmit power and antenna gains, sets the maximum range of a link through the link budget.</p>
 <p>The beauty of the sensitivity equation is that it decomposes cleanly into three physically meaningful pieces: the <em>thermal noise floor</em> (set by temperature and bandwidth, an inescapable floor from physics), the <em>noise figure</em> (how much the receiver's own electronics degrade that floor), and the <em>required SNR or $E_b/N_0$</em> (how much cleaner than noise the signal must be for your modulation and coding). Master these three and you can compute, compare and improve the sensitivity of any receiver — and explain why LoRa reaches kilometres where Wi-Fi reaches metres.</p>`,
@@ -503,6 +675,18 @@ CONTENT.topics.push(
         <tr><td>Bluetooth LE</td><td>1 MHz</td><td>$\approx-95$ dBm</td><td>1 MHz BW, GFSK, moderate required SNR</td></tr>
       </table>
       <p>The spread from $-70$ to $-137$ dBm — a factor of nearly $5\times10^6$ in power — is entirely explained by bandwidth, noise figure, required SNR and processing gain. Nothing magical: just the three terms of the sensitivity equation, plus spreading.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<div class="callout tip"><p>Everything above collapses to a handful of ideas:</p>
+      <ul>
+        <li><strong>The three-term equation:</strong> $S_{min}=-174+10\log_{10}B+NF+(S/N)_{req}$ — a physics floor, a hardware penalty, and a modem demand, all in dB.</li>
+        <li><strong>The two forms are equivalent:</strong> swap $10\log_{10}B$ for $10\log_{10}R_b$ and $(S/N)_{req}$ for $(E_b/N_0)_{req}$; sensitivity fundamentally tracks information rate, not raw bandwidth.</li>
+        <li><strong>The levers, each worth its dB:</strong> narrow bandwidth (−10 dB per decade), cut noise figure (1 dB for 1 dB, first LNA dominates), and reduce required SNR via coding, spreading, or robust modulation.</li>
+        <li><strong>MDS vs sensitivity:</strong> MDS is the 0 dB-SNR floor; sensitivity adds the required SNR on top. Always check which a datasheet quotes.</li>
+        <li><strong>Sign convention:</strong> more negative dBm = more sensitive = hears weaker signals.</li>
+        <li><strong>Why it matters:</strong> $S_{min}$ is the receive anchor of the link budget — 10 dB better sensitivity buys 10 dB more path loss and roughly triples free-space range.</li>
+      </ul></div>`
     }
   ],
   keyPoints: [
@@ -582,14 +766,14 @@ CONTENT.topics.push(
     { q: String.raw`Which term makes sensitivity depend on modulation and coding choice?`, options: [ String.raw`$-174$`, String.raw`$10\log_{10}B$`, String.raw`$(S/N)_{req}$ or $(E_b/N_0)_{req}$`, String.raw`The noise figure` ], answer: 2, explain: String.raw`The required SNR / $E_b/N_0$ is set by the modulation order and FEC; robust modulation and strong coding reduce it, improving sensitivity.` }
   ],
   numericals: [
-    { q: String.raw`A receiver has bandwidth $B=1$ MHz, noise figure $NF=6$ dB, and requires $(S/N)_{req}=12$ dB. Compute (a) the noise floor, (b) the MDS, and (c) the sensitivity.`, solution: String.raw`(a) Noise floor $=-174+10\log_{10}(10^6)+NF=-174+60+6=-108$ dBm. (b) MDS (0 dB SNR) $=-108$ dBm (noise floor with NF). (c) $S_{min}=\text{MDS}+(S/N)_{req}=-108+12=-96$ dBm.` },
-    { q: String.raw`A GSM receiver: $B=200$ kHz, $NF=8$ dB, required carrier-to-noise 9 dB. Find sensitivity and comment.`, solution: String.raw`$10\log_{10}(2\times10^5)=53$ dB. $S_{min}=-174+53+8+9=-104$ dBm. This is close to the GSM spec (~$-102$ dBm reference sensitivity for a mobile), confirming the model. Narrow BW is what keeps it so sensitive.` },
-    { q: String.raw`A modem runs at $R_b=1$ Mbps and needs $E_b/N_0=10$ dB after FEC. The front-end NF is 4 dB. Use the $E_b/N_0$ form to find sensitivity.`, solution: String.raw`$S_{min}=-174+NF+10\log_{10}R_b+(E_b/N_0)_{req}=-174+4+10\log_{10}(10^6)+10=-174+4+60+10=-100$ dBm.` },
-    { q: String.raw`Wi-Fi 20 MHz channel, $NF=5$ dB. For MCS0 (BPSK, rate 1/2) the required SNR is ~4 dB; for 64-QAM (rate 5/6) it is ~25 dB. Compute both sensitivities and the dynamic-range implication.`, solution: String.raw`$10\log_{10}(2\times10^7)=73$ dB. MCS0: $-174+73+5+4=-92$ dBm. 64-QAM: $-174+73+5+25=-71$ dBm. The 21 dB gap means the robust rate reaches ~11× farther (in free space, $10^{21/20}\approx11$ in path-loss terms), illustrating rate-vs-range adaptation.` },
-    { q: String.raw`A LoRa link uses $B=125$ kHz, $NF=6$ dB, and SF12 gives an effective required SNR of about $-20$ dB (thanks to processing gain). Find the sensitivity.`, solution: String.raw`$10\log_{10}(1.25\times10^5)=51$ dB. $S_{min}=-174+51+6+(-20)=-137$ dBm. The negative required SNR (the signal can be 20 dB below noise, recovered by chirp spreading) is what pushes LoRa to ~$-137$ dBm.` },
-    { q: String.raw`Compare noise figure vs bandwidth as sensitivity levers: a receiver at $B=2$ MHz, $NF=10$ dB, $(S/N)_{req}=10$ dB. You can either drop NF to 4 dB or narrow B to 500 kHz. Which helps more?`, solution: String.raw`Baseline: $-174+63+10+10=-91$ dBm. Option A (NF 10→4): improves 6 dB $\to -97$ dBm. Option B (B 2 MHz→500 kHz, $-6$ dB floor): $-174+57+10+10=-97$ dBm. Both give 6 dB, reaching $-97$ dBm — but narrowing B also cuts your data rate 4×, while lowering NF keeps the rate. If throughput matters, fix the NF.` },
-    { q: String.raw`A link has $P_{tx}=20$ dBm, $G_{tx}=G_{rx}=6$ dBi, receiver sensitivity $-100$ dBm, fade margin 10 dB, miscellaneous losses 3 dB. What is the maximum allowable free-space path loss and range at 2.4 GHz?`, solution: String.raw`Max path loss $L=P_{tx}+G_{tx}+G_{rx}-L_{misc}-M_{fade}-S_{min}=20+6+6-3-10-(-100)=119$ dB. FSPL$=32.44+20\log_{10}(f_{MHz})+20\log_{10}(d_{km})$. $32.44+20\log_{10}(2400)=32.44+67.6=100.0$ dB at 1 km. Remaining $119-100=19$ dB $\Rightarrow 20\log_{10}d=19\Rightarrow d=10^{0.95}\approx8.9$ km.` },
-    { q: String.raw`A designer adds a rate-1/2 convolutional code with 5 dB of coding gain to a receiver whose sensitivity was $-95$ dBm. Assuming bandwidth is held constant, what is the new sensitivity, and what range improvement (free space) does it give?`, solution: String.raw`Coding gain lowers the required SNR by 5 dB, so $S_{min}$ improves to $-95-5=-100$ dBm. Free-space range scales as $10^{5/20}\approx1.78\times$ — roughly a 78% range increase for the same link margin (ignoring the bandwidth expansion the code needs).` }
+    { q: String.raw`A receiver has bandwidth $B=1$ MHz, noise figure $NF=6$ dB, and requires $(S/N)_{req}=12$ dB. Compute (a) the noise floor, (b) the MDS, and (c) the sensitivity.`, solution: String.raw`<p><b>Formula.</b> $$N=-174+10\log_{10}B+NF,\quad \text{MDS}=N,\quad S_{min}=\text{MDS}+\left(\frac{S}{N}\right)_{req},$$ where $N$ is the noise floor (dBm), MDS the 0 dB-SNR detection limit, and $S_{min}$ the sensitivity.</p><p><b>Substitute.</b> $N=-174+10\log_{10}(10^{6})+6$; $S_{min}=N+12$.</p><p><b>Compute.</b> (a) $N=-174+60+6=-108$ dBm. (b) MDS $=-108$ dBm. (c) $S_{min}=-108+12=-96$ dBm.</p><p><b>Explanation.</b> The noise floor and MDS coincide (MDS is just the floor at 0 dB SNR); demanding 12 dB of SNR raises the minimum usable signal to −96 dBm. Any signal above −96 dBm decodes; below it fails.</p>` },
+    { q: String.raw`A GSM receiver: $B=200$ kHz, $NF=8$ dB, required carrier-to-noise 9 dB. Find sensitivity and comment.`, solution: String.raw`<p><b>Formula.</b> $$S_{min}=-174+10\log_{10}B+NF+\left(\frac{S}{N}\right)_{req},$$ the thermal floor plus noise figure plus the required carrier-to-noise.</p><p><b>Substitute.</b> $S_{min}=-174+10\log_{10}(2\times10^{5})+8+9$.</p><p><b>Compute.</b> $10\log_{10}(2\times10^{5})=53$ dB. $S_{min}=-174+53+8+9=-104$ dBm.</p><p><b>Explanation.</b> The −104 dBm result sits right beside GSM's ~−102 dBm reference-sensitivity spec, confirming the three-term model. The narrow 200 kHz channel keeps the noise floor low, which is exactly what makes GSM so sensitive relative to wideband systems.</p>` },
+    { q: String.raw`A modem runs at $R_b=1$ Mbps and needs $E_b/N_0=10$ dB after FEC. The front-end NF is 4 dB. Use the $E_b/N_0$ form to find sensitivity.`, solution: String.raw`<p><b>Formula.</b> The $E_b/N_0$ form replaces bandwidth with bit rate: $$S_{min}=-174+NF+10\log_{10}R_b+\left(\frac{E_b}{N_0}\right)_{req}.$$</p><p><b>Substitute.</b> $S_{min}=-174+4+10\log_{10}(10^{6})+10$.</p><p><b>Compute.</b> $10\log_{10}(10^{6})=60$ dB. $S_{min}=-174+4+60+10=-100$ dBm.</p><p><b>Explanation.</b> Sensitivity here depends on the 1 Mbps information rate, not the occupied bandwidth — the cleanest way to compare systems with different spreading. The −100 dBm figure is the receive anchor for this modem's link budget.</p>` },
+    { q: String.raw`Wi-Fi 20 MHz channel, $NF=5$ dB. For MCS0 (BPSK, rate 1/2) the required SNR is ~4 dB; for 64-QAM (rate 5/6) it is ~25 dB. Compute both sensitivities and the dynamic-range implication.`, solution: String.raw`<p><b>Formula.</b> $$S_{min}=-174+10\log_{10}B+NF+\left(\frac{S}{N}\right)_{req};\ \text{free-space range ratio}=10^{\Delta S_{min}/20}.$$</p><p><b>Substitute.</b> $10\log_{10}(2\times10^{7})=73$ dB. MCS0: $-174+73+5+4$. 64-QAM: $-174+73+5+25$.</p><p><b>Compute.</b> MCS0: $=-92$ dBm. 64-QAM: $=-71$ dBm. Gap $=21$ dB $\Rightarrow10^{21/20}\approx11\times$ range.</p><p><b>Explanation.</b> The robust low-order rate hears signals 21 dB weaker, reaching about 11× farther in free space. This 21 dB spread is exactly the rate-versus-range adaptation every Wi-Fi radio performs as you walk away from the access point.</p>` },
+    { q: String.raw`A LoRa link uses $B=125$ kHz, $NF=6$ dB, and SF12 gives an effective required SNR of about $-20$ dB (thanks to processing gain). Find the sensitivity.`, solution: String.raw`<p><b>Formula.</b> $$S_{min}=-174+10\log_{10}B+NF+\left(\frac{S}{N}\right)_{req},$$ where the required SNR can be negative when chirp spreading supplies processing gain.</p><p><b>Substitute.</b> $S_{min}=-174+10\log_{10}(1.25\times10^{5})+6+(-20)$.</p><p><b>Compute.</b> $10\log_{10}(1.25\times10^{5})=51$ dB. $S_{min}=-174+51+6-20=-137$ dBm.</p><p><b>Explanation.</b> A −20 dB required SNR means the signal sits 20 dB below the noise and is still recovered by chirp spreading — that is what pushes LoRa to ~−137 dBm and enables multi-kilometre IoT links. Narrow bandwidth plus a negative SNR term dominate the result.</p>` },
+    { q: String.raw`Compare noise figure vs bandwidth as sensitivity levers: a receiver at $B=2$ MHz, $NF=10$ dB, $(S/N)_{req}=10$ dB. You can either drop NF to 4 dB or narrow B to 500 kHz. Which helps more?`, solution: String.raw`<p><b>Formula.</b> $$S_{min}=-174+10\log_{10}B+NF+\left(\frac{S}{N}\right)_{req};$$ NF enters linearly, and bandwidth via $10\log_{10}B$ (a 4× cut is $-6$ dB).</p><p><b>Substitute.</b> Baseline: $-174+10\log_{10}(2\times10^{6})+10+10$. Option A: NF $10\to4$. Option B: $10\log_{10}(5\times10^{5})+10+10$.</p><p><b>Compute.</b> Baseline $=-174+63+10+10=-91$ dBm. Option A $=-174+63+4+10=-97$ dBm. Option B $=-174+57+10+10=-97$ dBm. Both improve 6 dB.</p><p><b>Explanation.</b> Numerically the two levers tie at −97 dBm, but narrowing bandwidth 4× also quarters the data rate, while cutting NF preserves it. When throughput matters, fix the front-end noise figure rather than shrink the channel.</p>` },
+    { q: String.raw`A link has $P_{tx}=20$ dBm, $G_{tx}=G_{rx}=6$ dBi, receiver sensitivity $-100$ dBm, fade margin 10 dB, miscellaneous losses 3 dB. What is the maximum allowable free-space path loss and range at 2.4 GHz?`, solution: String.raw`<p><b>Formula.</b> $$L_{max}=P_{tx}+G_{tx}+G_{rx}-L_{misc}-M_{fade}-S_{min},\qquad \mathrm{FSPL}=32.44+20\log_{10}f_{MHz}+20\log_{10}d_{km}.$$</p><p><b>Substitute.</b> $L_{max}=20+6+6-3-10-(-100)$; then set $\mathrm{FSPL}=L_{max}$ with $f=2400$ MHz to solve for $d$.</p><p><b>Compute.</b> $L_{max}=119$ dB. FSPL at 1 km $=32.44+67.6=100.0$ dB, leaving $119-100=19$ dB $\Rightarrow20\log_{10}d=19\Rightarrow d=10^{0.95}\approx8.9$ km.</p><p><b>Explanation.</b> The link closes out to about 8.9 km in free space. Sensitivity is the pivotal term: improving it 6 dB would add 6 dB to $L_{max}$ and roughly double the range — the direct sensitivity-to-range lever.</p>` },
+    { q: String.raw`A designer adds a rate-1/2 convolutional code with 5 dB of coding gain to a receiver whose sensitivity was $-95$ dBm. Assuming bandwidth is held constant, what is the new sensitivity, and what range improvement (free space) does it give?`, solution: String.raw`<p><b>Formula.</b> Coding gain lowers the required SNR term dB-for-dB, and free-space range scales as $$S_{min,new}=S_{min}-G_{coding},\qquad \frac{d_{new}}{d_{old}}=10^{G_{coding}/20}.$$</p><p><b>Substitute.</b> $S_{min,new}=-95-5$; range ratio $=10^{5/20}$.</p><p><b>Compute.</b> $S_{min,new}=-100$ dBm; range ratio $=10^{0.25}\approx1.78$.</p><p><b>Explanation.</b> The 5 dB of coding gain improves sensitivity to −100 dBm and stretches free-space range about 78%, for the same transmit power — coding buys range at the cost of the code's overhead/latency (bandwidth expansion here ignored).</p>` }
   ],
   realWorld: String.raw`<p>Receiver sensitivity is the headline spec on every radio datasheet — cellular handsets (3GPP reference sensitivity), Wi-Fi chipsets (per-MCS sensitivity tables), GPS/GNSS front ends (tracking sensitivity below $-160$ dBm with processing gain), LoRa and other LPWAN modules ($-137$ dBm enabling multi-kilometre IoT links), and satellite/deep-space receivers where cryogenically cooled LNAs push noise figure toward a fraction of a dB. It drives coverage planning (how many base stations to cover a city), battery life (a more sensitive receiver lets the transmitter use less power), and regulatory link design. The same three-term equation lets an engineer trade bandwidth, front-end quality and coding to hit a coverage target, and it is the receive-side anchor of every link budget.</p>`,
   related: [ 'noise-floor', 'noise-figure', 'eb-no', 'ber', 'link-budget', 'path-loss', 'processing-gain' ]

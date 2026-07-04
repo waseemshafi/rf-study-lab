@@ -6,7 +6,8 @@ CONTENT.topics.push(
   category: 'Fundamentals',
   tags: ['information theory', 'capacity', 'entropy', 'SNR', 'Shannon-Hartley', 'spectral efficiency'],
   summary: String.raw`Shannon's channel model and capacity theorem set the ultimate limit on error-free data rate, given by $C = B\log_2(1+\mathrm{SNR})$ bits per second.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-shannon" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="8" y="55" width="70" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="43" y="79" fill="#e6edf3" text-anchor="middle">Source</text>
@@ -23,6 +24,36 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`Shannon's channel model: source coded and protected, sent through a noisy channel of capacity $C=B\log_2(1+\mathrm{SNR})$, then decoded to the sink.`,
   },
+  {
+    title: String.raw`Two levers on capacity: widen B vs raise SNR`,
+    svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-shannon" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="200" y="12" width="140" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="270" y="30" fill="#e6edf3" text-anchor="middle">C = B·log₂(1+SNR)</text><text x="270" y="45" fill="#9aa7b5" text-anchor="middle" font-size="10">bits/s to raise</text>
+<rect x="20" y="78" width="200" height="44" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="120" y="97" fill="#e6edf3" text-anchor="middle" font-size="11">Path A — widen B</text><text x="120" y="112" fill="#9aa7b5" text-anchor="middle" font-size="10">C ∝ B linear (strong)</text>
+<rect x="320" y="78" width="200" height="44" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="420" y="97" fill="#e6edf3" text-anchor="middle" font-size="11">Path B — raise SNR</text><text x="420" y="112" fill="#9aa7b5" text-anchor="middle" font-size="10">C ∝ log₂SNR (weak)</text>
+<rect x="20" y="140" width="200" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="120" y="159" fill="#9aa7b5" text-anchor="middle" font-size="10">but N=N₀B rises too</text>
+<rect x="320" y="140" width="200" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="420" y="159" fill="#9aa7b5" text-anchor="middle" font-size="10">+3 dB ≈ +B bits/s only</text>
+<line x1="240" y1="52" x2="150" y2="76" stroke="#9aa7b5" marker-end="url(#arr2-shannon)"/>
+<line x1="300" y1="52" x2="390" y2="76" stroke="#9aa7b5" marker-end="url(#arr2-shannon)"/>
+<line x1="120" y1="122" x2="120" y2="138" stroke="#9aa7b5" marker-end="url(#arr2-shannon)"/>
+<line x1="420" y1="122" x2="420" y2="138" stroke="#9aa7b5" marker-end="url(#arr2-shannon)"/>
+</svg>`,
+    caption: String.raw`Two ways to raise capacity: widening bandwidth $B$ is a linear (strong) lever, while raising SNR only helps logarithmically — and adding bandwidth also admits more noise ($N=N_0B$).`,
+  },
+  {
+    title: String.raw`Operating regions: R<C reliable, R>C impossible`,
+    svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-shannon" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<line x1="60" y1="130" x2="500" y2="130" stroke="#9aa7b5"/><text x="500" y="148" fill="#9aa7b5" text-anchor="middle" font-size="10">rate R →</text>
+<line x1="280" y1="20" x2="280" y2="130" stroke="#ffa94d" stroke-dasharray="4 3"/><text x="280" y="15" fill="#ffa94d" text-anchor="middle" font-size="11">R = C</text>
+<rect x="70" y="45" width="190" height="60" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="165" y="70" fill="#e6edf3" text-anchor="middle" font-size="11">R &lt; C</text><text x="165" y="88" fill="#9aa7b5" text-anchor="middle" font-size="10">reliable: error → 0</text><text x="165" y="100" fill="#9aa7b5" text-anchor="middle" font-size="10">with long codes</text>
+<rect x="300" y="45" width="190" height="60" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="395" y="70" fill="#e6edf3" text-anchor="middle" font-size="11">R &gt; C</text><text x="395" y="88" fill="#9aa7b5" text-anchor="middle" font-size="10">impossible: error</text><text x="395" y="100" fill="#9aa7b5" text-anchor="middle" font-size="10">bounded away from 0</text>
+<line x1="165" y1="105" x2="165" y2="128" stroke="#9aa7b5" marker-end="url(#arr3-shannon)"/>
+<line x1="395" y1="105" x2="395" y2="128" stroke="#9aa7b5" marker-end="url(#arr3-shannon)"/>
+</svg>`,
+    caption: String.raw`The coding theorem's sharp threshold at $R=C$: below capacity, arbitrarily reliable communication is achievable; above it, no code can drive the error probability to zero.`,
+  }
+  ],
   prerequisites: ['comm-basics', 'noise', 'psd'],
   intro: String.raw`<p>In 1948 Claude Shannon founded information theory with a single, astonishing claim: every noisy channel has a finite number — its <b>capacity</b> $C$ — such that reliable (arbitrarily low error) communication is possible at any rate below $C$ and impossible above it. Before Shannon, engineers believed that noise forced an unavoidable trade: to get fewer errors you had to slow down without bound. Shannon proved instead that as long as you stay under $C$, you can drive the error probability to zero by clever coding. This page builds the channel model, defines information and entropy, and derives the celebrated <b>Shannon–Hartley</b> formula $C=B\log_2(1+\mathrm{SNR})$ from first principles.</p>`,
   sections: [
@@ -88,6 +119,18 @@ CONTENT.topics.push(
         <li><b>Bandwidth $\neq$ data rate.</b> A 1 MHz channel can carry far more or far less than 1 Mbit/s depending on SNR and coding.</li>
         <li><b>Zero SNR ⇒ zero capacity? No.</b> $C\to 0$ only as $S\to 0$; even tiny SNR gives positive capacity if bandwidth is large.</li>
       </ul>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<div class="callout tip"><p>Pulling the whole page together, you should now be able to say:</p>
+      <ul>
+        <li><b>Capacity is a threshold, not a suggestion.</b> There exists a number $C$ below which error can be driven to zero and above which reliable communication is flatly impossible — that is Shannon's central result.</li>
+        <li><b>Information is measured by surprise.</b> $H=-\sum p_i\log_2 p_i$ is the average bits per symbol, maximised when symbols are equiprobable, and capacity is the best mutual information $C=\max_{p(x)}I(X;Y)$.</li>
+        <li><b>The Shannon–Hartley formula $C=B\log_2(1+\mathrm{SNR})$</b> ties capacity to two knobs, and bandwidth (linear) is a stronger lever than power (logarithmic).</li>
+        <li><b>Spectral efficiency $\eta=\log_2(1+\mathrm{SNR})$</b> bounds every modulation, and the energy floor $E_b/N_0\ge\ln2=-1.59$ dB is the deepest limit in communications.</li>
+        <li><b>Source and channel coding are separable opposites:</b> compress to $H$, then protect up to $C$; reliable transmission needs $H\le C$.</li>
+        <li><b>Why it matters:</b> from the 56k modem plateau to LTE's adaptive QAM and Voyager's near-limit FEC, every real link is engineered against this single ceiling.</li>
+      </ul></div>`
     }
   ],
   keyPoints: [
@@ -201,12 +244,30 @@ CONTENT.topics.push(
     { q: String.raw`Which is TRUE of the noisy-channel coding theorem's converse?`, options: [String.raw`Above $C$, error can still be made arbitrarily small`, String.raw`Above $C$, error is bounded away from zero for any code`, String.raw`It applies only to noiseless channels`, String.raw`It requires infinite bandwidth`], answer: 1, explain: String.raw`No code can achieve reliability above capacity — that is the converse.` }
   ],
   numericals: [
-    { q: String.raw`A channel has $B=1$ MHz and SNR = 20 dB. Find capacity.`, solution: String.raw`SNR linear $=10^{20/10}=100$. $C=10^6\log_2(101)=10^6\times 6.658\approx 6.66$ Mbit/s.` },
-    { q: String.raw`What SNR (dB) is needed to reach 8 bits/s/Hz?`, solution: String.raw`$\eta=\log_2(1+\mathrm{SNR})=8 \Rightarrow \mathrm{SNR}=2^8-1=255$. In dB $=10\log_{10}255\approx 24.1$ dB.` },
-    { q: String.raw`A source has symbols with probabilities 0.5, 0.25, 0.25. Find its entropy.`, solution: String.raw`$H=-(0.5\log_2 0.5+2\times 0.25\log_2 0.25)=0.5+2\times 0.5=1.5$ bits/symbol.` },
-    { q: String.raw`A BSC has bit-flip probability $p=0.1$. Find its capacity.`, solution: String.raw`$H_b(0.1)=-0.1\log_2 0.1-0.9\log_2 0.9=0.332+0.137=0.469$. $C=1-0.469=0.531$ bit/use.` },
-    { q: String.raw`To send 100 Mbit/s reliably over a 20 MHz channel, what minimum SNR (dB) is required?`, solution: String.raw`$\eta=100/20=5$ bits/s/Hz. $\mathrm{SNR}=2^5-1=31 \Rightarrow 10\log_{10}31\approx 14.9$ dB.` },
-    { q: String.raw`Confirm the Shannon limit: compute $E_b/N_0$ at $\eta=1$ bit/s/Hz and compare to $\eta\to 0$.`, solution: String.raw`$E_b/N_0=(2^1-1)/1=1=0$ dB at $\eta=1$; as $\eta\to0$ it $\to\ln 2=0.693=-1.59$ dB. The floor is 1.59 dB below the $\eta=1$ value.` }
+    { q: String.raw`A channel has $B=1$ MHz and SNR = 20 dB. Find capacity.`, solution: String.raw`<p><b>Formula.</b> $$ C=B\log_2\!\left(1+\mathrm{SNR}\right) $$ where $C$ is capacity (bits/s), $B$ the bandwidth (Hz), and $\mathrm{SNR}$ the <i>linear</i> signal-to-noise ratio.</p>
+<p><b>Substitute.</b> First convert the SNR from dB: $\mathrm{SNR}=10^{20/10}=100$. Then $$ C=10^6\times\log_2\!\left(1+100\right)=10^6\times\log_2(101). $$</p>
+<p><b>Compute.</b> $\log_2(101)=6.658$, so $C=10^6\times6.658=6.658\times10^6\approx 6.66$ Mbit/s.</p>
+<p><b>Explanation.</b> This is the ceiling on error-free throughput for a 1 MHz link at a fairly clean 20 dB SNR. Sanity check: at high SNR each doubling of power (+3 dB) adds only about $B=1$ Mbit/s, confirming the log-law's diminishing returns.</p>` },
+    { q: String.raw`What SNR (dB) is needed to reach 8 bits/s/Hz?`, solution: String.raw`<p><b>Formula.</b> $$ \eta=\log_2\!\left(1+\mathrm{SNR}\right)\ \Rightarrow\ \mathrm{SNR}=2^{\eta}-1 $$ where $\eta$ is spectral efficiency (bits/s/Hz) and $\mathrm{SNR}$ is linear.</p>
+<p><b>Substitute.</b> $$ \mathrm{SNR}=2^{8}-1=256-1=255. $$</p>
+<p><b>Compute.</b> In decibels, $10\log_{10}(255)=10\times2.407=24.07\approx 24.1$ dB.</p>
+<p><b>Explanation.</b> Cramming 8 bits into every hertz (roughly 256-QAM territory) demands about 24 dB of SNR — a clean, wired-quality channel. It shows why high-order modulation is reserved for strong links.</p>` },
+    { q: String.raw`A source has symbols with probabilities 0.5, 0.25, 0.25. Find its entropy.`, solution: String.raw`<p><b>Formula.</b> $$ H=-\sum_i p_i\log_2 p_i $$ where $p_i$ is the probability of symbol $i$ and $H$ is entropy in bits/symbol.</p>
+<p><b>Substitute.</b> $$ H=-\left(0.5\log_2 0.5+0.25\log_2 0.25+0.25\log_2 0.25\right). $$</p>
+<p><b>Compute.</b> $\log_2 0.5=-1$ and $\log_2 0.25=-2$, so $H=-(0.5(-1)+0.25(-2)+0.25(-2))=0.5+0.5+0.5=1.5$ bits/symbol.</p>
+<p><b>Explanation.</b> The source carries 1.5 bits of information per symbol on average — less than the 2 bits a naïve fixed-length code would spend, so lossless compression can save 25%. Sanity check: $H$ lies below $\log_2 3\approx1.58$, the maximum for three symbols.</p>` },
+    { q: String.raw`A BSC has bit-flip probability $p=0.1$. Find its capacity.`, solution: String.raw`<p><b>Formula.</b> $$ C=1-H_b(p),\qquad H_b(p)=-p\log_2 p-(1-p)\log_2(1-p) $$ where $C$ is capacity in bits/use and $H_b$ is the binary entropy of the flip probability $p$.</p>
+<p><b>Substitute.</b> $$ H_b(0.1)=-0.1\log_2 0.1-0.9\log_2 0.9. $$</p>
+<p><b>Compute.</b> $-0.1\log_2 0.1=0.1\times3.322=0.332$ and $-0.9\log_2 0.9=0.9\times0.152=0.137$, so $H_b=0.469$ and $C=1-0.469=0.531$ bit/use.</p>
+<p><b>Explanation.</b> A 10% error rate destroys almost half the channel's information-carrying ability (0.531 of a possible 1 bit/use). Sanity check: at $p=0$ we'd get $C=1$, at $p=0.5$ we'd get $C=0$ — 0.531 sits correctly in between.</p>` },
+    { q: String.raw`To send 100 Mbit/s reliably over a 20 MHz channel, what minimum SNR (dB) is required?`, solution: String.raw`<p><b>Formula.</b> $$ \eta=\frac{R}{B},\qquad \mathrm{SNR}=2^{\eta}-1 $$ where $R$ is the required rate, $B$ the bandwidth, and $\eta$ the spectral efficiency that must not exceed $\log_2(1+\mathrm{SNR})$.</p>
+<p><b>Substitute.</b> $$ \eta=\frac{100\ \text{Mbit/s}}{20\ \text{MHz}}=5\ \text{bits/s/Hz},\qquad \mathrm{SNR}=2^{5}-1=31. $$</p>
+<p><b>Compute.</b> $10\log_{10}(31)=10\times1.491=14.91\approx 14.9$ dB.</p>
+<p><b>Explanation.</b> Any real modem needs at least this SNR (plus a coding-gap margin) to run 100 Mbit/s in 20 MHz. It quantifies the direct trade: to fit more bits per hertz you must buy more SNR.</p>` },
+    { q: String.raw`Confirm the Shannon limit: compute $E_b/N_0$ at $\eta=1$ bit/s/Hz and compare to $\eta\to 0$.`, solution: String.raw`<p><b>Formula.</b> $$ \frac{E_b}{N_0}=\frac{2^{\eta}-1}{\eta} $$ where $E_b/N_0$ is the energy-per-bit to noise-density ratio and $\eta$ is spectral efficiency.</p>
+<p><b>Substitute.</b> At $\eta=1$: $\dfrac{E_b}{N_0}=\dfrac{2^{1}-1}{1}$. In the wideband limit $\eta\to0$: expand $2^{\eta}\approx1+\eta\ln2$ so $\dfrac{E_b}{N_0}\to\ln2$.</p>
+<p><b>Compute.</b> At $\eta=1$: $E_b/N_0=1=0$ dB. As $\eta\to0$: $E_b/N_0=\ln2=0.693$, i.e. $10\log_{10}(0.693)=-1.59$ dB.</p>
+<p><b>Explanation.</b> The absolute floor of $-1.59$ dB sits exactly 1.59 dB below the $\eta=1$ value, and no coding can beat it. This is why spending unlimited bandwidth (spread spectrum, deep space) buys the lowest possible power per bit.</p>` }
   ],
   realWorld: String.raw`<p>Shannon capacity governs every modern link. Deep-space probes (Voyager, Mars rovers) run at extremely low SNR and enormous bandwidth to sit near the −1.59 dB power-limited corner, leaning on powerful <a href="#channel-coding">FEC</a> to approach capacity. Terrestrial cellular (LTE, 5G) instead operates in the bandwidth-limited regime, packing 64/256-QAM into each hertz and adapting the modulation to the measured SNR — a direct application of $\eta=\log_2(1+\mathrm{SNR})$. Wi-Fi's rate-adaptation, DOCSIS cable modems, and fibre coherent optics all pick the highest constellation their SNR allows without crossing the Shannon curve. The dial-up modem plateau at ~56 kbit/s over a 3–4 kHz phone line was a textbook confirmation that Shannon's ceiling is real and reachable.</p>`,
   related: ['source-coding', 'channel-coding', 'eb-no', 'noise', 'comm-basics']
@@ -217,7 +278,8 @@ CONTENT.topics.push(
   category: 'Fundamentals',
   tags: ['compression', 'entropy', 'Huffman', 'prefix code', 'lossless', 'lossy', 'redundancy'],
   summary: String.raw`Source coding compresses data by removing redundancy; the entropy $H=-\sum p\log_2 p$ is the hard limit on average bits per symbol for lossless compression.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-source-coding" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="8" y="50" width="120" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="68" y="70" fill="#e6edf3" text-anchor="middle">Symbols</text><text x="68" y="86" fill="#9aa7b5" text-anchor="middle" font-size="10">fixed 8 bits each</text>
@@ -229,6 +291,38 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`Source coding: redundant symbols pass through an entropy (Huffman) coder that assigns short codes to frequent symbols, shrinking the stream toward the entropy floor $H$.`,
   },
+  {
+    title: String.raw`Huffman-tree build: merge lowest two until one root`,
+    svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-source-coding" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="82" width="120" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="68" y="100" fill="#e6edf3" text-anchor="middle" font-size="11">probabilities</text><text x="68" y="114" fill="#9aa7b5" text-anchor="middle" font-size="10">A .5 B .25 C .125 D .125</text>
+<rect x="152" y="82" width="120" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="212" y="100" fill="#e6edf3" text-anchor="middle" font-size="11">merge lowest two</text><text x="212" y="114" fill="#9aa7b5" text-anchor="middle" font-size="10">C+D → .25 node</text>
+<rect x="296" y="82" width="110" height="40" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="351" y="100" fill="#e6edf3" text-anchor="middle" font-size="11">repeat → tree</text><text x="351" y="114" fill="#9aa7b5" text-anchor="middle" font-size="10">label edges 0/1</text>
+<rect x="430" y="82" width="102" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="481" y="100" fill="#e6edf3" text-anchor="middle" font-size="11">codewords</text><text x="481" y="114" fill="#9aa7b5" text-anchor="middle" font-size="9">0,10,110,111</text>
+<line x1="128" y1="102" x2="150" y2="102" stroke="#9aa7b5" marker-end="url(#arr2-source-coding)"/>
+<line x1="272" y1="102" x2="294" y2="102" stroke="#9aa7b5" marker-end="url(#arr2-source-coding)"/>
+<line x1="406" y1="102" x2="428" y2="102" stroke="#9aa7b5" marker-end="url(#arr2-source-coding)"/>
+<text x="270" y="165" fill="#9aa7b5" text-anchor="middle" font-size="10">greedy: frequent symbols end up nearest the root ⇒ shortest codes</text>
+</svg>`,
+    caption: String.raw`Huffman construction: start from the symbol probabilities, repeatedly merge the two least-probable nodes into a parent, and read root-to-leaf edge labels to get an optimal prefix code (here $\bar{L}=H=1.75$ bits).`,
+  },
+  {
+    title: String.raw`Compress / decompress chain`,
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-source-coding" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="28" width="96" height="38" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="56" y="45" fill="#e6edf3" text-anchor="middle" font-size="11">source</text><text x="56" y="59" fill="#9aa7b5" text-anchor="middle" font-size="10">8 bits/sym</text>
+<rect x="134" y="28" width="110" height="38" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="189" y="45" fill="#e6edf3" text-anchor="middle" font-size="11">encoder (model</text><text x="189" y="59" fill="#9aa7b5" text-anchor="middle" font-size="10">+ Huffman)</text>
+<rect x="274" y="28" width="96" height="38" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="322" y="45" fill="#e6edf3" text-anchor="middle" font-size="11">bitstream</text><text x="322" y="59" fill="#9aa7b5" text-anchor="middle" font-size="10">≈ H bits/sym</text>
+<rect x="400" y="28" width="110" height="38" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="455" y="45" fill="#e6edf3" text-anchor="middle" font-size="11">decoder</text><text x="455" y="59" fill="#9aa7b5" text-anchor="middle" font-size="10">walk the tree</text>
+<rect x="400" y="104" width="110" height="38" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="455" y="121" fill="#e6edf3" text-anchor="middle" font-size="11">exact copy</text><text x="455" y="135" fill="#9aa7b5" text-anchor="middle" font-size="10">lossless</text>
+<line x1="104" y1="47" x2="132" y2="47" stroke="#9aa7b5" marker-end="url(#arr3-source-coding)"/>
+<line x1="244" y1="47" x2="272" y2="47" stroke="#9aa7b5" marker-end="url(#arr3-source-coding)"/>
+<line x1="370" y1="47" x2="398" y2="47" stroke="#9aa7b5" marker-end="url(#arr3-source-coding)"/>
+<line x1="455" y1="66" x2="455" y2="102" stroke="#9aa7b5" marker-end="url(#arr3-source-coding)"/>
+</svg>`,
+    caption: String.raw`The lossless pipeline: a model plus entropy coder compress the source toward $H$ bits/symbol; the decoder walks the same code tree to reconstruct an exact copy — no information is lost.`,
+  }
+  ],
   prerequisites: ['comm-basics', 'shannon'],
   intro: String.raw`<p><b>Source coding</b> — data compression — is the first processing stage in Shannon's model. Its job is to represent a message with as few bits as possible by stripping out <b>redundancy</b>: the predictable, repetitive, or perceptually irrelevant parts. Shannon's source-coding theorem sets a precise floor — the <b>entropy</b> $H$ — that no lossless coder can beat on average, and Huffman coding gets essentially all the way there. This page builds entropy as the compression limit, constructs prefix and Huffman codes, and separates lossless from lossy compression, with ZIP, JPEG, and MP3 as running examples.</p>`,
   sections: [
@@ -291,6 +385,18 @@ CONTENT.topics.push(
       html: String.raw`<p>Source coding and <a href="#channel-coding">channel coding</a> are complementary opposites. Source coding <b>removes</b> redundancy to hit the entropy floor; channel coding <b>adds</b> calculated redundancy to survive noise. Shannon's <b>source–channel separation theorem</b> proves that, for a stationary source over a memoryless channel, you can design the two independently and still be optimal — first compress to $H$, then protect up to capacity $C$. Reliable end-to-end transmission is possible exactly when</p>
       $$ H \le C. $$
       <p>This is why the file on your disk is compressed (JPEG) yet still transmits with error-correction (Wi-Fi FEC): the two stages coexist without stepping on each other. In practice the separation is not perfect for finite blocks or fading channels, which motivates <i>joint source–channel coding</i>, but the clean textbook split remains the design default.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<div class="callout tip"><p>After this page you should be comfortable with the following:</p>
+      <ul>
+        <li><b>Compression removes redundancy, it never invents information.</b> The floor is the entropy $H$, and $\bar{L}\ge H$ always holds.</li>
+        <li><b>Prefix codes are decodable without markers</b> because no codeword prefixes another, and the Kraft inequality $\sum 2^{-\ell_i}\le1$ decides which length sets are realisable.</li>
+        <li><b>Huffman coding is the optimal prefix code</b> — greedily merge the two least-probable nodes — with $H\le\bar{L}<H+1$; blocking symbols or arithmetic coding closes the gap.</li>
+        <li><b>Lossless (ZIP, PNG, FLAC) reconstructs exactly; lossy (JPEG, MP3, H.264) discards perceptual detail</b> for far higher ratios, governed by rate–distortion $R(D)$.</li>
+        <li><b>Ideal codeword length is $\ell_i=-\log_2 p_i$:</b> frequent symbols deserve short codes (the Morse-code insight made rigorous).</li>
+        <li><b>Why it matters:</b> every gzip transfer, photo, and streamed song ends in an entropy coder, so this theory runs billions of times a second worldwide.</li>
+      </ul></div>`
     }
   ],
   keyPoints: [
@@ -388,12 +494,30 @@ CONTENT.topics.push(
     { q: String.raw`For a Gaussian source, each extra bit of rate reduces distortion by about:`, options: [String.raw`1 dB`, String.raw`3 dB`, String.raw`6 dB`, String.raw`20 dB`], answer: 2, explain: String.raw`$R(D)=\tfrac12\log_2(\sigma^2/D)$ gives 6 dB/bit.` }
   ],
   numericals: [
-    { q: String.raw`A source has 4 symbols with probabilities 0.5, 0.25, 0.125, 0.125. Find $H$ and design a Huffman code; compute $\bar{L}$.`, solution: String.raw`$H=0.5(1)+0.25(2)+2\times0.125(3)=0.5+0.5+0.75=1.75$ bits. Huffman: A=0, B=10, C=110, D=111. $\bar{L}=0.5(1)+0.25(2)+0.125(3)+0.125(3)=1.75$. Redundancy $=0$, efficiency 100%.` },
-    { q: String.raw`A file of 1000 8-bit symbols has entropy $H=3$ bits/symbol. What is the best possible compressed size and the compression ratio?`, solution: String.raw`Best size $=1000\times 3=3000$ bits $=375$ bytes. Original $=1000$ bytes. CR $=8/3\approx 2.67:1$.` },
-    { q: String.raw`Two symbols have probabilities 0.9 and 0.1. Find the entropy and comment on Huffman efficiency.`, solution: String.raw`$H=-0.9\log_2 0.9-0.1\log_2 0.1=0.137+0.332=0.469$ bits. But Huffman must use 1 bit each ($\bar{L}=1$), so efficiency $=0.469$ (47%). Blocking pairs would recover much of the loss.` },
-    { q: String.raw`Do the lengths $\{1,2,2,3\}$ satisfy the Kraft inequality?`, solution: String.raw`$2^{-1}+2^{-2}+2^{-2}+2^{-3}=0.5+0.25+0.25+0.125=1.125>1$. No — not realisable as a prefix code.` },
-    { q: String.raw`A Gaussian source has variance $\sigma^2=100$. What rate $R$ achieves distortion $D=1$ (MSE)?`, solution: String.raw`$R=\tfrac12\log_2(\sigma^2/D)=\tfrac12\log_2(100)=\tfrac12(6.64)=3.32$ bits/sample.` },
-    { q: String.raw`A source alphabet of 8 equiprobable symbols is coded. What is $H$, and can any lossless coder do better than 3 bits/symbol?`, solution: String.raw`$H=\log_2 8=3$ bits. No — it is maximum entropy, so 3 bits/symbol is already optimal; redundancy is zero.` }
+    { q: String.raw`A source has 4 symbols with probabilities 0.5, 0.25, 0.125, 0.125. Find $H$ and design a Huffman code; compute $\bar{L}$.`, solution: String.raw`<p><b>Formula.</b> $$ H=-\sum_i p_i\log_2 p_i,\qquad \bar{L}=\sum_i p_i\ell_i $$ where $p_i$ is a symbol's probability, $\ell_i$ its codeword length, $H$ the entropy and $\bar{L}$ the average code length (bits/symbol).</p>
+<p><b>Substitute.</b> $$ H=-\left[0.5\log_2 0.5+0.25\log_2 0.25+0.125\log_2 0.125+0.125\log_2 0.125\right]. $$</p>
+<p><b>Compute.</b> Using $\log_2 0.5=-1,\ \log_2 0.25=-2,\ \log_2 0.125=-3$: $H=0.5(1)+0.25(2)+0.125(3)+0.125(3)=0.5+0.5+0.375+0.375=1.75$ bits. Huffman (merge the two 0.125's, then the 0.25's, then the 0.5) gives A=0, B=10, C=110, D=111, so $\bar{L}=0.5(1)+0.25(2)+0.125(3)+0.125(3)=1.75$ bits.</p>
+<p><b>Explanation.</b> $\bar{L}=H$ exactly, so redundancy $\rho=0$ and efficiency is 100%. This perfect match happens because every probability is a power of two, letting $\ell_i=-\log_2 p_i$ be an integer.</p>` },
+    { q: String.raw`A file of 1000 8-bit symbols has entropy $H=3$ bits/symbol. What is the best possible compressed size and the compression ratio?`, solution: String.raw`<p><b>Formula.</b> $$ S_{\min}=n\,H,\qquad \text{CR}=\frac{b}{H} $$ where $n$ is the number of symbols, $H$ the entropy (bits/symbol), $b$ the original bits/symbol, $S_{\min}$ the smallest lossless size and CR the compression ratio.</p>
+<p><b>Substitute.</b> $$ S_{\min}=1000\times3=3000\ \text{bits},\qquad \text{CR}=\frac{8}{3}. $$</p>
+<p><b>Compute.</b> $S_{\min}=3000$ bits $=375$ bytes (versus the original $1000\times8=8000$ bits $=1000$ bytes), and $\text{CR}=8/3\approx 2.67:1$.</p>
+<p><b>Explanation.</b> Entropy caps the compression: no lossless coder can beat 375 bytes on average. Sanity check: the file used 8 bits but needed only 3, so we discard 5 bits of pure redundancy per symbol.</p>` },
+    { q: String.raw`Two symbols have probabilities 0.9 and 0.1. Find the entropy and comment on Huffman efficiency.`, solution: String.raw`<p><b>Formula.</b> $$ H=-\sum_i p_i\log_2 p_i,\qquad \eta=\frac{H}{\bar{L}} $$ where $\eta$ is the code efficiency and $\bar{L}$ the average Huffman length.</p>
+<p><b>Substitute.</b> $$ H=-0.9\log_2 0.9-0.1\log_2 0.1. $$</p>
+<p><b>Compute.</b> $-0.9\log_2 0.9=0.9\times0.152=0.137$ and $-0.1\log_2 0.1=0.1\times3.322=0.332$, so $H=0.469$ bits. A two-symbol Huffman code must assign 1 bit to each, giving $\bar{L}=1$, hence $\eta=0.469/1=0.469$ (47%).</p>
+<p><b>Explanation.</b> Huffman's one-bit-per-symbol granularity wastes over half the potential here because the source is highly skewed. Coding blocks of symbols (or using arithmetic coding) recovers most of the lost 0.531 bits.</p>` },
+    { q: String.raw`Do the lengths $\{1,2,2,3\}$ satisfy the Kraft inequality?`, solution: String.raw`<p><b>Formula.</b> $$ \sum_i 2^{-\ell_i}\le 1 $$ where $\ell_i$ are the codeword lengths; a prefix code with these lengths exists iff the sum is $\le 1$.</p>
+<p><b>Substitute.</b> $$ \sum_i 2^{-\ell_i}=2^{-1}+2^{-2}+2^{-2}+2^{-3}. $$</p>
+<p><b>Compute.</b> $=0.5+0.25+0.25+0.125=1.125$, which is $>1$.</p>
+<p><b>Explanation.</b> The budget is exceeded, so these lengths <b>cannot</b> form a prefix (uniquely decodable) code — the short codewords consume too much of the tree. You would need to lengthen at least one codeword to satisfy Kraft.</p>` },
+    { q: String.raw`A Gaussian source has variance $\sigma^2=100$. What rate $R$ achieves distortion $D=1$ (MSE)?`, solution: String.raw`<p><b>Formula.</b> $$ R(D)=\tfrac12\log_2\!\left(\frac{\sigma^2}{D}\right) $$ the rate–distortion function of a Gaussian source, where $\sigma^2$ is the source variance and $D$ the allowed mean-squared distortion (bits/sample).</p>
+<p><b>Substitute.</b> $$ R=\tfrac12\log_2\!\left(\frac{100}{1}\right)=\tfrac12\log_2(100). $$</p>
+<p><b>Compute.</b> $\log_2(100)=6.644$, so $R=\tfrac12(6.644)=3.32$ bits/sample.</p>
+<p><b>Explanation.</b> About 3.3 bits per sample suffice to hold the error to $D=1$. Sanity check: each extra bit multiplies $\sigma^2/D$ by 4 (halves the RMS error), the familiar 6 dB-per-bit rule behind quality sliders in JPEG/MP3.</p>` },
+    { q: String.raw`A source alphabet of 8 equiprobable symbols is coded. What is $H$, and can any lossless coder do better than 3 bits/symbol?`, solution: String.raw`<p><b>Formula.</b> $$ H=\log_2 M $$ the entropy of an $M$-symbol equiprobable (maximum-entropy) source, in bits/symbol.</p>
+<p><b>Substitute.</b> $$ H=\log_2 8. $$</p>
+<p><b>Compute.</b> $\log_2 8=3$ bits/symbol.</p>
+<p><b>Explanation.</b> With every symbol equally likely and uncorrelated there is no redundancy to remove, so 3 bits/symbol is already optimal ($\bar{L}\ge H=3$). No lossless coder can do better — the fixed-length code is entropy-optimal here.</p>` }
   ],
   realWorld: String.raw`<p>Source coding is everywhere on the machine you're reading this on. Text and code files travel as gzip/DEFLATE (LZ77 dictionary matching followed by Huffman) inside HTTP; your photos are JPEG (block DCT, perceptual quantisation, Huffman on the coefficients); music streams as MP3/AAC using psychoacoustic masking to drop sounds the ear can't hear; video calls use H.264/H.265 motion compensation and transform coding to hit 100:1 ratios. Every one of these ends in a classical entropy coder, so the Huffman and arithmetic-coding theory here is running billions of times per second worldwide. The entropy limit even shows up in benchmarks: a text compressor quoting "1.8 bits/character" on English is implicitly claiming the language's entropy is around that value.</p>`,
   related: ['shannon', 'channel-coding', 'comm-basics', 'fec']
@@ -404,7 +528,8 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['sinc', 'Fourier transform', 'sampling', 'reconstruction', 'pulse shaping', 'Gibbs'],
   summary: String.raw`The sinc function $\mathrm{sinc}(x)=\sin(\pi x)/(\pi x)$ is the Fourier transform of a rectangle and the ideal interpolation kernel for reconstructing sampled signals.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-sinc-function" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#b197fc"/></marker></defs>
 <text x="120" y="24" fill="#9aa7b5" text-anchor="middle" font-size="11">frequency domain</text>
@@ -422,6 +547,37 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`Fourier duality: a rectangle (brick-wall box) in one domain transforms to a sinc in the other — the rect$\leftrightarrow$sinc pair.`,
   },
+  {
+    title: String.raw`Ideal reconstruction: samples → summed sinc kernels`,
+    svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-sinc-function" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="70" width="104" height="44" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="60" y="88" fill="#e6edf3" text-anchor="middle" font-size="11">samples</text><text x="60" y="103" fill="#9aa7b5" text-anchor="middle" font-size="10">x(nTₛ)</text>
+<rect x="150" y="65" width="130" height="54" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="215" y="86" fill="#e6edf3" text-anchor="middle" font-size="11">plant a sinc kernel</text><text x="215" y="101" fill="#9aa7b5" text-anchor="middle" font-size="10">scaled &amp; shifted</text><text x="215" y="113" fill="#9aa7b5" text-anchor="middle" font-size="10">zero at other samples</text>
+<rect x="318" y="65" width="120" height="54" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="378" y="86" fill="#e6edf3" text-anchor="middle" font-size="11">superpose (Σ)</text><text x="378" y="101" fill="#9aa7b5" text-anchor="middle" font-size="10">ideal LPF in freq</text>
+<rect x="470" y="70" width="62" height="44" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="501" y="88" fill="#e6edf3" text-anchor="middle" font-size="11">x(t)</text><text x="501" y="103" fill="#9aa7b5" text-anchor="middle" font-size="9">exact</text>
+<line x1="112" y1="92" x2="148" y2="92" stroke="#9aa7b5" marker-end="url(#arr2-sinc-function)"/>
+<line x1="280" y1="92" x2="316" y2="92" stroke="#9aa7b5" marker-end="url(#arr2-sinc-function)"/>
+<line x1="438" y1="92" x2="468" y2="92" stroke="#9aa7b5" marker-end="url(#arr2-sinc-function)"/>
+<text x="270" y="150" fill="#9aa7b5" text-anchor="middle" font-size="10">Whittaker–Shannon: each sinc = 1 at its own sample, 0 at all others</text>
+</svg>`,
+    caption: String.raw`Ideal interpolation mechanism: each sample plants a scaled, shifted $\mathrm{sinc}$; because every kernel is zero at all other sample instants, their sum passes through every sample and fills the gaps — equivalent to an ideal low-pass filter that deletes the spectral images.`,
+  },
+  {
+    title: String.raw`Time–frequency duality map`,
+    svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-sinc-function" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#b197fc"/></marker></defs>
+<rect x="20" y="30" width="190" height="42" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="115" y="49" fill="#e6edf3" text-anchor="middle" font-size="11">narrow rect (time)</text><text x="115" y="63" fill="#9aa7b5" text-anchor="middle" font-size="10">short pulse</text>
+<rect x="330" y="30" width="190" height="42" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="425" y="49" fill="#e6edf3" text-anchor="middle" font-size="11">wide sinc (freq)</text><text x="425" y="63" fill="#9aa7b5" text-anchor="middle" font-size="10">broad spectrum</text>
+<rect x="20" y="104" width="190" height="42" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="115" y="123" fill="#e6edf3" text-anchor="middle" font-size="11">wide rect (freq)</text><text x="115" y="137" fill="#9aa7b5" text-anchor="middle" font-size="10">brick-wall LPF</text>
+<rect x="330" y="104" width="190" height="42" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="425" y="123" fill="#e6edf3" text-anchor="middle" font-size="11">narrow sinc (time)</text><text x="425" y="137" fill="#9aa7b5" text-anchor="middle" font-size="10">long impulse response</text>
+<line x1="210" y1="51" x2="328" y2="51" stroke="#b197fc" marker-end="url(#arr3-sinc-function)"/>
+<line x1="210" y1="125" x2="328" y2="125" stroke="#b197fc" marker-end="url(#arr3-sinc-function)"/>
+<text x="270" y="46" fill="#ffa94d" text-anchor="middle" font-size="12">ℱ</text>
+<text x="270" y="120" fill="#ffa94d" text-anchor="middle" font-size="12">ℱ</text>
+</svg>`,
+    caption: String.raw`Time–bandwidth duality: narrowing a rectangle in one domain widens its sinc in the other, so you can never localise a signal tightly in both time and frequency at once.`,
+  }
+  ],
   prerequisites: ['fourier-transform', 'nyquist-sampling', 'convolution'],
   intro: String.raw`<p>The <b>sinc function</b> is the single most important shape in signal processing. It is the Fourier transform of a rectangular pulse, the impulse response of an ideal low-pass filter, and the interpolation kernel that perfectly reconstructs a band-limited signal from its samples. Wherever a signal is band-limited or a spectrum is brick-wall flat, a sinc appears in the other domain. This page defines it, maps its zeros and lobes, proves the rectangle↔sinc transform pair, and shows its central role in sampling, reconstruction, pulse shaping, and the Gibbs phenomenon.</p>`,
   sections: [
@@ -469,6 +625,18 @@ CONTENT.topics.push(
       h: 'Gibbs phenomenon and time–bandwidth duality',
       html: String.raw`<p>Truncating an ideal (rectangular) frequency response to a finite length — equivalently, keeping only part of the infinite sinc impulse response — produces the <b>Gibbs phenomenon</b>: a persistent ~9% overshoot near sharp edges that never disappears as you add terms; it only narrows. This is the sinc's $1/x$ side lobes showing up as ripple. Windowing (Hamming, Hann, Blackman) tapers the sinc to suppress the overshoot at the cost of a wider transition band.</p>
       <p>The whole story is one manifestation of <b>time–bandwidth duality</b>: sharpness (a brick wall) in one domain forces spreading (long sinc tails) in the other. You cannot localise a signal arbitrarily in both time and frequency — the sinc/rect pair is the extreme illustration of this fundamental limit.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<div class="callout tip"><p>You should now be able to explain, without looking anything up:</p>
+      <ul>
+        <li><b>The sinc is the rect's Fourier partner:</b> $\mathrm{rect}(t/T)\leftrightarrow T\,\mathrm{sinc}(fT)$, and $\mathrm{sinc}(0)=1$ with zeros at every non-zero integer.</li>
+        <li><b>Its zeros landing on the integers is the whole point:</b> shifted sincs at sample instants don't interfere, giving both exact Whittaker–Shannon reconstruction and zero-ISI signalling.</li>
+        <li><b>It is the ideal low-pass impulse response</b> — perfect but infinite and non-causal, so real DACs and modems only approximate it (zero-order hold, raised-cosine).</li>
+        <li><b>The slow $1/x$ side lobes</b> (first one at $-13.3$ dB) are the root of spectral leakage, poor jitter tolerance, and the Gibbs overshoot — all fixed by windowing or softening the pulse.</li>
+        <li><b>Time–bandwidth duality</b> means you cannot be sharp in both domains: a short pulse always has a wide spectrum, and a brick-wall filter always has a long impulse response.</li>
+        <li><b>Why it matters:</b> the sinc lives inside every DAC reconstruction filter, every root-raised-cosine transmit pulse, and every window you apply to fight FFT leakage.</li>
+      </ul></div>`
     }
   ],
   keyPoints: [
@@ -569,12 +737,30 @@ CONTENT.topics.push(
     { q: String.raw`Narrowing a rectangle in time does what to its sinc spectrum?`, options: [String.raw`Narrows it`, String.raw`Widens it`, String.raw`Leaves it unchanged`, String.raw`Shifts it up`], answer: 1, explain: String.raw`Time–bandwidth duality: a shorter pulse spreads its spectrum.` }
   ],
   numericals: [
-    { q: String.raw`A rectangular pulse has width $T=1$ ms. At what frequencies does its sinc spectrum first hit zero?`, solution: String.raw`Spectrum $\propto \mathrm{sinc}(fT)$, zero when $fT=\pm1,\pm2,\dots$, i.e. $f=\pm1/T=\pm1$ kHz, $\pm2$ kHz, etc. First null at $\pm1$ kHz.` },
-    { q: String.raw`Compute $\mathrm{sinc}(0.5)$.`, solution: String.raw`$\mathrm{sinc}(0.5)=\sin(\pi/2)/(\pi/2)=1/(1.5708)=0.6366=2/\pi$.` },
-    { q: String.raw`A signal is sampled at $f_s=8$ kHz. What is the spacing of the zeros of the reconstruction sinc kernel in time?`, solution: String.raw`$T_s=1/8000=125\ \mu s$. The kernel $\mathrm{sinc}(t/T_s)$ has zeros at multiples of $T_s=125\ \mu s$.` },
-    { q: String.raw`What is the amplitude (linear) of the sinc at its first side-lobe peak ($x\approx1.43$)?`, solution: String.raw`$\sin(1.43\pi)/(1.43\pi)\approx \sin(257.4^\circ)/4.49 \approx -0.976/4.49\approx -0.217$; magnitude $0.217$, i.e. $-13.3$ dB.` },
-    { q: String.raw`A sinc pulse is used for zero-ISI signalling at symbol rate $1/T=2400$ Bd. What is its minimum (Nyquist) bandwidth?`, solution: String.raw`Minimum bandwidth $=1/(2T)=$ symbol rate$/2=1200$ Hz (one-sided baseband).` },
-    { q: String.raw`Verify that $\mathrm{sinc}(2)=0$ and explain its significance for sampling.`, solution: String.raw`$\mathrm{sinc}(2)=\sin(2\pi)/(2\pi)=0/(2\pi)=0$. Significance: the reconstruction sinc centred on one sample is exactly zero at the sample two positions away, so it does not corrupt that sample's value.` }
+    { q: String.raw`A rectangular pulse has width $T=1$ ms. At what frequencies does its sinc spectrum first hit zero?`, solution: String.raw`<p><b>Formula.</b> $$ X(f)\propto \mathrm{sinc}(fT),\qquad \mathrm{sinc}(fT)=0\iff fT=\pm1,\pm2,\dots $$ where $T$ is the pulse width and $f$ the frequency.</p>
+<p><b>Substitute.</b> Set $fT=\pm1$ (the first null): $$ f=\pm\frac{1}{T}=\pm\frac{1}{1\times10^{-3}\ \text{s}}. $$</p>
+<p><b>Compute.</b> $f=\pm1000$ Hz $=\pm1$ kHz; further nulls at $\pm2$ kHz, $\pm3$ kHz, and so on.</p>
+<p><b>Explanation.</b> The first null at $\pm1$ kHz sets the main-lobe (null-to-null) width of $2/T=2$ kHz. A shorter pulse would push the nulls out — the time–bandwidth trade in action.</p>` },
+    { q: String.raw`Compute $\mathrm{sinc}(0.5)$.`, solution: String.raw`<p><b>Formula.</b> $$ \mathrm{sinc}(x)=\frac{\sin(\pi x)}{\pi x} $$ the normalised sinc, with $x$ dimensionless.</p>
+<p><b>Substitute.</b> $$ \mathrm{sinc}(0.5)=\frac{\sin(0.5\pi)}{0.5\pi}=\frac{\sin(\pi/2)}{\pi/2}. $$</p>
+<p><b>Compute.</b> $\sin(\pi/2)=1$ and $\pi/2=1.5708$, so $\mathrm{sinc}(0.5)=1/1.5708=0.6366=2/\pi$.</p>
+<p><b>Explanation.</b> Halfway to the first zero the sinc has already fallen to about 64% of its peak. Sanity check: $2/\pi$ is the exact value, confirming the rapid initial roll-off of the main lobe.</p>` },
+    { q: String.raw`A signal is sampled at $f_s=8$ kHz. What is the spacing of the zeros of the reconstruction sinc kernel in time?`, solution: String.raw`<p><b>Formula.</b> $$ T_s=\frac{1}{f_s},\qquad \mathrm{sinc}\!\left(\frac{t}{T_s}\right)=0\iff t=\pm T_s,\pm 2T_s,\dots $$ where $T_s$ is the sample period and $f_s$ the sample rate.</p>
+<p><b>Substitute.</b> $$ T_s=\frac{1}{8000\ \text{Hz}}. $$</p>
+<p><b>Compute.</b> $T_s=125\ \mu\text{s}$, so the kernel's zeros fall at every multiple of $125\ \mu\text{s}$.</p>
+<p><b>Explanation.</b> The zeros land exactly on the neighbouring sample instants, which is precisely why the interpolation kernel from one sample never disturbs any other sample's value — the basis of exact reconstruction.</p>` },
+    { q: String.raw`What is the amplitude (linear) of the sinc at its first side-lobe peak ($x\approx1.43$)?`, solution: String.raw`<p><b>Formula.</b> $$ \mathrm{sinc}(x)=\frac{\sin(\pi x)}{\pi x},\qquad \text{dB}=20\log_{10}\!\left|\mathrm{sinc}(x)\right| $$ evaluated at the first side-lobe extremum $x\approx1.4303$ (root of $\tan\pi x=\pi x$).</p>
+<p><b>Substitute.</b> $$ \mathrm{sinc}(1.43)=\frac{\sin(1.43\pi)}{1.43\pi}. $$</p>
+<p><b>Compute.</b> $1.43\pi=4.49$ rad and $\sin(1.43\pi)\approx-0.976$, so $\mathrm{sinc}(1.43)\approx-0.976/4.49\approx-0.217$; magnitude $0.217$, i.e. $20\log_{10}(0.217)\approx-13.3$ dB.</p>
+<p><b>Explanation.</b> The first side lobe sits only 13.3 dB below the main lobe — high enough to cause noticeable spectral leakage, which is exactly why windows are applied to push side lobes lower.</p>` },
+    { q: String.raw`A sinc pulse is used for zero-ISI signalling at symbol rate $1/T=2400$ Bd. What is its minimum (Nyquist) bandwidth?`, solution: String.raw`<p><b>Formula.</b> $$ B_{\min}=\frac{1}{2T}=\frac{R_s}{2} $$ where $R_s=1/T$ is the symbol rate and $B_{\min}$ the one-sided (baseband) Nyquist bandwidth.</p>
+<p><b>Substitute.</b> $$ B_{\min}=\frac{2400\ \text{Bd}}{2}. $$</p>
+<p><b>Compute.</b> $B_{\min}=1200$ Hz.</p>
+<p><b>Explanation.</b> The ideal sinc packs symbols into the absolute minimum bandwidth — half the symbol rate — with no inter-symbol interference. Real systems widen this slightly (raised-cosine roll-off) to gain practical, causal filters.</p>` },
+    { q: String.raw`Verify that $\mathrm{sinc}(2)=0$ and explain its significance for sampling.`, solution: String.raw`<p><b>Formula.</b> $$ \mathrm{sinc}(x)=\frac{\sin(\pi x)}{\pi x} $$ which is zero wherever $\sin(\pi x)=0$ with $x\ne0$.</p>
+<p><b>Substitute.</b> $$ \mathrm{sinc}(2)=\frac{\sin(2\pi)}{2\pi}. $$</p>
+<p><b>Compute.</b> $\sin(2\pi)=0$, so $\mathrm{sinc}(2)=0/(2\pi)=0$.</p>
+<p><b>Explanation.</b> A reconstruction sinc centred on one sample is exactly zero at the sample two positions away, so it contributes nothing there. This zero-at-every-integer property is what lets shifted sincs reconstruct a signal without corrupting each other's samples.</p>` }
   ],
   realWorld: String.raw`<p>The sinc is baked into every digital-to-analog converter and every modem. A DAC's ideal reconstruction filter is a sinc; because that's unrealisable, real converters use a zero-order hold (which imposes its own $\mathrm{sinc}(f/f_s)$ droop across the band, corrected by a digital "sinc compensation" filter) followed by an analog low-pass. In communications, root-raised-cosine filters — tamed sincs — shape virtually every QAM/PSK transmit pulse in Wi-Fi, LTE, and satellite links to pack symbols into minimum bandwidth without inter-symbol interference. And every time an engineer applies a Hamming or Blackman window to an FFT to fight spectral leakage, they are fighting the sinc's $1/x$ side lobes head-on. The sinc/rect duality is also why a spectrum analyzer's resolution bandwidth and sweep time trade off — sharper frequency resolution demands longer time-domain observation.</p>`,
   related: ['fourier-transform', 'nyquist-sampling', 'pulse-shaping', 'frequency-spectrum', 'aliasing']
@@ -585,7 +771,8 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['spectrum', 'Fourier', 'amplitude', 'phase', 'PSD', 'bandwidth', 'spectrum analyzer'],
   summary: String.raw`A frequency spectrum shows how a signal's energy is distributed over frequency — its amplitude and phase versus frequency — and is the Fourier-domain view of a time signal.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-frequency-spectrum" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="8" y="70" width="90" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="53" y="90" fill="#e6edf3" text-anchor="middle">Signal</text><text x="53" y="105" fill="#9aa7b5" text-anchor="middle" font-size="10">x(t)</text>
@@ -605,6 +792,39 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`A time signal passes through a Fourier analyzer to reveal its spectrum — amplitude (and phase) plotted against frequency as spectral lines.`,
   },
+  {
+    title: String.raw`Spectrum-analyzer chain: sweep/FFT → detect → display`,
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-frequency-spectrum" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="55" width="88" height="44" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="52" y="73" fill="#e6edf3" text-anchor="middle" font-size="11">RF input</text><text x="52" y="88" fill="#9aa7b5" text-anchor="middle" font-size="10">x(t)</text>
+<rect x="118" y="50" width="104" height="54" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="170" y="70" fill="#e6edf3" text-anchor="middle" font-size="11">mixer sweep</text><text x="170" y="84" fill="#9aa7b5" text-anchor="middle" font-size="10">or FFT (RBW</text><text x="170" y="96" fill="#9aa7b5" text-anchor="middle" font-size="10">filter)</text>
+<rect x="244" y="55" width="96" height="44" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="292" y="73" fill="#e6edf3" text-anchor="middle" font-size="11">detector</text><text x="292" y="88" fill="#9aa7b5" text-anchor="middle" font-size="10">|·|, log, VBW</text>
+<rect x="362" y="50" width="170" height="60" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="447" y="66" fill="#e6edf3" text-anchor="middle" font-size="10">display dBm vs f</text>
+<line x1="378" y1="100" x2="524" y2="100" stroke="#9aa7b5"/>
+<line x1="400" y1="100" x2="400" y2="78" stroke="#ffa94d" stroke-width="2"/>
+<line x1="440" y1="100" x2="440" y2="72" stroke="#ffa94d" stroke-width="2"/>
+<line x1="485" y1="100" x2="485" y2="90" stroke="#ffa94d" stroke-width="2"/>
+<line x1="96" y1="77" x2="116" y2="77" stroke="#9aa7b5" marker-end="url(#arr2-frequency-spectrum)"/>
+<line x1="222" y1="77" x2="242" y2="77" stroke="#9aa7b5" marker-end="url(#arr2-frequency-spectrum)"/>
+<line x1="340" y1="77" x2="360" y2="77" stroke="#9aa7b5" marker-end="url(#arr2-frequency-spectrum)"/>
+</svg>`,
+    caption: String.raw`Spectrum-analyzer signal chain: the input is swept past a narrow RBW filter (or transformed by an FFT), envelope-detected and log-scaled (with VBW smoothing), then plotted as power versus frequency — carrier, harmonics, spurs and noise floor.`,
+  },
+  {
+    title: String.raw`One signal, three views: time ↔ magnitude ↔ phase`,
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-frequency-spectrum" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#b197fc"/></marker></defs>
+<rect x="200" y="12" width="140" height="36" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="270" y="34" fill="#e6edf3" text-anchor="middle" font-size="11">one signal x(t)</text>
+<rect x="8" y="90" width="150" height="50" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="83" y="110" fill="#e6edf3" text-anchor="middle" font-size="11">time view</text><text x="83" y="125" fill="#9aa7b5" text-anchor="middle" font-size="10">amplitude vs t</text>
+<rect x="195" y="90" width="150" height="50" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="270" y="110" fill="#e6edf3" text-anchor="middle" font-size="11">magnitude |X(f)|</text><text x="270" y="125" fill="#9aa7b5" text-anchor="middle" font-size="10">strength vs f</text>
+<rect x="382" y="90" width="150" height="50" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="457" y="110" fill="#e6edf3" text-anchor="middle" font-size="11">phase ∠X(f)</text><text x="457" y="125" fill="#9aa7b5" text-anchor="middle" font-size="10">timing vs f</text>
+<line x1="240" y1="48" x2="110" y2="88" stroke="#b197fc" marker-end="url(#arr3-frequency-spectrum)"/>
+<line x1="270" y1="48" x2="270" y2="88" stroke="#b197fc" marker-end="url(#arr3-frequency-spectrum)"/>
+<line x1="300" y1="48" x2="430" y2="88" stroke="#b197fc" marker-end="url(#arr3-frequency-spectrum)"/>
+</svg>`,
+    caption: String.raw`One signal, three equivalent views: the time waveform, the magnitude spectrum $|X(f)|$, and the phase spectrum $\angle X(f)$. Magnitude and phase together lose nothing; discarding phase (a power spectrum) keeps strength but forfeits exact reconstruction.`,
+  }
+  ],
   prerequisites: ['fourier-transform', 'sinc-function', 'psd'],
   intro: String.raw`<p>A signal can be viewed two ways: as a <b>waveform</b> (amplitude versus time) or as a <b>spectrum</b> (content versus frequency). The spectrum answers "which frequencies are present, how strong, and in what phase?" It is the Fourier transform made visible, and it is how engineers read bandwidth, harmonics, noise, and interference. This page defines amplitude and phase spectra, distinguishes line from continuous and one-sided from two-sided spectra, connects the spectrum to the Fourier transform and power spectral density, and explains how to read a spectrum analyzer display.</p>`,
   sections: [
@@ -668,6 +888,18 @@ CONTENT.topics.push(
         <li><b>Reference level & scale</b> — top of the screen and dB/division.</li>
       </ul>
       <p>What you read off the screen: the <b>carrier</b> and its power, <b>harmonics</b> and <b>spurs</b> (unwanted discrete tones), <b>occupied bandwidth</b>, the <b>noise floor</b>, and intermodulation products. A clean transmitter shows a single dominant line with harmonics far below; a distorted or overdriven one sprouts spurious lines. Because the display is a PSD, absolute power depends on RBW for noise-like signals but not for discrete tones — a crucial distinction when quoting numbers.</p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<div class="callout tip"><p>By now the spectrum should feel like a second native language for signals:</p>
+      <ul>
+        <li><b>A spectrum is amplitude and phase versus frequency</b> — the Fourier view $X(f)=|X(f)|e^{j\angle X(f)}$ — and it loses nothing that the waveform contains.</li>
+        <li><b>Signal type sets spectrum type:</b> periodic → line spectra, aperiodic → continuous spectra, random → a continuous PSD.</li>
+        <li><b>Real signals are conjugate-symmetric</b> ($X(-f)=X^*(f)$), so the one-sided spectrum doubles positive amplitudes — but never DC or Nyquist (the 3 dB trap).</li>
+        <li><b>"Bandwidth" needs a definition:</b> −3 dB, null-to-null, occupied, or equivalent-noise — they give different numbers.</li>
+        <li><b>Deterministic pulses use the Fourier transform; noise uses the PSD</b> (Wiener–Khinchin), and a live analyzer estimates a PSD whose noise floor scales with RBW.</li>
+        <li><b>Why it matters:</b> regulators, EMC labs, and every SDR waterfall read exactly these amplitude/phase and power spectra to police channels, hunt spurs, and diagnose distortion.</li>
+      </ul></div>`
     }
   ],
   keyPoints: [
@@ -765,12 +997,30 @@ CONTENT.topics.push(
     { q: String.raw`The −3 dB bandwidth is the width between points where power falls to:`, options: [String.raw`One-tenth`, String.raw`One-half`, String.raw`One-quarter`, String.raw`Zero`], answer: 1, explain: String.raw`Half power = −3 dB = amplitude $1/\sqrt2$.` }
   ],
   numericals: [
-    { q: String.raw`A 2 V peak, 1 kHz cosine is analyzed. What amplitude appears at 1 kHz on a two-sided vs a one-sided spectrum?`, solution: String.raw`Two-sided: two lines of 1 V each at $\pm1$ kHz. One-sided: a single 2 V line at 1 kHz (positive half doubled).` },
-    { q: String.raw`A rectangular data pulse lasts $T=0.5\ \mu s$. Find its null-to-null bandwidth.`, solution: String.raw`$B_{\text{null}}=2/T=2/(0.5\times10^{-6})=4$ MHz.` },
-    { q: String.raw`A spectrum analyzer shows a noise floor of $-90$ dBm at RBW = 10 kHz. What noise floor would you expect at RBW = 1 kHz?`, solution: String.raw`Noise power scales with RBW: reducing by 10× lowers it 10 dB, giving $-100$ dBm.` },
-    { q: String.raw`A square wave has fundamental 1 kHz. List the frequencies of its first three spectral lines.`, solution: String.raw`Odd harmonics only: 1 kHz, 3 kHz, 5 kHz (amplitudes $\propto 1,1/3,1/5$).` },
-    { q: String.raw`White noise has PSD $N_0/2 = 10^{-20}$ W/Hz. What noise power falls in a 1 MHz bandwidth?`, solution: String.raw`Two-sided-to-one-sided: use $N_0=2\times10^{-20}$ W/Hz. $P=N_0 B=2\times10^{-20}\times10^{6}=2\times10^{-14}$ W $=-107$ dBm.` },
-    { q: String.raw`A signal occupies from 100.0 to 100.2 MHz. State its bandwidth and the analyzer center frequency to display it centered.`, solution: String.raw`Bandwidth $=100.2-100.0=0.2$ MHz $=200$ kHz. Center frequency $=(100.0+100.2)/2=100.1$ MHz.` }
+    { q: String.raw`A 2 V peak, 1 kHz cosine is analyzed. What amplitude appears at 1 kHz on a two-sided vs a one-sided spectrum?`, solution: String.raw`<p><b>Formula.</b> $$ A\cos(2\pi f_0 t)=\tfrac{A}{2}e^{j2\pi f_0 t}+\tfrac{A}{2}e^{-j2\pi f_0 t},\qquad A_1=2\cdot\tfrac{A}{2}=A\ (f>0) $$ where $A$ is the peak amplitude, the two-sided spectrum splits it into $A/2$ at $\pm f_0$, and the one-sided folds the negative half over.</p>
+<p><b>Substitute.</b> With $A=2$ V and $f_0=1$ kHz, the two-sided spikes are $A/2=1$ V each; folding gives $A_1=1+1$ V.</p>
+<p><b>Compute.</b> Two-sided: two 1 V lines at $\pm1$ kHz. One-sided: a single 2 V line at 1 kHz.</p>
+<p><b>Explanation.</b> The one-sided line matches the physical peak (2 V), which is why analyzers use it. Sanity check: total is conserved — $1+1=2$ V of the same tone, just displayed on one axis instead of two.</p>` },
+    { q: String.raw`A rectangular data pulse lasts $T=0.5\ \mu s$. Find its null-to-null bandwidth.`, solution: String.raw`<p><b>Formula.</b> $$ B_{\text{null}}=\frac{2}{T} $$ the main-lobe width of a duration-$T$ rectangular pulse's sinc spectrum (first nulls at $\pm1/T$).</p>
+<p><b>Substitute.</b> $$ B_{\text{null}}=\frac{2}{0.5\times10^{-6}\ \text{s}}. $$</p>
+<p><b>Compute.</b> $B_{\text{null}}=4\times10^{6}$ Hz $=4$ MHz.</p>
+<p><b>Explanation.</b> A half-microsecond pulse spreads its energy across a 4 MHz main lobe. Sanity check: halving the pulse duration would double the bandwidth — the direct spectral cost of faster signalling.</p>` },
+    { q: String.raw`A spectrum analyzer shows a noise floor of $-90$ dBm at RBW = 10 kHz. What noise floor would you expect at RBW = 1 kHz?`, solution: String.raw`<p><b>Formula.</b> $$ \Delta P_{\text{dB}}=10\log_{10}\!\left(\frac{\text{RBW}_2}{\text{RBW}_1}\right) $$ because displayed noise power is proportional to the resolution-bandwidth filter width.</p>
+<p><b>Substitute.</b> $$ \Delta P_{\text{dB}}=10\log_{10}\!\left(\frac{1\ \text{kHz}}{10\ \text{kHz}}\right)=10\log_{10}(0.1). $$</p>
+<p><b>Compute.</b> $\Delta P_{\text{dB}}=-10$ dB, so the new floor is $-90-10=-100$ dBm.</p>
+<p><b>Explanation.</b> Narrowing the RBW tenfold passes ten times less noise, lowering the floor by 10 dB and exposing weaker signals. Note a discrete tone's reading would <i>not</i> change — only noise power scales with RBW.</p>` },
+    { q: String.raw`A square wave has fundamental 1 kHz. List the frequencies of its first three spectral lines.`, solution: String.raw`<p><b>Formula.</b> $$ f_n=(2m-1)f_0,\quad m=1,2,3,\dots $$ an ideal square wave contains only odd harmonics of the fundamental $f_0$, with amplitudes $\propto 1/(2m-1)$.</p>
+<p><b>Substitute.</b> With $f_0=1$ kHz: $f_1=1\cdot f_0$, $f_2=3\cdot f_0$, $f_3=5\cdot f_0$.</p>
+<p><b>Compute.</b> The first three lines are at 1 kHz, 3 kHz, and 5 kHz (amplitudes $\propto 1,\tfrac13,\tfrac15$).</p>
+<p><b>Explanation.</b> The absence of even harmonics is the half-wave symmetry of a square wave. Sanity check: the $1/n$ amplitude fall-off is what makes the reconstructed edges sharp yet shows Gibbs overshoot when truncated.</p>` },
+    { q: String.raw`White noise has PSD $N_0/2 = 10^{-20}$ W/Hz. What noise power falls in a 1 MHz bandwidth?`, solution: String.raw`<p><b>Formula.</b> $$ P=N_0 B $$ where $N_0$ is the <i>one-sided</i> noise density and $B$ the one-sided bandwidth; the given two-sided level is $N_0/2$.</p>
+<p><b>Substitute.</b> Convert to one-sided: $N_0=2\times10^{-20}$ W/Hz. Then $$ P=2\times10^{-20}\times10^{6}. $$</p>
+<p><b>Compute.</b> $P=2\times10^{-14}$ W. In dBm: $10\log_{10}(2\times10^{-14}/10^{-3})=10\log_{10}(2\times10^{-11})=-107$ dBm.</p>
+<p><b>Explanation.</b> A 1 MHz band collects a very small $2\times10^{-14}$ W of thermal-like noise. The factor-of-two conversion from the two-sided $N_0/2$ to the one-sided $N_0$ is the classic 3 dB trap — omitting it halves the answer.</p>` },
+    { q: String.raw`A signal occupies from 100.0 to 100.2 MHz. State its bandwidth and the analyzer center frequency to display it centered.`, solution: String.raw`<p><b>Formula.</b> $$ B=f_{\text{high}}-f_{\text{low}},\qquad f_c=\frac{f_{\text{high}}+f_{\text{low}}}{2} $$ where $B$ is the occupied bandwidth and $f_c$ the centre frequency.</p>
+<p><b>Substitute.</b> $$ B=100.2-100.0\ \text{MHz},\qquad f_c=\frac{100.0+100.2}{2}\ \text{MHz}. $$</p>
+<p><b>Compute.</b> $B=0.2$ MHz $=200$ kHz and $f_c=100.1$ MHz.</p>
+<p><b>Explanation.</b> Setting centre 100.1 MHz with a span slightly above 200 kHz frames the whole signal. This is the routine setup for measuring a channel's occupied bandwidth against a regulatory mask.</p>` }
   ],
   realWorld: String.raw`<p>The frequency spectrum is the working language of RF engineering. Regulators (FCC, ITU) allocate and police spectrum by occupied bandwidth and spurious-emission masks read directly off a spectrum analyzer. Cellular and Wi-Fi radios must keep their power within an assigned channel and their out-of-band emissions below a spectral mask — verified by the amplitude spectrum. EMC/EMI compliance testing hunts for harmonics and spurs. In diagnostics, a spectrum reveals oscillator <a href="#phase-noise">phase noise</a> as a skirt around the carrier, intermodulation as extra tones, and interference as unexpected lines. Audio engineers read the same displays to spot hum (50/60 Hz lines) and distortion harmonics. Every SDR waterfall display, every satellite-link power-flux-density check, and every radar Doppler measurement is fundamentally a frequency-spectrum reading.</p>`,
   related: ['fourier-transform', 'psd', 'sinc-function', 'shannon', 'noise-floor']

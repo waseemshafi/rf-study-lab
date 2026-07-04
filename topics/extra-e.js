@@ -6,7 +6,8 @@ CONTENT.topics.push(
     category: 'Fundamentals',
     tags: ['bandwidth', 'nyquist', 'occupied-bandwidth', 'noise-bandwidth', 'half-power', 'fractional-bandwidth', 'data-rate'],
     summary: String.raw`Bandwidth is the width of the frequency band a signal occupies (or a system passes), but the exact number depends on which of several precise definitions — null-to-null, −3 dB, occupied, noise-equivalent, or Nyquist — you apply.`,
-    diagram: {
+    diagram: [
+    {
       svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-bandwidth" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <line x1="40" y1="170" x2="510" y2="170" stroke="#9aa7b5"/>
@@ -27,6 +28,53 @@ CONTENT.topics.push(
 </svg>`,
       caption: String.raw`Bandwidth mechanism: a single PSD carries several distinct labelled widths — −3 dB, null-to-null, and 99% occupied — that differ by 2× or more.`
     },
+    {
+      title: String.raw`Modulation-to-bandwidth map`,
+      svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-bandwidth" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="20" y="30" width="150" height="55" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="95" y="52" fill="#e6edf3" text-anchor="middle">Symbol rate R_s,</text>
+  <text x="95" y="70" fill="#9aa7b5" text-anchor="middle">roll-off β / dev Δf</text>
+  <rect x="220" y="20" width="140" height="34" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="290" y="42" fill="#e6edf3" text-anchor="middle">BPSK: (1+β)R_s</text>
+  <rect x="220" y="66" width="140" height="34" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="290" y="88" fill="#e6edf3" text-anchor="middle">QPSK: (1+β)R_s</text>
+  <rect x="220" y="112" width="140" height="34" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="290" y="134" fill="#e6edf3" text-anchor="middle">FM: 2(Δf+f_m)</text>
+  <rect x="410" y="66" width="110" height="55" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="465" y="88" fill="#e6edf3" text-anchor="middle">Occupied</text>
+  <text x="465" y="106" fill="#9aa7b5" text-anchor="middle">RF BW</text>
+  <line x1="170" y1="57" x2="218" y2="37" stroke="#9aa7b5" marker-end="url(#arr2-bandwidth)"/>
+  <line x1="170" y1="60" x2="218" y2="83" stroke="#9aa7b5" marker-end="url(#arr2-bandwidth)"/>
+  <line x1="170" y1="65" x2="218" y2="129" stroke="#9aa7b5" marker-end="url(#arr2-bandwidth)"/>
+  <line x1="360" y1="37" x2="408" y2="80" stroke="#9aa7b5" marker-end="url(#arr2-bandwidth)"/>
+  <line x1="360" y1="83" x2="408" y2="90" stroke="#9aa7b5" marker-end="url(#arr2-bandwidth)"/>
+  <line x1="360" y1="129" x2="408" y2="105" stroke="#9aa7b5" marker-end="url(#arr2-bandwidth)"/>
+  <text x="270" y="185" fill="#b197fc" text-anchor="middle">bits/symbol set data rate; R_s, β (or Δf) set the occupied width</text>
+  <text x="270" y="210" fill="#9aa7b5" text-anchor="middle">BPSK & QPSK share BW; QPSK carries 2× the bits</text>
+</svg>`,
+      caption: String.raw`Modulation-to-bandwidth map: the symbol rate and roll-off (or FM deviation) fix the occupied RF bandwidth. BPSK and QPSK occupy the same (1+β)R_s, but QPSK packs twice the bits; FM follows Carson's rule 2(Δf+f_m).`
+    },
+    {
+      title: String.raw`Regulatory spectral mask`,
+      svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr3-bandwidth" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="40" y1="175" x2="510" y2="175" stroke="#9aa7b5" marker-end="url(#arr3-bandwidth)"/>
+  <text x="505" y="192" fill="#9aa7b5">f</text>
+  <line x1="60" y1="175" x2="60" y2="30" stroke="#9aa7b5"/>
+  <text x="42" y="40" fill="#9aa7b5">PSD</text>
+  <path d="M150,175 L150,60 L390,60 L390,175" fill="none" stroke="#ffa94d" stroke-width="2" stroke-dasharray="6 4"/>
+  <path d="M60,175 L120,170 L170,90 Q270,55 370,90 L420,170 L480,175 L480,175" fill="#4dabf7" fill-opacity="0.15" stroke="#4dabf7" stroke-width="2"/>
+  <text x="270" y="48" fill="#ffa94d" text-anchor="middle">mask (limit)</text>
+  <text x="270" y="120" fill="#4dabf7" text-anchor="middle">emitted PSD</text>
+  <line x1="150" y1="150" x2="390" y2="150" stroke="#b197fc" marker-end="url(#arr3-bandwidth)"/>
+  <line x1="390" y1="150" x2="150" y2="150" stroke="#b197fc" marker-end="url(#arr3-bandwidth)"/>
+  <text x="270" y="143" fill="#b197fc" text-anchor="middle">99% occupied BW</text>
+  <text x="270" y="210" fill="#9aa7b5" text-anchor="middle">signal must stay under the mask; OBW is the compliance number</text>
+</svg>`,
+      caption: String.raw`Regulatory mask: the emitted PSD must sit entirely beneath a legally defined spectral mask. The 99% occupied bandwidth — not null-to-null — is the number measured for type approval.`
+    }
+    ],
     prerequisites: ['comm-basics', 'frequency-spectrum', 'sinc-function', 'psd'],
     intro: String.raw`<p><strong>Bandwidth</strong> is one of the most used and most abused words in communications. Loosely it means "how much frequency space a signal takes up," but that single phrase hides at least half a dozen different, precisely defined quantities that can differ by factors of two or more for the very same waveform. A pulse whose null-to-null bandwidth is 2 MHz might have a −3 dB bandwidth of 900 kHz, a 99% occupied bandwidth of 1.8 MHz, and a noise-equivalent bandwidth of 1 MHz. Getting exam questions and real link budgets right depends entirely on knowing <em>which</em> definition is in play.</p>
 <p>Bandwidth matters because it is the currency of both <strong>capacity</strong> and <strong>cost</strong>. Shannon tells us capacity grows with bandwidth; Nyquist tells us the symbol rate we can push through a band; regulators sell it by the megahertz; and every extra hertz a receiver accepts lets in more noise power ($N_0 B$). This topic assembles all the standard definitions, shows how each is measured, works an example for each, and nails the two relationships every engineer must have reflexively: the Nyquist link between bandwidth and symbol rate, and the factor-of-two between baseband and RF (passband) bandwidth.</p>`,
@@ -109,6 +157,19 @@ CONTENT.topics.push(
 <li><strong>Detector and averaging:</strong> use RMS/power averaging for noise-like signals; sample or peak detectors distort the measured width.</li>
 </ul>
 <p>Recurrent mistakes: (1) confusing one-sided and two-sided bandwidth (a factor of 2); (2) confusing baseband and RF bandwidth (another factor of 2 — so people are off by 4×); (3) using −3 dB bandwidth in a noise calculation instead of NEB; (4) forgetting that raised-cosine widens the ideal Nyquist band by $(1+\alpha)$; (5) quoting an absolute bandwidth as "wideband" without referencing the carrier (use fractional bandwidth). Keeping the definitions straight is more than half the battle.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<p>The single lesson of this topic is that <strong>"bandwidth" is never one number</strong> — always name the definition. With that discipline, everything else clicks into place:</p>
+<ul>
+<li><strong>Five definitions, one spectrum.</strong> Null-to-null, −3 dB, occupied (99%), noise-equivalent, and Nyquist can differ by 2× or more for the same waveform. Context picks the right one: filters/channels → −3 dB; masks/regulation → occupied; noise/SNR → NEB; "what data rate fits?" → Nyquist.</li>
+<li><strong>The two must-have relationships.</strong> Nyquist: an ideal band $B$ carries $2B$ symbols/s, so $B_{min}=R_s/2$ (widened to $\tfrac{R_s}{2}(1+\alpha)$ by raised-cosine shaping). Baseband-to-RF: $B_{RF}=2B_{baseband}$ for double-sideband signals (SSB recovers the factor of two).</li>
+<li><strong>Noise belongs to NEB, not −3 dB.</strong> $N=N_0B_N$ with $B_N=\frac{1}{|H(f_0)|^2}\int_0^\infty|H(f)|^2df$; for an RC filter that is $1.57\times$ the −3 dB width, because the gentle skirt keeps leaking noise past the corner.</li>
+<li><strong>Bits come from packing, capped by Shannon.</strong> $R_b=R_s\log_2 M$; raise $M$ or shrink $\alpha$ to lift spectral efficiency, but $C=B\log_2(1+\mathrm{SNR})$ is the ceiling no cleverness beats.</li>
+<li><strong>Scale matters.</strong> Fractional bandwidth $B_f=(f_H-f_L)/f_c$ tells you whether a band is "wide"; UWB is $B_f>20\%$ or $>500$ MHz. It also decides antenna feasibility and whether the channel is frequency-flat.</li>
+<li><strong>The compounding trap.</strong> One-sided vs two-sided, and baseband vs RF, are each a factor of 2 — muddle both and you are off by 4×. Resolve both before trusting any bandwidth figure.</li>
+</ul>
+<div class="callout tip">If you internalize one habit: whenever someone says "the bandwidth is X," ask <em>which</em> bandwidth and whether it is one-sided/two-sided, baseband/RF. Getting the definition right is more than half of every bandwidth problem.</div>`
       }
     ],
     keyPoints: [
@@ -197,14 +258,38 @@ CONTENT.topics.push(
       { q: String.raw`On a spectrum analyzer, which setting most directly affects the displayed noise floor?`, options: [String.raw`Span`, String.raw`Resolution bandwidth (RBW)`, String.raw`Center frequency`, String.raw`Reference level`], answer: 1, explain: String.raw`The displayed noise floor scales as $10\log_{10}(\mathrm{RBW})$; narrowing RBW lowers the floor and reveals weaker signals.` }
     ],
     numericals: [
-      { q: String.raw`A system transmits rectangular NRZ symbols at 5 Mbaud. Give the one-sided and two-sided null-to-null baseband bandwidths and the −3 dB two-sided bandwidth.`, solution: String.raw`Null-to-null one-sided $=R_s=5$ MHz; two-sided $=2R_s=10$ MHz. −3 dB two-sided $\approx0.886R_s=0.886\times5=4.43$ MHz. The −3 dB figure is under half the null-to-null width for the same signal.` },
-      { q: String.raw`Find the noise-equivalent bandwidth of a first-order RC low-pass with $f_{3\mathrm{dB}}=1$ MHz, and the noise power it passes for $N_0=4\times10^{-21}$ W/Hz.`, solution: String.raw`$B_N=\tfrac{\pi}{2}f_{3\mathrm{dB}}=1.571\times1=1.571$ MHz. Noise power $N=N_0B_N=4\times10^{-21}\times1.571\times10^6=6.28\times10^{-15}$ W $=-141.7$ dBm. Using the −3 dB value (1 MHz) would under-estimate the noise by 1.96 dB.` },
-      { q: String.raw`What minimum baseband and passband bandwidth are needed to send 10 Msymbol/s with (a) an ideal Nyquist filter and (b) a raised cosine with $\alpha=0.35$?`, solution: String.raw`(a) Ideal: $B_{bb}=R_s/2=5$ MHz baseband, $B_{RF}=R_s=10$ MHz passband. (b) $\alpha=0.35$: $B_{bb}=\tfrac{R_s}{2}(1+\alpha)=5\times1.35=6.75$ MHz baseband; passband $=R_s(1+\alpha)=13.5$ MHz. The 35% roll-off costs 35% extra spectrum for realizability.` },
-      { q: String.raw`A channel offers 20 MHz of RF bandwidth. Using 16-QAM with $\alpha=0.25$, find the achievable symbol and bit rates.`, solution: String.raw`Passband bandwidth relation: $B_{RF}=R_s(1+\alpha)\Rightarrow R_s=B_{RF}/(1+\alpha)=20/1.25=16$ Msym/s. 16-QAM carries $\log_2 16=4$ bits/symbol, so $R_b=16\times4=64$ Mbit/s. Spectral efficiency $=64/20=3.2$ bits/s/Hz.` },
-      { q: String.raw`An FM signal has peak deviation $\Delta f=75$ kHz and highest message frequency $f_m=15$ kHz. Estimate its occupied bandwidth by Carson's rule and its fractional bandwidth at a 100 MHz carrier.`, solution: String.raw`Carson: $B\approx2(\Delta f+f_m)=2(75+15)=180$ kHz $\approx200$ kHz (the standard FM broadcast channel). Fractional bandwidth $=0.2/100=0.2\%$ — decidedly narrowband, so the antenna and channel are easy and frequency-flat.` },
-      { q: String.raw`A baseband voice message occupies 0–4 kHz. Give the RF bandwidth for (a) DSB-AM and (b) SSB.`, solution: String.raw`(a) DSB: both sidebands, $B_{RF}=2W=2\times4=8$ kHz. (b) SSB: one sideband only, $B_{RF}=W=4$ kHz. SSB halves the bandwidth (and, for suppressed carrier, saves power), at the cost of a harder demodulator.` },
-      { q: String.raw`A UWB device must have fractional bandwidth $>20\%$ around a 6 GHz centre. What is the minimum absolute bandwidth, and does 500 MHz qualify?`, solution: String.raw`Minimum by the percentage rule: $B_{min}=0.20\times6000=1200$ MHz. However the FCC UWB definition is satisfied by <em>either</em> $B_f>20\%$ <em>or</em> absolute bandwidth $>500$ MHz, so a 500 MHz emission at 6 GHz ($B_f=8.3\%$) still qualifies as UWB via the absolute-bandwidth clause.` },
-      { q: String.raw`A raised-cosine link uses QPSK, $\alpha=0.2$, over 6 MHz of baseband bandwidth. Find $R_s$, $R_b$, and spectral efficiency.`, solution: String.raw`$B_{bb}=\tfrac{R_s}{2}(1+\alpha)\Rightarrow R_s=\dfrac{2B_{bb}}{1+\alpha}=\dfrac{2\times6}{1.2}=10$ Msym/s. QPSK carries 2 bits/symbol: $R_b=10\times2=20$ Mbit/s. Efficiency referenced to the passband bandwidth $R_s(1+\alpha)=12$ MHz gives $20/12=1.67$ bits/s/Hz (the theoretical QPSK max is $2/(1+\alpha)=1.67$).` }
+      { q: String.raw`A system transmits rectangular NRZ symbols at 5 Mbaud. Give the one-sided and two-sided null-to-null baseband bandwidths and the −3 dB two-sided bandwidth.`, solution: String.raw`<p><b>Formula.</b> $$B_{nn,1side}=R_s,\quad B_{nn,2side}=2R_s,\quad B_{3dB,2side}\approx0.886R_s,$$ where $R_s$ is the symbol rate; the first sinc nulls sit at $\pm R_s$ and the half-power points at $\pm0.443R_s$.</p>
+      <p><b>Substitute.</b> With $R_s=5$ MHz: one-sided $=5$, two-sided $=2\times5$, and −3 dB $=0.886\times5$.</p>
+      <p><b>Compute.</b> Null-to-null one-sided $=5$ MHz; two-sided $=10$ MHz; −3 dB two-sided $\approx4.43$ MHz.</p>
+      <p><b>Explanation.</b> Three different "bandwidths" for one waveform, spanning more than 2× — the whole point of the topic. The −3 dB width (4.43 MHz) is under half the null-to-null (10 MHz), so quoting a number without naming its definition is meaningless.</p>` },
+      { q: String.raw`Find the noise-equivalent bandwidth of a first-order RC low-pass with $f_{3\mathrm{dB}}=1$ MHz, and the noise power it passes for $N_0=4\times10^{-21}$ W/Hz.`, solution: String.raw`<p><b>Formula.</b> $$B_N=\frac{\pi}{2}f_{3\mathrm{dB}},\qquad N=N_0 B_N,$$ the noise-equivalent bandwidth of an RC filter and the thermal noise power it admits.</p>
+      <p><b>Substitute.</b> $B_N=\dfrac{\pi}{2}\times1$ MHz; $N=4\times10^{-21}\times B_N$.</p>
+      <p><b>Compute.</b> $B_N=1.571$ MHz. $N=4\times10^{-21}\times1.571\times10^6=6.28\times10^{-15}$ W. In dBm: $10\log_{10}(6.28\times10^{-15}/10^{-3})=-112.0$ dBm. Using the −3 dB value (1 MHz) instead would under-estimate the noise by $10\log_{10}(1.571)=1.96$ dB.</p>
+      <p><b>Explanation.</b> The RC skirt passes 57% more noise than a brick wall at the same corner, which is exactly why NEB — not the −3 dB bandwidth — belongs in $N=N_0B$. (This corrects a prior typo that read −141.7 dBm; the correct level is −112.0 dBm.)</p>` },
+      { q: String.raw`What minimum baseband and passband bandwidth are needed to send 10 Msymbol/s with (a) an ideal Nyquist filter and (b) a raised cosine with $\alpha=0.35$?`, solution: String.raw`<p><b>Formula.</b> $$B_{bb}=\frac{R_s}{2}(1+\alpha),\qquad B_{RF}=R_s(1+\alpha),$$ reducing to $R_s/2$ and $R_s$ respectively for the ideal $\alpha=0$ case.</p>
+      <p><b>Substitute.</b> (a) $\alpha=0$: $B_{bb}=10/2$, $B_{RF}=10$. (b) $\alpha=0.35$: $B_{bb}=5\times1.35$, $B_{RF}=10\times1.35$.</p>
+      <p><b>Compute.</b> (a) $B_{bb}=5$ MHz, $B_{RF}=10$ MHz. (b) $B_{bb}=6.75$ MHz, $B_{RF}=13.5$ MHz.</p>
+      <p><b>Explanation.</b> The 35% roll-off costs 35% extra spectrum in exchange for a realizable filter with finite pulse tails. Note the passband is always twice the baseband — the ubiquitous factor-of-two between baseband and RF.</p>` },
+      { q: String.raw`A channel offers 20 MHz of RF bandwidth. Using 16-QAM with $\alpha=0.25$, find the achievable symbol and bit rates.`, solution: String.raw`<p><b>Formula.</b> $$R_s=\frac{B_{RF}}{1+\alpha},\qquad R_b=R_s\log_2 M,\qquad \eta=\frac{R_b}{B_{RF}},$$ with $M=16$ so $\log_2 M=4$ bits/symbol.</p>
+      <p><b>Substitute.</b> $R_s=\dfrac{20}{1.25}$; $R_b=R_s\times4$; $\eta=R_b/20$.</p>
+      <p><b>Compute.</b> $R_s=16$ Msym/s; $R_b=64$ Mbit/s; $\eta=64/20=3.2$ bits/s/Hz.</p>
+      <p><b>Explanation.</b> 16-QAM's 4 bits/symbol lifts spectral efficiency to 3.2 bits/s/Hz — you cannot beat Nyquist's symbol ceiling, so packing more bits per symbol is the lever, bounded ultimately by Shannon.</p>` },
+      { q: String.raw`An FM signal has peak deviation $\Delta f=75$ kHz and highest message frequency $f_m=15$ kHz. Estimate its occupied bandwidth by Carson's rule and its fractional bandwidth at a 100 MHz carrier.`, solution: String.raw`<p><b>Formula.</b> $$B\approx2(\Delta f+f_m)\ \text{(Carson)},\qquad B_f=\frac{B}{f_c},$$ giving the occupied bandwidth of angle modulation and its width relative to the carrier.</p>
+      <p><b>Substitute.</b> $B=2(75+15)$ kHz; $B_f=\dfrac{0.2\text{ MHz}}{100\text{ MHz}}$.</p>
+      <p><b>Compute.</b> $B\approx180$ kHz ($\approx200$ kHz channel with guard band); $B_f=0.2/100=0.2\%$.</p>
+      <p><b>Explanation.</b> The 180 kHz confirms the 200 kHz FM channel spacing. At 0.2% fractional bandwidth the signal is decidedly narrowband, so the antenna is easy to build and the channel is frequency-flat (no equalization needed).</p>` },
+      { q: String.raw`A baseband voice message occupies 0–4 kHz. Give the RF bandwidth for (a) DSB-AM and (b) SSB.`, solution: String.raw`<p><b>Formula.</b> $$B_{DSB}=2W,\qquad B_{SSB}=W,$$ where $W$ is the one-sided baseband message bandwidth; DSB keeps both sidebands, SSB one.</p>
+      <p><b>Substitute.</b> With $W=4$ kHz: $B_{DSB}=2\times4$; $B_{SSB}=4$.</p>
+      <p><b>Compute.</b> (a) $B_{DSB}=8$ kHz; (b) $B_{SSB}=4$ kHz.</p>
+      <p><b>Explanation.</b> This is the baseband-to-RF doubling in action: DSB mirrors the message into two sidebands around the carrier. SSB discards the redundant one, halving the bandwidth (and, with suppressed carrier, saving power) at the cost of a harder demodulator.</p>` },
+      { q: String.raw`A UWB device must have fractional bandwidth $>20\%$ around a 6 GHz centre. What is the minimum absolute bandwidth, and does 500 MHz qualify?`, solution: String.raw`<p><b>Formula.</b> $$B_{min}=0.20\,f_c\ \text{(percentage rule)},\qquad \text{UWB if }B_f>20\%\ \textbf{or}\ B>500\ \text{MHz}.$$</p>
+      <p><b>Substitute.</b> $B_{min}=0.20\times6000$ MHz; check $500$ MHz against both clauses ($B_f=500/6000$).</p>
+      <p><b>Compute.</b> $B_{min}=1200$ MHz by the percentage rule. A 500 MHz emission gives $B_f=8.3\%$ ($<20\%$) but still qualifies as UWB via the absolute $>500$ MHz clause.</p>
+      <p><b>Explanation.</b> The FCC UWB definition is an <em>OR</em> of two conditions, so at high carriers the absolute-bandwidth clause is the easier one to satisfy. This is why "wideband" must always be judged against the carrier via fractional bandwidth, not absolute Hz alone.</p>` },
+      { q: String.raw`A raised-cosine link uses QPSK, $\alpha=0.2$, over 6 MHz of baseband bandwidth. Find $R_s$, $R_b$, and spectral efficiency.`, solution: String.raw`<p><b>Formula.</b> $$R_s=\frac{2B_{bb}}{1+\alpha},\qquad R_b=R_s\log_2 M=2R_s,\qquad \eta=\frac{R_b}{B_{RF}},$$ where $B_{RF}=R_s(1+\alpha)$ and QPSK has $\log_2 M=2$.</p>
+      <p><b>Substitute.</b> $R_s=\dfrac{2\times6}{1.2}$; $R_b=2R_s$; $B_{RF}=R_s\times1.2$; $\eta=R_b/B_{RF}$.</p>
+      <p><b>Compute.</b> $R_s=10$ Msym/s; $R_b=20$ Mbit/s; $B_{RF}=12$ MHz; $\eta=20/12=1.67$ bits/s/Hz.</p>
+      <p><b>Explanation.</b> The result matches the theoretical QPSK ceiling $2/(1+\alpha)=2/1.2=1.67$ bits/s/Hz, confirming the arithmetic. Referencing efficiency to the passband width (12 MHz), not the 6 MHz baseband, is the correct convention for a spectral-efficiency figure.</p>` }
     ],
     realWorld: String.raw`<p>Bandwidth is where communications meets economics and law. National regulators auction spectrum in megahertz-wide blocks worth billions, and every emission must fit inside a legally defined spectral mask — measured as occupied bandwidth, not null-to-null — or the device fails type approval. Wi-Fi channels (20/40/80/160 MHz), LTE/5G resource blocks, and satellite transponders are all quoted by bandwidth, and the choice trades data rate against the noise power ($N_0B$) the receiver must swallow, which is why sensitivity and bandwidth appear together in every link budget. RF engineers live by the baseband-to-RF doubling and the Nyquist symbol-rate relation when sizing filters, ADC sample rates (which must clear the two-sided occupied bandwidth), and channelizers. The noise-equivalent bandwidth is what actually sets a radiometer's or receiver's sensitivity. And fractional bandwidth decides antenna feasibility: a cellular whip at under 10% is routine, whereas a multi-octave UWB or spiral antenna is a serious design. Modern SDRs expose all of this directly — you set the sample rate, RRC roll-off, and channel filter, and the same waveform's null-to-null, occupied, and noise bandwidths must all be reconciled against the regulatory mask before you key up.</p>`,
     related: ['comm-basics', 'shannon', 'nyquist-sampling', 'sinc-function', 'pulse-shaping', 'rrc-filter', 'frequency-spectrum', 'noise']
@@ -215,7 +300,8 @@ CONTENT.topics.push(
     category: 'Synchronization',
     tags: ['early-late', 'code-tracking', 'dll', 'timing-recovery', 'correlator', 'gps', 'discriminator', 's-curve'],
     summary: String.raw`The early-late gate tracks symbol or code timing by correlating the received signal against Early, Prompt, and Late replicas and driving a delay-locked loop with the Early−Late discriminator, whose S-curve is zero exactly at perfect alignment.`,
-    diagram: {
+    diagram: [
+    {
       svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-early-late-correlator" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <text x="18" y="115" fill="#9aa7b5">rx code</text>
@@ -246,6 +332,60 @@ CONTENT.topics.push(
 </svg>`,
       caption: String.raw`Early-late mechanism: Early, Prompt, Late correlators feed an E−L discriminator through a loop filter to a code NCO that adjusts replica timing.`
     },
+    {
+      title: String.raw`S-curve discriminator`,
+      svg: String.raw`<svg viewBox="0 0 540 240" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-early-late-correlator" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="40" y1="120" x2="510" y2="120" stroke="#9aa7b5" marker-end="url(#arr2-early-late-correlator)"/>
+  <text x="500" y="138" fill="#9aa7b5">τ (timing error)</text>
+  <line x1="270" y1="220" x2="270" y2="20" stroke="#9aa7b5" marker-end="url(#arr2-early-late-correlator)"/>
+  <text x="282" y="28" fill="#9aa7b5">D = E−L</text>
+  <path d="M120,190 Q170,185 200,150 Q245,120 270,120 Q295,120 340,90 Q370,55 420,50" fill="none" stroke="#4dabf7" stroke-width="2"/>
+  <circle cx="270" cy="120" r="6" fill="#63e6be"/>
+  <text x="300" y="145" fill="#63e6be">lock: D=0</text>
+  <line x1="200" y1="150" x2="340" y2="90" stroke="#ffa94d" stroke-dasharray="4 3"/>
+  <text x="360" y="150" fill="#ffa94d">slope K_D</text>
+  <text x="150" y="180" fill="#b197fc">early (L&gt;E)</text>
+  <text x="380" y="80" fill="#b197fc">late (E&gt;L)</text>
+  <line x1="200" y1="205" x2="340" y2="205" stroke="#9aa7b5" marker-end="url(#arr2-early-late-correlator)"/>
+  <line x1="340" y1="205" x2="200" y2="205" stroke="#9aa7b5" marker-end="url(#arr2-early-late-correlator)"/>
+  <text x="270" y="225" fill="#9aa7b5" text-anchor="middle">linear pull-in ≈ ±(1−d/2) chips</text>
+</svg>`,
+      caption: String.raw`The Early−Late discriminator S-curve: an odd function of timing error τ that crosses zero at perfect alignment (the stable lock point). Its origin slope K_D sets the loop gain; the loop drives D→0.`
+    },
+    {
+      title: String.raw`GPS code-tracking loop`,
+      svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr3-early-late-correlator" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="15" y="80" width="80" height="45" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="55" y="100" fill="#e6edf3" text-anchor="middle">Code gen</text>
+  <text x="55" y="116" fill="#9aa7b5" text-anchor="middle">C/A replica</text>
+  <rect x="130" y="25" width="90" height="34" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="175" y="47" fill="#e6edf3" text-anchor="middle">Early corr</text>
+  <rect x="130" y="86" width="90" height="34" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="175" y="108" fill="#e6edf3" text-anchor="middle">Prompt</text>
+  <rect x="130" y="147" width="90" height="34" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="175" y="169" fill="#e6edf3" text-anchor="middle">Late corr</text>
+  <rect x="255" y="60" width="95" height="40" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="302" y="78" fill="#e6edf3" text-anchor="middle">Discrim.</text>
+  <text x="302" y="93" fill="#9aa7b5" text-anchor="middle">E²−L²</text>
+  <rect x="380" y="60" width="70" height="40" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="415" y="84" fill="#e6edf3" text-anchor="middle">Loop filt</text>
+  <rect x="460" y="60" width="65" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="492" y="84" fill="#e6edf3" text-anchor="middle">Code NCO</text>
+  <line x1="95" y1="95" x2="128" y2="45" stroke="#9aa7b5" marker-end="url(#arr3-early-late-correlator)"/>
+  <line x1="95" y1="100" x2="128" y2="103" stroke="#9aa7b5" marker-end="url(#arr3-early-late-correlator)"/>
+  <line x1="95" y1="105" x2="128" y2="162" stroke="#9aa7b5" marker-end="url(#arr3-early-late-correlator)"/>
+  <line x1="220" y1="42" x2="253" y2="72" stroke="#9aa7b5" marker-end="url(#arr3-early-late-correlator)"/>
+  <line x1="220" y1="164" x2="253" y2="90" stroke="#9aa7b5" marker-end="url(#arr3-early-late-correlator)"/>
+  <line x1="350" y1="80" x2="378" y2="80" stroke="#9aa7b5" marker-end="url(#arr3-early-late-correlator)"/>
+  <line x1="450" y1="80" x2="458" y2="80" stroke="#9aa7b5" marker-end="url(#arr3-early-late-correlator)"/>
+  <path d="M492,100 L492,195 L55,195 L55,125" fill="none" stroke="#9aa7b5" stroke-dasharray="3 3" marker-end="url(#arr3-early-late-correlator)"/>
+  <text x="270" y="190" fill="#9aa7b5" text-anchor="middle">NCO steers the code generator; Prompt output = pseudorange + nav data</text>
+</svg>`,
+      caption: String.raw`GPS code-tracking chain: the code generator makes Early/Prompt/Late C/A replicas, three correlators feed a (noncoherent E²−L²) discriminator, a loop filter, and a code NCO that closes the loop by steering the generator. The Prompt code phase becomes the pseudorange.`
+    }
+    ],
     prerequisites: ['correlation', 'matched-filter', 'pll', 'pn-codes'],
     intro: String.raw`<p>A coherent receiver recovers <em>carrier</em> phase with a PLL/Costas loop, but it must independently recover <em>timing</em>: the precise instant to sample each symbol, or the exact code phase of a spreading sequence. Sampling even a fraction of a symbol early or late collapses the eye and destroys the matched-filter SNR. The <strong>early-late gate</strong> (and its code-tracking cousin, the <strong>delay-locked loop, DLL</strong>) is the classic feedback mechanism that finds and holds that instant.</p>
 <p>The idea is beautifully symmetric. The matched-filter/correlation output as a function of timing offset is a peak — triangular for a chip/symbol, a raised-cosine-like hump for shaped pulses. You cannot measure "am I at the peak?" directly because the peak is flat to first order. Instead you probe <em>either side</em>: correlate with an <strong>Early</strong> replica advanced by half a chip and a <strong>Late</strong> replica delayed by half a chip. If Early and Late correlations are equal you are centred; if Early &gt; Late you are late and must advance; if Late &gt; Early you are early and must retard. The difference Early−Late is a <strong>discriminator</strong> whose characteristic (the S-curve) crosses zero at perfect alignment and has the right slope to close a tracking loop. The <strong>Prompt</strong> correlator sits at the centre and delivers the actual data/despread output. This structure — three correlators, a discriminator, a loop filter, and a numerically controlled oscillator (NCO) adjusting the replica timing — is exactly a PLL redrawn in the timing domain, and it is the beating heart of every GPS receiver and most symbol synchronizers.</p>`,
@@ -326,6 +466,19 @@ CONTENT.topics.push(
 <tr><td>DLL / early-late</td><td>code/symbol timing</td><td>early-late discriminator (S-curve)</td><td>code NCO (timing)</td></tr>
 </table>
 <p>A complete GNSS or coherent-DSSS receiver runs all three concurrently: an FLL/PLL for carrier, a DLL for code, with carrier aiding the code loop. The mathematics of each is the same second-order loop with $\omega_n$, $\zeta$, and $B_L$ — only the detector's physical meaning (phase, frequency, or timing error) changes. Master the PLL and the early-late gate is the same machine measuring a different error.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<p>The whole mechanism grows from one obstacle and one clever fix. The obstacle: the correlation peak you want to sit on is <em>flat and even</em>, so you cannot climb it. The fix: probe both sides and subtract. Carry these away:</p>
+<ul>
+<li><strong>Why an odd error signal.</strong> Near the peak $dR/d\tau\to0$ and $R$ is even — no gradient, no early/late sense. The Early−Late difference manufactures an <em>odd</em> discriminator that is zero only at alignment.</li>
+<li><strong>Three correlators, one job each.</strong> Early ($+d/2$) and Late ($-d/2$) sense the slope; Prompt (on-time) is the matched filter that despreads data and indicates lock. At alignment $E=L$; $E>L$ means the replica is late (advance it), $L>E$ means early (retard).</li>
+<li><strong>The S-curve.</strong> $D(\tau)=R(\tau+d/2)-R(\tau-d/2)$ crosses zero at $\tau=0$ with slope $K_D$ (the loop gain) and a linear pull-in range of about $\pm(1-d/2)$ chips. It is essentially a finite-difference estimate of $dR/d\tau$, so nulling it finds the peak.</li>
+<li><strong>Coherent vs noncoherent.</strong> $E-L$ needs known carrier phase; $E^2-L^2$ or $|E|-|L|$ square out unknown phase and data sign at the cost of squaring loss — used before carrier lock is firm.</li>
+<li><strong>It is a PLL in disguise.</strong> Discriminator + loop filter + code NCO = the DLL, structurally identical to a PLL (the NCO is the $1/s$ integrator). All the PLL machinery transfers: $\omega_n$, $\zeta$, $B_L$, and $\sigma_\tau^2\propto B_L/(C/N_0)$.</li>
+<li><strong>Why it matters.</strong> Narrow spacing ($d\approx0.1$ chip) sharpens the S-curve and rejects multipath but shrinks pull-in, leaning on good acquisition and carrier aiding. In GPS the Prompt code phase becomes the pseudorange, so DLL jitter and multipath bias directly limit position accuracy.</li>
+</ul>
+<div class="callout tip">One line to keep: you cannot track the top of a hill by its height — you track it by the <em>difference in height a step to each side</em>. That difference is the S-curve, and wrapping it in a loop (the DLL) is a PLL measuring timing instead of phase.</div>`
       }
     ],
     keyPoints: [
@@ -409,14 +562,38 @@ CONTENT.topics.push(
       { q: String.raw`The Prompt correlator at lock is equivalent to:`, options: [String.raw`A frequency discriminator`, String.raw`The matched filter sampled at the optimal instant`, String.raw`A phase detector`, String.raw`A noise generator`], answer: 1, explain: String.raw`On-time, it realizes the matched-filter output at the correct sampling instant, giving the optimal (max-SNR) decision statistic.` }
     ],
     numericals: [
-      { q: String.raw`A DSSS system has chip rate 1.023 Mchip/s (GPS C/A), so $T_c=977.5$ ns. With one-chip spacing, find the discriminator slope magnitude $K_D$ (per second of timing error) for the ideal triangular autocorrelation.`, solution: String.raw`$|K_D|=2/T_c=2/(977.5\times10^{-9})=2.046\times10^6$ per second $=2.046$ per microsecond. In chip units it is simply $2$ per chip. A 0.1-chip timing error thus produces $D=0.2$ (normalized), giving the loop a strong, unambiguous correction signal.` },
-      { q: String.raw`For a narrow correlator with spacing $d=0.1$ chip, the maximum tolerable prior timing error (linear range) is about $\pm(1-d/2)$ chip? Interpret, and give the range in nanoseconds for GPS C/A.`, solution: String.raw`The <em>linear</em> range of the discriminator is about $\pm(1-d/2)=\pm0.95$ chip for the difference-triangle, but the useful <em>narrow-correlator pull-in</em> is limited to about $\pm d/2=\pm0.05$ chip where the two narrow gates still straddle the peak cleanly. In ns: $0.05\times977.5=48.9$ ns. Beyond this the acquisition stage (search) must have delivered alignment, which is why narrow correlators rely on good acquisition and carrier aiding.` },
-      { q: String.raw`A DLL uses $K_D=2$/chip, $K_{NCO}=1$ chip/s per volt, and a loop filter with $\tau_1=0.01$ s, $\tau_2=0.02$ s. Find $\omega_n$ and $\zeta$.`, solution: String.raw`$\omega_n=\sqrt{K_DK_{NCO}/\tau_1}=\sqrt{2\times1/0.01}=\sqrt{200}=14.14$ rad/s. $\zeta=\omega_n\tau_2/2=14.14\times0.02/2=0.141$. This loop is under-damped (rings); raising $\tau_2$ to $0.1$ s would give $\zeta=0.707$ for a well-behaved response.` },
-      { q: String.raw`A code loop has one-sided noise bandwidth $B_L=1$ Hz, $C/N_0=40$ dB-Hz, spacing $d=1$ chip. Estimate the RMS code jitter (chips), ignoring squaring loss.`, solution: String.raw`$C/N_0=10^{4.0}=10^4$ Hz. $\sigma_\tau^2\approx dB_L/[2(C/N_0)]=1\times1/(2\times10^4)=5\times10^{-5}$ chip$^2$. $\sigma_\tau=7.07\times10^{-3}$ chip. For GPS C/A ($T_c=293$ m of range), that is $0.00707\times293\approx2.1$ m RMS ranging noise from thermal jitter alone.` },
-      { q: String.raw`Repeat the previous jitter estimate at threshold $C/N_0=25$ dB-Hz with a narrow spacing $d=0.1$ and coherent integration $T_{coh}=20$ ms, now including squaring loss.`, solution: String.raw`$C/N_0=10^{2.5}=316$ Hz. Thermal term: $dB_L/[2(C/N_0)]=0.1\times1/(2\times316)=1.58\times10^{-4}$. Squaring-loss factor: $1+\dfrac{2}{(2-d)T_{coh}(C/N_0)}=1+\dfrac{2}{1.9\times0.02\times316}=1+0.167=1.167$. So $\sigma_\tau^2=1.58\times10^{-4}\times1.167=1.84\times10^{-4}$ chip$^2$, $\sigma_\tau=0.0136$ chip. The narrow spacing keeps jitter low even at low $C/N_0$, though squaring loss now adds ~17%.` },
-      { q: String.raw`A symbol synchronizer uses an early-late gate on the matched-filter output at 10 Msym/s. If the loop must hold timing error under 2% of a symbol, what timing accuracy is that in ps?`, solution: String.raw`Symbol period $T=1/10^7=100$ ns. 2% of $T=0.02\times100=2$ ns $=2000$ ps. The DLL loop bandwidth and $C/N_0$ must be chosen so $\sigma_\tau<2$ ns; from $\sigma_\tau^2\propto B_L/(C/N_0)$, this sets an upper limit on $B_L$ for the available SNR.` },
-      { q: String.raw`Multipath adds a replica delayed by 0.3 chip. Explain quantitatively why a $d=0.1$ narrow correlator is nearly immune while a $d=1$ wide correlator is biased.`, solution: String.raw`The early-late gates span $\pm d/2$. For $d=1$, the gates reach $\pm0.5$ chip, so a 0.3-chip-delayed multipath triangle overlaps the Late gate and shifts the S-curve zero, biasing the estimate. For $d=0.1$, the gates reach only $\pm0.05$ chip; a 0.3-chip multipath falls entirely outside the gated region and cannot distort the central discriminator — hence near-immunity to multipath delays $>d/2$.` },
-      { q: String.raw`Show numerically that the noncoherent $E^2-L^2$ discriminator has zero output at perfect alignment. Use the triangular autocorrelation with $d=1$ chip.`, solution: String.raw`At $\tau=0$: $E=R(+0.5)=1-0.5=0.5$ and $L=R(-0.5)=1-0.5=0.5$. Then $E^2-L^2=0.25-0.25=0$. The discriminator is exactly zero at alignment, confirming the lock point; a small $\tau=+0.05$ gives $E=R(0.55)=0.45$, $L=R(-0.45)=0.55$, so $E^2-L^2=0.2025-0.3025=-0.10\neq0$, driving the loop back toward $\tau=0$.` }
+      { q: String.raw`A DSSS system has chip rate 1.023 Mchip/s (GPS C/A), so $T_c=977.5$ ns. With one-chip spacing, find the discriminator slope magnitude $K_D$ (per second of timing error) for the ideal triangular autocorrelation.`, solution: String.raw`<p><b>Formula.</b> $$|K_D|=\frac{2}{T_c},$$ the origin slope of the Early−Late S-curve for an ideal triangular chip autocorrelation with one-chip spacing, where $T_c$ is the chip duration.</p>
+      <p><b>Substitute.</b> $|K_D|=\dfrac{2}{977.5\times10^{-9}\text{ s}}$.</p>
+      <p><b>Compute.</b> $|K_D|=2.046\times10^{6}$ per second $=2.046$ per microsecond; in chip units simply $2$ per chip.</p>
+      <p><b>Explanation.</b> A 0.1-chip timing error thus produces a normalized $D=0.2$ — a strong, unambiguous correction signal. The steeper $K_D$, the lower the timing jitter, which is why narrowing the spacing (raising the effective slope) is the lever for precision tracking.</p>` },
+      { q: String.raw`For a narrow correlator with spacing $d=0.1$ chip, the maximum tolerable prior timing error (linear range) is about $\pm(1-d/2)$ chip? Interpret, and give the range in nanoseconds for GPS C/A.`, solution: String.raw`<p><b>Formula.</b> $$\text{linear range}\approx\pm\left(1-\frac{d}{2}\right)\text{ chip},\qquad \text{narrow pull-in}\approx\pm\frac{d}{2}\text{ chip},$$ then convert chips to time via $\times T_c$ ($T_c=977.5$ ns for GPS C/A).</p>
+      <p><b>Substitute.</b> Linear range $=\pm(1-0.05)$; useful narrow pull-in $=\pm0.05$ chip $\times977.5$ ns.</p>
+      <p><b>Compute.</b> The <em>linear</em> range is $\pm0.95$ chip, but the useful <em>narrow-correlator pull-in</em> — where the two tight gates still cleanly straddle the peak — is only about $\pm0.05$ chip $=\pm48.9$ ns.</p>
+      <p><b>Explanation.</b> Beyond $\pm0.05$ chip the acquisition (search) stage must already have delivered alignment. This tiny pull-in is exactly why narrow correlators buy their multipath rejection and low jitter at the price of depending on good acquisition and carrier aiding.</p>` },
+      { q: String.raw`A DLL uses $K_D=2$/chip, $K_{NCO}=1$ chip/s per volt, and a loop filter with $\tau_1=0.01$ s, $\tau_2=0.02$ s. Find $\omega_n$ and $\zeta$.`, solution: String.raw`<p><b>Formula.</b> $$\omega_n=\sqrt{\frac{K_D K_{NCO}}{\tau_1}},\qquad \zeta=\frac{\omega_n\tau_2}{2},$$ the second-order natural frequency and damping of the DLL, identical in form to a PLL.</p>
+      <p><b>Substitute.</b> $\omega_n=\sqrt{\dfrac{2\times1}{0.01}}=\sqrt{200}$; $\zeta=\dfrac{\omega_n\times0.02}{2}$.</p>
+      <p><b>Compute.</b> $\omega_n=14.14$ rad/s; $\zeta=14.14\times0.02/2=0.141$.</p>
+      <p><b>Explanation.</b> With $\zeta=0.141$ the loop is badly under-damped and will ring. Raising $\tau_2$ to $0.1$ s would give $\zeta=0.707$ — the standard critically-well-damped target — showing how the loop filter zero sets the damping.</p>` },
+      { q: String.raw`A code loop has one-sided noise bandwidth $B_L=1$ Hz, $C/N_0=40$ dB-Hz, spacing $d=1$ chip. Estimate the RMS code jitter (chips), ignoring squaring loss.`, solution: String.raw`<p><b>Formula.</b> $$\sigma_\tau^2\approx\frac{d\,B_L}{2\,(C/N_0)}\ \text{chip}^2,\qquad \sigma_\tau=\sqrt{\sigma_\tau^2},$$ the thermal-noise timing-jitter variance of the DLL (squaring loss neglected).</p>
+      <p><b>Substitute.</b> Convert $C/N_0=40$ dB-Hz $=10^{4.0}=10^4$ Hz. Then $\sigma_\tau^2=\dfrac{1\times1}{2\times10^4}$.</p>
+      <p><b>Compute.</b> $\sigma_\tau^2=5\times10^{-5}$ chip$^2$, so $\sigma_\tau=7.07\times10^{-3}$ chip. For GPS C/A one chip $=293$ m of range, giving $0.00707\times293\approx2.1$ m RMS ranging noise from thermal jitter alone.</p>
+      <p><b>Explanation.</b> A couple of metres of thermal ranging noise at a strong $40$ dB-Hz is typical, and it scales as $\sqrt{B_L/(C/N_0)}$ — narrower loop bandwidth and higher carrier-to-noise density both tighten it, exactly like PLL phase jitter.</p>` },
+      { q: String.raw`Repeat the previous jitter estimate at threshold $C/N_0=25$ dB-Hz with a narrow spacing $d=0.1$ and coherent integration $T_{coh}=20$ ms, now including squaring loss.`, solution: String.raw`<p><b>Formula.</b> $$\sigma_\tau^2\approx\frac{d\,B_L}{2\,(C/N_0)}\left(1+\frac{2}{(2-d)\,T_{coh}\,(C/N_0)}\right)\text{chip}^2,$$ the noncoherent-DLL jitter with the bracketed squaring-loss correction.</p>
+      <p><b>Substitute.</b> $C/N_0=10^{2.5}=316$ Hz. Thermal term $=\dfrac{0.1\times1}{2\times316}$; squaring-loss factor $=1+\dfrac{2}{1.9\times0.02\times316}$.</p>
+      <p><b>Compute.</b> Thermal $=1.58\times10^{-4}$; squaring factor $=1+0.167=1.167$; so $\sigma_\tau^2=1.58\times10^{-4}\times1.167=1.84\times10^{-4}$ chip$^2$, $\sigma_\tau=0.0136$ chip.</p>
+      <p><b>Explanation.</b> Even at the $25$ dB-Hz threshold the narrow $d=0.1$ spacing keeps jitter to $\sim0.014$ chip, though squaring loss now adds about 17%. This is the weak-signal regime where the noise×noise self-term of the $E^2-L^2$ discriminator starts to bite.</p>` },
+      { q: String.raw`A symbol synchronizer uses an early-late gate on the matched-filter output at 10 Msym/s. If the loop must hold timing error under 2% of a symbol, what timing accuracy is that in ps?`, solution: String.raw`<p><b>Formula.</b> $$T=\frac{1}{R_s},\qquad \Delta t=0.02\,T,$$ the symbol period and the 2%-of-symbol timing budget.</p>
+      <p><b>Substitute.</b> $T=\dfrac{1}{10\times10^6\text{ s}^{-1}}$; $\Delta t=0.02\times T$.</p>
+      <p><b>Compute.</b> $T=100$ ns; $\Delta t=0.02\times100=2$ ns $=2000$ ps.</p>
+      <p><b>Explanation.</b> The DLL loop bandwidth and $C/N_0$ must be chosen so the RMS jitter $\sigma_\tau<2$ ns; since $\sigma_\tau^2\propto B_L/(C/N_0)$, this directly caps $B_L$ for the available SNR — the concrete design constraint behind a "2% timing error" spec.</p>` },
+      { q: String.raw`Multipath adds a replica delayed by 0.3 chip. Explain quantitatively why a $d=0.1$ narrow correlator is nearly immune while a $d=1$ wide correlator is biased.`, solution: String.raw`<p><b>Formula.</b> $$\text{gate reach}=\pm\frac{d}{2}\ \text{chip};\quad \text{multipath at delay }\tau_m\text{ distorts the S-curve only if }\tau_m<\frac{d}{2}+\text{(peak width)}.$$</p>
+      <p><b>Substitute.</b> Wide $d=1$: gates reach $\pm0.5$ chip. Narrow $d=0.1$: gates reach $\pm0.05$ chip. Compare each to $\tau_m=0.3$ chip.</p>
+      <p><b>Compute.</b> For $d=1$, the $0.3$-chip multipath triangle overlaps the Late gate (inside $\pm0.5$), shifting the S-curve zero and biasing the estimate. For $d=0.1$, the gates reach only $\pm0.05$ chip, so the $0.3$-chip multipath falls entirely outside the gated region and cannot distort the central discriminator.</p>
+      <p><b>Explanation.</b> A narrow correlator is nearly immune to any multipath whose delay exceeds $\approx d/2$ plus the peak half-width — the quantitative reason high-precision GNSS receivers use $d=0.1$ chip to combat urban multipath ranging bias.</p>` },
+      { q: String.raw`Show numerically that the noncoherent $E^2-L^2$ discriminator has zero output at perfect alignment. Use the triangular autocorrelation with $d=1$ chip.`, solution: String.raw`<p><b>Formula.</b> $$D_{nc}=|E|^2-|L|^2,\qquad E=R(\tau+\tfrac{d}{2}),\ L=R(\tau-\tfrac{d}{2}),\qquad R(\tau)=1-|\tau|\ (|\tau|\le1),$$ the noncoherent power discriminator on the triangular chip autocorrelation.</p>
+      <p><b>Substitute.</b> At $\tau=0$, $d=1$: $E=R(+0.5)$, $L=R(-0.5)$. Then perturb to $\tau=+0.05$: $E=R(0.55)$, $L=R(-0.45)$.</p>
+      <p><b>Compute.</b> At $\tau=0$: $E=1-0.5=0.5$, $L=0.5$, so $E^2-L^2=0.25-0.25=0$. At $\tau=+0.05$: $E=0.45$, $L=0.55$, so $E^2-L^2=0.2025-0.3025=-0.10\ne0$.</p>
+      <p><b>Explanation.</b> The discriminator is exactly zero at alignment (the lock point) and negative for a positive timing error, i.e. it drives the loop back toward $\tau=0$ — confirming both the zero-crossing and the restoring (negative-feedback) slope that make the S-curve a stable lock.</p>` }
     ],
     realWorld: String.raw`<p>The early-late gate is one of the most widely deployed synchronization structures in existence. Every GPS/GNSS receiver runs a delay-locked loop per satellite channel: after the acquisition engine coarsely aligns the local C/A or P(Y) code, the DLL's Early/Prompt/Late correlators keep the replica locked to a small fraction of a chip, and the resulting code phase becomes the pseudorange feeding the position solution. Modern receivers use narrow correlators (0.1 chip) and multipath-estimating variants precisely because DLL timing bias from reflections is a dominant error in urban positioning. The very same principle recovers the symbol clock in cable and satellite modems, in every SDR symbol synchronizer (Gardner and Mueller-Müller timing-error detectors are early-late relatives operating on the matched-filter output), and in optical and disk read channels. In GNU Radio and similar frameworks the structure is a handful of DSP blocks — three correlators, a discriminator, a loop filter, and an NCO/interpolator — tuned by loop bandwidth and damping exactly like a PLL. In high-dynamics or weak-signal receivers (spacecraft, defense), carrier-aided narrow DLLs achieve sub-metre code tracking at carrier-to-noise densities where an unaided loop would break lock, illustrating how the timing loop, carrier loop, and matched filter operate as one tightly coupled system.</p>`,
     related: ['pll', 'fll', 'costas-loop', 'correlation', 'matched-filter', 'dsss', 'pn-codes', 'processing-gain']
@@ -427,7 +604,8 @@ CONTENT.topics.push(
     category: 'Antennas & Electromagnetics',
     tags: ['polarization', 'circular-polarization', 'axial-ratio', 'faraday-rotation', 'plf', 'cross-pol', 'diversity'],
     summary: String.raw`Polarization is the time-varying orientation of a wave's electric field — linear, circular, or elliptical — and matching it between transmit and receive antennas is essential, with the polarization loss factor $\mathrm{PLF}=|\cos\psi|^2$ quantifying the penalty for a mismatch.`,
-    diagram: {
+    diagram: [
+    {
       svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-polarization" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <line x1="120" y1="115" x2="120" y2="30" stroke="#4dabf7" stroke-width="2" marker-end="url(#arr-polarization)"/>
@@ -448,6 +626,58 @@ CONTENT.topics.push(
 </svg>`,
       caption: String.raw`Polarization mechanism: two orthogonal E-components (Ex, Ey) with relative phase δ set the polarization ellipse — linear (V/H), circular, or elliptical.`
     },
+    {
+      title: String.raw`Mismatch-loss geometry (PLF = cos²ψ)`,
+      svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-polarization" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="150" y1="200" x2="150" y2="40" stroke="#4dabf7" stroke-width="2" marker-end="url(#arr2-polarization)"/>
+  <text x="150" y="32" fill="#4dabf7" text-anchor="middle">wave E</text>
+  <line x1="150" y1="200" x2="255" y2="70" stroke="#ffa94d" stroke-width="2" marker-end="url(#arr2-polarization)"/>
+  <text x="265" y="66" fill="#ffa94d">antenna ρ_a</text>
+  <path d="M150,120 A80,80 0 0 1 178,133" fill="none" stroke="#9aa7b5"/>
+  <text x="182" y="115" fill="#9aa7b5">ψ</text>
+  <line x1="150" y1="200" x2="150" y2="115" stroke="#63e6be" stroke-width="3" stroke-dasharray="5 3"/>
+  <text x="95" y="105" fill="#63e6be">E·cosψ</text>
+  <text x="150" y="222" fill="#9aa7b5" text-anchor="middle">captured field = projection onto antenna axis</text>
+  <rect x="330" y="55" width="185" height="120" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="422" y="80" fill="#e6edf3" text-anchor="middle">PLF = cos²ψ</text>
+  <text x="422" y="104" fill="#9aa7b5" text-anchor="middle">ψ=0° → 1 (0 dB)</text>
+  <text x="422" y="126" fill="#9aa7b5" text-anchor="middle">ψ=45° → 0.5 (−3 dB)</text>
+  <text x="422" y="148" fill="#9aa7b5" text-anchor="middle">ψ=90° → 0 (isolated)</text>
+  <text x="422" y="168" fill="#63e6be" text-anchor="middle">cross-pol → XPD 25–35 dB</text>
+</svg>`,
+      caption: String.raw`Polarization mismatch: the antenna captures only the projection E·cosψ of the wave onto its own axis, so power scales as PLF=cos²ψ — 0 dB aligned, −3 dB at 45°, complete rejection at 90°. Residual leakage between orthogonal polarizations is set by the cross-pol isolation (XPD).`
+    },
+    {
+      title: String.raw`Dual-pol frequency reuse`,
+      svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr3-polarization" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="15" y="30" width="90" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="60" y="55" fill="#e6edf3" text-anchor="middle">Stream A</text>
+  <rect x="15" y="140" width="90" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="60" y="165" fill="#e6edf3" text-anchor="middle">Stream B</text>
+  <rect x="150" y="30" width="95" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="197" y="50" fill="#e6edf3" text-anchor="middle">V (or RHCP)</text>
+  <text x="197" y="65" fill="#9aa7b5" text-anchor="middle">same f</text>
+  <rect x="150" y="140" width="95" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="197" y="160" fill="#e6edf3" text-anchor="middle">H (or LHCP)</text>
+  <text x="197" y="175" fill="#9aa7b5" text-anchor="middle">same f</text>
+  <rect x="300" y="85" width="110" height="45" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="355" y="105" fill="#e6edf3" text-anchor="middle">Dual-pol</text>
+  <text x="355" y="121" fill="#9aa7b5" text-anchor="middle">channel</text>
+  <rect x="440" y="85" width="90" height="45" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="485" y="105" fill="#e6edf3" text-anchor="middle">separate</text>
+  <text x="485" y="121" fill="#9aa7b5" text-anchor="middle">by XPD</text>
+  <line x1="105" y1="50" x2="148" y2="50" stroke="#9aa7b5" marker-end="url(#arr3-polarization)"/>
+  <line x1="105" y1="160" x2="148" y2="160" stroke="#9aa7b5" marker-end="url(#arr3-polarization)"/>
+  <line x1="245" y1="50" x2="300" y2="95" stroke="#9aa7b5" marker-end="url(#arr3-polarization)"/>
+  <line x1="245" y1="160" x2="300" y2="120" stroke="#9aa7b5" marker-end="url(#arr3-polarization)"/>
+  <line x1="410" y1="107" x2="438" y2="107" stroke="#9aa7b5" marker-end="url(#arr3-polarization)"/>
+  <text x="270" y="200" fill="#9aa7b5" text-anchor="middle">two orthogonal polarizations carry two streams on one frequency — 2× capacity</text>
+</svg>`,
+      caption: String.raw`Dual-polarization frequency reuse: two independent streams share the same frequency on orthogonal polarizations (V/H or RHCP/LHCP) and are separated at the receiver, doubling spectral efficiency — limited by the cross-polarization discrimination (XPD).`
+    }
+    ],
     prerequisites: ['maxwell', 'antenna', 'antenna-gain', 'link-budget'],
     intro: String.raw`<p>An electromagnetic wave is a transverse oscillation: its electric field $\vec E$ points perpendicular to the direction of travel and oscillates in time. <strong>Polarization</strong> describes how the tip of that $\vec E$ vector moves as the wave passes a fixed point — whether it stays on a line (linear), traces a circle (circular), or sweeps an ellipse (elliptical). It is a property as fundamental as frequency or amplitude, and getting it wrong can cost you 3, 20, or even an infinite number of decibels of received signal.</p>
 <p>Polarization matters because antennas are polarization-sensitive: a receive antenna only captures the component of the incoming field aligned with its own polarization. A vertical dipole is deaf to a horizontally polarized wave; a right-hand circular antenna rejects a left-hand circular wave. This lets engineers <em>reuse</em> the same frequency twice (vertical and horizontal, or LHCP and RHCP) to double capacity, gives satellites immunity to the random rotation their signals suffer crossing the ionosphere, and provides a diversity dimension that MIMO and dual-pol radar exploit. This topic builds polarization from Maxwell's transverse fields, shows how the relative phase and amplitude of two orthogonal components set the polarization state, defines the axial ratio and cross-pol figures engineers actually measure, derives the polarization loss factor, and explains Faraday rotation and why satellites overwhelmingly choose circular polarization.</p>`,
@@ -531,6 +761,19 @@ CONTENT.topics.push(
 <li><strong>Polarimetric radar:</strong> transmitting/receiving on both polarizations and measuring the full scattering matrix reveals target shape and orientation (dual-pol weather radar distinguishes rain, hail, and snow by their depolarization signatures).</li>
 </ul>
 <div class="callout"><strong>Design takeaway:</strong> polarization is simultaneously a hazard to be matched (PLF, Faraday rotation, AR, rain depolarization) and a degree of freedom to be exploited (frequency reuse, diversity, MIMO, polarimetry). Good RF design treats it as a first-class quantity, not an afterthought.</div>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<p>Everything here flows from one physical fact — a transverse $\vec E$ field has two orthogonal components — and one design consequence: antennas only capture the aligned part. Carry these away:</p>
+<ul>
+<li><strong>Two knobs make every state.</strong> The amplitude ratio $E_y/E_x$ and relative phase $\delta$ fully specify the polarization ellipse: $\delta=0,\pi$ → linear; $E_x=E_y,\ \delta=\pm90^\circ$ → circular; everything else → elliptical (the general case).</li>
+<li><strong>Handedness and orthogonality.</strong> RHCP/LHCP (defined looking along propagation in IEEE) are orthogonal, as are V/H. Orthogonal polarizations do not couple — the basis of frequency reuse.</li>
+<li><strong>Two purity/loss numbers.</strong> Axial ratio $\mathrm{AR}=E_{max}/E_{min}$ measures how circular a wave is (0 dB = perfect circle, ∞ = linear; $\le3$ dB is "good CP"). The polarization loss factor $\mathrm{PLF}=|\cos\psi|^2$ (or generally $|\hat\rho_w\cdot\hat\rho_a^*|^2$) sets the mismatch penalty: 0 dB aligned, −3 dB at 45°, −∞ orthogonal.</li>
+<li><strong>The universal 3 dB rule.</strong> A circular antenna receiving any linear wave (or vice versa) always loses exactly 3 dB, independent of the linear tilt — a fixed, budgetable price that buys robustness to unknown orientation.</li>
+<li><strong>Why satellites go circular.</strong> Faraday rotation ($\Omega\propto f^{-2}\int N_eB_\parallel dl$) rotates a linear wave's plane unpredictably, causing deep fades; a circular wave is immune (rotating a circle leaves it a circle). Hence GPS and most satellite links use CP.</li>
+<li><strong>Polarization as a resource.</strong> Orthogonal polarizations double capacity (frequency reuse, limited by XPD ≈ 25–35 dB), and dual-polarized antennas give MIMO streams and diversity in one aperture. Rain depolarization is the main threat to XPD at high frequencies.</li>
+</ul>
+<div class="callout tip">One line to keep: an antenna captures only the component of $\vec E$ aligned with its own polarization. Match it and you lose nothing; mismatch by $\psi$ and you lose $\cos^2\psi$; go orthogonal and you lose everything — which is precisely why the same orthogonality that <em>hurts</em> a mismatched link is <em>exploited</em> for frequency reuse.</div>`
       }
     ],
     keyPoints: [
@@ -614,14 +857,38 @@ CONTENT.topics.push(
       { q: String.raw`Rain affects polarization by:`, options: [String.raw`Increasing axial ratio purity`, String.raw`Depolarizing the signal (degrading XPD) via asymmetric raindrops`, String.raw`Rotating only circular waves`, String.raw`Having no effect`], answer: 1, explain: String.raw`Oblate raindrops attenuate and phase-shift H and V differently, depolarizing the wave and lowering XPD on high-frequency links.` }
     ],
     numericals: [
-      { q: String.raw`A transmit antenna is vertically polarized; the receive antenna is tilted 30° from vertical. Find the polarization loss factor in linear and dB.`, solution: String.raw`$\mathrm{PLF}=\cos^2 30^\circ=(0.866)^2=0.75$. In dB: $10\log_{10}(0.75)=-1.25$ dB. A 30° misalignment costs only 1.25 dB, but at 60° it would be $\cos^2 60^\circ=0.25=-6$ dB, and at 90° infinite loss.` },
-      { q: String.raw`A GPS satellite transmits RHCP; a user's antenna is a simple linear (vertical) whip. What polarization loss applies, and why is it acceptable?`, solution: String.raw`Linear receiving circular gives $\mathrm{PLF}=0.5=-3$ dB, independent of how the whip is oriented. It is acceptable because the alternative — a linear satellite signal — would suffer deep, unpredictable Faraday and orientation fades (down to −∞ dB); a fixed, budgetable 3 dB is far preferable.` },
-      { q: String.raw`A "circular" antenna has axial ratio 3 dB. Express its major-to-minor field ratio and estimate the extra loss when it receives a perfectly circular co-pol wave (approx. worst case $\tfrac12(1+\tfrac{(r-1)^2}{... })$—use the standard AR formula).`, solution: String.raw`AR = 3 dB $\Rightarrow E_{max}/E_{min}=10^{3/20}=1.413$, so $r=1.413$. Using the co-polar PLF for two elliptical antennas at worst relative orientation, $\mathrm{PLF}=\tfrac12+\tfrac12\cdot\dfrac{4r_1r_2}{(1+r_1^2)(1+r_2^2)}$-type expressions; for a perfect wave ($r_1=1$) and $r_2=1.413$: $\mathrm{PLF}=\dfrac{(1+r_2)^2/... }{}$ simplifies to about $0.97$, i.e. roughly $-0.14$ dB extra loss. A 3 dB AR is thus a small but real penalty.` },
-      { q: String.raw`Two dual-pol streams share a channel with XPD = 25 dB. What fraction of the interfering (cross-pol) stream leaks into the wanted one, and what is the resulting signal-to-interference ratio if both streams have equal power?`, solution: String.raw`XPD = 25 dB $\Rightarrow$ leaked fraction $=10^{-25/10}=3.16\times10^{-3}$ (0.316%). With equal transmit powers, the wanted-to-cross ratio at the receiver is essentially the XPD itself: SIR $\approx25$ dB. This caps the achievable SNR for dual-pol reuse unless cross-polar cancellation is applied.` },
-      { q: String.raw`At 400 MHz the Faraday rotation across the ionosphere is measured as 120°. Estimate the rotation at 1600 MHz (L-band) for the same path.`, solution: String.raw`$\Omega\propto 1/f^2$. Frequency ratio $1600/400=4$, so rotation scales by $1/4^2=1/16$: $\Omega_{L}=120^\circ/16=7.5^\circ$. The corresponding linear-link loss would be $\cos^2 7.5^\circ=0.983=-0.07$ dB at L-band versus $\cos^2 120^\circ=0.25=-6$ dB at 400 MHz — illustrating why higher frequencies and CP are used.` },
-      { q: String.raw`A linear wave (tilt unknown, uniformly random 0–90°) is received by a linear antenna. What is the average PLF, and how does that compare with using a circular antenna?`, solution: String.raw`Average of $\cos^2\psi$ over $\psi\in[0,90°]$ uniform: $\langle\cos^2\psi\rangle=\tfrac12$ (mean of $\cos^2$ over a quarter period). So on average −3 dB, but with huge variance (0 dB to −∞ dB, including deep nulls). A circular antenna gives a <em>constant</em> −3 dB with no nulls — same average, vastly better worst case. This is why CP is chosen when tilt is unknown.` },
-      { q: String.raw`Design check: a satellite CP downlink budgets a 3 dB linear-terminal polarization loss plus a 0.5 dB axial-ratio mismatch. If the received power at a perfectly matched CP terminal would be −110 dBm, what is it at the linear terminal?`, solution: String.raw`Total polarization penalty at the linear terminal $=3+0.5=3.5$ dB. Received power $=-110-3.5=-113.5$ dBm. The link budget must ensure this still clears the receiver sensitivity plus margin; if not, a CP terminal (avoiding the 3 dB) is required.` },
-      { q: String.raw`A wave has $E_x=1$, $E_y=1$, $\delta=+90^\circ$. Identify the polarization and confirm its handedness convention, then give the axial ratio.`, solution: String.raw`Equal amplitudes with $\delta=+90^\circ$: circular polarization. In IEEE convention $\delta=+90^\circ$ (y leads x) corresponds to LHCP (counter-clockwise looking along $+z$). Because $E_x=E_y$ and phase is exactly quadrature, the ellipse is a perfect circle: $E_{max}=E_{min}$, so AR = 1 (0 dB).` }
+      { q: String.raw`A transmit antenna is vertically polarized; the receive antenna is tilted 30° from vertical. Find the polarization loss factor in linear and dB.`, solution: String.raw`<p><b>Formula.</b> $$\mathrm{PLF}=\cos^2\psi,\qquad \mathrm{PLF_{dB}}=10\log_{10}(\cos^2\psi),$$ where $\psi$ is the angle between the two linear polarizations.</p>
+      <p><b>Substitute.</b> $\mathrm{PLF}=\cos^2 30^\circ=(0.866)^2$, then convert to dB.</p>
+      <p><b>Compute.</b> $\mathrm{PLF}=0.75$; $10\log_{10}(0.75)=-1.25$ dB.</p>
+      <p><b>Explanation.</b> A modest 30° tilt costs only 1.25 dB, but the $\cos^2$ law bites fast: 60° gives $-6$ dB and 90° gives complete rejection. That steep fall near 90° is exactly what makes orthogonal polarizations usable for frequency reuse.</p>` },
+      { q: String.raw`A GPS satellite transmits RHCP; a user's antenna is a simple linear (vertical) whip. What polarization loss applies, and why is it acceptable?`, solution: String.raw`<p><b>Formula.</b> $$\mathrm{PLF}_{\text{lin}\leftarrow\text{circ}}=\tfrac12\ (=-3\text{ dB}),$$ the fixed loss when a linear antenna receives a circular wave (any linear tilt captures half the circular power).</p>
+      <p><b>Substitute.</b> Circular wave into linear antenna → $\mathrm{PLF}=0.5$.</p>
+      <p><b>Compute.</b> $\mathrm{PLF}=0.5=-3$ dB, independent of the whip's orientation.</p>
+      <p><b>Explanation.</b> The 3 dB is fixed and budgetable, whereas a <em>linear</em> satellite signal would suffer deep, unpredictable Faraday and orientation fades (down to $-\infty$ dB at a null). Trading a guaranteed 3 dB for immunity to those fades is why GPS transmits circular.</p>` },
+      { q: String.raw`A "circular" antenna has axial ratio 3 dB. Express its major-to-minor field ratio and estimate the extra loss when it receives a perfectly circular co-pol wave (best relative orientation).`, solution: String.raw`<p><b>Formula.</b> $$r=10^{\mathrm{AR_{dB}}/20},\qquad \mathrm{PLF}=\frac12+\frac12\cdot\frac{4r_1 r_2}{(1+r_1^2)(1+r_2^2)},$$ the axial-ratio mismatch loss between a wave of ratio $r_1$ and an antenna of ratio $r_2$ (co-polar, aligned major axes = best case).</p>
+      <p><b>Substitute.</b> $r_2=10^{3/20}=1.413$; a perfect circular wave has $r_1=1$. Then $\mathrm{PLF}=\dfrac12+\dfrac12\cdot\dfrac{4(1)(1.413)}{(1+1)(1+1.413^2)}$.</p>
+      <p><b>Compute.</b> $r_2=1.413$; the fraction $=\dfrac{5.65}{2\times2.996}=0.943$, so $\mathrm{PLF}=0.5+0.5(0.943)=0.972$, i.e. about $-0.13$ dB extra loss.</p>
+      <p><b>Explanation.</b> A 3 dB axial ratio costs only ~0.13 dB in the best orientation but can reach many dB at the worst relative rotation (the minus-sign branch) — which is why CP-antenna specs quote AR bandwidth, and why even two nominally co-pol CP links incur a small mismatch penalty.</p>` },
+      { q: String.raw`Two dual-pol streams share a channel with XPD = 25 dB. What fraction of the interfering (cross-pol) stream leaks into the wanted one, and what is the resulting signal-to-interference ratio if both streams have equal power?`, solution: String.raw`<p><b>Formula.</b> $$\text{leaked fraction}=10^{-\mathrm{XPD_{dB}}/10},\qquad \mathrm{SIR}\approx\mathrm{XPD}\ \text{(equal powers)},$$ where XPD is the cross-polarization discrimination.</p>
+      <p><b>Substitute.</b> Leaked fraction $=10^{-25/10}$; SIR set by the same 25 dB.</p>
+      <p><b>Compute.</b> Leaked fraction $=3.16\times10^{-3}$ (0.316%); $\mathrm{SIR}\approx25$ dB.</p>
+      <p><b>Explanation.</b> With equal transmit powers the wanted-to-cross ratio at the receiver is essentially the XPD itself. This caps the usable SNR of dual-pol frequency reuse; pushing higher-order modulation on such a link needs cross-polar cancellation to beat the 25 dB floor.</p>` },
+      { q: String.raw`At 400 MHz the Faraday rotation across the ionosphere is measured as 120°. Estimate the rotation at 1600 MHz (L-band) for the same path.`, solution: String.raw`<p><b>Formula.</b> $$\Omega\propto\frac{1}{f^2}\ \Rightarrow\ \frac{\Omega_2}{\Omega_1}=\left(\frac{f_1}{f_2}\right)^2,$$ since the integrated $N_e B_\parallel$ path term is the same for both frequencies.</p>
+      <p><b>Substitute.</b> Frequency ratio $f_2/f_1=1600/400=4$, so $\Omega_2=120^\circ\times(1/4)^2$.</p>
+      <p><b>Compute.</b> $\Omega_2=120^\circ/16=7.5^\circ$. Linear-link loss: $\cos^2 7.5^\circ=0.983=-0.07$ dB at L-band versus $\cos^2 120^\circ=0.25=-6$ dB at 400 MHz.</p>
+      <p><b>Explanation.</b> The $f^{-2}$ law makes Faraday rotation severe at UHF (120° = 6 dB loss and swinging toward nulls) but nearly negligible at L-band. This is precisely why higher frequencies and circular polarization are favoured for satellite links through the ionosphere.</p>` },
+      { q: String.raw`A linear wave (tilt unknown, uniformly random 0–90°) is received by a linear antenna. What is the average PLF, and how does that compare with using a circular antenna?`, solution: String.raw`<p><b>Formula.</b> $$\langle\mathrm{PLF}\rangle=\frac{1}{\pi/2}\int_0^{\pi/2}\cos^2\psi\,d\psi=\frac12,$$ the mean of $\cos^2$ over a uniformly random tilt in $[0,90^\circ]$.</p>
+      <p><b>Substitute.</b> $\langle\cos^2\psi\rangle=\tfrac12$ (average of $\cos^2$ over a quarter period).</p>
+      <p><b>Compute.</b> Average PLF $=0.5=-3$ dB — but with huge variance, ranging from 0 dB (aligned) down to $-\infty$ dB (orthogonal null).</p>
+      <p><b>Explanation.</b> A circular antenna gives a <em>constant</em> $-3$ dB with no nulls — the same average but a vastly better worst case. When the incoming tilt is unknown, CP trades no average performance for the elimination of catastrophic deep fades, which is why it is the default for unknown-orientation links.</p>` },
+      { q: String.raw`Design check: a satellite CP downlink budgets a 3 dB linear-terminal polarization loss plus a 0.5 dB axial-ratio mismatch. If the received power at a perfectly matched CP terminal would be −110 dBm, what is it at the linear terminal?`, solution: String.raw`<p><b>Formula.</b> $$P_{rx}=P_{rx,\text{matched}}-L_{pol},\qquad L_{pol}=L_{\text{lin/circ}}+L_{AR},$$ subtracting the total polarization penalty (in dB) from the matched-case received power.</p>
+      <p><b>Substitute.</b> $L_{pol}=3+0.5$ dB; $P_{rx}=-110-L_{pol}$.</p>
+      <p><b>Compute.</b> $L_{pol}=3.5$ dB; $P_{rx}=-110-3.5=-113.5$ dBm.</p>
+      <p><b>Explanation.</b> The link budget must ensure $-113.5$ dBm still clears the receiver sensitivity plus margin. If it does not, a proper CP terminal (avoiding the 3 dB linear penalty) is required — a concrete example of how polarization loss enters a link budget alongside path loss and noise.</p>` },
+      { q: String.raw`A wave has $E_x=1$, $E_y=1$, $\delta=+90^\circ$. Identify the polarization and confirm its handedness convention, then give the axial ratio.`, solution: String.raw`<p><b>Formula.</b> $$E_x=E_y\ \text{and}\ \delta=\pm90^\circ\ \Rightarrow\ \text{circular};\qquad \mathrm{AR}=\frac{E_{max}}{E_{min}},$$ with the sign of $\delta$ fixing the handedness (IEEE, looking along $+z$).</p>
+      <p><b>Substitute.</b> $E_x=E_y=1$ and $\delta=+90^\circ$ satisfy the circular condition; equal amplitudes in exact quadrature give $E_{max}=E_{min}$.</p>
+      <p><b>Compute.</b> The wave is circularly polarized; $\delta=+90^\circ$ (y leads x) is LHCP in the IEEE convention (counter-clockwise looking along $+z$). Since $E_{max}=E_{min}$, $\mathrm{AR}=1$ (0 dB).</p>
+      <p><b>Explanation.</b> Perfect equal amplitudes and exact $90^\circ$ phase make an ideal circle, so the axial ratio is unity. Breaking either condition (unequal amplitude or off-quadrature phase) would turn the circle into an ellipse with $\mathrm{AR}>1$ — the general elliptical case.</p>` }
     ],
     realWorld: String.raw`<p>Polarization is a daily design driver across the RF world. Satellite operators reuse every transponder frequency twice — vertical and horizontal, or RHCP and LHCP — to double capacity, relying on 30+ dB cross-polarization discrimination and, at Ku/Ka band, on adaptive cross-polar cancellers to counter rain depolarization. GPS and virtually all GNSS transmit RHCP so that a handheld receiver held at any angle, and the signal's passage through the Faraday-rotating ionosphere, incur only a fixed, budgetable loss rather than deep random fades — the same reasoning drives circular polarization on most space telemetry and TT&C links. Terrestrial cellular base stations almost universally use ±45° slant dual-polarized panels, giving two MIMO streams and polarization diversity from a single compact aperture, which is central to LTE/5G capacity. Broadcast and point-to-point microwave links specify polarization to control interference between adjacent operators. Weather services run dual-polarization radar, reading the differential reflectivity and depolarization to tell rain from hail from snow. And in every link budget an engineer must add the polarization loss factor — a benign 0 dB for matched linear, a planned 3 dB for linear-to-circular, or an unacceptable deep null for orthogonal — making polarization matching as fundamental to closing a link as gain, path loss, and noise.</p>`,
     related: ['antenna', 'antenna-gain', 'maxwell', 'link-budget', 'path-loss', 'antenna-types']

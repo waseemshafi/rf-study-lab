@@ -92,6 +92,18 @@ CONTENT.topics.push(
           <li>An isotropic radiator ($G=1$) has $A_e = \lambda^2/(4\pi)$ — even a "point" receiver has finite capture area set by wavelength.</li>
           <li>This is the receive term in the Friis equation $P_r = P_t G_t G_r (\lambda/4\pi R)^2$.</li>
         </ul>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip"><p>Pulling the page together, you should now be able to explain:</p>
+        <ul>
+          <li><strong>Why antennas radiate at all:</strong> accelerating (time-varying) charge produces a detaching far field that falls as $1/r$, so real power leaves the source — a steady current cannot do this.</li>
+          <li><strong>Reciprocity:</strong> the same pattern, gain, impedance and polarization apply on transmit and receive in linear media, so you can measure one and use the other.</li>
+          <li><strong>Where measurements are valid:</strong> only beyond the Fraunhofer distance $r_{ff}=2D^2/\lambda$, where the wave is locally planar and the pattern has settled.</li>
+          <li><strong>Matching:</strong> $Z_A=R_A+jX_A$, resonance zeroes $X_A$, and $\Gamma$, VSWR and return loss quantify how well the antenna matches the line (conjugate match $Z_A=Z_0^*$ for maximum transfer).</li>
+          <li><strong>Polarization loss:</strong> $\mathrm{PLF}=\cos^2\psi$ — including the fixed $-3$ dB for linear-to-circular and total rejection for opposite-sense circular.</li>
+          <li><strong>Efficiency and aperture:</strong> $\eta_{rad}=R_r/(R_r+R_L)$ links directivity to gain, and $A_e=G\lambda^2/(4\pi)$ turns a receive antenna's gain into a capture area for the link budget.</li>
+        </ul></div>`
       }
     ],
     keyPoints: [
@@ -152,6 +164,30 @@ CONTENT.topics.push(
           <text x="500" y="140" fill="#9aa7b5" font-size="10" text-anchor="middle">r</text>
         </svg>`,
         caption: 'Near/far field zoning. The far-field pattern is established beyond the Fraunhofer distance 2D^2/lambda.'
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+          <defs>
+            <marker id="arr3-antenna" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#63e6be"/></marker>
+          </defs>
+          <rect width="540" height="250" fill="#1c232e"/>
+          <text x="270" y="22" fill="#e6edf3" font-size="14" text-anchor="middle">Radiation mechanism: acceleration detaches field lines</text>
+          <rect x="20" y="80" width="150" height="70" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.8"/>
+          <text x="95" y="108" fill="#e6edf3" font-size="12" text-anchor="middle">Accelerating</text>
+          <text x="95" y="126" fill="#9aa7b5" font-size="11" text-anchor="middle">charge (I&#775; dl)</text>
+          <rect x="200" y="80" width="150" height="70" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.8"/>
+          <text x="275" y="108" fill="#e6edf3" font-size="12" text-anchor="middle">Field-line "kink"</text>
+          <text x="275" y="126" fill="#9aa7b5" font-size="11" text-anchor="middle">detaches, closes on itself</text>
+          <rect x="380" y="80" width="150" height="70" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.8"/>
+          <text x="455" y="108" fill="#e6edf3" font-size="12" text-anchor="middle">Propagating wave</text>
+          <text x="455" y="126" fill="#9aa7b5" font-size="11" text-anchor="middle">far field &#8733; a&#8869;/r</text>
+          <line x1="170" y1="115" x2="198" y2="115" stroke="#63e6be" stroke-width="2" marker-end="url(#arr3-antenna)"/>
+          <line x1="350" y1="115" x2="378" y2="115" stroke="#63e6be" stroke-width="2" marker-end="url(#arr3-antenna)"/>
+          <rect x="120" y="185" width="300" height="46" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+          <text x="270" y="205" fill="#b197fc" font-size="12" text-anchor="middle">DC (constant v) &#8594; no kink &#8594; no radiation</text>
+          <text x="270" y="222" fill="#9aa7b5" font-size="10.5" text-anchor="middle">only time-varying (accelerated) current radiates</text>
+        </svg>`,
+        caption: 'Radiation chain: a time-varying (accelerating) current produces a kink that detaches from the near-field lines and propagates outward as the 1/r far field; steady DC current radiates nothing.'
       }
     ],
     equations: [
@@ -217,12 +253,30 @@ CONTENT.topics.push(
       { q: String.raw`Two cross-polarized linear antennas ($\psi=90°$) have PLF:`, options: [String.raw`1`, String.raw`0.5`, String.raw`0`, String.raw`2`], answer: 2, explain: String.raw`$\cos^2 90°=0$ — theoretically no coupling.` }
     ],
     numericals: [
-      { q: String.raw`Find the length of a resonant half-wave dipole for $f=900$ MHz (use free-space $\lambda$, then apply the $0.95$ shortening factor).`, solution: String.raw`$\lambda = c/f = 3\times10^8 / 9\times10^8 = 0.333$ m. Ideal $\ell=\lambda/2=0.167$ m. Practical (velocity/end-effect factor $\approx0.95$): $\ell\approx0.95\times0.167 = 0.158$ m $\approx 15.8$ cm.` },
-      { q: String.raw`A 2.4 m dish operates at 12 GHz. Compute the Fraunhofer distance.`, solution: String.raw`$\lambda=c/f=3\times10^8/1.2\times10^{10}=0.025$ m. $r_{ff}=2D^2/\lambda=2(2.4)^2/0.025 = 2(5.76)/0.025 = 11.52/0.025 = 460.8$ m.` },
-      { q: String.raw`An antenna has $Z_A=73\ \Omega$ on a $50\ \Omega$ line. Find $\Gamma$, VSWR, and return loss.`, solution: String.raw`$\Gamma=(73-50)/(73+50)=23/123=0.187$. VSWR$=(1+0.187)/(1-0.187)=1.187/0.813=1.46$. RL$=-20\log_{10}(0.187)=14.6$ dB.` },
-      { q: String.raw`A GPS antenna at 1.575 GHz has $G=3$ dBi. Find its effective aperture.`, solution: String.raw`$\lambda=3\times10^8/1.575\times10^9=0.1905$ m. $G=10^{0.3}=2.0$ (linear). $A_e=G\lambda^2/4\pi = 2.0(0.1905)^2/(4\pi)=2.0(0.0363)/12.57=0.0726/12.57=5.78\times10^{-3}$ m$^2$ ($\approx 57.8$ cm$^2$).` },
-      { q: String.raw`A dipole has $R_r=73\ \Omega$ and $R_L=7\ \Omega$. Find radiation efficiency and, if directivity is 2.15 dBi, its gain in dBi.`, solution: String.raw`$\eta_{rad}=73/(73+7)=73/80=0.9125$ ($-0.40$ dB). $D=2.15$ dBi, so $G=2.15-0.40=1.75$ dBi.` },
-      { q: String.raw`A transmit antenna is vertically polarized; the receive dipole is tilted $30°$. Compute the polarization loss.`, solution: String.raw`PLF$=\cos^2(30°)=(0.866)^2=0.75$. In dB: $10\log_{10}(0.75)=-1.25$ dB.` }
+      { q: String.raw`Find the length of a resonant half-wave dipole for $f=900$ MHz (use free-space $\lambda$, then apply the $0.95$ shortening factor).`, solution: String.raw`<p><b>Formula.</b> $$\ell = 0.95\,\frac{\lambda}{2},\qquad \lambda=\frac{c}{f}$$ where $\ell$ = practical dipole length (m), $\lambda$ = free-space wavelength (m), $c=3\times10^8$ m/s, $f$ = frequency (Hz), and $0.95$ is the velocity/end-effect shortening factor.</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{9\times10^8},\qquad \ell = 0.95\times\frac{\lambda}{2}$$</p>
+      <p><b>Compute.</b> $\lambda = 0.333$ m, so the ideal $\lambda/2 = 0.167$ m. Applying the factor: $\ell = 0.95\times0.167 = 0.158$ m $\approx 15.8$ cm.</p>
+      <p><b>Explanation.</b> The dipole is trimmed a few percent short of a physical half-wavelength so end-effects zero the reactance at resonance. A $\sim16$ cm rod is a sensible size for a 900 MHz whip, confirming the answer.</p>` },
+      { q: String.raw`A 2.4 m dish operates at 12 GHz. Compute the Fraunhofer distance.`, solution: String.raw`<p><b>Formula.</b> $$r_{ff}=\frac{2D^2}{\lambda},\qquad \lambda=\frac{c}{f}$$ where $r_{ff}$ = far-field distance (m), $D$ = largest aperture dimension (m), $\lambda$ = wavelength (m).</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{1.2\times10^{10}},\qquad r_{ff}=\frac{2(2.4)^2}{\lambda}$$</p>
+      <p><b>Compute.</b> $\lambda=0.025$ m. $r_{ff}=\dfrac{2\times5.76}{0.025}=\dfrac{11.52}{0.025}=460.8$ m.</p>
+      <p><b>Explanation.</b> The far field only begins nearly half a kilometre away, so this dish cannot be characterised across a room — antenna ranges must be long, or use compact-range/near-field techniques.</p>` },
+      { q: String.raw`An antenna has $Z_A=73\ \Omega$ on a $50\ \Omega$ line. Find $\Gamma$, VSWR, and return loss.`, solution: String.raw`<p><b>Formula.</b> $$\Gamma=\frac{Z_A-Z_0}{Z_A+Z_0},\quad \mathrm{VSWR}=\frac{1+|\Gamma|}{1-|\Gamma|},\quad RL=-20\log_{10}|\Gamma|$$ where $Z_A$ = antenna impedance, $Z_0$ = line impedance, $\Gamma$ = reflection coefficient, $RL$ = return loss (dB).</p>
+      <p><b>Substitute.</b> $$\Gamma=\frac{73-50}{73+50}=\frac{23}{123},\quad \mathrm{VSWR}=\frac{1+0.187}{1-0.187},\quad RL=-20\log_{10}(0.187)$$</p>
+      <p><b>Compute.</b> $\Gamma=0.187$; VSWR$=\dfrac{1.187}{0.813}=1.46$; $RL=-20\log_{10}(0.187)=14.6$ dB.</p>
+      <p><b>Explanation.</b> A raw $73\ \Omega$ dipole on $50\ \Omega$ coax gives VSWR $1.46$ (well under the usual $\le 2$ spec) and reflects only $|\Gamma|^2\approx3.5\%$ of power — an acceptable match even without a network.</p>` },
+      { q: String.raw`A GPS antenna at 1.575 GHz has $G=3$ dBi. Find its effective aperture.`, solution: String.raw`<p><b>Formula.</b> $$A_e=\frac{G\lambda^2}{4\pi},\qquad \lambda=\frac{c}{f},\qquad G=10^{G_{\mathrm{dBi}}/10}$$ where $A_e$ = effective aperture (m$^2$), $G$ = linear gain, $\lambda$ = wavelength (m).</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{1.575\times10^9},\quad G=10^{3/10}=10^{0.3},\quad A_e=\frac{G\lambda^2}{4\pi}$$</p>
+      <p><b>Compute.</b> $\lambda=0.1905$ m, $G=2.0$ (linear). $A_e=\dfrac{2.0\times(0.1905)^2}{4\pi}=\dfrac{2.0\times0.0363}{12.57}=\dfrac{0.0726}{12.57}=5.78\times10^{-3}$ m$^2\approx57.8$ cm$^2$.</p>
+      <p><b>Explanation.</b> Even a modest-gain patch presents about the area of a small coaster to the incoming wave. Capture area scales with $\lambda^2$, so lower-frequency antennas of the same gain are physically larger.</p>` },
+      { q: String.raw`A dipole has $R_r=73\ \Omega$ and $R_L=7\ \Omega$. Find radiation efficiency and, if directivity is 2.15 dBi, its gain in dBi.`, solution: String.raw`<p><b>Formula.</b> $$\eta_{rad}=\frac{R_r}{R_r+R_L},\qquad G_{\mathrm{dBi}}=D_{\mathrm{dBi}}+10\log_{10}\eta_{rad}$$ where $R_r$ = radiation resistance, $R_L$ = loss resistance, $\eta_{rad}$ = radiation efficiency, $D$ = directivity.</p>
+      <p><b>Substitute.</b> $$\eta_{rad}=\frac{73}{73+7}=\frac{73}{80},\qquad G=2.15+10\log_{10}(0.9125)$$</p>
+      <p><b>Compute.</b> $\eta_{rad}=0.9125$, i.e. $10\log_{10}(0.9125)=-0.40$ dB. $G=2.15-0.40=1.75$ dBi.</p>
+      <p><b>Explanation.</b> Ohmic loss of $7\ \Omega$ costs only $0.4$ dB because it is small next to the $73\ \Omega$ radiation resistance — efficient antennas are ones whose radiation resistance dominates their loss resistance.</p>` },
+      { q: String.raw`A transmit antenna is vertically polarized; the receive dipole is tilted $30°$. Compute the polarization loss.`, solution: String.raw`<p><b>Formula.</b> $$\mathrm{PLF}=\cos^2\psi,\qquad L_{\mathrm{dB}}=10\log_{10}(\mathrm{PLF})$$ where $\mathrm{PLF}$ = polarization loss factor and $\psi$ = angle between the two linear polarizations.</p>
+      <p><b>Substitute.</b> $$\mathrm{PLF}=\cos^2(30°),\qquad L_{\mathrm{dB}}=10\log_{10}(\cos^2 30°)$$</p>
+      <p><b>Compute.</b> $\cos30°=0.866$, so $\mathrm{PLF}=(0.866)^2=0.75$; $L_{\mathrm{dB}}=10\log_{10}(0.75)=-1.25$ dB.</p>
+      <p><b>Explanation.</b> A $30°$ tilt costs only $1.25$ dB, but the loss grows steeply as $\psi\to90°$ (cross-pol), where it becomes total — which is why alignment matters far more near orthogonality.</p>` }
     ],
     realWorld: String.raw`<p>Every wireless device is a study in these fundamentals. A phone's PCB antenna is deliberately made physically small and therefore high-$Q$, so designers fight the Chu limit with clever matching networks to hit VSWR $\le 2$ across LTE/5G bands. GPS and satellite links use RHCP to survive Faraday rotation in the ionosphere and tumbling geometry, accepting the 3 dB polarization penalty. Broadcast and cellular base stations trim dipoles to $0.47\lambda$ for a clean $\approx 73\ \Omega$ resonance and use baluns to feed them from coax. Antenna test ranges and anechoic chambers are built long enough to reach $2D^2/\lambda$ so that measured gain and pattern are genuinely far-field. And the $A_e=G\lambda^2/4\pi$ relation is what lets link-budget engineers convert a receive antenna's gain directly into captured signal power in the Friis equation.</p>`,
     related: ['maxwell', 'antenna-gain', 'antenna-types', 'path-loss', 'link-budget']
@@ -300,6 +354,18 @@ CONTENT.topics.push(
         html: String.raw`<p>Gain enters system budgets through <strong>EIRP</strong> (Effective Isotropic Radiated Power):</p>
         <p>$$\mathrm{EIRP\,(dBW)} = P_t\,(\mathrm{dBW}) + G_t\,(\mathrm{dBi}) - L_{feed}\,(\mathrm{dB})$$</p>
         <p>EIRP is the power an isotropic antenna would need to produce the same field in the boresight direction. On the receive side, gain contributes to $G/T$ (gain-to-noise-temperature), the key figure of merit for sensitive links. Both feed directly into the Friis and link-budget equations.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip"><p>You should now be able to reason about gain from several angles:</p>
+        <ul>
+          <li><strong>What gain is:</strong> the boresight intensity relative to a lossless isotropic source radiating the same power — a redistribution of power, never a creation of it.</li>
+          <li><strong>Directivity vs gain vs realized gain:</strong> $D$ is pure pattern shape; $G=\eta_{rad}D$ folds in heating loss; realized gain adds the mismatch factor $(1-|\Gamma|^2)$.</li>
+          <li><strong>References:</strong> $G_{\mathrm{dBi}}=G_{\mathrm{dBd}}+2.15$ — always check whether a datasheet quotes dBi or dBd.</li>
+          <li><strong>Aperture antennas:</strong> $G=\eta_{ap}(\pi D/\lambda)^2$, so gain rises as electrical size squared — $+6$ dB per doubling of diameter or of frequency.</li>
+          <li><strong>Gain-beamwidth link:</strong> $G\approx26000/(\theta_{az}\theta_{el})$ ties high gain to narrow beams and tight pointing.</li>
+          <li><strong>System context:</strong> gain enters transmit budgets through $\mathrm{EIRP}=P_t+G_t-L_{feed}$ and receive budgets through $G/T$.</li>
+        </ul></div>`
       }
     ],
     keyPoints: [
@@ -348,6 +414,35 @@ CONTENT.topics.push(
           <circle cx="400" cy="80" r="4" fill="#4dabf7"/><text x="405" y="72" fill="#4dabf7" font-size="10" text-anchor="middle">4D (+12dB)</text>
         </svg>`,
         caption: 'Gain scales as (D/lambda)^2 — each doubling of diameter (or frequency) adds 6 dB.'
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+          <defs>
+            <marker id="arr3-antenna-gain" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#63e6be"/></marker>
+          </defs>
+          <rect width="540" height="210" fill="#1c232e"/>
+          <text x="270" y="22" fill="#e6edf3" font-size="14" text-anchor="middle">Anatomy of gain &amp; EIRP</text>
+          <rect x="12" y="55" width="118" height="66" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.8"/>
+          <text x="71" y="82" fill="#e6edf3" font-size="12" text-anchor="middle">Input power</text>
+          <text x="71" y="100" fill="#9aa7b5" font-size="11" text-anchor="middle">P&#8348; (accepted)</text>
+          <rect x="150" y="55" width="118" height="66" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.8"/>
+          <text x="209" y="78" fill="#e6edf3" font-size="12" text-anchor="middle">Efficiency</text>
+          <text x="209" y="95" fill="#9aa7b5" font-size="10.5" text-anchor="middle">&#215;&#951;&#7523;&#7488;&#7496; (heat loss)</text>
+          <text x="209" y="111" fill="#9aa7b5" font-size="10.5" text-anchor="middle">G = &#951;&#7523;&#7488;&#7496; D</text>
+          <rect x="288" y="55" width="118" height="66" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.8"/>
+          <text x="347" y="78" fill="#e6edf3" font-size="12" text-anchor="middle">Directivity</text>
+          <text x="347" y="95" fill="#9aa7b5" font-size="10.5" text-anchor="middle">focus into &#937;&#7488;</text>
+          <text x="347" y="111" fill="#9aa7b5" font-size="10.5" text-anchor="middle">&#215; gain factor</text>
+          <rect x="426" y="55" width="102" height="66" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.8"/>
+          <text x="477" y="82" fill="#e6edf3" font-size="12" text-anchor="middle">EIRP</text>
+          <text x="477" y="100" fill="#9aa7b5" font-size="10.5" text-anchor="middle">P&#8348;+G&#8348;&#8722;L</text>
+          <line x1="130" y1="88" x2="148" y2="88" stroke="#63e6be" stroke-width="2" marker-end="url(#arr3-antenna-gain)"/>
+          <line x1="268" y1="88" x2="286" y2="88" stroke="#63e6be" stroke-width="2" marker-end="url(#arr3-antenna-gain)"/>
+          <line x1="406" y1="88" x2="424" y2="88" stroke="#63e6be" stroke-width="2" marker-end="url(#arr3-antenna-gain)"/>
+          <text x="270" y="155" fill="#9aa7b5" font-size="11" text-anchor="middle">Realized gain also multiplies by mismatch (1&#8722;|&#915;|&#178;)</text>
+          <text x="270" y="180" fill="#b197fc" font-size="11" text-anchor="middle">Gain redistributes power; it never creates it.</text>
+        </svg>`,
+        caption: 'From accepted input power to EIRP: radiation efficiency turns directivity into gain, then transmit power and feed loss set the isotropic-equivalent radiated power.'
       }
     ],
     equations: [
@@ -417,12 +512,30 @@ CONTENT.topics.push(
       { q: String.raw`Which grows the same way with frequency as fixed-aperture gain?`, options: [String.raw`thermal noise`, String.raw`free-space path loss`, String.raw`antenna length`, String.raw`VSWR`], answer: 1, explain: String.raw`Both path loss and fixed-aperture gain scale as $f^2$.` }
     ],
     numericals: [
-      { q: String.raw`A 3 m parabolic dish at 6 GHz has aperture efficiency 0.6. Find its gain in dBi.`, solution: String.raw`$\lambda=c/f=3\times10^8/6\times10^9=0.05$ m. $G=\eta_{ap}(\pi D/\lambda)^2=0.6\times(\pi\times3/0.05)^2=0.6\times(188.5)^2=0.6\times35530=21318$. In dB: $10\log_{10}(21318)=43.3$ dBi.` },
-      { q: String.raw`Estimate the half-power beamwidth of a 40 dBi antenna assuming a symmetric beam and constant 26000.`, solution: String.raw`$G=10^{4}=10000=26000/\theta^2\Rightarrow\theta^2=26000/10000=2.6\Rightarrow\theta=1.61°$ (per plane).` },
-      { q: String.raw`A dish gives 30 dBi at 4 GHz. What is its gain at 8 GHz (same dish)?`, solution: String.raw`Doubling frequency = +6 dB (fixed aperture). $30+6=36$ dBi.` },
-      { q: String.raw`An antenna has directivity 25 dBi and radiation efficiency 80%. Find its gain in dBi.`, solution: String.raw`$\eta_{rad}=0.8\Rightarrow10\log_{10}0.8=-0.97$ dB. $G=25-0.97\approx24.0$ dBi.` },
-      { q: String.raw`Transmitter delivers 20 W into an antenna of 18 dBi through a cable with 2 dB loss. Find EIRP in dBW and W.`, solution: String.raw`$P_t=10\log_{10}20=13.0$ dBW. EIRP$=13.0+18-2=29.0$ dBW $=10^{2.9}=794$ W.` },
-      { q: String.raw`Convert a 14 dBd Yagi to dBi, then find its effective aperture at 435 MHz.`, solution: String.raw`$G_{dBi}=14+2.15=16.15$ dBi $=10^{1.615}=41.2$ (linear). $\lambda=3\times10^8/4.35\times10^8=0.690$ m. $A_e=G\lambda^2/4\pi=41.2\times0.476/12.57=19.6/12.57=1.56$ m$^2$.` }
+      { q: String.raw`A 3 m parabolic dish at 6 GHz has aperture efficiency 0.6. Find its gain in dBi.`, solution: String.raw`<p><b>Formula.</b> $$G=\eta_{ap}\left(\frac{\pi D}{\lambda}\right)^2,\qquad \lambda=\frac{c}{f}$$ where $G$ = gain (linear), $\eta_{ap}$ = aperture efficiency, $D$ = dish diameter (m), $\lambda$ = wavelength (m).</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{6\times10^9},\qquad G=0.6\left(\frac{\pi\times3}{0.05}\right)^2$$</p>
+      <p><b>Compute.</b> $\lambda=0.05$ m; $\pi D/\lambda=188.5$; $G=0.6\times(188.5)^2=0.6\times35530=21318$. In dB: $10\log_{10}(21318)=43.3$ dBi.</p>
+      <p><b>Explanation.</b> Gain grows as the square of the aperture in wavelengths ($D/\lambda=60$ here), so a 3 m dish at C-band easily exceeds 40 dBi — the workhorse figure for satellite ground stations.</p>` },
+      { q: String.raw`Estimate the half-power beamwidth of a 40 dBi antenna assuming a symmetric beam and constant 26000.`, solution: String.raw`<p><b>Formula.</b> $$G\approx\frac{26000}{\theta^2}\;\Rightarrow\;\theta\approx\sqrt{\frac{26000}{G}}$$ where $G$ = linear gain, $\theta$ = HPBW per plane (degrees), symmetric beam $\theta_{az}=\theta_{el}=\theta$.</p>
+      <p><b>Substitute.</b> $$G=10^{40/10}=10^4=10000,\qquad \theta=\sqrt{\frac{26000}{10000}}$$</p>
+      <p><b>Compute.</b> $\theta=\sqrt{2.6}=1.61°$ per plane.</p>
+      <p><b>Explanation.</b> A 40 dBi antenna has a pencil beam roughly $1.6°$ wide — this inverse gain-beamwidth link is why high gain always demands accurate pointing.</p>` },
+      { q: String.raw`A dish gives 30 dBi at 4 GHz. What is its gain at 8 GHz (same dish)?`, solution: String.raw`<p><b>Formula.</b> $$G\propto\frac{A_{phys}}{\lambda^2}\propto f^2\;\Rightarrow\;\Delta G_{\mathrm{dB}}=20\log_{10}\!\frac{f_2}{f_1}$$ where the physical aperture $A_{phys}$ is fixed, so gain scales with $f^2$.</p>
+      <p><b>Substitute.</b> $$\Delta G=20\log_{10}\!\frac{8}{4}=20\log_{10}2$$</p>
+      <p><b>Compute.</b> $\Delta G=20\times0.301=6.0$ dB, so $G=30+6=36$ dBi.</p>
+      <p><b>Explanation.</b> Doubling frequency is one octave and adds $+6$ dB to a fixed aperture because it becomes electrically larger; the same dish is markedly more directive at the higher band.</p>` },
+      { q: String.raw`An antenna has directivity 25 dBi and radiation efficiency 80%. Find its gain in dBi.`, solution: String.raw`<p><b>Formula.</b> $$G_{\mathrm{dBi}}=D_{\mathrm{dBi}}+10\log_{10}\eta_{rad}$$ where $D$ = directivity, $\eta_{rad}$ = radiation efficiency, $G$ = gain.</p>
+      <p><b>Substitute.</b> $$G=25+10\log_{10}(0.8)$$</p>
+      <p><b>Compute.</b> $10\log_{10}(0.8)=-0.97$ dB, so $G=25-0.97\approx24.0$ dBi.</p>
+      <p><b>Explanation.</b> $80\%$ efficiency costs about $1$ dB; gain is always at or below directivity, and the gap is exactly the efficiency loss in dB.</p>` },
+      { q: String.raw`Transmitter delivers 20 W into an antenna of 18 dBi through a cable with 2 dB loss. Find EIRP in dBW and W.`, solution: String.raw`<p><b>Formula.</b> $$\mathrm{EIRP}=P_t+G_t-L_{feed}\ (\mathrm{dB}),\qquad P_t(\mathrm{dBW})=10\log_{10}P_t(\mathrm{W})$$ where $P_t$ = transmit power, $G_t$ = antenna gain, $L_{feed}$ = feed loss.</p>
+      <p><b>Substitute.</b> $$P_t=10\log_{10}(20)=13.0\ \mathrm{dBW},\qquad \mathrm{EIRP}=13.0+18-2$$</p>
+      <p><b>Compute.</b> $\mathrm{EIRP}=29.0$ dBW $=10^{29.0/10}=10^{2.9}=794$ W.</p>
+      <p><b>Explanation.</b> The 18 dBi antenna multiplies the effective boresight power roughly 40-fold even after the 2 dB cable loss — EIRP, not raw wattage, is what regulators cap and what the link budget uses.</p>` },
+      { q: String.raw`Convert a 14 dBd Yagi to dBi, then find its effective aperture at 435 MHz.`, solution: String.raw`<p><b>Formula.</b> $$G_{\mathrm{dBi}}=G_{\mathrm{dBd}}+2.15,\qquad A_e=\frac{G\lambda^2}{4\pi},\qquad \lambda=\frac{c}{f}$$ where the $2.15$ dB offset is the dipole reference's gain over isotropic.</p>
+      <p><b>Substitute.</b> $$G_{\mathrm{dBi}}=14+2.15=16.15,\quad G=10^{1.615},\quad \lambda=\frac{3\times10^8}{4.35\times10^8},\quad A_e=\frac{G\lambda^2}{4\pi}$$</p>
+      <p><b>Compute.</b> $G=41.2$ (linear); $\lambda=0.690$ m; $A_e=\dfrac{41.2\times(0.690)^2}{4\pi}=\dfrac{41.2\times0.476}{12.57}=\dfrac{19.6}{12.57}=1.56$ m$^2$.</p>
+      <p><b>Explanation.</b> Always check the reference: quoting dBi inflates the number by 2.15 dB over dBd. At UHF the long wavelength makes even a modest Yagi's capture area over a square metre.</p>` }
     ],
     realWorld: String.raw`<p>Gain is the lever every RF system pulls. Satellite ground stations use large dishes precisely because $G\propto(D/\lambda)^2$ turns metal into link margin — a VSAT terminal trades a smaller dish for a bigger amplifier. Cellular sector antennas quote around 15–18 dBi and are engineered so that gain-beamwidth gives roughly a $65°$ azimuth sector with narrow elevation, packing capacity per cell. Radar range depends on $G^2$ (used twice, TX and RX), so gain enters to the fourth power in the radar equation. And regulators cap <em>EIRP</em> rather than raw transmit power, precisely because gain, not just power, sets the field strength that can interfere with or expose others — Wi-Fi's 36 dBm EIRP limit in some bands is a gain-plus-power ceiling.</p>`,
     related: ['antenna', 'antenna-beamwidth', 'antenna-types', 'link-budget', 'path-loss']
@@ -497,6 +610,18 @@ CONTENT.topics.push(
         html: String.raw`<p>An <strong>array</strong> of $N$ elements spaced $d$ has an <em>array factor</em> whose main lobe narrows as $N$ grows — the effective aperture is $\approx Nd$. For a uniform broadside array:</p>
         <p>$$\theta_{HPBW}\approx \frac{0.886\,\lambda}{Nd\cos\theta_0}\ \text{rad}$$</p>
         <p>Doubling $N$ (hence aperture) roughly halves the beamwidth and adds ~3 dB of array gain. Phased arrays additionally <em>scan</em> the beam by inter-element phase, at the cost of beam broadening as $1/\cos\theta_0$ off boresight (scan loss). Arrays are how radar and 5G achieve narrow, steerable beams without moving parts.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip"><p>By now the beamwidth story should hang together:</p>
+        <ul>
+          <li><strong>HPBW:</strong> the $-3$ dB (half-power) angular width of the main lobe — half power, but $0.707$ in field amplitude.</li>
+          <li><strong>Pattern anatomy:</strong> main lobe, side lobes (SLL), nulls, and back lobe (front-to-back ratio) — side lobes waste power and admit interference.</li>
+          <li><strong>Aperture rule:</strong> $\theta_{HPBW}\approx70\lambda/D$ deg (tapered), $\approx51\lambda/D$ uniform; FNBW $\approx115\lambda/D$ is about twice the HPBW and sets angular resolution.</li>
+          <li><strong>The taper trilemma:</strong> you cannot maximise narrow beam, low side lobes, and gain at once — the uniform aperture's first side lobe is fixed at $-13.3$ dB, and tapering trades beamwidth/gain for lower SLL.</li>
+          <li><strong>Pointing:</strong> boresight loss $\approx12(\theta_e/\theta_{HPBW})^2$ dB, so narrow beams demand accurate tracking.</li>
+          <li><strong>Arrays:</strong> $N$ elements narrow the beam $\propto1/(Nd)$ and scan-broaden as $1/\cos\theta_0$ off boresight.</li>
+        </ul></div>`
       }
     ],
     keyPoints: [
@@ -564,6 +689,27 @@ CONTENT.topics.push(
           <text x="60" y="136" fill="#ffa94d" font-size="10">-13.3 dB SLL</text>
         </svg>`,
         caption: 'Cartesian (dB) pattern showing the -3 dB HPBW near the peak and the -13.3 dB first side lobe of a uniformly illuminated aperture.'
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+          <rect width="540" height="250" fill="#1c232e"/>
+          <text x="270" y="22" fill="#e6edf3" font-size="14" text-anchor="middle">Larger aperture &#8594; narrower beam &#8594; higher gain</text>
+          <!-- small aperture -->
+          <rect x="40" y="80" width="10" height="60" rx="3" fill="#4dabf7"/>
+          <text x="45" y="160" fill="#9aa7b5" font-size="10" text-anchor="middle">small D</text>
+          <path d="M50,110 L200,55 M50,110 L200,165" stroke="#ffa94d" stroke-width="1.5"/>
+          <path d="M170,72 A130 130 0 0 1 170,148" fill="none" stroke="#ffa94d" stroke-width="1.3"/>
+          <text x="150" y="112" fill="#ffa94d" font-size="11" text-anchor="middle">wide &#952;</text>
+          <!-- large aperture -->
+          <rect x="300" y="60" width="10" height="100" rx="3" fill="#4dabf7"/>
+          <text x="305" y="178" fill="#9aa7b5" font-size="10" text-anchor="middle">large D</text>
+          <path d="M310,110 L470,92 M310,110 L470,128" stroke="#63e6be" stroke-width="1.5"/>
+          <path d="M452,98 A160 160 0 0 1 452,122" fill="none" stroke="#63e6be" stroke-width="1.3"/>
+          <text x="440" y="112" fill="#63e6be" font-size="11" text-anchor="middle">narrow &#952;</text>
+          <text x="270" y="215" fill="#e6edf3" font-size="12" text-anchor="middle">&#952;&#8323;&#8340;&#8341;&#8342; &#8776; 70&#955;/D deg &#160;&#8660;&#160; G &#8776; 26000/(&#952;&#8331;&#7511;&#952;&#7473;&#8343;)</text>
+          <text x="270" y="235" fill="#b197fc" font-size="10.5" text-anchor="middle">the same electrical size that narrows the beam raises the gain</text>
+        </svg>`,
+        caption: 'Aperture-beamwidth-gain link: a larger electrical aperture D/lambda narrows the HPBW (approx 70 lambda/D) and, because the beam packs into a smaller solid angle, simultaneously raises the gain.'
       }
     ],
     equations: [
@@ -623,12 +769,30 @@ CONTENT.topics.push(
       { q: String.raw`Front-to-back ratio compares:`, options: [String.raw`two side lobes`, String.raw`main lobe to back lobe`, String.raw`HPBW to FNBW`, String.raw`gain to directivity`], answer: 1, explain: String.raw`It is the main-beam-to-back-lobe level in dB.` }
     ],
     numericals: [
-      { q: String.raw`A 1.8 m dish operates at 4 GHz. Estimate the HPBW using the $70\lambda/D$ rule.`, solution: String.raw`$\lambda=c/f=3\times10^8/4\times10^9=0.075$ m. $\theta_{HPBW}\approx70\times0.075/1.8=5.25/1.8=2.9°$.` },
-      { q: String.raw`For the same dish, estimate gain from the beamwidth (symmetric beam, constant 26000).`, solution: String.raw`$G\approx26000/(2.9\times2.9)=26000/8.41=3092\Rightarrow10\log_{10}3092=34.9$ dBi.` },
-      { q: String.raw`A dish has HPBW = 2°. What pointing error gives 1 dB loss?`, solution: String.raw`$1=12(\theta_e/2)^2\Rightarrow(\theta_e/2)^2=0.0833\Rightarrow\theta_e/2=0.289\Rightarrow\theta_e=0.58°$.` },
-      { q: String.raw`Estimate the FNBW of a 30 wavelength aperture (uniform).`, solution: String.raw`$D/\lambda=30$. FNBW$\approx115\lambda/D=115/30=3.83°$. (HPBW $\approx51/30=1.7°$, consistent with $\sim2\times$.)` },
-      { q: String.raw`A 16-element array has half-wavelength spacing at broadside. Estimate the HPBW.`, solution: String.raw`$Nd=16\times0.5\lambda=8\lambda$. $\theta\approx0.886\lambda/(Nd)=0.886/8=0.1108$ rad $=6.35°$.` },
-      { q: String.raw`The array above is scanned to $60°$. Find the broadened beamwidth.`, solution: String.raw`Broadening factor $1/\cos60°=2$. $\theta\approx6.35°\times2=12.7°$.` }
+      { q: String.raw`A 1.8 m dish operates at 4 GHz. Estimate the HPBW using the $70\lambda/D$ rule.`, solution: String.raw`<p><b>Formula.</b> $$\theta_{HPBW}\approx\frac{70\lambda}{D}\ \text{deg},\qquad \lambda=\frac{c}{f}$$ where $\theta_{HPBW}$ = half-power beamwidth (degrees), $D$ = aperture diameter (m), $\lambda$ = wavelength (m).</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{4\times10^9},\qquad \theta_{HPBW}=\frac{70\times0.075}{1.8}$$</p>
+      <p><b>Compute.</b> $\lambda=0.075$ m; $\theta_{HPBW}=\dfrac{5.25}{1.8}=2.9°$.</p>
+      <p><b>Explanation.</b> A near-3-degree beam is typical for a metre-class C-band dish. The beamwidth follows the aperture in wavelengths ($D/\lambda=24$), the same electrical size that fixes the gain.</p>` },
+      { q: String.raw`For the same dish, estimate gain from the beamwidth (symmetric beam, constant 26000).`, solution: String.raw`<p><b>Formula.</b> $$G\approx\frac{26000}{\theta_{az}\theta_{el}}$$ where $\theta_{az},\theta_{el}$ = HPBWs (degrees); for a symmetric beam $\theta_{az}=\theta_{el}=2.9°$.</p>
+      <p><b>Substitute.</b> $$G\approx\frac{26000}{2.9\times2.9}$$</p>
+      <p><b>Compute.</b> $G=\dfrac{26000}{8.41}=3092$; in dB: $10\log_{10}(3092)=34.9$ dBi.</p>
+      <p><b>Explanation.</b> Deriving gain straight from beamwidth gives $\approx35$ dBi, consistent with the aperture formula for this dish — beamwidth and gain are two views of the same focusing.</p>` },
+      { q: String.raw`A dish has HPBW = 2°. What pointing error gives 1 dB loss?`, solution: String.raw`<p><b>Formula.</b> $$L(\theta_e)\approx 12\left(\frac{\theta_e}{\theta_{HPBW}}\right)^2\ \text{dB}\;\Rightarrow\;\theta_e=\theta_{HPBW}\sqrt{\frac{L}{12}}$$ where $L$ = boresight loss (dB), $\theta_e$ = pointing error, $\theta_{HPBW}$ = half-power beamwidth.</p>
+      <p><b>Substitute.</b> $$1=12\left(\frac{\theta_e}{2}\right)^2\;\Rightarrow\;\left(\frac{\theta_e}{2}\right)^2=\frac{1}{12}=0.0833$$</p>
+      <p><b>Compute.</b> $\dfrac{\theta_e}{2}=\sqrt{0.0833}=0.289$, so $\theta_e=0.58°$.</p>
+      <p><b>Explanation.</b> Only about a quarter of the HPBW of error already costs 1 dB, so narrow-beam dishes need tracking accurate to a fraction of a degree.</p>` },
+      { q: String.raw`Estimate the FNBW of a 30 wavelength aperture (uniform).`, solution: String.raw`<p><b>Formula.</b> $$\mathrm{FNBW}\approx\frac{115\lambda}{D}\ \text{deg}\quad(\text{uniform});\qquad \theta_{HPBW}\approx\frac{51\lambda}{D}$$ where $D/\lambda$ = aperture size in wavelengths.</p>
+      <p><b>Substitute.</b> $$\frac{D}{\lambda}=30\;\Rightarrow\;\mathrm{FNBW}=\frac{115}{30},\qquad \theta_{HPBW}=\frac{51}{30}$$</p>
+      <p><b>Compute.</b> $\mathrm{FNBW}=3.83°$; $\theta_{HPBW}=1.7°$.</p>
+      <p><b>Explanation.</b> The first-null width is about twice the HPBW, as expected for a uniform aperture. FNBW sets angular resolution — the ability to separate two closely spaced sources.</p>` },
+      { q: String.raw`A 16-element array has half-wavelength spacing at broadside. Estimate the HPBW.`, solution: String.raw`<p><b>Formula.</b> $$\theta_{HPBW}\approx\frac{0.886\lambda}{Nd}\ \text{rad},\qquad L=Nd$$ where $N$ = number of elements, $d$ = element spacing, $L$ = electrical aperture; broadside ($\theta_0=0$).</p>
+      <p><b>Substitute.</b> $$Nd=16\times0.5\lambda=8\lambda,\qquad \theta_{HPBW}=\frac{0.886\lambda}{8\lambda}$$</p>
+      <p><b>Compute.</b> $\theta_{HPBW}=0.1108$ rad $=0.1108\times57.3=6.35°$.</p>
+      <p><b>Explanation.</b> Sixteen elements over $8\lambda$ give a $\sim6°$ beam; doubling $N$ (hence aperture) would roughly halve it and add about 3 dB of array gain.</p>` },
+      { q: String.raw`The array above is scanned to $60°$. Find the broadened beamwidth.`, solution: String.raw`<p><b>Formula.</b> $$\theta_{scan}\approx\frac{\theta_{HPBW}}{\cos\theta_0}$$ where $\theta_0$ = scan angle off boresight; the projected aperture shrinks by $\cos\theta_0$.</p>
+      <p><b>Substitute.</b> $$\theta_{scan}=\frac{6.35°}{\cos 60°}=\frac{6.35°}{0.5}$$</p>
+      <p><b>Compute.</b> Broadening factor $1/\cos60°=2$, so $\theta_{scan}=6.35°\times2=12.7°$.</p>
+      <p><b>Explanation.</b> Scanning to $60°$ doubles the beamwidth (and drops gain) because the array presents only half its aperture in that direction — the fundamental scan-loss penalty of phased arrays.</p>` }
     ],
     realWorld: String.raw`<p>Beamwidth is where physics meets operations. Weather and air-traffic radars use narrow beams (small FNBW) for angular resolution, then apply Chebyshev/Taylor tapers to push side lobes below −30 dB so ground clutter and out-of-beam targets do not masquerade as signals. Satellite dishes with sub-degree HPBW require motorised trackers because the pointing-loss law $12(\theta_e/\theta_{HPBW})^2$ turns a fraction of a degree of wind sway into dropped links. 5G mmWave base stations use large phased arrays precisely to synthesise pencil beams that both boost gain and spatially multiplex users, accepting scan-broadening near the array edges. And the humble Wi-Fi/handset antenna is deliberately wide-beam so it works regardless of how you hold it — the opposite end of the same trade-off.</p>`,
     related: ['antenna', 'antenna-gain', 'antenna-types', 'maxwell', 'link-budget']
@@ -722,6 +886,20 @@ CONTENT.topics.push(
           <tr><td>Phased array</td><td>scalable/high</td><td>element-limited</td><td>steerable beam</td><td>configurable</td><td>AESA radar, 5G, SatCom</td></tr>
           <tr><td>Loop / ferrite</td><td>low (< 0 dBi)</td><td>narrow</td><td>figure-eight</td><td>magnetic (H-field)</td><td>AM, RFID, DF</td></tr>
         </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip"><p>You should now be able to pick and compare antenna types on their merits:</p>
+        <ul>
+          <li><strong>Wire (dipole/monopole):</strong> the omnidirectional building blocks — dipole $2.15$ dBi at $73\ \Omega$; $\lambda/4$ monopole $\approx5.15$ dBi at $\approx36.5\ \Omega$ from image theory.</li>
+          <li><strong>Directional wire (Yagi):</strong> a driven element plus reflector and directors gives cheap end-fire gain (7–16 dBi), narrowband.</li>
+          <li><strong>Printed (patch):</strong> low-profile, cheap, arrayable, but narrowband; readily made circularly polarized.</li>
+          <li><strong>Aperture (horn, dish):</strong> the high-gain family — horns as wideband references/feeds, dishes for the highest gain $G=\eta_{ap}(\pi D/\lambda)^2$.</li>
+          <li><strong>Circular polarization (helix, CP patch):</strong> tolerates unknown orientation and Faraday rotation.</li>
+          <li><strong>Steerable (phased array):</strong> electronic beam pointing via $\phi=2\pi d\sin\theta/\lambda$, keeping $d\le\lambda/2$ to avoid grating lobes.</li>
+          <li><strong>Small magnetic (loop/ferrite):</strong> figure-eight pattern with sharp nulls for direction finding.</li>
+          <li><strong>The overarching lesson:</strong> every choice trades gain, bandwidth, pattern, polarization, size and steering against cost — there is no universal antenna.</li>
+        </ul></div>`
       }
     ],
     keyPoints: [
@@ -810,6 +988,44 @@ CONTENT.topics.push(
           <text x="420" y="230" fill="#ffa94d" font-size="10" text-anchor="middle">4&#966;</text>
         </svg>`,
         caption: 'Applying a progressive phase phi across equally spaced elements tilts the equiphase wavefront, steering the beam to angle theta.'
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 300" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+          <defs>
+            <marker id="arr3-antenna-types" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#63e6be"/></marker>
+          </defs>
+          <rect width="540" height="300" fill="#1c232e"/>
+          <text x="270" y="22" fill="#e6edf3" font-size="14" text-anchor="middle">Selection flow: pick the antenna from the requirement</text>
+          <rect x="180" y="38" width="180" height="40" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.8"/>
+          <text x="270" y="63" fill="#e6edf3" font-size="12" text-anchor="middle">Requirements</text>
+          <!-- branch: gain -->
+          <rect x="20" y="110" width="150" height="46" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.6"/>
+          <text x="95" y="130" fill="#e6edf3" font-size="11.5" text-anchor="middle">Very high gain?</text>
+          <text x="95" y="147" fill="#9aa7b5" font-size="10" text-anchor="middle">dish / horn / array</text>
+          <!-- branch: omni -->
+          <rect x="195" y="110" width="150" height="46" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.6"/>
+          <text x="270" y="130" fill="#e6edf3" font-size="11.5" text-anchor="middle">Omni coverage?</text>
+          <text x="270" y="147" fill="#9aa7b5" font-size="10" text-anchor="middle">dipole / monopole</text>
+          <!-- branch: CP -->
+          <rect x="370" y="110" width="150" height="46" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.6"/>
+          <text x="445" y="130" fill="#e6edf3" font-size="11.5" text-anchor="middle">Circular pol.?</text>
+          <text x="445" y="147" fill="#9aa7b5" font-size="10" text-anchor="middle">helix / CP patch</text>
+          <line x1="230" y1="78" x2="110" y2="108" stroke="#63e6be" stroke-width="1.6" marker-end="url(#arr3-antenna-types)"/>
+          <line x1="270" y1="78" x2="270" y2="108" stroke="#63e6be" stroke-width="1.6" marker-end="url(#arr3-antenna-types)"/>
+          <line x1="310" y1="78" x2="430" y2="108" stroke="#63e6be" stroke-width="1.6" marker-end="url(#arr3-antenna-types)"/>
+          <!-- second row -->
+          <rect x="20" y="190" width="150" height="46" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.6"/>
+          <text x="95" y="210" fill="#e6edf3" font-size="11.5" text-anchor="middle">Low-profile / printed?</text>
+          <text x="95" y="227" fill="#9aa7b5" font-size="10" text-anchor="middle">patch (microstrip)</text>
+          <rect x="195" y="190" width="150" height="46" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.6"/>
+          <text x="270" y="210" fill="#e6edf3" font-size="11.5" text-anchor="middle">Steer w/o motor?</text>
+          <text x="270" y="227" fill="#9aa7b5" font-size="10" text-anchor="middle">phased array</text>
+          <rect x="370" y="190" width="150" height="46" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.6"/>
+          <text x="445" y="210" fill="#e6edf3" font-size="11.5" text-anchor="middle">Direction finding?</text>
+          <text x="445" y="227" fill="#9aa7b5" font-size="10" text-anchor="middle">loop / ferrite</text>
+          <text x="270" y="270" fill="#b197fc" font-size="11" text-anchor="middle">Every choice trades gain, bandwidth, size, polarization &amp; steering vs cost.</text>
+        </svg>`,
+        caption: 'A requirement-driven chooser: gain, coverage, polarization, profile, steering and direction-finding needs each funnel toward a specific antenna family.'
       }
     ],
     equations: [
@@ -869,12 +1085,30 @@ CONTENT.topics.push(
       { q: String.raw`Circular polarization is preferred for satellites mainly to:`, options: [String.raw`increase gain by 3 dB`, String.raw`tolerate orientation and Faraday rotation`, String.raw`reduce cost`, String.raw`widen bandwidth`], answer: 1, explain: String.raw`CP works regardless of relative orientation and survives ionospheric rotation.` }
     ],
     numericals: [
-      { q: String.raw`A phased array has elements spaced $d=0.5\lambda$. Find the steering phase to point the beam at $30°$.`, solution: String.raw`$\phi=2\pi d\sin\theta/\lambda=2\pi(0.5)\sin30°=2\pi(0.5)(0.5)=\pi/2=90°$ per element.` },
-      { q: String.raw`For $d=0.6\lambda$, what maximum scan angle avoids grating lobes?`, solution: String.raw`$d\le\lambda/(1+\sin\theta_{max})\Rightarrow0.6\le1/(1+\sin\theta_{max})$; solve $1+\sin\theta_{max}\le1/0.6=1.667\Rightarrow\sin\theta_{max}\le0.667\Rightarrow$ grating-free only for $\theta_{max}\le\sin^{-1}(1/0.6-1)=\sin^{-1}(0.667)=41.8°$.` },
-      { q: String.raw`A 2.4 m dish at 11 GHz has $\eta_{ap}=0.65$. Find the gain in dBi.`, solution: String.raw`$\lambda=3\times10^8/1.1\times10^{10}=0.0273$ m. $G=0.65(\pi\times2.4/0.0273)^2=0.65(276.2)^2=0.65\times76290=49588\Rightarrow10\log_{10}=47.0$ dBi.` },
-      { q: String.raw`Find the length of a Yagi driven element (0.47λ) and reflector (0.5λ) at 145 MHz.`, solution: String.raw`$\lambda=3\times10^8/1.45\times10^8=2.069$ m. Driven $=0.47\times2.069=0.972$ m. Reflector $=0.5\times2.069=1.035$ m.` },
-      { q: String.raw`A helix in axial mode has circumference $C=\lambda$ at 1.5 GHz. Find its diameter.`, solution: String.raw`$\lambda=3\times10^8/1.5\times10^9=0.2$ m. $C=\pi D=\lambda\Rightarrow D=\lambda/\pi=0.2/3.1416=0.0637$ m $=6.37$ cm.` },
-      { q: String.raw`Compare capture area of a 2.15 dBi dipole and a 25 dBi dish at 3 GHz.`, solution: String.raw`$\lambda=0.1$ m. Dipole $G=10^{0.215}=1.64$; $A_e=1.64(0.01)/12.57=1.30\times10^{-3}$ m$^2$. Dish $G=10^{2.5}=316$; $A_e=316(0.01)/12.57=0.251$ m$^2$. Ratio $\approx193\times$ (= 22.85 dB gain difference).` }
+      { q: String.raw`A phased array has elements spaced $d=0.5\lambda$. Find the steering phase to point the beam at $30°$.`, solution: String.raw`<p><b>Formula.</b> $$\phi=\frac{2\pi d}{\lambda}\sin\theta$$ where $\phi$ = progressive inter-element phase (rad), $d$ = element spacing, $\theta$ = steering angle off boresight.</p>
+      <p><b>Substitute.</b> $$\phi=2\pi\left(\frac{0.5\lambda}{\lambda}\right)\sin 30°=2\pi(0.5)(0.5)$$</p>
+      <p><b>Compute.</b> $\phi=\pi/2$ rad $=90°$ per element.</p>
+      <p><b>Explanation.</b> Each element leads its neighbour by $90°$ so their contributions add in phase at $30°$. This electrical phase compensates the physical path difference $d\sin\theta$ across the array.</p>` },
+      { q: String.raw`For $d=0.6\lambda$, what maximum scan angle avoids grating lobes?`, solution: String.raw`<p><b>Formula.</b> $$d\le\frac{\lambda}{1+|\sin\theta_{max}|}\;\Rightarrow\;\sin\theta_{max}\le\frac{\lambda}{d}-1$$ where $\theta_{max}$ = largest grating-lobe-free scan angle, $d$ = spacing.</p>
+      <p><b>Substitute.</b> $$0.6\le\frac{1}{1+\sin\theta_{max}}\;\Rightarrow\;1+\sin\theta_{max}\le\frac{1}{0.6}=1.667$$</p>
+      <p><b>Compute.</b> $\sin\theta_{max}\le0.667$, so $\theta_{max}=\sin^{-1}(0.667)=41.8°$.</p>
+      <p><b>Explanation.</b> Spacing above $\lambda/2$ limits the grating-lobe-free scan: at $0.6\lambda$ the array can only scan to about $\pm42°$ before a false beam appears. Keeping $d\le\lambda/2$ permits full $\pm90°$ scan.</p>` },
+      { q: String.raw`A 2.4 m dish at 11 GHz has $\eta_{ap}=0.65$. Find the gain in dBi.`, solution: String.raw`<p><b>Formula.</b> $$G=\eta_{ap}\left(\frac{\pi D}{\lambda}\right)^2,\qquad \lambda=\frac{c}{f}$$ where $G$ = gain (linear), $\eta_{ap}$ = aperture efficiency, $D$ = diameter (m).</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{1.1\times10^{10}},\qquad G=0.65\left(\frac{\pi\times2.4}{0.0273}\right)^2$$</p>
+      <p><b>Compute.</b> $\lambda=0.0273$ m; $\pi D/\lambda=276.2$; $G=0.65\times(276.2)^2=0.65\times76290=49588$; $10\log_{10}(49588)=47.0$ dBi.</p>
+      <p><b>Explanation.</b> A 2.4 m Ku-band dish reaches 47 dBi — the very high directivity that makes VSAT and satellite links close over 36 000 km.</p>` },
+      { q: String.raw`Find the length of a Yagi driven element (0.47λ) and reflector (0.5λ) at 145 MHz.`, solution: String.raw`<p><b>Formula.</b> $$\ell_{driven}=0.47\lambda,\quad \ell_{refl}=0.5\lambda,\qquad \lambda=\frac{c}{f}$$ where $\ell$ = element length (m); the reflector is made longer (inductive) than the driven element.</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{1.45\times10^8},\qquad \ell_{driven}=0.47\lambda,\quad \ell_{refl}=0.5\lambda$$</p>
+      <p><b>Compute.</b> $\lambda=2.069$ m; $\ell_{driven}=0.47\times2.069=0.972$ m; $\ell_{refl}=0.5\times2.069=1.035$ m.</p>
+      <p><b>Explanation.</b> At 2 m (VHF) the elements are around a metre long — hence rooftop TV/ham Yagis are large. The slightly longer reflector phases the pattern forward toward the directors.</p>` },
+      { q: String.raw`A helix in axial mode has circumference $C=\lambda$ at 1.5 GHz. Find its diameter.`, solution: String.raw`<p><b>Formula.</b> $$C=\pi D=\lambda\;\Rightarrow\;D=\frac{\lambda}{\pi},\qquad \lambda=\frac{c}{f}$$ where $C$ = coil circumference, $D$ = helix diameter (m).</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{1.5\times10^9},\qquad D=\frac{\lambda}{\pi}$$</p>
+      <p><b>Compute.</b> $\lambda=0.2$ m; $D=\dfrac{0.2}{3.1416}=0.0637$ m $=6.37$ cm.</p>
+      <p><b>Explanation.</b> Axial (end-fire) mode requires a circumference near one wavelength, giving a $\sim6$ cm coil at L-band that radiates circular polarization — ideal for GPS and satellite telemetry.</p>` },
+      { q: String.raw`Compare capture area of a 2.15 dBi dipole and a 25 dBi dish at 3 GHz.`, solution: String.raw`<p><b>Formula.</b> $$A_e=\frac{G\lambda^2}{4\pi},\qquad G=10^{G_{\mathrm{dBi}}/10},\qquad \lambda=\frac{c}{f}$$ where $A_e$ = effective aperture (m$^2$).</p>
+      <p><b>Substitute.</b> $$\lambda=\frac{3\times10^8}{3\times10^9}=0.1\ \text{m};\quad A_e^{dipole}=\frac{10^{0.215}(0.1)^2}{4\pi},\quad A_e^{dish}=\frac{10^{2.5}(0.1)^2}{4\pi}$$</p>
+      <p><b>Compute.</b> Dipole $G=1.64$: $A_e=\dfrac{1.64\times0.01}{12.57}=1.30\times10^{-3}$ m$^2$. Dish $G=316$: $A_e=\dfrac{316\times0.01}{12.57}=0.251$ m$^2$. Ratio $=316/1.64\approx193\times$ (= $22.85$ dB gain difference).</p>
+      <p><b>Explanation.</b> The dish captures nearly 200 times more power from the same wave — the capture-area ratio equals the gain ratio exactly, since $A_e\propto G$ at a fixed frequency.</p>` }
     ],
     realWorld: String.raw`<p>The right antenna is a systems decision. Your phone stacks several types at once: a patch or PIFA for cellular, a CP patch for GPS, and a chip antenna for Bluetooth/Wi-Fi. Rooftop TV still uses Yagis for their cheap directional gain. Satellite ground stations use dishes fed by horns, while modern flat-panel terminals (Starlink, aircraft SatCom) replace them with electronically steered phased arrays that track moving satellites without a motor. AESA radars point beams in microseconds by phase alone, and AM radios still tune tiny ferrite loops. Each choice is the comparison table in action — trading gain, bandwidth, size, polarization, and steering against cost.</p>`,
     related: ['antenna', 'antenna-gain', 'antenna-beamwidth', 'maxwell', 'link-budget']
@@ -909,7 +1143,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Deriving the wave equation',
-        html: String.raw`<p>In a source-free region ($\rho=0$, $\vec J=0$), take the curl of Faraday's law:</p>
+        html: String.raw`<div class="callout tip"><strong>The idea before the algebra:</strong> Faraday says a changing $\vec H$ makes $\vec E$, and Ampère-Maxwell says a changing $\vec E$ makes $\vec H$. Feed one into the other and each field ends up driven by its own second time-derivative — the signature of a wave. The curl manipulation below is just the formal way of substituting one law into the other.</div>
+        <p>In a source-free region ($\rho=0$, $\vec J=0$), take the curl of Faraday's law:</p>
         <p>$$\nabla\times(\nabla\times\vec E)=-\mu\varepsilon\frac{\partial^2\vec E}{\partial t^2}$$</p>
         <p>Using the identity $\nabla\times(\nabla\times\vec E)=\nabla(\nabla\cdot\vec E)-\nabla^2\vec E$ and $\nabla\cdot\vec E=0$ (no charge), we obtain the <strong>vector wave equation</strong>:</p>
         <p>$$\nabla^2\vec E = \mu\varepsilon\frac{\partial^2\vec E}{\partial t^2}$$</p>
@@ -948,6 +1183,18 @@ CONTENT.topics.push(
           <li>Normal $\vec D$ jumps by any surface charge $\sigma$; normal $\vec B$ is continuous.</li>
           <li>At a perfect conductor: tangential $\vec E=0$ and normal $\vec B=0$ at the surface (why currents flow on the skin and antennas can be fed against ground planes).</li>
         </ul>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip"><p>These four laws are the foundation for everything else on this site — you should now grasp:</p>
+        <ul>
+          <li><strong>The four laws:</strong> Gauss(E) ($\nabla\cdot\vec D=\rho$) and Gauss(B) ($\nabla\cdot\vec B=0$) fix the sources; Faraday and Ampère-Maxwell couple $\vec E$ and $\vec H$ through their time derivatives.</li>
+          <li><strong>Displacement current:</strong> the $\partial\vec D/\partial t$ term restores charge conservation and lets a changing $\vec E$ create $\vec H$ in empty space — without it there is no radiation.</li>
+          <li><strong>Why waves exist:</strong> the two curl laws regenerate one another, yielding $\nabla^2\vec E=\mu\varepsilon\,\partial^2\vec E/\partial t^2$ with speed $v=1/\sqrt{\mu\varepsilon}$.</li>
+          <li><strong>Two vacuum constants:</strong> $c=1/\sqrt{\mu_0\varepsilon_0}\approx3\times10^8$ m/s and $\eta_0=\sqrt{\mu_0/\varepsilon_0}\approx377\ \Omega$.</li>
+          <li><strong>Plane-wave picture:</strong> $\vec E\perp\vec H\perp\hat k$, in phase, $E=\eta H$, with power flow $\vec S=\vec E\times\vec H$ — the local form of every antenna's far field.</li>
+          <li><strong>Media and boundaries:</strong> $v=c/n$, $\lambda_m=\lambda_0/n$, $\eta=\eta_0/\sqrt{\varepsilon_r}$; tangential $\vec E$ is continuous and vanishes at a perfect conductor.</li>
+        </ul></div>`
       }
     ],
     keyPoints: [
@@ -1005,6 +1252,38 @@ CONTENT.topics.push(
           <text x="270" y="230" fill="#9aa7b5" font-size="11" text-anchor="middle">the loop closes &#8594; wave propagates at c = 1/&#8730;(&#956;&#8320;&#949;&#8320;)</text>
         </svg>`,
         caption: "Faraday's and Ampere-Maxwell's laws regenerate one another, so an EM disturbance propagates as a wave at c."
+      },
+      {
+        svg: String.raw`<svg viewBox="0 0 540 270" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+          <defs>
+            <marker id="arr3-maxwell" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#63e6be"/></marker>
+          </defs>
+          <rect width="540" height="270" fill="#1c232e"/>
+          <text x="270" y="22" fill="#e6edf3" font-size="14" text-anchor="middle">Source &#8594; field map: which law links what</text>
+          <!-- sources -->
+          <rect x="20" y="55" width="130" height="46" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.8"/>
+          <text x="85" y="82" fill="#e6edf3" font-size="12" text-anchor="middle">Charge &#961;</text>
+          <rect x="20" y="165" width="130" height="46" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.8"/>
+          <text x="85" y="185" fill="#e6edf3" font-size="12" text-anchor="middle">Current J</text>
+          <text x="85" y="202" fill="#9aa7b5" font-size="10" text-anchor="middle">(and &#8706;D/&#8706;t)</text>
+          <!-- fields -->
+          <rect x="360" y="55" width="160" height="46" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.8"/>
+          <text x="440" y="82" fill="#4dabf7" font-size="13" text-anchor="middle">E field</text>
+          <rect x="360" y="165" width="160" height="46" rx="6" fill="#1c232e" stroke="#ff6b6b" stroke-width="1.8"/>
+          <text x="440" y="192" fill="#ff6b6b" font-size="13" text-anchor="middle">H / B field</text>
+          <!-- links -->
+          <line x1="150" y1="78" x2="358" y2="78" stroke="#63e6be" stroke-width="1.8" marker-end="url(#arr3-maxwell)"/>
+          <text x="255" y="70" fill="#9aa7b5" font-size="10.5" text-anchor="middle">Gauss(E): &#8711;&#183;D=&#961;</text>
+          <line x1="150" y1="188" x2="358" y2="188" stroke="#63e6be" stroke-width="1.8" marker-end="url(#arr3-maxwell)"/>
+          <text x="255" y="180" fill="#9aa7b5" font-size="10.5" text-anchor="middle">Amp&#232;re-Maxwell: &#8711;&#215;H=J+&#8706;D/&#8706;t</text>
+          <!-- cross coupling -->
+          <line x1="440" y1="101" x2="440" y2="163" stroke="#ffa94d" stroke-width="1.8" marker-end="url(#arr3-maxwell)"/>
+          <text x="530" y="135" fill="#9aa7b5" font-size="10" text-anchor="end">Amp&#232;re</text>
+          <line x1="420" y1="163" x2="420" y2="103" stroke="#63e6be" stroke-width="1.8" marker-end="url(#arr3-maxwell)"/>
+          <text x="352" y="135" fill="#9aa7b5" font-size="10" text-anchor="end">Faraday</text>
+          <text x="270" y="245" fill="#b197fc" font-size="11" text-anchor="middle">&#8711;&#183;B=0: no magnetic charge &#8594; H has no isolated source</text>
+        </svg>`,
+        caption: 'Source-to-field map: charge sources E (Gauss), current and displacement current source H (Ampere-Maxwell), and the two curl laws cross-couple E and H; B has no source because there are no magnetic monopoles.'
       }
     ],
     equations: [
@@ -1070,12 +1349,30 @@ CONTENT.topics.push(
       { q: String.raw`Which pair of laws directly enables wave propagation?`, options: [String.raw`the two Gauss laws`, String.raw`Faraday and Ampère-Maxwell`, String.raw`Gauss(E) and Faraday`, String.raw`Gauss(B) and Ampère`], answer: 1, explain: String.raw`Their mutual time-derivative coupling regenerates the fields as a wave.` }
     ],
     numericals: [
-      { q: String.raw`Verify $c$ from $\mu_0=4\pi\times10^{-7}$ H/m and $\varepsilon_0=8.854\times10^{-12}$ F/m.`, solution: String.raw`$\mu_0\varepsilon_0=(1.2566\times10^{-6})(8.854\times10^{-12})=1.1127\times10^{-17}$. $c=1/\sqrt{1.1127\times10^{-17}}=1/(3.336\times10^{-9})=2.998\times10^8$ m/s. ✓` },
-      { q: String.raw`Compute the intrinsic impedance of free space.`, solution: String.raw`$\eta_0=\sqrt{\mu_0/\varepsilon_0}=\sqrt{1.2566\times10^{-6}/8.854\times10^{-12}}=\sqrt{1.4194\times10^{5}}=376.7\ \Omega\approx377\ \Omega$ (=$120\pi$).` },
-      { q: String.raw`A plane wave has peak E-field $E_0=10$ V/m in free space. Find peak H and average power density.`, solution: String.raw`$H_0=E_0/\eta_0=10/377=0.0265$ A/m. $S_{avg}=E_0^2/(2\eta_0)=100/(2\times377)=100/754=0.1326$ W/m$^2$.` },
-      { q: String.raw`A signal at 2.4 GHz enters a dielectric with $\varepsilon_r=4$. Find the wavelength inside.`, solution: String.raw`$\lambda_0=c/f=3\times10^8/2.4\times10^9=0.125$ m. $n=\sqrt4=2$. $\lambda_m=\lambda_0/n=0.125/2=0.0625$ m $=6.25$ cm.` },
-      { q: String.raw`Find the intrinsic impedance of a medium with $\varepsilon_r=2.2$, $\mu_r=1$.`, solution: String.raw`$\eta=\eta_0/\sqrt{\varepsilon_r}=377/\sqrt{2.2}=377/1.483=254.2\ \Omega$.` },
-      { q: String.raw`A wave carries $S=1$ W/m$^2$ in vacuum. Find the peak E-field.`, solution: String.raw`$S_{avg}=E_0^2/(2\eta_0)\Rightarrow E_0=\sqrt{2\eta_0 S}=\sqrt{2\times377\times1}=\sqrt{754}=27.5$ V/m.` }
+      { q: String.raw`Verify $c$ from $\mu_0=4\pi\times10^{-7}$ H/m and $\varepsilon_0=8.854\times10^{-12}$ F/m.`, solution: String.raw`<p><b>Formula.</b> $$c=\frac{1}{\sqrt{\mu_0\varepsilon_0}}$$ where $c$ = speed of light (m/s), $\mu_0$ = permeability of free space (H/m), $\varepsilon_0$ = permittivity of free space (F/m).</p>
+      <p><b>Substitute.</b> $$\mu_0\varepsilon_0=(1.2566\times10^{-6})(8.854\times10^{-12}),\qquad c=\frac{1}{\sqrt{\mu_0\varepsilon_0}}$$</p>
+      <p><b>Compute.</b> $\mu_0\varepsilon_0=1.1127\times10^{-17}$; $\sqrt{\mu_0\varepsilon_0}=3.336\times10^{-9}$; $c=\dfrac{1}{3.336\times10^{-9}}=2.998\times10^8$ m/s.</p>
+      <p><b>Explanation.</b> The result matches the measured speed of light — Maxwell's proof that light is an electromagnetic wave, built purely from two electrostatic/magnetostatic constants.</p>` },
+      { q: String.raw`Compute the intrinsic impedance of free space.`, solution: String.raw`<p><b>Formula.</b> $$\eta_0=\sqrt{\frac{\mu_0}{\varepsilon_0}}$$ where $\eta_0$ = intrinsic (wave) impedance of vacuum ($\Omega$), equal to the $E/H$ ratio in a plane wave.</p>
+      <p><b>Substitute.</b> $$\eta_0=\sqrt{\frac{1.2566\times10^{-6}}{8.854\times10^{-12}}}$$</p>
+      <p><b>Compute.</b> The ratio is $1.4194\times10^{5}$; $\eta_0=\sqrt{1.4194\times10^{5}}=376.7\ \Omega\approx377\ \Omega$ (exactly $120\pi\ \Omega$).</p>
+      <p><b>Explanation.</b> This $377\ \Omega$ sets how strongly $E$ and $H$ couple in a wave and underlies radiation resistance, power-density formulas, and absorber/anechoic design.</p>` },
+      { q: String.raw`A plane wave has peak E-field $E_0=10$ V/m in free space. Find peak H and average power density.`, solution: String.raw`<p><b>Formula.</b> $$H_0=\frac{E_0}{\eta_0},\qquad S_{avg}=\frac{E_0^2}{2\eta_0}$$ where $E_0,H_0$ = peak field amplitudes, $S_{avg}$ = time-averaged Poynting power density (W/m$^2$).</p>
+      <p><b>Substitute.</b> $$H_0=\frac{10}{377},\qquad S_{avg}=\frac{(10)^2}{2\times377}$$</p>
+      <p><b>Compute.</b> $H_0=0.0265$ A/m; $S_{avg}=\dfrac{100}{754}=0.1326$ W/m$^2$.</p>
+      <p><b>Explanation.</b> $E$ and $H$ are locked by $\eta_0$, and the factor of 2 comes from time-averaging a sinusoid — this is the everyday link between measured field strength and power flux.</p>` },
+      { q: String.raw`A signal at 2.4 GHz enters a dielectric with $\varepsilon_r=4$. Find the wavelength inside.`, solution: String.raw`<p><b>Formula.</b> $$\lambda_m=\frac{\lambda_0}{n},\qquad n=\sqrt{\varepsilon_r\mu_r},\qquad \lambda_0=\frac{c}{f}$$ where $\lambda_m$ = wavelength in the medium, $\lambda_0$ = free-space wavelength, $n$ = refractive index ($\mu_r=1$).</p>
+      <p><b>Substitute.</b> $$\lambda_0=\frac{3\times10^8}{2.4\times10^9},\qquad n=\sqrt{4}=2,\qquad \lambda_m=\frac{\lambda_0}{2}$$</p>
+      <p><b>Compute.</b> $\lambda_0=0.125$ m; $\lambda_m=\dfrac{0.125}{2}=0.0625$ m $=6.25$ cm.</p>
+      <p><b>Explanation.</b> Frequency is unchanged but the wave slows and shortens by $n$ inside the dielectric — exactly why patch antennas printed on high-$\varepsilon_r$ substrate are physically smaller.</p>` },
+      { q: String.raw`Find the intrinsic impedance of a medium with $\varepsilon_r=2.2$, $\mu_r=1$.`, solution: String.raw`<p><b>Formula.</b> $$\eta=\frac{\eta_0}{\sqrt{\varepsilon_r}}\quad(\mu_r=1)$$ where $\eta$ = intrinsic impedance of the medium, $\eta_0=377\ \Omega$, $\varepsilon_r$ = relative permittivity.</p>
+      <p><b>Substitute.</b> $$\eta=\frac{377}{\sqrt{2.2}}$$</p>
+      <p><b>Compute.</b> $\sqrt{2.2}=1.483$; $\eta=\dfrac{377}{1.483}=254.2\ \Omega$.</p>
+      <p><b>Explanation.</b> A denser dielectric lowers the wave impedance below the free-space $377\ \Omega$; PTFE-like substrates ($\varepsilon_r\approx2.2$) are common in microwave PCBs, and this impedance governs reflections at their surfaces.</p>` },
+      { q: String.raw`A wave carries $S=1$ W/m$^2$ in vacuum. Find the peak E-field.`, solution: String.raw`<p><b>Formula.</b> $$S_{avg}=\frac{E_0^2}{2\eta_0}\;\Rightarrow\;E_0=\sqrt{2\eta_0 S_{avg}}$$ where $E_0$ = peak E-field (V/m), $S_{avg}$ = power density (W/m$^2$), $\eta_0=377\ \Omega$.</p>
+      <p><b>Substitute.</b> $$E_0=\sqrt{2\times377\times1}$$</p>
+      <p><b>Compute.</b> $E_0=\sqrt{754}=27.5$ V/m.</p>
+      <p><b>Explanation.</b> Inverting the Poynting relation converts an incident power density into a field strength — the routine step for EMC/exposure limits and for sizing detector sensitivity.</p>` }
     ],
     realWorld: String.raw`<p>Maxwell's equations are not abstract — they are the design equations for the entire radio world. Every antenna's radiation, every transmission line's impedance, and every wave's propagation is a boundary-value problem in these four laws; full-wave solvers (HFSS, CST, FEKO) simply solve them numerically. The $377\ \Omega$ free-space impedance sets how efficiently an aperture couples to space and underlies absorber/anechoic-chamber design. The $v=c/n$ relation is why fiber optics, GPS ionospheric delay, and PCB microstrip all differ from free space, and why high-$\varepsilon_r$ substrates miniaturise antennas. Displacement current is literally what lets a capacitor-fed antenna radiate. Understanding these laws is the difference between memorising formulas and knowing why they are true.</p>`,
     related: ['antenna', 'antenna-gain', 'antenna-types', 'comm-basics', 'path-loss']

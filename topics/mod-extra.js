@@ -6,7 +6,8 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['ISI', 'Nyquist', 'raised cosine', 'RRC', 'roll-off', 'bandwidth'],
   summary: String.raw`Pulse shaping designs the transmitted symbol waveform so the signal fits a bandwidth mask while producing zero intersymbol interference at the sampling instants.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-pulse-shaping" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <text x="40" y="30" fill="#e6edf3" text-anchor="middle">symbols</text>
@@ -28,6 +29,58 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`Symbol impulses are convolved with an RRC/raised-cosine filter to produce a bandlimited, ISI-free waveform.`
   },
+  {
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-pulse-shaping" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <text x="270" y="24" fill="#e6edf3" text-anchor="middle">Transmit chain: bits to shaped RF</text>
+  <rect x="14" y="52" width="70" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="49" y="70" fill="#e6edf3" text-anchor="middle">bits &#8594;</text>
+  <text x="49" y="84" fill="#9aa7b5" text-anchor="middle">symbols</text>
+  <line x1="84" y1="72" x2="112" y2="72" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-pulse-shaping)"/>
+  <rect x="114" y="52" width="66" height="40" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="147" y="70" fill="#e6edf3" text-anchor="middle">upsample</text>
+  <text x="147" y="84" fill="#9aa7b5" text-anchor="middle">&#8593;L</text>
+  <line x1="180" y1="72" x2="208" y2="72" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-pulse-shaping)"/>
+  <rect x="210" y="52" width="78" height="40" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="249" y="70" fill="#e6edf3" text-anchor="middle">RRC FIR</text>
+  <text x="249" y="84" fill="#9aa7b5" text-anchor="middle">shaping</text>
+  <line x1="288" y1="72" x2="316" y2="72" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-pulse-shaping)"/>
+  <rect x="318" y="52" width="66" height="40" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+  <text x="351" y="76" fill="#e6edf3" text-anchor="middle">DAC</text>
+  <line x1="384" y1="72" x2="412" y2="72" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-pulse-shaping)"/>
+  <rect x="414" y="52" width="74" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="451" y="70" fill="#e6edf3" text-anchor="middle">upconvert</text>
+  <text x="451" y="84" fill="#9aa7b5" text-anchor="middle">to RF</text>
+  <line x1="488" y1="72" x2="516" y2="72" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-pulse-shaping)"/>
+  <text x="270" y="122" fill="#9aa7b5" text-anchor="middle">upsample by L = samples/symbol; RRC runs at the oversampled rate</text>
+  <text x="270" y="142" fill="#b197fc" text-anchor="middle">occupied BW after shaping &#8776; (1+&#946;)R_s</text>
+</svg>`,
+    caption: String.raw`Full transmit chain: map bits to symbols, upsample to samples-per-symbol L, apply the RRC shaping FIR, convert to analog (DAC), and upconvert to RF.`
+  },
+  {
+    svg: String.raw`<svg viewBox="0 0 540 190" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <rect x="0" y="0" width="540" height="190" fill="#1c232e"/>
+  <text x="270" y="22" fill="#e6edf3" text-anchor="middle">Zero-ISI: neighbour pulses vanish at each sampling instant</text>
+  <line x1="30" y1="120" x2="520" y2="120" stroke="#9aa7b5" stroke-width="1"/>
+  <line x1="130" y1="40" x2="130" y2="130" stroke="#9aa7b5" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <line x1="250" y1="40" x2="250" y2="130" stroke="#9aa7b5" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <line x1="370" y1="40" x2="370" y2="130" stroke="#9aa7b5" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <text x="130" y="145" fill="#9aa7b5" text-anchor="middle">(k-1)T</text>
+  <text x="250" y="145" fill="#9aa7b5" text-anchor="middle">kT</text>
+  <text x="370" y="145" fill="#9aa7b5" text-anchor="middle">(k+1)T</text>
+  <path d="M30,120 Q90,120 130,50 Q170,120 190,124 Q220,128 250,120 Q280,118 310,121 Q350,124 370,120 Q410,116 520,120" fill="none" stroke="#4dabf7" stroke-width="2"/>
+  <path d="M30,120 Q150,124 190,122 Q230,120 250,50 Q290,120 310,124 Q340,128 370,120 Q450,116 520,120" fill="none" stroke="#ffa94d" stroke-width="2" stroke-dasharray="5 3"/>
+  <circle cx="130" cy="50" r="4" fill="#4dabf7"/>
+  <circle cx="250" cy="50" r="4" fill="#ffa94d"/>
+  <circle cx="250" cy="120" r="4" fill="#4dabf7"/>
+  <circle cx="130" cy="120" r="4" fill="#ffa94d"/>
+  <text x="80" y="45" fill="#4dabf7" text-anchor="middle">pulse k-1</text>
+  <text x="300" y="45" fill="#ffa94d" text-anchor="middle">pulse k</text>
+  <text x="270" y="175" fill="#63e6be" text-anchor="middle">each pulse crosses zero at every OTHER symbol instant &#8594; no ISI</text>
+</svg>`,
+    caption: String.raw`Time-domain ISI mechanism: a Nyquist pulse peaks at its own sampling instant and passes through zero at all neighbouring instants, so overlapping symbols do not interfere at kT.`
+  }
+  ],
   prerequisites: ['comm-basics', 'nyquist-sampling', 'fourier-transform', 'convolution'],
   intro: String.raw`<p>Digital symbols are abstract numbers, but a radio must send continuous waveforms of finite bandwidth. If we naively transmit rectangular pulses of duration $T$, their spectrum is a $\text{sinc}$ that spreads energy across an infinite band — unacceptable when channels are packed side by side. If instead we brick-wall filter to a narrow band, the pulses smear in time and each symbol bleeds into its neighbours, producing <em>intersymbol interference (ISI)</em>. Pulse shaping resolves this tension: it band-limits the signal <strong>and</strong> guarantees that, at the correct sampling instants, every symbol except the current one contributes exactly zero. This is the practical embodiment of Nyquist's ISI criterion, realised most often by the raised-cosine and root-raised-cosine families.</p>`,
   sections: [
@@ -51,7 +104,8 @@ CONTENT.topics.push(
     },
     {
       h: 'The raised-cosine pulse',
-      html: String.raw`<p>The raised-cosine (RC) pulse is the standard Nyquist pulse. Its frequency response has a flat passband, a cosine-shaped roll-off, and a stopband, parameterised by the <strong>roll-off factor</strong> $\beta\in[0,1]$:</p>
+      html: String.raw`<p><em>The idea in words:</em> the ideal brick-wall (sinc) pulse meets the Nyquist condition but has a razor-sharp spectral edge and slowly dying tails. The raised cosine simply softens that sharp edge into a gentle cosine ramp. Rounding the corner in frequency is what makes the tails decay fast in time — and the small price is a little extra bandwidth, set by how wide you make the ramp. That ramp width is the roll-off factor $\beta$.</p>
+<p>The raised-cosine (RC) pulse is the standard Nyquist pulse. Its frequency response has a flat passband, a cosine-shaped roll-off, and a stopband, parameterised by the <strong>roll-off factor</strong> $\beta\in[0,1]$:</p>
       <p>$$P_{RC}(f)=\begin{cases}T, & |f|\le \dfrac{1-\beta}{2T}\\[6pt] \dfrac{T}{2}\!\left[1+\cos\!\dfrac{\pi T}{\beta}\!\left(|f|-\dfrac{1-\beta}{2T}\right)\right], & \dfrac{1-\beta}{2T}<|f|\le \dfrac{1+\beta}{2T}\\[6pt] 0, & |f|>\dfrac{1+\beta}{2T}\end{cases}$$</p>
       <p>Its time-domain impulse response is</p>
       <p>$$p_{RC}(t)=\text{sinc}\!\left(\frac{t}{T}\right)\frac{\cos(\pi\beta t/T)}{1-(2\beta t/T)^2}.$$</p>
@@ -98,6 +152,18 @@ CONTENT.topics.push(
         <li><strong>PAPR note:</strong> pulse shaping introduces amplitude variation between symbols (the pulses ring), so a shaped QPSK signal no longer has constant envelope. This raises the <em>peak-to-average power ratio (PAPR)</em>, forcing power-amplifier back-off. Smaller $\beta$ generally worsens PAPR because sharper filtering causes larger overshoot; offset-QPSK and $\pi/4$-QPSK are used to tame envelope excursions.</li>
       </ul>
       <div class="callout">Rule of thumb: a shaped signal's occupied bandwidth is $\approx (1+\beta)R_s$; to fit rate $R_b$ bits/s of an $M$-ary scheme, $R_s=R_b/\log_2 M$.</div></p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<p>Pulse shaping is where the abstract Nyquist theory meets a real transmit filter. You should now grasp:</p>
+      <ul>
+        <li><strong>The tension it resolves:</strong> a compact spectrum and zero ISI pull in opposite directions, and shaping satisfies both by designing the composite pulse to be zero at every neighbouring sampling instant.</li>
+        <li><strong>The Nyquist criterion:</strong> in time, $p(kT)=\delta_{k,0}$; in frequency, spectral copies spaced by $1/T$ sum to a constant.</li>
+        <li><strong>The raised cosine:</strong> a softened brick wall with bandwidth $(1+\beta)R_s/2$, where roll-off $\beta$ measures the excess over the Nyquist minimum and trades bandwidth against timing tolerance.</li>
+        <li><strong>The RRC split:</strong> putting $\sqrt{P_{RC}}$ at both ends makes the receiver matched (max SNR) while the cascade stays Nyquist (zero ISI) — remember a lone RRC pulse is <em>not</em> ISI-free.</li>
+        <li><strong>The practical costs:</strong> FIR truncation and oversampling introduce tiny residual ISI, and shaping raises PAPR, forcing PA back-off.</li>
+        <li><strong>The efficiency:</strong> $\eta\approx\log_2 M/(1+\beta)$ bits/s/Hz ties shaping choices directly to throughput.</li>
+      </ul>`
     }
   ],
   keyPoints: [
@@ -176,12 +242,30 @@ CONTENT.topics.push(
     { q: String.raw`A shaping FIR filter running at 8 samples-per-symbol is:`, options: [String.raw`Undersampling the pulse`, String.raw`Oversampling with factor 8`, String.raw`Operating at the Nyquist symbol rate`, String.raw`Aliasing the spectrum`], answer: 1, explain: String.raw`Samples-per-symbol of 8 means the filter is oversampled 8x relative to the symbol rate, giving smooth waveforms and headroom for the RC spectrum.` }
   ],
   numericals: [
-    { q: String.raw`A system uses raised-cosine shaping with roll-off $\beta=0.25$ and symbol rate $R_s=10$ Msym/s. Find the single-sided occupied bandwidth and the passband (double-sided) bandwidth.`, solution: String.raw`<p>Single-sided: $B=(1+\beta)R_s/2=(1.25)(10\times10^6)/2=6.25$ MHz.</p><p>Passband (double-sided) bandwidth $=2B=(1+\beta)R_s=12.5$ MHz.</p>` },
-    { q: String.raw`A channel bandwidth of 20 MHz (passband) is available. Using RRC with $\beta=0.35$, what maximum symbol rate fits, and what bit rate does 64-QAM achieve?`, solution: String.raw`<p>Passband BW $=(1+\beta)R_s\Rightarrow R_s=B/(1+\beta)=20\times10^6/1.35\approx14.8$ Msym/s.</p><p>64-QAM carries $\log_2 64=6$ bits/symbol, so $R_b=6\times14.8\approx88.9$ Mb/s.</p>` },
-    { q: String.raw`Compute the excess bandwidth (in MHz and %) for $R_s=5$ Msym/s with $\beta=0.5$.`, solution: String.raw`<p>Nyquist minimum single-sided BW $=R_s/2=2.5$ MHz. Actual $=(1+0.5)(5)/2=3.75$ MHz. Excess $=3.75-2.5=1.25$ MHz $=50\%$ of the minimum — consistent with $\beta=0.5$.</p>` },
-    { q: String.raw`What roll-off is needed to transmit 100 Msym/s within a 130 MHz passband allocation?`, solution: String.raw`<p>$(1+\beta)R_s\le130\Rightarrow 1+\beta\le130/100=1.30\Rightarrow \beta\le0.30$. Choose $\beta=0.30$ (or slightly less for margin).</p>` },
-    { q: String.raw`A QPSK link must deliver 40 Mb/s. With $\beta=0.2$ RRC shaping, find the symbol rate and occupied passband bandwidth.`, solution: String.raw`<p>QPSK: $\log_2 4=2$ bits/symbol $\Rightarrow R_s=40/2=20$ Msym/s. Passband BW $=(1+0.2)(20)=24$ MHz.</p>` },
-    { q: String.raw`Compare the spectral efficiency of 16-QAM at $\beta=0.35$ versus $\beta=0.1$.`, solution: String.raw`<p>$\eta=\log_2 16/(1+\beta)=4/(1+\beta)$. At $\beta=0.35$: $4/1.35=2.96$ bits/s/Hz. At $\beta=0.1$: $4/1.1=3.64$ bits/s/Hz — about 23% higher, at the cost of tighter timing recovery.</p>` }
+    { q: String.raw`A system uses raised-cosine shaping with roll-off $\beta=0.25$ and symbol rate $R_s=10$ Msym/s. Find the single-sided occupied bandwidth and the passband (double-sided) bandwidth.`, solution: String.raw`<p><b>Formula.</b> $$B=\frac{(1+\beta)R_s}{2},\qquad B_{\text{pass}}=2B=(1+\beta)R_s$$ where $B$ is the single-sided occupied bandwidth, $\beta$ the roll-off and $R_s$ the symbol rate.</p>
+<p><b>Substitute.</b> $B=\dfrac{(1.25)(10\times10^6)}{2}$; $B_{\text{pass}}=(1.25)(10\times10^6)$.</p>
+<p><b>Compute.</b> $B=\mathbf{6.25\ MHz}$; $B_{\text{pass}}=\mathbf{12.5\ MHz}$.</p>
+<p><b>Explanation.</b> The passband signal is 25% wider than the 10 MHz Nyquist floor for this symbol rate; this is the number a spectrum planner uses to set channel spacing.</p>` },
+    { q: String.raw`A channel bandwidth of 20 MHz (passband) is available. Using RRC with $\beta=0.35$, what maximum symbol rate fits, and what bit rate does 64-QAM achieve?`, solution: String.raw`<p><b>Formula.</b> $$R_s=\frac{B_{\text{pass}}}{1+\beta},\qquad R_b=R_s\log_2 M$$ with $B_{\text{pass}}$ the passband allocation and $M$ the constellation size.</p>
+<p><b>Substitute.</b> $R_s=\dfrac{20\times10^6}{1.35}$; $R_b=R_s\times\log_2 64 = R_s\times 6$.</p>
+<p><b>Compute.</b> $R_s\approx 14.8$ Msym/s; $R_b=6\times14.8\approx\mathbf{88.9\ Mb/s}$.</p>
+<p><b>Explanation.</b> The roll-off "tax" caps the symbol rate below 20 Msym/s; choosing 64-QAM then converts each symbol into 6 bits, showing how bandwidth and modulation order jointly set throughput.</p>` },
+    { q: String.raw`Compute the excess bandwidth (in MHz and %) for $R_s=5$ Msym/s with $\beta=0.5$.`, solution: String.raw`<p><b>Formula.</b> Excess bandwidth is actual minus Nyquist-minimum single-sided bandwidth: $$B_{\text{exc}}=\frac{(1+\beta)R_s}{2}-\frac{R_s}{2}=\frac{\beta R_s}{2},\qquad \%=\beta\times100.$$</p>
+<p><b>Substitute.</b> Nyquist min $=R_s/2=2.5$ MHz; actual $=(1.5)(5)/2=3.75$ MHz; $B_{\text{exc}}=3.75-2.5$.</p>
+<p><b>Compute.</b> $B_{\text{exc}}=\mathbf{1.25\ MHz}$, which is $\mathbf{50\%}$ of the minimum.</p>
+<p><b>Explanation.</b> The percentage excess equals $\beta$ by construction, confirming the identity; here half the theoretical-minimum bandwidth is spent buying gentler filter tails and easier timing recovery.</p>` },
+    { q: String.raw`What roll-off is needed to transmit 100 Msym/s within a 130 MHz passband allocation?`, solution: String.raw`<p><b>Formula.</b> $$B_{\text{pass}}=(1+\beta)R_s\ \le\ B_{\text{alloc}}\;\Rightarrow\;\beta\le\frac{B_{\text{alloc}}}{R_s}-1.$$</p>
+<p><b>Substitute.</b> $\beta\le\dfrac{130\times10^6}{100\times10^6}-1 = 1.30-1$.</p>
+<p><b>Compute.</b> $\beta\le 0.30$; choose $\beta=\mathbf{0.30}$ (or slightly less for margin).</p>
+<p><b>Explanation.</b> The allocation fixes the maximum roll-off; picking a hair under 0.30 leaves guardband for filter imperfections, a routine design compromise between spectral fit and timing robustness.</p>` },
+    { q: String.raw`A QPSK link must deliver 40 Mb/s. With $\beta=0.2$ RRC shaping, find the symbol rate and occupied passband bandwidth.`, solution: String.raw`<p><b>Formula.</b> $$R_s=\frac{R_b}{\log_2 M},\qquad B_{\text{pass}}=(1+\beta)R_s$$ for target bit rate $R_b$ and QPSK ($M=4$).</p>
+<p><b>Substitute.</b> $R_s=\dfrac{40}{\log_2 4}=\dfrac{40}{2}$ Msym/s; $B_{\text{pass}}=(1.2)(20)$.</p>
+<p><b>Compute.</b> $R_s=20$ Msym/s; $B_{\text{pass}}=\mathbf{24\ MHz}$.</p>
+<p><b>Explanation.</b> QPSK's 2 bits/symbol halves the needed symbol rate versus BPSK, and the 20% roll-off adds 4 MHz — a compact 24 MHz footprint an engineer checks against the channel plan.</p>` },
+    { q: String.raw`Compare the spectral efficiency of 16-QAM at $\beta=0.35$ versus $\beta=0.1$.`, solution: String.raw`<p><b>Formula.</b> $$\eta=\frac{\log_2 M}{1+\beta}\ \text{bits/s/Hz}$$ the shaped spectral efficiency; for 16-QAM, $\log_2 M=4$.</p>
+<p><b>Substitute.</b> $\eta_{0.35}=\dfrac{4}{1.35}$; $\eta_{0.1}=\dfrac{4}{1.1}$.</p>
+<p><b>Compute.</b> $\eta_{0.35}=2.96$ bits/s/Hz; $\eta_{0.1}=3.64$ bits/s/Hz — about $23\%$ higher.</p>
+<p><b>Explanation.</b> Tightening the roll-off from 0.35 to 0.1 buys ~23% more throughput in the same band, but at the cost of far more demanding symbol-timing recovery — the classic pulse-shaping trade.</p>` }
   ],
   realWorld: String.raw`<p>Root-raised-cosine shaping is ubiquitous: WCDMA/UMTS uses RRC with $\beta=0.22$, DVB-S satellite uses $\beta=0.35$ (and DVB-S2 offers 0.20/0.25/0.35), and countless SDR waveforms (built on chips such as the AD9361) apply RRC FIR filters in the digital front-end. When you configure a modem's "alpha" or "roll-off", you are trading spectral occupancy against timing-loop robustness and PA back-off. Getting the Tx/Rx RRC pair matched is also what lets the receiver's matched filter and symbol-timing recovery hit their theoretical BER — a mismatched or truncated filter shows up as an eye that never fully opens and as EVM that plateaus above the noise floor.</p>`,
   related: ['eye-diagram', 'matched-filter', 'nyquist-sampling', 'bpsk', 'evm']
@@ -192,7 +276,8 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['eye', 'ISI', 'jitter', 'timing margin', 'PAM', 'diagnostics'],
   summary: String.raw`An eye diagram overlays many symbol-period traces of a received signal to reveal ISI, noise margin, timing jitter and the optimal sampling instant at a glance.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-eye-diagram" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <text x="45" y="60" fill="#e6edf3" text-anchor="middle">rx</text>
@@ -215,6 +300,32 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`Overlaying every symbol period forms the eye; its opening gives the noise/timing margin at the optimal sampling instant.`
   },
+  {
+    svg: String.raw`<svg viewBox="0 0 540 175" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-eye-diagram" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="0" y="0" width="540" height="175" fill="#1c232e"/>
+  <text x="270" y="22" fill="#e6edf3" text-anchor="middle">How an eye diagram is built</text>
+  <rect x="12" y="55" width="86" height="44" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="55" y="73" fill="#e6edf3" text-anchor="middle">rx</text>
+  <text x="55" y="88" fill="#9aa7b5" text-anchor="middle">waveform</text>
+  <line x1="98" y1="77" x2="126" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-eye-diagram)"/>
+  <rect x="128" y="55" width="96" height="44" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="176" y="73" fill="#e6edf3" text-anchor="middle">trigger @</text>
+  <text x="176" y="88" fill="#9aa7b5" text-anchor="middle">symbol clock</text>
+  <line x1="224" y1="77" x2="252" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-eye-diagram)"/>
+  <rect x="254" y="55" width="100" height="44" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="304" y="73" fill="#e6edf3" text-anchor="middle">persistence</text>
+  <text x="304" y="88" fill="#9aa7b5" text-anchor="middle">overlay</text>
+  <line x1="354" y1="77" x2="382" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-eye-diagram)"/>
+  <rect x="384" y="55" width="142" height="44" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+  <text x="455" y="73" fill="#e6edf3" text-anchor="middle">eye metrics:</text>
+  <text x="455" y="88" fill="#9aa7b5" text-anchor="middle">width / height / jitter</text>
+  <text x="270" y="135" fill="#9aa7b5" text-anchor="middle">the recovered symbol clock slices the waveform into T-long segments,</text>
+  <text x="270" y="153" fill="#63e6be" text-anchor="middle">overlaid with persistence to reveal the open eye and its margins</text>
+</svg>`,
+    caption: String.raw`Build chain: the received waveform is sliced at the recovered symbol clock and the segments are overlaid with persistence, from which eye width, height and jitter are read.`
+  }
+  ],
   prerequisites: ['pulse-shaping', 'comm-basics', 'noise'],
   intro: String.raw`<p>The eye diagram is the oscilloscope of digital communications. Take the recovered baseband waveform, slice it into segments one (or two) symbol periods long, and overlay them all on the same time axis. Random data means every possible symbol transition is superimposed, and the persistence forms a shape with a central open region — the "eye". A wide-open eye means clean, easily-detected symbols; a closing eye means ISI, noise and jitter are eating the margins. Because it collapses timing, amplitude and distortion information into one picture, the eye diagram is the fastest qualitative diagnostic a communications engineer has.</p>`,
   sections: [
@@ -278,6 +389,18 @@ CONTENT.topics.push(
         <li><strong>Mask testing</strong>: standards define a forbidden polygon inside the eye; traces must not intrude, guaranteeing minimum openings.</li>
         <li><strong>Relation to constellation/EVM</strong>: a closing eye corresponds to a smeared constellation and elevated EVM; the eye is the time-domain twin of the constellation's amplitude-domain view.</li>
       </ul></p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<p>The eye diagram fuses many impairments into one picture; you should now be able to read it fluently:</p>
+      <ul>
+        <li><strong>What it is:</strong> overlaid symbol-period segments of the received waveform, with $M-1$ stacked eyes for $M$-level PAM.</li>
+        <li><strong>The two margins:</strong> vertical opening = noise margin (half of it is the tolerable noise); horizontal width = timing margin (how far the sampling clock may drift).</li>
+        <li><strong>Where to sample:</strong> at the instant of maximum vertical opening — where the clock-recovery loop must lock.</li>
+        <li><strong>The impairment map:</strong> ISI narrows the eye both ways, noise adds vertical fuzz, jitter thickens the crossings, and larger roll-off $\beta$ opens the eye with gentler slopes.</li>
+        <li><strong>The failure mode:</strong> a fully closed eye means no threshold works — equalisation or better shaping is needed.</li>
+        <li><strong>The connections:</strong> the eye is the time-domain twin of the constellation (closing eye ↔ high EVM), and sweeping the sample point traces the BER bathtub whose flat bottom is the usable timing margin.</li>
+      </ul>`
     }
   ],
   keyPoints: [
@@ -352,12 +475,30 @@ CONTENT.topics.push(
     { q: String.raw`The eye diagram is best described as the time-domain counterpart of:`, options: [String.raw`The power spectral density`, String.raw`The constellation diagram`, String.raw`The autocorrelation`, String.raw`The link budget`], answer: 1, explain: String.raw`A closing eye corresponds to a smeared constellation and elevated EVM — they view the same impairments from time and amplitude domains.` }
   ],
   numericals: [
-    { q: String.raw`A binary eye has an ideal vertical opening of 1.0 V. Measured with ISI, the opening drops to 0.7 V. What is the eye-opening SNR penalty in dB?`, solution: String.raw`<p>$\Delta=20\log_{10}(1.0/0.7)=20\log_{10}(1.429)=20\times0.155=3.1$ dB penalty.</p>` },
-    { q: String.raw`A PAM-8 signal is transmitted. How many eyes appear, and if the total peak-to-peak amplitude is 7 V split evenly, what is the nominal spacing between adjacent levels?`, solution: String.raw`<p>Eyes $=M-1=7$. With 8 levels spanning 7 V, adjacent spacing $=7/(8-1)=1$ V between levels.</p>` },
-    { q: String.raw`The recovered symbol period is $T=1$ ns. Peak-to-peak jitter thickens each crossing by 0.15 ns and ISI eats 0.10 ns of opening on each side. Estimate the timing margin.`, solution: String.raw`<p>Total horizontal loss $\approx$ jitter (0.15 ns) plus ISI spread (0.10+0.10 = 0.20 ns) $=0.35$ ns. Timing margin $\approx T-0.35=1.0-0.35=0.65$ ns.</p>` },
-    { q: String.raw`An eye's vertical opening is 0.8 V and the decision threshold is centred. What Gaussian noise RMS keeps errors rare, roughly using a $\pm 3\sigma$ margin rule?`, solution: String.raw`<p>Noise margin $=0.8/2=0.4$ V. For a $3\sigma$ margin, $3\sigma\le0.4\Rightarrow\sigma\le0.133$ V RMS. Keeping the noise RMS below ~0.13 V makes threshold crossings (errors) rare.</p>` },
-    { q: String.raw`Two systems use $\beta=0.2$ and $\beta=0.5$. Qualitatively and via eye width, which is easier for timing recovery, and why?`, solution: String.raw`<p>$\beta=0.5$ produces a wider, more open eye with gentler crossing slopes, so the sampling clock has more timing margin and small phase errors cause less amplitude error. $\beta=0.2$ gives a narrow eye with steep crossings — spectrally efficient but far more demanding on the clock-recovery loop.</p>` },
-    { q: String.raw`The ideal eye opening is 1.2 V; after adding a channel that closes it to 0.3 V, is the link usable, and what does this imply?`, solution: String.raw`<p>Penalty $=20\log_{10}(1.2/0.3)=20\log_{10}(4)=12$ dB — a severe reduction. The eye is nearly closed; the link needs equalisation (or a stronger signal / better shaping) to restore an acceptable opening and BER.</p>` }
+    { q: String.raw`A binary eye has an ideal vertical opening of 1.0 V. Measured with ISI, the opening drops to 0.7 V. What is the eye-opening SNR penalty in dB?`, solution: String.raw`<p><b>Formula.</b> $$\Delta_{\text{dB}}=20\log_{10}\!\left(\frac{A}{A'}\right)$$ where $A$ is the ideal opening and $A'$ the reduced opening; the amplitude ratio enters as $20\log_{10}$.</p>
+<p><b>Substitute.</b> $\Delta_{\text{dB}}=20\log_{10}(1.0/0.7)=20\log_{10}(1.429)$.</p>
+<p><b>Compute.</b> $\log_{10}(1.429)=0.155$, so $\Delta_{\text{dB}}=20\times0.155=\mathbf{3.1\ dB}$ penalty.</p>
+<p><b>Explanation.</b> Losing 30% of the opening costs about 3 dB of effective SNR — directly worsening BER — which is why a visibly narrowing eye is an early warning of ISI before any bit-error count is taken.</p>` },
+    { q: String.raw`A PAM-8 signal is transmitted. How many eyes appear, and if the total peak-to-peak amplitude is 7 V split evenly, what is the nominal spacing between adjacent levels?`, solution: String.raw`<p><b>Formula.</b> $$N_{\text{eyes}}=M-1,\qquad d=\frac{V_{pp}}{M-1}$$ for $M$-PAM with peak-to-peak amplitude $V_{pp}$ over $M$ evenly spaced levels.</p>
+<p><b>Substitute.</b> $M=8$: $N_{\text{eyes}}=8-1$; $d=\dfrac{7}{8-1}$.</p>
+<p><b>Compute.</b> $N_{\text{eyes}}=\mathbf{7}$; $d=\mathbf{1\ V}$ between adjacent levels.</p>
+<p><b>Explanation.</b> The 8 levels open 7 stacked eyes each only 1 V tall, versus a single full-height binary eye; this shrinkage is the visual reason PAM-8 needs far more SNR than binary signalling.</p>` },
+    { q: String.raw`The recovered symbol period is $T=1$ ns. Peak-to-peak jitter thickens each crossing by 0.15 ns and ISI eats 0.10 ns of opening on each side. Estimate the timing margin.`, solution: String.raw`<p><b>Formula.</b> $$\text{TM}=T-t_{\text{jitter,pp}}-2\,t_{\text{ISI}}$$ the clear horizontal width after jitter and (two-sided) ISI erosion subtract from the symbol period.</p>
+<p><b>Substitute.</b> $\text{TM}=1.0-0.15-(0.10+0.10)$ ns.</p>
+<p><b>Compute.</b> Total loss $=0.15+0.20=0.35$ ns, so $\text{TM}=1.0-0.35=\mathbf{0.65\ ns}$.</p>
+<p><b>Explanation.</b> Only 65% of the symbol period remains as usable sampling window; the clock-recovery loop must hold the sample point within this band, so jitter and ISI directly set how accurate that loop must be.</p>` },
+    { q: String.raw`An eye's vertical opening is 0.8 V and the decision threshold is centred. What Gaussian noise RMS keeps errors rare, roughly using a $\pm 3\sigma$ margin rule?`, solution: String.raw`<p><b>Formula.</b> Noise margin is half the opening, and the $3\sigma$ rule requires $3\sigma\le\text{NM}$: $$\text{NM}=\tfrac12 A,\qquad \sigma\le\frac{\text{NM}}{3}.$$</p>
+<p><b>Substitute.</b> $\text{NM}=0.8/2=0.4$ V; $\sigma\le 0.4/3$.</p>
+<p><b>Compute.</b> $\sigma\le \mathbf{0.133\ V}$ RMS.</p>
+<p><b>Explanation.</b> Keeping the noise RMS below ~0.13 V puts the decision threshold more than $3\sigma$ from either level, making crossings (bit errors) rare — a quick way to translate an eye opening into a noise budget.</p>` },
+    { q: String.raw`Two systems use $\beta=0.2$ and $\beta=0.5$. Qualitatively and via eye width, which is easier for timing recovery, and why?`, solution: String.raw`<p><b>Formula.</b> Eye width (timing margin) grows with roll-off: qualitatively $W_{\text{eye}}$ increases and crossing slope $\propto 1/(1+\beta)$ softens as $\beta$ rises. Compare $\beta=0.2$ vs $\beta=0.5$.</p>
+<p><b>Substitute.</b> Larger $\beta=0.5$ gives a wider opening and gentler crossings; smaller $\beta=0.2$ gives a narrow eye with steep crossings.</p>
+<p><b>Compute.</b> $\beta=\mathbf{0.5}$ is easier for timing recovery.</p>
+<p><b>Explanation.</b> Gentler crossing slopes mean a given timing error produces less amplitude error, so the sampling clock has more margin; the trade is that $\beta=0.5$ occupies more bandwidth than $\beta=0.2$.</p>` },
+    { q: String.raw`The ideal eye opening is 1.2 V; after adding a channel that closes it to 0.3 V, is the link usable, and what does this imply?`, solution: String.raw`<p><b>Formula.</b> $$\Delta_{\text{dB}}=20\log_{10}\!\left(\frac{A}{A'}\right)$$ with $A=1.2$ V the ideal and $A'=0.3$ V the closed opening.</p>
+<p><b>Substitute.</b> $\Delta_{\text{dB}}=20\log_{10}(1.2/0.3)=20\log_{10}(4)$.</p>
+<p><b>Compute.</b> $\Delta_{\text{dB}}=20\times0.602=\mathbf{12\ dB}$ penalty — the eye is nearly closed.</p>
+<p><b>Explanation.</b> A 12 dB opening loss is severe; the link needs equalisation (or more signal / better shaping) to reopen the eye, since no decision threshold can reliably separate levels through such a closed eye.</p>` }
   ],
   realWorld: String.raw`<p>Eye diagrams are the first thing engineers pull up on a sampling scope or in SDR analysis software when a link misbehaves. High-speed serial standards (PCIe, USB, Ethernet SerDes, DDR) mandate eye <em>mask tests</em>: the trace must clear a forbidden polygon to guarantee margin. In wireless SDR bring-up, plotting the eye after the RRC matched filter instantly reveals whether the receive filter is matched, whether symbol timing is locked, and whether the channel is adding ISI — long before you trust a BER number. Because it fuses timing, amplitude and jitter into one persistence display, the eye remains the fastest go/no-go diagnostic in the digital-comms toolbox, and it ties directly to the BER and EVM you will later measure.</p>`,
   related: ['pulse-shaping', 'ber', 'evm', 'matched-filter']
@@ -368,7 +509,8 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['BER', 'SER', 'Q-function', 'waterfall', 'coding', 'EVM'],
   summary: String.raw`Bit error rate is the fraction of received bits that are wrong, the fundamental figure of merit that ties modulation choice, Eb/N0, coding and channel together.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-ber" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <text x="38" y="52" fill="#e6edf3" text-anchor="middle">rx</text>
@@ -391,6 +533,62 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`The receiver matched-filters, makes a threshold decision, and compares to the sent bits: BER = errors/total.`
   },
+  {
+    svg: String.raw`<svg viewBox="0 0 540 175" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-ber" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="0" y="0" width="540" height="175" fill="#1c232e"/>
+  <text x="270" y="22" fill="#e6edf3" text-anchor="middle">BER test loop (BERT)</text>
+  <rect x="12" y="50" width="78" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="51" y="68" fill="#e6edf3" text-anchor="middle">PRBS</text>
+  <text x="51" y="82" fill="#9aa7b5" text-anchor="middle">generator</text>
+  <line x1="90" y1="70" x2="116" y2="70" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-ber)"/>
+  <rect x="118" y="50" width="80" height="40" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="158" y="68" fill="#e6edf3" text-anchor="middle">channel</text>
+  <text x="158" y="82" fill="#9aa7b5" text-anchor="middle">+ noise</text>
+  <line x1="198" y1="70" x2="224" y2="70" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-ber)"/>
+  <rect x="226" y="50" width="80" height="40" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="266" y="74" fill="#e6edf3" text-anchor="middle">receiver</text>
+  <line x1="306" y1="70" x2="332" y2="70" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-ber)"/>
+  <rect x="334" y="50" width="86" height="40" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+  <text x="377" y="68" fill="#e6edf3" text-anchor="middle">bit</text>
+  <text x="377" y="82" fill="#9aa7b5" text-anchor="middle">compare</text>
+  <line x1="420" y1="70" x2="446" y2="70" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-ber)"/>
+  <rect x="448" y="50" width="80" height="40" rx="6" fill="#1c232e" stroke="#ff6b6b" stroke-width="1.5"/>
+  <text x="488" y="74" fill="#e6edf3" text-anchor="middle">counter</text>
+  <line x1="377" y1="90" x2="377" y2="120" stroke="#9aa7b5" stroke-width="1.2"/>
+  <line x1="377" y1="120" x2="51" y2="120" stroke="#9aa7b5" stroke-width="1.2"/>
+  <line x1="51" y1="120" x2="51" y2="92" stroke="#9aa7b5" stroke-width="1.2" marker-end="url(#arr2-ber)"/>
+  <text x="200" y="115" fill="#9aa7b5" text-anchor="middle">reference PRBS re-synced for comparison</text>
+  <text x="270" y="155" fill="#63e6be" text-anchor="middle">the comparator XORs rx bits against the known PRBS; the counter accumulates errors</text>
+</svg>`,
+    caption: String.raw`BER test loop: a known PRBS is sent through the channel and receiver, then compared bit-by-bit against the reference so a counter accumulates the error count over many bits.`
+  },
+  {
+    svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <rect x="0" y="0" width="540" height="220" fill="#1c232e"/>
+  <text x="270" y="20" fill="#e6edf3" text-anchor="middle">Reading the BER waterfall curve</text>
+  <line x1="70" y1="30" x2="70" y2="185" stroke="#9aa7b5" stroke-width="1.5"/>
+  <line x1="70" y1="185" x2="500" y2="185" stroke="#9aa7b5" stroke-width="1.5"/>
+  <text x="30" y="40" fill="#e6edf3" text-anchor="middle">BER</text>
+  <text x="430" y="208" fill="#e6edf3" text-anchor="middle">Eb/N0 (dB)</text>
+  <text x="52" y="55" fill="#9aa7b5" text-anchor="middle">1e-2</text>
+  <text x="52" y="120" fill="#9aa7b5" text-anchor="middle">1e-4</text>
+  <text x="52" y="180" fill="#9aa7b5" text-anchor="middle">1e-6</text>
+  <path d="M85,45 C150,60 210,95 270,135 C320,168 360,178 420,182" fill="none" stroke="#4dabf7" stroke-width="2.5"/>
+  <path d="M120,45 C185,62 245,100 305,140 C355,172 395,180 455,183" fill="none" stroke="#ffa94d" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="200" y="90" fill="#4dabf7" text-anchor="middle">coded / lower order</text>
+  <text x="360" y="115" fill="#ffa94d" text-anchor="middle">higher order</text>
+  <line x1="270" y1="135" x2="305" y2="135" stroke="#63e6be" stroke-width="1.5"/>
+  <line x1="270" y1="130" x2="270" y2="140" stroke="#63e6be" stroke-width="1.5"/>
+  <line x1="305" y1="130" x2="305" y2="140" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="287" y="124" fill="#63e6be" text-anchor="middle">dB gap = gain/penalty</text>
+  <path d="M430,182 C450,182 460,181 470,178" fill="none" stroke="#ff6b6b" stroke-width="2"/>
+  <text x="455" y="168" fill="#ff6b6b" text-anchor="middle">error floor</text>
+  <text x="270" y="205" fill="#9aa7b5" text-anchor="middle">steep plunge from the Q-function tail; floor = non-noise impairment</text>
+</svg>`,
+    caption: String.raw`Reading the waterfall: BER plunges steeply with Eb/N0; the horizontal gap between curves is coding gain/modulation penalty, and a flattening tail signals a non-noise error floor.`
+  }
+  ],
   prerequisites: ['bpsk', 'noise', 'eb-no', 'comm-basics'],
   intro: String.raw`<p>Bit error rate (BER) is the single most important performance number in digital communications: of all the bits sent, what fraction arrive wrong? It is the currency in which every design decision is paid — modulation order, transmit power, coding, bandwidth, and receiver quality all ultimately show up as a point on a BER-versus-$E_b/N_0$ curve. A well-designed link targets a BER low enough (e.g. $10^{-6}$ raw, or $10^{-12}$ after coding) that the application sees essentially error-free data. Understanding BER means understanding the Q-function relationships for each modulation, the "waterfall" shape of the curves, how coding shifts them, and how many bits you must actually observe to measure a small BER with confidence.</p>`,
   sections: [
@@ -418,7 +616,8 @@ CONTENT.topics.push(
     },
     {
       h: 'BER of M-PSK and M-QAM',
-      html: String.raw`<p>Higher-order modulations pack more bits per symbol but crowd the constellation, so they need more $E_b/N_0$ for the same BER. Useful Gray-coded AWGN approximations:</p>
+      html: String.raw`<p><em>Read the formulas this way:</em> every BER expression is really "how many neighbours can a symbol be mistaken for" (the prefactor) times "how likely is one such mistake" (the Q-function of the minimum distance over noise). Higher-order schemes shrink that minimum distance because the same energy is shared among more, more tightly packed points — so the Q-argument falls and the BER rises. The algebra below is just this one idea specialised to the circular geometry of PSK and the square grid of QAM.</p>
+<p>Higher-order modulations pack more bits per symbol but crowd the constellation, so they need more $E_b/N_0$ for the same BER. Useful Gray-coded AWGN approximations:</p>
       <p><strong>$M$-PSK</strong> (for $M\ge4$):</p>
       <p>$$P_b^{M\text{-PSK}}\approx\frac{2}{\log_2 M}\,Q\!\left(\sqrt{\frac{2E_b\log_2 M}{N_0}}\,\sin\frac{\pi}{M}\right).$$</p>
       <p><strong>Square $M$-QAM</strong>:</p>
@@ -462,6 +661,17 @@ CONTENT.topics.push(
         <li>Test time explodes at low BER — hence extrapolation from higher-BER measurements along the theoretical curve, and use of accelerated/stressed-eye methods.</li>
         <li><strong>Relation to EVM:</strong> for AWGN-limited links, error-vector magnitude and BER are two views of the same SNR. Approximately $\text{SNR}\approx1/\text{EVM}_{\text{rms}}^2$, so EVM feeds directly into the Q-function BER prediction — a fast proxy when you cannot run enough bits to measure BER directly.</li>
       </ul></p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<p>BER is the currency every other topic is ultimately paid in; you should now be able to reason about it end to end:</p>
+      <ul>
+        <li><strong>The definitions:</strong> BER counts wrong bits; SER counts wrong symbols; with Gray coding at high SNR, BER $\approx$ SER$/\log_2 M$ (and BER $=$ SER for BPSK).</li>
+        <li><strong>The anchor law:</strong> BPSK and QPSK share $P_b=Q(\sqrt{2E_b/N_0})$, and higher-order QAM/PSK sit to the right on the waterfall because their minimum distance shrinks.</li>
+        <li><strong>The waterfall shape:</strong> flat then plunging (the Q-function's exponential tail), with a flattening tail signalling a non-noise error floor — never pure AWGN.</li>
+        <li><strong>Coding gain:</strong> FEC shifts the curve left by several dB, buying the same BER for effectively free transmit power at the cost of rate.</li>
+        <li><strong>Measuring it:</strong> low BERs need enormous bit counts ($N\approx-\ln(1-CL)/\text{BER}$, or ~100 error events to measure), which is why EVM ($\text{SNR}\approx1/\text{EVM}^2$) is used as a fast proxy.</li>
+      </ul>`
     }
   ],
   keyPoints: [
@@ -541,13 +751,34 @@ CONTENT.topics.push(
     { q: String.raw`The Q-function $Q(x)$ equals:`, options: [String.raw`$\text{erfc}(x)$`, String.raw`$\tfrac12\text{erfc}(x/\sqrt2)$`, String.raw`$1-\text{erf}(x)$`, String.raw`$e^{-x}$`], answer: 1, explain: String.raw`$Q(x)=\tfrac12\text{erfc}(x/\sqrt2)$ is the standard-normal tail probability.` }
   ],
   numericals: [
-    { q: String.raw`A BPSK link operates at $E_b/N_0=9$ dB. Estimate the BER. (Use $Q(x)\approx\tfrac12 e^{-x^2/2}$ for a quick estimate.)`, solution: String.raw`<p>$E_b/N_0=10^{0.9}=7.94$ (linear). Argument $x=\sqrt{2\times7.94}=\sqrt{15.9}=3.99$. $Q(3.99)\approx\tfrac12 e^{-3.99^2/2}=\tfrac12 e^{-7.96}=\tfrac12(3.5\times10^{-4})\approx1.7\times10^{-4}$. (Exact tables give $\approx3.4\times10^{-5}$; the exponential approximation overestimates but shows the order.) A more precise $Q(3.99)\approx3.3\times10^{-5}$.</p>` },
-    { q: String.raw`What $E_b/N_0$ (dB) does BPSK need for BER $=10^{-6}$? ($Q^{-1}(10^{-6})\approx4.75$.)`, solution: String.raw`<p>$Q(\sqrt{2E_b/N_0})=10^{-6}\Rightarrow\sqrt{2E_b/N_0}=4.75\Rightarrow2E_b/N_0=22.56\Rightarrow E_b/N_0=11.28$ (linear) $=10\log_{10}(11.28)=10.5$ dB.</p>` },
-    { q: String.raw`A 16-QAM system measures SER $=4\times10^{-4}$ with Gray coding. Estimate the BER.`, solution: String.raw`<p>BER $\approx$ SER$/\log_2 16=4\times10^{-4}/4=1\times10^{-4}$.</p>` },
-    { q: String.raw`How many bits must be transmitted to confirm BER $\le10^{-8}$ at 99% confidence with no errors observed?`, solution: String.raw`<p>$N=-\ln(1-0.99)/\text{BER}=-\ln(0.01)/10^{-8}=4.605/10^{-8}=4.6\times10^{8}$ bits.</p>` },
-    { q: String.raw`A receiver measures rms EVM of 5% on a QPSK signal. Estimate the effective $E_b/N_0$ and comment on link health.`, solution: String.raw`<p>$\text{SNR}\approx1/\text{EVM}^2=1/(0.05)^2=1/0.0025=400=26$ dB. For QPSK, $E_b/N_0=\text{SNR}/\log_2 4=400/2=200=23$ dB. This is far above the ~10.5 dB needed for $10^{-6}$ BER, so the link is very healthy.</p>` },
-    { q: String.raw`A code provides 5 dB of coding gain. If the uncoded link needs 10.5 dB $E_b/N_0$ for BER $10^{-6}$, what coded $E_b/N_0$ achieves the same BER, and what transmit-power saving does that represent?`, solution: String.raw`<p>Coded requirement $=10.5-5=5.5$ dB. The 5 dB saving corresponds to a power reduction factor of $10^{5/10}=3.16\times$ — the same BER at less than one-third the transmit power.</p>` },
-    { q: String.raw`Convert: a QPSK link has SNR $=13$ dB in a bandwidth equal to its symbol rate. What is $E_b/N_0$?`, solution: String.raw`<p>SNR $=13$ dB $=20$ (linear). $E_b/N_0=\text{SNR}\cdot B/R_b$. With $B=R_s$ and QPSK $R_b=2R_s$, $E_b/N_0=20\cdot R_s/(2R_s)=10=10$ dB. Just below the ~10.5 dB for $10^{-6}$, so BER will be slightly worse than $10^{-6}$.</p>` }
+    { q: String.raw`A BPSK link operates at $E_b/N_0=9$ dB. Estimate the BER. (Use $Q(x)\approx\tfrac12 e^{-x^2/2}$ for a quick estimate.)`, solution: String.raw`<p><b>Formula.</b> $$P_b=Q\!\left(\sqrt{\tfrac{2E_b}{N_0}}\right),\qquad Q(x)\approx\tfrac12 e^{-x^2/2}$$ the BPSK BER and the exponential tail approximation for a quick estimate.</p>
+<p><b>Substitute.</b> $E_b/N_0=10^{0.9}=7.94$ (linear); $x=\sqrt{2\times7.94}=\sqrt{15.9}=3.99$; $P_b\approx\tfrac12 e^{-(3.99)^2/2}=\tfrac12 e^{-7.96}$.</p>
+<p><b>Compute.</b> Approximation: $\tfrac12(3.5\times10^{-4})\approx 1.7\times10^{-4}$. The exponential form overestimates the tail; a precise value is $Q(3.99)\approx\mathbf{3.3\times10^{-5}}$.</p>
+<p><b>Explanation.</b> The quick $\tfrac12 e^{-x^2/2}$ estimate captures the order of magnitude but runs several times high because it omits the $1/x$ prefactor of the true tail — fine for a sanity check, not for a spec.</p>` },
+    { q: String.raw`What $E_b/N_0$ (dB) does BPSK need for BER $=10^{-6}$? ($Q^{-1}(10^{-6})\approx4.75$.)`, solution: String.raw`<p><b>Formula.</b> Invert $P_b=Q(\sqrt{2E_b/N_0})$: $$\frac{E_b}{N_0}=\frac{\big[Q^{-1}(P_b)\big]^2}{2}.$$</p>
+<p><b>Substitute.</b> $Q^{-1}(10^{-6})=4.75$, so $E_b/N_0=(4.75)^2/2 = 22.56/2$.</p>
+<p><b>Compute.</b> $E_b/N_0=11.28$ (linear) $=10\log_{10}(11.28)=\mathbf{10.5\ dB}$.</p>
+<p><b>Explanation.</b> This 10.5 dB is the canonical BPSK/QPSK operating point for $10^{-6}$; link budgets are dimensioned to deliver it with margin, and coding gain is what lets a real system fall short of it and still pass.</p>` },
+    { q: String.raw`A 16-QAM system measures SER $=4\times10^{-4}$ with Gray coding. Estimate the BER.`, solution: String.raw`<p><b>Formula.</b> $$\text{BER}\approx\frac{\text{SER}}{\log_2 M}$$ the Gray-coded high-SNR approximation, since a nearest-neighbour symbol error flips one of $\log_2 M$ bits.</p>
+<p><b>Substitute.</b> $M=16$, $\log_2 16=4$, so $\text{BER}\approx\dfrac{4\times10^{-4}}{4}$.</p>
+<p><b>Compute.</b> $\text{BER}\approx\mathbf{1\times10^{-4}}$.</p>
+<p><b>Explanation.</b> Gray coding is what makes this simple division valid; without it a symbol error could flip several bits and the BER would be up to $\log_2 M$ times higher.</p>` },
+    { q: String.raw`How many bits must be transmitted to confirm BER $\le10^{-8}$ at 99% confidence with no errors observed?`, solution: String.raw`<p><b>Formula.</b> $$N=\frac{-\ln(1-CL)}{\text{BER}}$$ the bits needed to bound a BER at confidence $CL$ having observed zero errors (Poisson zero-error argument).</p>
+<p><b>Substitute.</b> $N=\dfrac{-\ln(1-0.99)}{10^{-8}}=\dfrac{-\ln(0.01)}{10^{-8}}$.</p>
+<p><b>Compute.</b> $-\ln(0.01)=4.605$, so $N=\dfrac{4.605}{10^{-8}}=\mathbf{4.6\times10^{8}}$ bits.</p>
+<p><b>Explanation.</b> Confirming very low BERs is expensive: nearly half a billion error-free bits are needed here, which is why engineers extrapolate along the theoretical curve or use EVM as a fast proxy rather than measuring $10^{-8}$ directly.</p>` },
+    { q: String.raw`A receiver measures rms EVM of 5% on a QPSK signal. Estimate the effective $E_b/N_0$ and comment on link health.`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}\approx\frac{1}{\text{EVM}_{\text{rms}}^2},\qquad \frac{E_b}{N_0}=\frac{\text{SNR}}{\log_2 M}$$ mapping EVM to SNR (noise-like error) then to per-bit ratio for QPSK ($M=4$).</p>
+<p><b>Substitute.</b> $\text{SNR}=1/(0.05)^2=1/0.0025$; $E_b/N_0=\text{SNR}/2$.</p>
+<p><b>Compute.</b> $\text{SNR}=400=26$ dB; $E_b/N_0=400/2=200=\mathbf{23\ dB}$.</p>
+<p><b>Explanation.</b> At 23 dB the link runs more than 12 dB above the ~10.5 dB needed for $10^{-6}$ BER, so it is very healthy — EVM here is a fast one-shot proxy for a BER measurement that would take hundreds of millions of bits.</p>` },
+    { q: String.raw`A code provides 5 dB of coding gain. If the uncoded link needs 10.5 dB $E_b/N_0$ for BER $10^{-6}$, what coded $E_b/N_0$ achieves the same BER, and what transmit-power saving does that represent?`, solution: String.raw`<p><b>Formula.</b> $$\left(\frac{E_b}{N_0}\right)_{\text{coded,dB}}=\left(\frac{E_b}{N_0}\right)_{\text{uncoded,dB}}-G_c,\qquad \text{power factor}=10^{G_c/10}$$ for coding gain $G_c$.</p>
+<p><b>Substitute.</b> Coded requirement $=10.5-5$ dB; power factor $=10^{5/10}$.</p>
+<p><b>Compute.</b> Coded $E_b/N_0=\mathbf{5.5\ dB}$; power reduction $=10^{0.5}=\mathbf{3.16\times}$.</p>
+<p><b>Explanation.</b> 5 dB of coding gain buys the same BER at under one-third the transmit power — "free watts" traded for bandwidth/rate overhead, which is why FEC is universal in power-limited links.</p>` },
+    { q: String.raw`Convert: a QPSK link has SNR $=13$ dB in a bandwidth equal to its symbol rate. What is $E_b/N_0$?`, solution: String.raw`<p><b>Formula.</b> $$\frac{E_b}{N_0}=\text{SNR}\cdot\frac{B}{R_b},\qquad R_b=R_s\log_2 M$$ with $B$ the noise bandwidth; here $B=R_s$ and QPSK gives $R_b=2R_s$.</p>
+<p><b>Substitute.</b> $\text{SNR}=10^{13/10}=20$ (linear); $B/R_b=R_s/(2R_s)=1/2$; $E_b/N_0=20\times\tfrac12$.</p>
+<p><b>Compute.</b> $E_b/N_0=10$ (linear) $=\mathbf{10\ dB}$ (equivalently $13-10\log_{10}2=13-3=10$ dB).</p>
+<p><b>Explanation.</b> At 10 dB the link sits just below the ~10.5 dB needed for $10^{-6}$, so BER will be slightly worse than $10^{-6}$ — the conversion is what lets an instrument SNR reading be checked against a theoretical requirement.</p>` }
   ],
   realWorld: String.raw`<p>BER is the acceptance criterion baked into every communications standard: a cellular receiver's sensitivity is specified as the lowest signal power that still meets a reference BER/BLER, and satellite links are dimensioned so that after FEC the BER is $10^{-10}$ or better. Bit-error-rate testers (BERTs) drive high-speed serial links with known pseudo-random sequences and count errors; because measuring $10^{-12}$ directly takes hours, engineers extrapolate along the theoretical waterfall or use EVM as a fast proxy. In SDR development on platforms like the AD9361 or RFSoC, plotting measured BER against $E_b/N_0$ and comparing with the $Q(\sqrt{2E_b/N_0})$ curve is the definitive check that the whole chain — pulse shaping, matched filter, synchronisation, and detection — is working to theory rather than leaving implementation loss on the table.</p>`,
   related: ['eb-no', 'bpsk', 'evm', 'fec', 'matched-filter']
@@ -558,7 +789,8 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['Eb/N0', 'SNR', 'Shannon', 'spectral efficiency', 'link budget'],
   summary: String.raw`Eb/N0 is the energy per information bit divided by the noise power spectral density, the normalized, modulation-fair metric against which BER performance is measured.`,
-  diagram: {
+  diagram: [
+  {
     svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
   <defs><marker id="arr-eb-no" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
   <rect x="14" y="42" width="70" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
@@ -581,6 +813,54 @@ CONTENT.topics.push(
 </svg>`,
     caption: String.raw`Tx through a noisy channel to Rx; the resulting Eb/N0 feeds Q(&#8730;(2Eb/N0)) to predict BER.`
   },
+  {
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr2-eb-no" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="0" y="0" width="540" height="160" fill="#1c232e"/>
+  <text x="270" y="24" fill="#e6edf3" text-anchor="middle">Converting measured SNR to Eb/N0</text>
+  <rect x="18" y="55" width="96" height="44" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="66" y="73" fill="#e6edf3" text-anchor="middle">measured</text>
+  <text x="66" y="88" fill="#9aa7b5" text-anchor="middle">SNR = S/N</text>
+  <line x1="114" y1="77" x2="150" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-eb-no)"/>
+  <rect x="152" y="55" width="120" height="44" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="212" y="73" fill="#e6edf3" text-anchor="middle">scale by</text>
+  <text x="212" y="89" fill="#9aa7b5" text-anchor="middle">B / R_b</text>
+  <line x1="272" y1="77" x2="308" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-eb-no)"/>
+  <rect x="310" y="55" width="120" height="44" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="370" y="73" fill="#e6edf3" text-anchor="middle">Eb/N0 =</text>
+  <text x="370" y="89" fill="#9aa7b5" text-anchor="middle">SNR &#183; B/R_b</text>
+  <line x1="430" y1="77" x2="466" y2="77" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr2-eb-no)"/>
+  <rect x="468" y="55" width="60" height="44" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+  <text x="498" y="80" fill="#63e6be" text-anchor="middle">BER</text>
+  <text x="270" y="128" fill="#9aa7b5" text-anchor="middle">with R_b = R_s&#183;log&#8322;M and B the noise bandwidth</text>
+  <text x="270" y="147" fill="#b197fc" text-anchor="middle">equivalently SNR = (Eb/N0)&#183;&#951;,  &#951; = R_b/B</text>
+</svg>`,
+    caption: String.raw`Conversion chain: multiply the instrument's SNR by the bandwidth-to-bit-rate ratio to obtain the modulation-fair Eb/N0 that feeds the BER formula.`
+  },
+  {
+    svg: String.raw`<svg viewBox="0 0 540 205" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <rect x="0" y="0" width="540" height="205" fill="#1c232e"/>
+  <text x="270" y="20" fill="#e6edf3" text-anchor="middle">Modulation comparison on the Eb/N0 axis</text>
+  <line x1="70" y1="30" x2="70" y2="170" stroke="#9aa7b5" stroke-width="1.5"/>
+  <line x1="70" y1="170" x2="500" y2="170" stroke="#9aa7b5" stroke-width="1.5"/>
+  <text x="34" y="40" fill="#e6edf3" text-anchor="middle">BER</text>
+  <text x="440" y="193" fill="#e6edf3" text-anchor="middle">Eb/N0 (dB)</text>
+  <path d="M85,42 C140,58 190,95 235,130 C270,158 300,166 345,169" fill="none" stroke="#4dabf7" stroke-width="2.5"/>
+  <path d="M175,42 C230,58 280,95 325,130 C360,158 395,166 440,169" fill="none" stroke="#ffa94d" stroke-width="2.5"/>
+  <text x="150" y="120" fill="#4dabf7" text-anchor="middle">BPSK / QPSK</text>
+  <text x="360" y="120" fill="#ffa94d" text-anchor="middle">16/64-QAM</text>
+  <line x1="235" y1="130" x2="325" y2="130" stroke="#63e6be" stroke-width="1.5"/>
+  <line x1="235" y1="125" x2="235" y2="135" stroke="#63e6be" stroke-width="1.3"/>
+  <line x1="325" y1="125" x2="325" y2="135" stroke="#63e6be" stroke-width="1.3"/>
+  <text x="280" y="150" fill="#63e6be" text-anchor="middle">extra dB</text>
+  <line x1="95" y1="30" x2="95" y2="170" stroke="#b197fc" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="95" y="185" fill="#b197fc" text-anchor="middle">-1.59 dB</text>
+  <text x="118" y="46" fill="#b197fc" text-anchor="start">Shannon limit</text>
+  <text x="270" y="200" fill="#9aa7b5" text-anchor="middle">higher-order schemes sit to the right: more bits/Hz cost more energy/bit</text>
+</svg>`,
+    caption: String.raw`Modulation comparison: Eb/N0 places every scheme on one fair axis. BPSK/QPSK share a curve; higher-order QAM sits to the right, and the Shannon floor at -1.59 dB bounds all of them.`
+  }
+  ],
   prerequisites: ['noise', 'ber', 'comm-basics', 'psd'],
   intro: String.raw`<p>$E_b/N_0$ ("ebno") is the great equaliser of digital communications. Raw signal-to-noise ratio (SNR) mixes together the effects of bandwidth, symbol rate and modulation order, making it impossible to compare, say, BPSK against 64-QAM fairly. $E_b/N_0$ strips those out by normalising to the <em>energy carried by one information bit</em> against the <em>noise density per hertz</em>. The result is a dimensionless ratio that lets every modulation be plotted on the same axis, that reveals the ultimate Shannon limit of $-1.59$ dB, and that ties directly to the BER waterfall curves. If SNR is what a spectrum analyser shows, $E_b/N_0$ is what the theory is written in.</p>`,
   sections: [
@@ -615,7 +895,8 @@ CONTENT.topics.push(
     },
     {
       h: 'The Shannon limit and −1.59 dB',
-      html: String.raw`<p>Shannon's capacity theorem, $C=B\log_2(1+\text{SNR})$, sets the absolute ceiling. Rewriting in terms of $E_b/N_0$ and spectral efficiency $\eta=R_b/B$ (setting $R_b=C$ for capacity-achieving operation):</p>
+      html: String.raw`<p><em>Why there is a floor at all:</em> you might expect that with enough bandwidth you could drive the energy per bit arbitrarily low. Shannon says no — there is a hard wall. Spreading a bit's energy over more and more bandwidth helps, but with diminishing returns, and the returns bottom out at a finite number: $\ln 2$, or $-1.59$ dB. Below that, no code however clever can communicate reliably. The rewrite below makes this concrete by expressing capacity in terms of $E_b/N_0$ and taking the wide-bandwidth limit.</p>
+<p>Shannon's capacity theorem, $C=B\log_2(1+\text{SNR})$, sets the absolute ceiling. Rewriting in terms of $E_b/N_0$ and spectral efficiency $\eta=R_b/B$ (setting $R_b=C$ for capacity-achieving operation):</p>
       <p>$$\frac{E_b}{N_0}=\frac{2^{\eta}-1}{\eta}.$$</p>
       <p>As spectral efficiency $\eta\to0$ (infinite bandwidth, vanishingly few bits per Hz), this approaches the fundamental minimum:</p>
       <p>$$\lim_{\eta\to0}\frac{E_b}{N_0}=\ln 2=0.693=-1.59\ \text{dB}.$$</p>
@@ -646,6 +927,18 @@ CONTENT.topics.push(
         <li>Adding coding lowers the <em>required</em> $E_b/N_0$ (coding gain), directly increasing margin without more transmit power.</li>
       </ul>
       <div class="callout"><strong>Design loop:</strong> pick a BER target &rarr; read required $E_b/N_0$ from the modulation's curve &rarr; add coding gain and implementation loss &rarr; check the link budget delivers that $E_b/N_0$ with positive margin.</div></p>`
+    },
+    {
+      h: 'What you should now understand',
+      html: String.raw`<p>$E_b/N_0$ is the axis all of digital-comms theory is written on; you should now be fluent in it:</p>
+      <ul>
+        <li><strong>What it is:</strong> energy per information bit over noise PSD — dimensionless — which normalises away bandwidth and rate so any two modulations compare fairly on one BER axis.</li>
+        <li><strong>The SNR bridge:</strong> $E_b/N_0=\text{SNR}\cdot B/R_b$, equivalently $\text{SNR}=(E_b/N_0)\eta$; and $E_s/N_0=\log_2 M\cdot E_b/N_0$.</li>
+        <li><strong>The key equivalence:</strong> BPSK and QPSK lie on the <em>same</em> $E_b/N_0$ curve — equally power-efficient, QPSK twice as bandwidth-efficient.</li>
+        <li><strong>The fundamental floor:</strong> the Shannon limit $\ln 2=-1.59$ dB, approached as $\eta\to0$; higher $\eta$ always costs more energy per bit.</li>
+        <li><strong>The two regimes:</strong> power-limited ($\eta<1$, spread + code toward the floor) versus bandwidth-limited ($\eta>1$, high-order QAM at high $E_b/N_0$).</li>
+        <li><strong>The design use:</strong> received $E_b/N_0=P_{rx}/(kT_{sys}R_b)$ meets the modulation's requirement with a link margin that coding gain widens for free.</li>
+      </ul>`
     }
   ],
   keyPoints: [
@@ -725,13 +1018,34 @@ CONTENT.topics.push(
     { q: String.raw`$E_b/N_0$ is dimensionless because:`, options: [String.raw`It is measured in dB`, String.raw`Both $E_b$ and $N_0$ have units of energy (joules)`, String.raw`It ignores bandwidth`, String.raw`It is a power ratio`], answer: 1, explain: String.raw`$N_0$ in W/Hz equals J, and $E_b$ is in J, so the ratio cancels to a pure number.` }
   ],
   numericals: [
-    { q: String.raw`A QPSK link has SNR $=13$ dB measured in a bandwidth equal to the symbol rate ($B=R_s$). Find $E_b/N_0$ in dB.`, solution: String.raw`<p>QPSK: $R_b=2R_s$, so $R_b/B=2$. $E_b/N_0=\text{SNR}\cdot B/R_b=\text{SNR}/2$. In dB: $13-10\log_{10}2=13-3.01=9.99\approx10$ dB.</p>` },
-    { q: String.raw`A system needs $E_b/N_0=10.5$ dB for BER $10^{-6}$ using 16-QAM ($\eta=4$ b/s/Hz). What SNR does the receiver require?`, solution: String.raw`<p>$\text{SNR}=(E_b/N_0)\cdot\eta$. In dB: $10.5+10\log_{10}4=10.5+6.02=16.5$ dB.</p>` },
-    { q: String.raw`Convert $E_b/N_0=8$ dB to $E_s/N_0$ for 64-QAM.`, solution: String.raw`<p>$\log_2 64=6$. $E_s/N_0=E_b/N_0+10\log_{10}6=8+7.78=15.8$ dB.</p>` },
-    { q: String.raw`A deep-space link operates at spectral efficiency $\eta=0.1$ b/s/Hz. What is the theoretical minimum $E_b/N_0$ (Shannon) for this $\eta$?`, solution: String.raw`<p>$E_b/N_0=(2^{\eta}-1)/\eta=(2^{0.1}-1)/0.1=(1.0718-1)/0.1=0.718=10\log_{10}(0.718)=-1.44$ dB. Close to the $-1.59$ dB ultimate limit, as expected for small $\eta$.</p>` },
-    { q: String.raw`A receiver gets $P_{rx}=-120$ dBm, has $R_b=1$ Mbps, and noise density $N_0=-174$ dBm/Hz. Compute available $E_b/N_0$.`, solution: String.raw`<p>$E_b/N_0=P_{rx}-10\log_{10}R_b-N_0$ (all in dB). $10\log_{10}(10^6)=60$ dB. $E_b/N_0=-120-60-(-174)=-180+174=-6$ dB. That is below threshold — this link cannot support the rate without coding or more power. (If $R_b=1$ kbps instead: $-120-30+174=+24$ dB, comfortable.)</p>` },
-    { q: String.raw`A modulation needs 9.6 dB $E_b/N_0$ for the target BER; the link budget delivers 12.0 dB. What is the link margin, and what does 5 dB of added coding gain do?`, solution: String.raw`<p>Margin $=12.0-9.6=2.4$ dB. With 5 dB coding gain the required $E_b/N_0$ drops to $9.6-5=4.6$ dB, so margin becomes $12.0-4.6=7.4$ dB — much more robust, at the cost of coding overhead.</p>` },
-    { q: String.raw`At what spectral efficiency does the Shannon-required $E_b/N_0$ equal 0 dB (unity)?`, solution: String.raw`<p>Set $(2^{\eta}-1)/\eta=1\Rightarrow 2^{\eta}-1=\eta$. Solve numerically: at $\eta=1$, $2^1-1=1=\eta$ exactly. So $\eta=1$ b/s/Hz requires $E_b/N_0=1=0$ dB at the Shannon bound.</p>` }
+    { q: String.raw`A QPSK link has SNR $=13$ dB measured in a bandwidth equal to the symbol rate ($B=R_s$). Find $E_b/N_0$ in dB.`, solution: String.raw`<p><b>Formula.</b> $$\frac{E_b}{N_0}=\text{SNR}\cdot\frac{B}{R_b},\qquad R_b=R_s\log_2 M$$ with $B$ the noise bandwidth; QPSK ($M=4$) gives $R_b=2R_s$.</p>
+<p><b>Substitute.</b> $B/R_b=R_s/(2R_s)=1/2$, so in dB $E_b/N_0=13+10\log_{10}(1/2)=13-10\log_{10}2$.</p>
+<p><b>Compute.</b> $E_b/N_0=13-3.01=9.99\approx\mathbf{10\ dB}$.</p>
+<p><b>Explanation.</b> Packing 2 bits per symbol means the per-bit ratio is 3 dB below the raw SNR; this conversion is what lets an instrument's SNR be compared fairly against a modulation's $E_b/N_0$ requirement.</p>` },
+    { q: String.raw`A system needs $E_b/N_0=10.5$ dB for BER $10^{-6}$ using 16-QAM ($\eta=4$ b/s/Hz). What SNR does the receiver require?`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}=\frac{E_b}{N_0}\cdot\eta\;\Rightarrow\;\text{SNR}_{dB}=\left(\frac{E_b}{N_0}\right)_{dB}+10\log_{10}\eta$$ with $\eta$ the spectral efficiency.</p>
+<p><b>Substitute.</b> $\text{SNR}_{dB}=10.5+10\log_{10}4$.</p>
+<p><b>Compute.</b> $\text{SNR}_{dB}=10.5+6.02=\mathbf{16.5\ dB}$.</p>
+<p><b>Explanation.</b> Cramming 4 bits/s/Hz costs 6 dB of extra SNR over the per-bit figure; this is why a spectrum analyser makes 16-QAM "look" much more SNR-hungry than the fair $E_b/N_0$ comparison suggests.</p>` },
+    { q: String.raw`Convert $E_b/N_0=8$ dB to $E_s/N_0$ for 64-QAM.`, solution: String.raw`<p><b>Formula.</b> $$\frac{E_s}{N_0}=\log_2 M\cdot\frac{E_b}{N_0}\;\Rightarrow\;\left(\frac{E_s}{N_0}\right)_{dB}=\left(\frac{E_b}{N_0}\right)_{dB}+10\log_{10}(\log_2 M)$$ since each symbol carries $\log_2 M$ bits.</p>
+<p><b>Substitute.</b> $\log_2 64=6$, so $E_s/N_0=8+10\log_{10}6$.</p>
+<p><b>Compute.</b> $E_s/N_0=8+7.78=\mathbf{15.8\ dB}$.</p>
+<p><b>Explanation.</b> The symbol carries 6 bits' worth of energy, raising the per-symbol ratio by 7.78 dB; symbol-level metrics like $E_s/N_0$ are the natural input to symbol-error-rate formulas.</p>` },
+    { q: String.raw`A deep-space link operates at spectral efficiency $\eta=0.1$ b/s/Hz. What is the theoretical minimum $E_b/N_0$ (Shannon) for this $\eta$?`, solution: String.raw`<p><b>Formula.</b> $$\frac{E_b}{N_0}=\frac{2^{\eta}-1}{\eta}$$ the Shannon-bound energy-per-bit for spectral efficiency $\eta$.</p>
+<p><b>Substitute.</b> $\dfrac{2^{0.1}-1}{0.1}=\dfrac{1.0718-1}{0.1}$.</p>
+<p><b>Compute.</b> $=\dfrac{0.0718}{0.1}=0.718$ (linear) $=10\log_{10}(0.718)=\mathbf{-1.44\ dB}$.</p>
+<p><b>Explanation.</b> At this very low $\eta$ the bound sits just above the ultimate $-1.59$ dB Shannon floor, which is exactly why deep-space links spread over huge bandwidth and use powerful codes to operate near that limit.</p>` },
+    { q: String.raw`A receiver gets $P_{rx}=-120$ dBm, has $R_b=1$ Mbps, and noise density $N_0=-174$ dBm/Hz. Compute available $E_b/N_0$.`, solution: String.raw`<p><b>Formula.</b> $$\left(\frac{E_b}{N_0}\right)_{dB}=P_{rx,\text{dBm}}-10\log_{10}R_b-N_{0,\text{dBm/Hz}}$$ from $E_b/N_0=P_{rx}/(N_0 R_b)$.</p>
+<p><b>Substitute.</b> $10\log_{10}(10^6)=60$ dB, so $E_b/N_0=-120-60-(-174)$.</p>
+<p><b>Compute.</b> $E_b/N_0=-180+174=\mathbf{-6\ dB}$. (At $R_b=1$ kbps instead: $-120-30+174=+24$ dB.)</p>
+<p><b>Explanation.</b> At $-6$ dB the link is below any usable threshold and cannot support 1 Mbps without more power or coding; dropping to 1 kbps buys 30 dB back, showing the direct rate-vs-margin trade in a link budget.</p>` },
+    { q: String.raw`A modulation needs 9.6 dB $E_b/N_0$ for the target BER; the link budget delivers 12.0 dB. What is the link margin, and what does 5 dB of added coding gain do?`, solution: String.raw`<p><b>Formula.</b> $$M_{dB}=\left(\frac{E_b}{N_0}\right)_{\text{avail}}-\left(\frac{E_b}{N_0}\right)_{\text{req}},\qquad \left(\frac{E_b}{N_0}\right)_{\text{req,coded}}=\left(\frac{E_b}{N_0}\right)_{\text{req}}-G_c.$$</p>
+<p><b>Substitute.</b> $M=12.0-9.6$; with $G_c=5$ dB, new required $=9.6-5=4.6$ dB, new margin $=12.0-4.6$.</p>
+<p><b>Compute.</b> Margin $=\mathbf{2.4\ dB}$ uncoded; $\mathbf{7.4\ dB}$ with coding.</p>
+<p><b>Explanation.</b> Coding lowers the required $E_b/N_0$, converting a thin 2.4 dB margin into a robust 7.4 dB — the same effect as adding 5 dB of transmit power, but paid for in redundancy instead of watts.</p>` },
+    { q: String.raw`At what spectral efficiency does the Shannon-required $E_b/N_0$ equal 0 dB (unity)?`, solution: String.raw`<p><b>Formula.</b> Set the Shannon bound to unity: $$\frac{2^{\eta}-1}{\eta}=1\;\Rightarrow\;2^{\eta}-1=\eta.$$</p>
+<p><b>Substitute.</b> Test $\eta=1$: $2^1-1=1$, and the right side is also $\eta=1$.</p>
+<p><b>Compute.</b> The equation holds exactly at $\eta=\mathbf{1}$ b/s/Hz, where $E_b/N_0=1=\mathbf{0\ dB}$.</p>
+<p><b>Explanation.</b> $\eta=1$ b/s/Hz is the tidy crossover where the Shannon-minimum energy per bit is exactly unity; below it (power-limited) the requirement drops toward $-1.59$ dB, above it (bandwidth-limited) it climbs steeply.</p>` }
   ],
   realWorld: String.raw`<p>$E_b/N_0$ is the language of link design. Satellite and deep-space engineers (NASA's DSN operates within a dB or so of the Shannon limit using powerful LDPC/turbo codes) quote required $E_b/N_0$ for each modulation-and-coding mode, then build a link budget that must deliver it with margin. Cellular and WiFi adaptive-modulation schemes pick the highest-order constellation whose required $E_b/N_0$ the measured channel can support, walking up and down the bandwidth-efficiency plane in real time. In SDR work, computing available $E_b/N_0=P_{rx}/(kT_{sys}R_b)$ and comparing it against the modulation's BER curve is the sanity check that a link will close — and the $-1.59$ dB Shannon floor is the reminder that no amount of cleverness gets something for nothing.</p>`,
   related: ['ber', 'noise', 'link-budget', 'bpsk', 'fec']

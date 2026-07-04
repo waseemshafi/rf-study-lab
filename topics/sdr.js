@@ -7,7 +7,8 @@ CONTENT.topics.push(
     tags: ['sdr', 'iq', 'quadrature', 'zero-if', 'baseband', 'gnu-radio', 'digitization'],
     summary: String.raw`A radio in which functions traditionally realized in analog hardware (mixing, filtering, modulation, demodulation) are moved into digital signal processing on programmable devices, with the ADC/DAC placed as close to the antenna as practical.`,
     prerequisites: ['comm-basics', 'adc', 'dac', 'pll'],
-    intro: String.raw`<p>A <b>Software-Defined Radio (SDR)</b> replaces fixed-function analog signal chains with a minimal RF front end followed by high-speed data converters and programmable processing (FPGA/GPU/CPU). The guiding principle is to <b>digitize as near the antenna as feasible</b>: once samples exist, everything downstream (channel selection, demodulation, equalization, decoding) becomes software that can be re-loaded to change bands, waveforms, and standards without touching hardware. This flexibility is why SDR underpins cognitive radio, multi-standard basestations, test instruments, electronic warfare, and hobbyist platforms alike.</p>
+    intro: String.raw`<p><b>Why does the SDR exist?</b> A traditional radio is frozen in copper and silicon: its filters, mixers, and demodulator are soldered for one band and one waveform, so supporting a new standard means designing a new board. That is slow, expensive, and impossible to update in the field. The SDR asks a liberating question - what if we digitized the signal as early as possible and did the rest in <i>software</i>? Then the same hardware could become a GPS receiver, an LTE modem, or a radar simply by loading new code. That single idea reshaped the RF industry.</p>
+    <p>A <b>Software-Defined Radio (SDR)</b> replaces fixed-function analog signal chains with a minimal RF front end followed by high-speed data converters and programmable processing (FPGA/GPU/CPU). The guiding principle is to <b>digitize as near the antenna as feasible</b>: once samples exist, everything downstream (channel selection, demodulation, equalization, decoding) becomes software that can be re-loaded to change bands, waveforms, and standards without touching hardware. This flexibility is why SDR underpins cognitive radio, multi-standard basestations, test instruments, electronic warfare, and hobbyist platforms alike.</p>
     <p>The mathematical heart of modern SDR is the <b>complex baseband (IQ) representation</b>: a real bandpass signal centered at a carrier is represented by a complex envelope sampled at a rate proportional to its bandwidth, not its carrier frequency. This decouples the processing rate from the RF frequency and lets DSP treat any modulation uniformly.</p>`,
     sections: [
       {
@@ -23,7 +24,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Quadrature (IQ) Sampling and Complex Baseband',
-        html: String.raw`<p>A real bandpass signal can be written as $s(t)=A(t)\cos(2\pi f_c t + \phi(t))$. Expanding gives $s(t)=I(t)\cos(2\pi f_c t)-Q(t)\sin(2\pi f_c t)$ where $I=A\cos\phi$ and $Q=A\sin\phi$ are the <b>in-phase</b> and <b>quadrature</b> components. The <b>complex envelope</b> is $\tilde s(t)=I(t)+jQ(t)=A(t)e^{j\phi(t)}$.</p>
+        html: String.raw`<div class="callout tip"><b>Intuition first:</b> think of a signal as a spinning arrow (a phasor). To describe where the arrow points you need two numbers - its shadow on a horizontal axis (I) and on a vertical axis (Q). One number alone is ambiguous: a shadow of "0.5" could be an arrow tilting up or down. That is exactly why one real channel cannot tell a positive frequency from a negative one, and why we always carry the I/Q <i>pair</i>. Below we make this precise.</div>
+        <p>A real bandpass signal can be written as $s(t)=A(t)\cos(2\pi f_c t + \phi(t))$. Expanding gives $s(t)=I(t)\cos(2\pi f_c t)-Q(t)\sin(2\pi f_c t)$ where $I=A\cos\phi$ and $Q=A\sin\phi$ are the <b>in-phase</b> and <b>quadrature</b> components. The <b>complex envelope</b> is $\tilde s(t)=I(t)+jQ(t)=A(t)e^{j\phi(t)}$.</p>
         <p>Quadrature downconversion multiplies the incoming signal by $\cos(2\pi f_c t)$ and $-\sin(2\pi f_c t)$ in two parallel paths and lowpass-filters each, recovering $I$ and $Q$. The pair fully describes amplitude and phase, so a complex sample rate equal to the signal bandwidth suffices (versus twice the highest RF frequency for a naive real ADC).</p>
         <ul>
           <li>A single real channel cannot distinguish positive from negative frequencies; the IQ pair can, giving an unambiguous <b>two-sided</b> spectrum of width $f_s$ (complex).</li>
@@ -79,6 +81,17 @@ CONTENT.topics.push(
           <li><b>Sample rate</b> $\geq$ (complex) signal bandwidth, with margin for filter transition bands. Wider capture eases tuning but raises data rate and processing load.</li>
           <li><b>Bit depth / ENOB</b> sets spur-free and noise dynamic range; blockers demand more bits than the wanted signal alone.</li>
           <li><b>Data throughput</b> = $f_s \times \text{bits} \times 2\,(I,Q) \times \text{channels}$; e.g. $61.44\text{ MS/s} \times 12 \times 2 \times 2 \approx 2.95$ Gb/s must reach the host.</li>
+        </ul>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<ul>
+          <li><b>The core move:</b> digitize as near the antenna as physics allows, then do filtering, mixing, demod, and decoding in reconfigurable software/logic - so one radio serves many bands and standards.</li>
+          <li><b>Why IQ:</b> the complex envelope $\tilde s=I+jQ=Ae^{j\phi}$ carries all amplitude and phase, distinguishes positive from negative frequencies, and lets the sample rate track <i>bandwidth</i> instead of carrier frequency (complex $f_s$ = real $2f_s$).</li>
+          <li><b>Architecture trade:</b> zero-IF integrates best but suffers DC offset, LO leakage, 1/f noise, and IQ-imbalance images; low-IF sidesteps DC problems for a calibratable image; superhet gives the best selectivity but is bulky.</li>
+          <li><b>Impairment math:</b> IQ imbalance sets image rejection $\text{IRR}\approx1/((\varepsilon/2)^2+(\psi/2)^2)$ - a handle you can now compute and calibrate against.</li>
+          <li><b>Digital front end:</b> DDC (NCO mix to DC + decimate) and DUC (interpolate + NCO up) reshape rate and channel; decimating to bandwidth buys oversampling processing gain.</li>
+          <li><b>System budget:</b> AGC fills the ADC without clipping, and throughput $f_s\times\text{bits}\times2\times\text{channels}$ often bottlenecks the host link, forcing on-chip decimation.</li>
         </ul>`
       }
     ],
@@ -149,6 +162,52 @@ CONTENT.topics.push(
         <text x="330" y="163" fill="#9aa7b5" font-size="10">rate ~ bandwidth, not f_c</text>
         </svg>`,
         caption: 'Quadrature downconversion produces I and Q; the complex envelope carries all amplitude/phase information at a rate set by bandwidth.'
+      },
+      {
+        title: String.raw`Superheterodyne vs Zero-IF: where the IF stage lives`,
+        svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+        <defs><marker id="arr3-sdr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="12" y="16" fill="#e6edf3" font-size="13">Superheterodyne vs Zero-IF architectures</text>
+        <text x="20" y="42" fill="#ffa94d" font-size="10">Superhet: extra IF mixing + image filter</text>
+        <polygon points="20,72 36,63 36,81" fill="#4dabf7"/>
+        <rect x="46" y="60" width="40" height="26" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="50" y="77" fill="#e6edf3" font-size="8">LNA/BPF</text>
+        <circle cx="112" cy="73" r="13" fill="#1c232e" stroke="#ffa94d"/><text x="106" y="77" fill="#e6edf3" font-size="9">x</text>
+        <rect x="140" y="60" width="46" height="26" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="144" y="72" fill="#e6edf3" font-size="8">IF SAW</text><text x="146" y="83" fill="#9aa7b5" font-size="7">image rej</text>
+        <circle cx="212" cy="73" r="13" fill="#1c232e" stroke="#ffa94d"/><text x="206" y="77" fill="#e6edf3" font-size="9">x</text>
+        <rect x="240" y="60" width="40" height="26" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="246" y="77" fill="#e6edf3" font-size="8">ADC</text>
+        <rect x="300" y="60" width="52" height="26" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="306" y="77" fill="#e6edf3" font-size="8">DSP</text>
+        <line x1="36" y1="72" x2="46" y2="72" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="86" y1="73" x2="98" y2="73" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="125" y1="73" x2="140" y2="73" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="186" y1="73" x2="198" y2="73" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="225" y1="73" x2="240" y2="73" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="280" y1="73" x2="300" y2="73" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <text x="105" y="106" fill="#9aa7b5" font-size="8">LO1</text><line x1="112" y1="98" x2="112" y2="86" stroke="#9aa7b5"/>
+        <text x="205" y="106" fill="#9aa7b5" font-size="8">LO2</text><line x1="212" y1="98" x2="212" y2="86" stroke="#9aa7b5"/>
+        <line x1="20" y1="120" x2="520" y2="120" stroke="#2b3440"/>
+        <text x="20" y="142" fill="#63e6be" font-size="10">Zero-IF: one quadrature mixer straight to DC, no IF</text>
+        <polygon points="20,178 36,169 36,187" fill="#4dabf7"/>
+        <rect x="46" y="166" width="40" height="26" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="50" y="183" fill="#e6edf3" font-size="8">LNA/BPF</text>
+        <circle cx="116" cy="179" r="14" fill="#1c232e" stroke="#ffa94d"/><text x="108" y="183" fill="#e6edf3" font-size="9">IQ</text>
+        <rect x="150" y="152" width="42" height="22" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="156" y="167" fill="#e6edf3" font-size="8">LPF I</text>
+        <rect x="150" y="182" width="42" height="22" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="156" y="197" fill="#e6edf3" font-size="8">LPF Q</text>
+        <rect x="204" y="152" width="38" height="22" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="209" y="167" fill="#e6edf3" font-size="8">ADC</text>
+        <rect x="204" y="182" width="38" height="22" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="209" y="197" fill="#e6edf3" font-size="8">ADC</text>
+        <rect x="262" y="166" width="60" height="26" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="268" y="183" fill="#e6edf3" font-size="8">DSP demod</text>
+        <line x1="36" y1="178" x2="46" y2="178" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="86" y1="178" x2="102" y2="178" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="130" y1="171" x2="150" y2="163" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="130" y1="187" x2="150" y2="193" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="192" y1="163" x2="204" y2="163" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="192" y1="193" x2="204" y2="193" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="242" y1="163" x2="262" y2="176" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <line x1="242" y1="193" x2="262" y2="182" stroke="#9aa7b5" marker-end="url(#arr3-sdr)"/>
+        <text x="105" y="222" fill="#9aa7b5" font-size="8">LO = f_c</text><line x1="116" y1="207" x2="116" y2="193" stroke="#9aa7b5"/>
+        <text x="330" y="180" fill="#9aa7b5" font-size="9">Zero-IF deletes the IF mixer</text>
+        <text x="330" y="195" fill="#9aa7b5" font-size="9">and image SAW: one SoC,</text>
+        <text x="330" y="210" fill="#9aa7b5" font-size="9">but DC/IQ impairments appear.</text>
+        </svg>`,
+        caption: 'Superheterodyne uses two mixing stages and a sharp IF image-reject filter; zero-IF collapses to a single quadrature mixer to DC, trading the image filter for near-DC impairments.'
       }
     ],
     equations: [
@@ -217,12 +276,30 @@ CONTENT.topics.push(
       { q: String.raw`Decimating to the signal bandwidth improves in-band SNR because it:`, options: [String.raw`adds dither`, String.raw`discards out-of-band quantization noise`, String.raw`raises the LO`, String.raw`increases IQ imbalance`], answer: 1, explain: String.raw`Oversampling processing gain: filtering before downsampling removes noise outside the retained band.` }
     ],
     numericals: [
-      { q: String.raw`Compute the image rejection ratio (dB) for a zero-IF receiver with 0.5% gain mismatch and 0.5 deg phase error.`, solution: String.raw`$\varepsilon=0.005$, $\psi=0.5^\circ=0.00873$ rad. IRR $=1/[(0.0025)^2+(0.004363)^2]=1/[6.25\times10^{-6}+1.904\times10^{-5}]=1/2.529\times10^{-5}=3.95\times10^4$. In dB: $10\log_{10}(3.95\times10^4)\approx 46$ dB.` },
-      { q: String.raw`A wideband capture is 20 MHz. Give the minimum complex and equivalent real sample rates (ignore filter margin).`, solution: String.raw`Complex: $f_s \ge B = 20$ MS/s (complex). Equivalent real rate $=2B=40$ MS/s. In practice add ~25% for transition band, so ~25 MS/s complex.` },
-      { q: String.raw`An SDR captures at 122.88 MS/s complex, 14-bit, single channel. What USB/link rate is needed?`, solution: String.raw`$R=122.88\times10^6\times14\times2=3.44$ Gb/s. Exceeds USB 3.0 (~5 Gb/s raw but ~3.2 usable), so on-chip decimation or PCIe/10GbE is required.` },
-      { q: String.raw`A DDC must retain a 200 kHz channel from a 20 MHz-wide capture at 20 MS/s. What decimation factor reaches a 500 kS/s output?`, solution: String.raw`$M=f_{s,in}/f_{s,out}=20\times10^6/500\times10^3=40$. A CIC of decimation 40 (or CIC 20 + FIR 2) plus droop-compensating FIR gives the 500 kS/s complex channel (Nyquist 250 kHz > 100 kHz half-bandwidth).` },
-      { q: String.raw`Oversampling by a factor of 16 relative to Nyquist gives how much SNR processing gain in dB?`, solution: String.raw`Gain $=10\log_{10}(\text{OSR})=10\log_{10}16=12.04$ dB (equivalently 2 extra bits of ENOB for a flat-quantization-noise ADC, ~3 dB/octave over 4 octaves).` },
-      { q: String.raw`A zero-IF transmitter has residual LO feedthrough of -35 dBc. Express as a linear ratio and comment.`, solution: String.raw`$-35$ dBc $\Rightarrow 10^{-35/10}=3.16\times10^{-4}$ of carrier power. This carrier spur sits at the LO/center frequency; on-chip DC-bias calibration typically pushes it below -50 dBc.` }
+      { q: String.raw`Compute the image rejection ratio (dB) for a zero-IF receiver with 0.5% gain mismatch and 0.5 deg phase error.`, solution: String.raw`<p><b>Formula.</b> $$\text{IRR}=\frac{1}{(\varepsilon/2)^2+(\psi/2)^2},\qquad \text{IRR}_{dB}=10\log_{10}\text{IRR}$$ where $\varepsilon$ is the fractional I/Q gain mismatch (dimensionless) and $\psi$ is the I/Q phase error in radians.</p>
+      <p><b>Substitute.</b> $\varepsilon=0.005$, $\psi=0.5^\circ=0.5\times\pi/180=0.008727$ rad, so $$\text{IRR}=\frac{1}{(0.0025)^2+(0.004363)^2}.$$</p>
+      <p><b>Compute.</b> $(0.0025)^2=6.25\times10^{-6}$; $(0.004363)^2=1.904\times10^{-5}$; sum $=2.529\times10^{-5}$. $\text{IRR}=1/2.529\times10^{-5}=3.95\times10^{4}$. In dB: $10\log_{10}(3.95\times10^{4})=45.97\approx 46$ dB.</p>
+      <p><b>Explanation.</b> The image tone lands at the mirror frequency about 46 dB below the wanted signal - the phase error dominates here because $\psi$ in radians exceeds $\varepsilon$. This is typical of an uncalibrated direct-conversion receiver; higher-order modulation (e.g. 256-QAM) needs on-chip IQ calibration to push IRR well past this.</p>` },
+      { q: String.raw`A wideband capture is 20 MHz. Give the minimum complex and equivalent real sample rates (ignore filter margin).`, solution: String.raw`<p><b>Formula.</b> $$f_{s,\text{complex}}\ge B,\qquad f_{s,\text{real}}\ge 2B$$ where $B$ is the signal bandwidth, $f_{s,\text{complex}}$ the complex (IQ) sample rate, and $f_{s,\text{real}}$ the equivalent real-sampling rate.</p>
+      <p><b>Substitute.</b> $B=20$ MHz, so $f_{s,\text{complex}}\ge 20$ MHz and $f_{s,\text{real}}\ge 2\times20$ MHz.</p>
+      <p><b>Compute.</b> $f_{s,\text{complex}}=20$ MS/s (complex); $f_{s,\text{real}}=40$ MS/s (real). Adding ~25% guard for the filter transition band gives about $25$ MS/s complex in practice.</p>
+      <p><b>Explanation.</b> One complex sample equals two real samples, so a 20 MS/s IQ stream carries the same information as 40 MS/s real - this is why SDRs quote complex rates matched to bandwidth, not carrier. The 25% margin keeps the wanted band clear of the anti-alias filter's roll-off.</p>` },
+      { q: String.raw`An SDR captures at 122.88 MS/s complex, 14-bit, single channel. What USB/link rate is needed?`, solution: String.raw`<p><b>Formula.</b> $$R=f_s\times N_{bits}\times 2_{(I,Q)}\times N_{ch}$$ where $f_s$ is the complex sample rate, $N_{bits}$ the bits per sample, the factor 2 accounts for the I and Q words, and $N_{ch}$ the number of channels.</p>
+      <p><b>Substitute.</b> $f_s=122.88\times10^{6}$ S/s, $N_{bits}=14$, $N_{ch}=1$: $$R=122.88\times10^{6}\times14\times2\times1.$$</p>
+      <p><b>Compute.</b> $122.88\times10^{6}\times14=1.720\times10^{9}$; $\times2=3.44\times10^{9}=3.44$ Gb/s.</p>
+      <p><b>Explanation.</b> 3.44 Gb/s exceeds USB 3.0's ~3.2 Gb/s usable payload, so the raw stream cannot be shipped whole - on-chip decimation to a narrower channel, or a PCIe/10 GbE link, is required. This is the practical bottleneck that forces the digital front end to reduce rate before the host.</p>` },
+      { q: String.raw`A DDC must retain a 200 kHz channel from a 20 MHz-wide capture at 20 MS/s. What decimation factor reaches a 500 kS/s output?`, solution: String.raw`<p><b>Formula.</b> $$M=\frac{f_{s,in}}{f_{s,out}}$$ where $M$ is the integer decimation factor, $f_{s,in}$ the DDC input rate, and $f_{s,out}$ the desired output rate.</p>
+      <p><b>Substitute.</b> $f_{s,in}=20\times10^{6}$ S/s, $f_{s,out}=500\times10^{3}$ S/s: $$M=\frac{20\times10^{6}}{500\times10^{3}}.$$</p>
+      <p><b>Compute.</b> $M=40$. Realize as a CIC of decimation 40 (or CIC 20 followed by an FIR of 2) plus a droop-compensating FIR, yielding the 500 kS/s complex channel.</p>
+      <p><b>Explanation.</b> The 500 kS/s complex output has Nyquist $\pm250$ kHz, comfortably wider than the $\pm100$ kHz half-bandwidth of the 200 kHz channel, so nothing wanted is lost. Decimating discards the out-of-band 19.8 MHz of noise, delivering oversampling processing gain on top of channel isolation.</p>` },
+      { q: String.raw`Oversampling by a factor of 16 relative to Nyquist gives how much SNR processing gain in dB?`, solution: String.raw`<p><b>Formula.</b> $$\Delta\text{SNR}=10\log_{10}(\text{OSR})$$ where OSR is the oversampling ratio $f_s/(2B)$ and $\Delta\text{SNR}$ the in-band SNR improvement after filtering to bandwidth $B$.</p>
+      <p><b>Substitute.</b> $\text{OSR}=16$: $$\Delta\text{SNR}=10\log_{10}16.$$</p>
+      <p><b>Compute.</b> $\log_{10}16=1.204$, so $\Delta\text{SNR}=12.04$ dB.</p>
+      <p><b>Explanation.</b> 12.04 dB is about 2 extra ENOB ($12.04/6.02$), consistent with ~3 dB/octave over $\log_2 16=4$ octaves. Sanity check: each octave of oversampling buys half a bit, so 4 octaves buys 2 bits - oversampling is a real but expensive way to gain resolution, which motivates noise shaping.</p>` },
+      { q: String.raw`A zero-IF transmitter has residual LO feedthrough of -35 dBc. Express as a linear ratio and comment.`, solution: String.raw`<p><b>Formula.</b> $$\frac{P_{spur}}{P_{carrier}}=10^{L_{dBc}/10}$$ where $L_{dBc}$ is the feedthrough level in dBc (dB relative to the carrier) and the ratio is a linear power fraction.</p>
+      <p><b>Substitute.</b> $L_{dBc}=-35$ dBc: $$\frac{P_{spur}}{P_{carrier}}=10^{-35/10}=10^{-3.5}.$$</p>
+      <p><b>Compute.</b> $10^{-3.5}=3.16\times10^{-4}$ of the carrier power (equivalently $\sqrt{3.16\times10^{-4}}=1.78\times10^{-2}$, i.e. 1.8% in voltage amplitude).</p>
+      <p><b>Explanation.</b> This LO self-mixing spur sits right at the carrier/center frequency, exactly where a DC-centered channel is most sensitive. On-chip DC-bias (LO-leakage) calibration typically drives it below -50 dBc ($10^{-5}$), which is why zero-IF transmitters need active cancellation to meet spectral masks.</p>` }
     ],
     realWorld: String.raw`<p>SDR is now the default architecture across the RF industry. Cellular basestations use direct-conversion transceivers with digital front ends so one radio serves multiple bands and standards (2G-5G) via software. Test-and-measurement vendors build vector signal analyzers/generators on SDR platforms. In defense, wideband SDRs support electronic warfare, signal intelligence, and cognitive/anti-jam waveforms that adapt in software. Open platforms - RTL-SDR (cheap RX-only), Ettus USRP (UHD driver), and the ADALM-PLUTO (AD9361-based) - have made SDR ubiquitous in research and education, almost always programmed through GNU Radio flowgraphs or MATLAB/Simulink.</p>`,
     related: ['adc', 'dac', 'ad9361', 'rfsoc', 'comm-basics']
@@ -235,7 +312,8 @@ CONTENT.topics.push(
     tags: ['adc', 'sampling', 'nyquist', 'quantization', 'snr', 'enob', 'sfdr', 'sigma-delta'],
     summary: String.raw`An ADC samples a continuous signal in time and quantizes it in amplitude; its performance is bounded by the sampling theorem, quantization noise, jitter, and linearity, summarized by SNR, ENOB, SFDR, and SINAD.`,
     prerequisites: ['comm-basics', 'noise', 'psd', 'sdr'],
-    intro: String.raw`<p>An <b>Analog-to-Digital Converter</b> performs two distinct operations: <b>sampling</b> (discretizing time) and <b>quantization</b> (discretizing amplitude). Sampling is governed by the Nyquist-Shannon theorem and, when violated deliberately, by aliasing/undersampling. Quantization introduces an irreducible error that, treated as noise, sets the fundamental dynamic-range limit. The famous result $\text{SNR}_{ideal}=6.02N+1.76$ dB ties bit depth to achievable signal-to-noise ratio, while real converters fall short by an amount captured in <b>ENOB</b>.</p>
+    intro: String.raw`<p><b>Why does the ADC matter so much?</b> Every digital system - your phone, an SDR, an oscilloscope - lives behind an ADC, and the ADC is the gate through which the analog world must pass. Whatever information it loses at that gate can never be recovered downstream, no matter how clever the DSP. So the ADC sets the ceiling on the entire system's fidelity: its bits, its speed, and its noise decide how weak a signal you can hear and how strong a blocker you can survive. Understanding it is understanding the fundamental limit of everything after it.</p>
+    <p>An <b>Analog-to-Digital Converter</b> performs two distinct operations: <b>sampling</b> (discretizing time) and <b>quantization</b> (discretizing amplitude). Sampling is governed by the Nyquist-Shannon theorem and, when violated deliberately, by aliasing/undersampling. Quantization introduces an irreducible error that, treated as noise, sets the fundamental dynamic-range limit. The famous result $\text{SNR}_{ideal}=6.02N+1.76$ dB ties bit depth to achievable signal-to-noise ratio, while real converters fall short by an amount captured in <b>ENOB</b>.</p>
     <p>Understanding an ADC means understanding where its noise and spurs come from - quantization, thermal noise, aperture jitter, and nonlinearity - and how techniques like oversampling and noise shaping (sigma-delta) trade sample rate for resolution.</p>`,
     sections: [
       {
@@ -249,7 +327,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Quantization Error and Its Noise Model',
-        html: String.raw`<p>An $N$-bit ADC with full-scale range $V_{FS}$ has step size (LSB) $\Delta=V_{FS}/2^N$. Rounding to the nearest level introduces an error $e$ uniformly distributed in $[-\Delta/2,+\Delta/2]$ (valid when the signal is busy and spans many codes). The error power (variance) is</p>
+        html: String.raw`<div class="callout tip"><b>Intuition:</b> quantizing is like rounding every measurement to the nearest tick on a ruler. If the ticks are $\Delta$ apart, your worst rounding error is half a tick, and on average the error looks like a small random "hiss" added to the signal. That is the whole trick - we treat rounding as if it were noise, which lets us put a single number ($\Delta^2/12$) on it and reason about SNR.</div>
+        <p>An $N$-bit ADC with full-scale range $V_{FS}$ has step size (LSB) $\Delta=V_{FS}/2^N$. Rounding to the nearest level introduces an error $e$ uniformly distributed in $[-\Delta/2,+\Delta/2]$ (valid when the signal is busy and spans many codes). The error power (variance) is</p>
         $$\sigma_q^2=\frac{1}{\Delta}\int_{-\Delta/2}^{\Delta/2} e^2\,de = \frac{\Delta^2}{12}.$$
         <p>This is the celebrated <b>quantization noise power</b>. Modeling it as additive white noise spread uniformly across the Nyquist band $[0,f_s/2]$ gives a quantization-noise PSD of $\sigma_q^2/(f_s/2)$. Two consequences follow immediately: more bits reduce $\Delta$ and hence noise; spreading fixed noise over a wider band (oversampling) reduces the in-band portion.</p>`
       },
@@ -281,7 +360,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Sigma-Delta Modulation: Noise Shaping',
-        html: String.raw`<p>A <b>sigma-delta (ΣΔ) ADC</b> combines heavy oversampling with a feedback loop containing an integrator and a coarse (often 1-bit) quantizer. The loop acts as a lowpass to the signal but a highpass to the quantization noise - it <b>shapes</b> the noise out of the baseband and up to high frequencies, where a digital decimation filter removes it.</p>
+        html: String.raw`<div class="callout tip"><b>The key idea in one sentence:</b> plain oversampling spreads quantization noise thinner everywhere; noise <i>shaping</i> actively <b>sweeps the noise out of the band you care about</b> and piles it up at high frequencies, where a digital filter can throw it away. It is the difference between diluting dirt across a whole floor versus sweeping it into one corner and removing the corner.</div>
+        <p>A <b>sigma-delta (ΣΔ) ADC</b> combines heavy oversampling with a feedback loop containing an integrator and a coarse (often 1-bit) quantizer. The loop acts as a lowpass to the signal but a highpass to the quantization noise - it <b>shapes</b> the noise out of the baseband and up to high frequencies, where a digital decimation filter removes it.</p>
         <p>For an $L$-th order modulator with OSR, the in-band quantization noise and SNR improve as</p>
         $$\text{SNR} \approx 6.02N + 1.76 + (20L+10)\log_{10}(\text{OSR}) - 10\log_{10}\!\frac{\pi^{2L}}{2L+1}.$$
         <ul>
@@ -300,6 +380,17 @@ CONTENT.topics.push(
           <tr><td>Sigma-Delta</td><td>Very high (16-24b)</td><td>Low-moderate</td><td>Audio, precision</td><td>Oversampled, noise-shaped</td></tr>
         </table>
         <p>SDR receivers overwhelmingly use pipeline (and increasingly RF-sampling) ADCs for their balance of speed and resolution.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<ul>
+          <li><b>Two operations:</b> sampling (discretize time, governed by Nyquist $f_s>2B$ and aliasing $|f_{in}-kf_s|$) and quantization (discretize amplitude, noise power $\Delta^2/12$) - each with its own limit.</li>
+          <li><b>The master formula:</b> ideal $\text{SNR}=6.02N+1.76$ dB, and its inverse $\text{ENOB}=(\text{SINAD}-1.76)/6.02$ tells you the <i>real</i> resolution a converter delivers at a given frequency.</li>
+          <li><b>Real noise floors:</b> aperture jitter ($\text{SNR}=-20\log_{10}(2\pi f_{in}t_j)$, worse at high input frequency) and thermal noise usually dominate over quantization in high-resolution parts.</li>
+          <li><b>Buying resolution:</b> oversampling gives $10\log_{10}(\text{OSR})$ (~3 dB/octave); noise shaping of order $L$ gives a far steeper $(6L+3)$ dB/octave - the reason $\Sigma\Delta$ reaches 24 bits.</li>
+          <li><b>Undersampling:</b> deliberately aliasing a bandpass signal to baseband needs only $f_s>2B$, not $2f_{high}$ - but punishes jitter because $f_{in}$ is high.</li>
+          <li><b>Architecture map:</b> flash (fast/low-res), pipeline (SDR sweet spot), SAR (low-power precision), $\Sigma\Delta$ (highest resolution) - pick by the speed/resolution/power corner you need.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -355,6 +446,27 @@ CONTENT.topics.push(
         <text x="250" y="185" fill="#9aa7b5" font-size="9">Loop is LP to signal, HP to quantization noise (noise shaping).</text>
         </svg>`,
         caption: 'Sigma-delta modulator: integrator + coarse quantizer in feedback shapes quantization noise out of band; a decimation filter removes it.'
+      },
+      {
+        title: String.raw`SAR successive-approximation loop`,
+        svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+        <defs><marker id="arr3-adc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="12" y="18" fill="#e6edf3" font-size="13">SAR ADC: binary-search loop</text>
+        <line x1="20" y1="70" x2="55" y2="70" stroke="#9aa7b5" marker-end="url(#arr3-adc)"/><text x="16" y="62" fill="#9aa7b5" font-size="10">V_in</text>
+        <rect x="55" y="56" width="46" height="28" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="60" y="74" fill="#e6edf3" font-size="8">S/H</text>
+        <path d="M120,50 L120,90 L152,70 Z" fill="#1c232e" stroke="#ffa94d"/><text x="123" y="74" fill="#e6edf3" font-size="9">cmp</text>
+        <line x1="101" y1="70" x2="120" y2="70" stroke="#9aa7b5" marker-end="url(#arr3-adc)"/>
+        <rect x="175" y="52" width="70" height="36" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="181" y="68" fill="#e6edf3" font-size="8">SAR logic</text><text x="181" y="82" fill="#9aa7b5" font-size="7">bit register</text>
+        <line x1="152" y1="70" x2="175" y2="70" stroke="#9aa7b5" marker-end="url(#arr3-adc)"/>
+        <rect x="175" y="120" width="70" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="181" y="139" fill="#e6edf3" font-size="8">N-bit DAC</text>
+        <line x1="210" y1="88" x2="210" y2="120" stroke="#9aa7b5" marker-end="url(#arr3-adc)"/><text x="214" y="108" fill="#9aa7b5" font-size="7">trial code</text>
+        <path d="M175,135 L110,135 L110,72" stroke="#9aa7b5" fill="none" marker-end="url(#arr3-adc)"/><text x="112" y="150" fill="#9aa7b5" font-size="7">V_dac to -in</text>
+        <text x="106" y="46" fill="#ff6b6b" font-size="8">+</text><text x="106" y="98" fill="#63e6be" font-size="8">-</text>
+        <line x1="245" y1="70" x2="290" y2="70" stroke="#9aa7b5" marker-end="url(#arr3-adc)"/><text x="295" y="74" fill="#63e6be" font-size="9">N-bit code</text>
+        <text x="20" y="180" fill="#9aa7b5" font-size="9">Test MSB first: set bit, compare V_in vs DAC output;</text>
+        <text x="20" y="196" fill="#9aa7b5" font-size="9">keep bit if V_in larger, else clear. One bit per clock -> N cycles.</text>
+        </svg>`,
+        caption: 'SAR ADC: a comparator, N-bit feedback DAC, and successive-approximation register run a binary search, resolving one bit per clock (MSB to LSB) over N cycles.'
       }
     ],
     equations: [
@@ -428,13 +540,34 @@ CONTENT.topics.push(
       { q: String.raw`Increasing bit depth beyond ~14 bits often does NOT help because:`, options: [String.raw`aliasing worsens`, String.raw`thermal noise dominates`, String.raw`the Nyquist rate rises`, String.raw`SFDR is fixed`], answer: 1, explain: String.raw`kT/C and amplifier thermal noise set the floor above quantization noise.` }
     ],
     numericals: [
-      { q: String.raw`A 16-bit ADC has $V_{FS}=2$ V. Find the LSB, quantization noise rms, and ideal SNR.`, solution: String.raw`$\Delta=2/2^{16}=30.5\ \mu$V. Noise rms $=\Delta/\sqrt{12}=30.5\mu/3.464=8.81\ \mu$V. Ideal SNR $=6.02\times16+1.76=98.1$ dB.` },
-      { q: String.raw`An ADC datasheet lists SINAD = 65 dB at 70 MHz input. What is the ENOB?`, solution: String.raw`ENOB $=(65-1.76)/6.02=10.5$ bits. So the 70 MHz performance is that of an ideal ~10.5-bit converter.` },
-      { q: String.raw`What aperture jitter is needed to achieve 70 dB SNR for a 200 MHz input tone?`, solution: String.raw`$70=-20\log_{10}(2\pi f_{in}t_j)\Rightarrow 2\pi f_{in}t_j=10^{-70/20}=3.16\times10^{-4}$. $t_j=3.16\times10^{-4}/(2\pi\times200\times10^6)=2.52\times10^{-13}$ s $=0.25$ ps rms.` },
-      { q: String.raw`A signal occupies 100 kHz and is sampled at 25.6 MHz. Find the OSR and oversampling SNR gain.`, solution: String.raw`OSR $=f_s/(2B)=25.6\times10^6/(200\times10^3)=128$. Gain $=10\log_{10}128=21.1$ dB (about 3.5 extra bits from oversampling alone).` },
-      { q: String.raw`A 100 MHz carrier is undersampled at 40 MS/s. Find the alias (baseband) frequency and note any inversion.`, solution: String.raw`The nearest multiple of $f_s$ is $k=\text{round}(100/40)\approx 2$ or $3$, both giving $|100-2\times40|=|100-3\times40|=20$ MHz, so the alias lands at $f_{alias}=20$ MHz - exactly the Nyquist edge $f_s/2$. The tone sits in Nyquist zone $\lceil 100/(40/2)\rceil=\lceil 5\rceil=5$ (an odd zone), so the spectrum is NOT inverted. In practice one shifts $f_s$ slightly so the band sits comfortably inside a zone rather than on the boundary.` },
-      { q: String.raw`A 3rd-order sigma-delta runs at OSR = 64. Estimate the noise-shaping SNR gain over Nyquist (ignore the constant penalty).`, solution: String.raw`Per octave $(6L+3)=21$ dB. Octaves of oversampling $=\log_2 64=6$. Gain $\approx 21\times6=126$ dB (the fixed penalty $10\log_{10}(\pi^6/7)\approx 21$ dB reduces the net, but the shaping term is enormous - why $\Sigma\Delta$ reaches 20+ bits).` },
-      { q: String.raw`Compute the combined SNR when quantization-limited SNR is 74 dB and jitter-limited SNR is 70 dB.`, solution: String.raw`Convert to noise powers: $10^{-74/10}=3.98\times10^{-8}$, $10^{-70/10}=1.0\times10^{-7}$. Sum $=1.40\times10^{-7}$. Combined SNR $=-10\log_{10}(1.40\times10^{-7})=68.5$ dB - jitter dominates.` }
+      { q: String.raw`A 16-bit ADC has $V_{FS}=2$ V. Find the LSB, quantization noise rms, and ideal SNR.`, solution: String.raw`<p><b>Formula.</b> $$\Delta=\frac{V_{FS}}{2^{N}},\qquad \sigma_q=\frac{\Delta}{\sqrt{12}},\qquad \text{SNR}_{ideal}=6.02N+1.76\ \text{dB}$$ where $\Delta$ is the LSB step, $\sigma_q$ the rms quantization noise (uniform error on $\pm\Delta/2$), $V_{FS}$ the full-scale range, and $N$ the bit count.</p>
+      <p><b>Substitute.</b> $V_{FS}=2$ V, $N=16$: $\Delta=2/2^{16}$; $\sigma_q=\Delta/\sqrt{12}$; $\text{SNR}=6.02\times16+1.76$.</p>
+      <p><b>Compute.</b> $\Delta=2/65536=30.52\ \mu$V. $\sigma_q=30.52\ \mu\text{V}/3.4641=8.81\ \mu$V. $\text{SNR}_{ideal}=96.32+1.76=98.1$ dB.</p>
+      <p><b>Explanation.</b> Each extra bit halves the LSB and adds 6.02 dB; a 16-bit part reaches ~98 dB in theory. In practice thermal (kT/C) noise usually exceeds this 8.8 µV floor, so a real 16-bit converter delivers fewer ENOB than the ideal.</p>` },
+      { q: String.raw`An ADC datasheet lists SINAD = 65 dB at 70 MHz input. What is the ENOB?`, solution: String.raw`<p><b>Formula.</b> $$\text{ENOB}=\frac{\text{SINAD}-1.76}{6.02}$$ where SINAD (dB) is the measured signal-to-noise-and-distortion ratio and ENOB is the effective number of bits.</p>
+      <p><b>Substitute.</b> $\text{SINAD}=65$ dB: $$\text{ENOB}=\frac{65-1.76}{6.02}.$$</p>
+      <p><b>Compute.</b> $65-1.76=63.24$; $63.24/6.02=10.5$ bits.</p>
+      <p><b>Explanation.</b> At 70 MHz the converter behaves like an ideal 10.5-bit ADC, even if it is marketed as (say) a 12- or 14-bit part. ENOB collapses all real impairments - distortion, jitter, thermal noise - into one honest figure, and it typically falls as input frequency rises.</p>` },
+      { q: String.raw`What aperture jitter is needed to achieve 70 dB SNR for a 200 MHz input tone?`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}_{jitter}=-20\log_{10}(2\pi f_{in}t_j)\;\Rightarrow\; t_j=\frac{10^{-\text{SNR}/20}}{2\pi f_{in}}$$ where $t_j$ is the rms aperture jitter, $f_{in}$ the input frequency, and SNR the jitter-limited signal-to-noise ratio in dB.</p>
+      <p><b>Substitute.</b> $\text{SNR}=70$ dB, $f_{in}=200\times10^{6}$ Hz: $2\pi f_{in}t_j=10^{-70/20}=10^{-3.5}$, so $$t_j=\frac{3.16\times10^{-4}}{2\pi\times200\times10^{6}}.$$</p>
+      <p><b>Compute.</b> $2\pi\times200\times10^{6}=1.257\times10^{9}$. $t_j=3.16\times10^{-4}/1.257\times10^{9}=2.52\times10^{-13}$ s $=0.25$ ps rms.</p>
+      <p><b>Explanation.</b> A quarter-picosecond of clock jitter caps SNR at 70 dB for a 200 MHz tone - and the requirement tightens with $f_{in}$, not sample rate. This is why undersampling or direct-RF sampling of GHz signals demands sub-100-fs clocks.</p>` },
+      { q: String.raw`A signal occupies 100 kHz and is sampled at 25.6 MHz. Find the OSR and oversampling SNR gain.`, solution: String.raw`<p><b>Formula.</b> $$\text{OSR}=\frac{f_s}{2B},\qquad \Delta\text{SNR}=10\log_{10}(\text{OSR})$$ where $f_s$ is the sample rate, $B$ the signal bandwidth, OSR the oversampling ratio, and $\Delta\text{SNR}$ the processing gain after filtering to $B$.</p>
+      <p><b>Substitute.</b> $f_s=25.6\times10^{6}$ Hz, $B=100\times10^{3}$ Hz: $\text{OSR}=25.6\times10^{6}/(2\times100\times10^{3})$; then $\Delta\text{SNR}=10\log_{10}(\text{OSR})$.</p>
+      <p><b>Compute.</b> $\text{OSR}=25.6\times10^{6}/200\times10^{3}=128$. $\Delta\text{SNR}=10\log_{10}128=21.07$ dB.</p>
+      <p><b>Explanation.</b> Filtering to the 100 kHz band discards 127/128 of the quantization noise, adding ~21 dB (about $21.07/6.02\approx3.5$ extra bits). Sanity check: $\log_2 128=7$ octaves $\times$ 3 dB/octave $=21$ dB - consistent.</p>` },
+      { q: String.raw`A 100 MHz carrier is undersampled at 40 MS/s. Find the alias (baseband) frequency and note any inversion.`, solution: String.raw`<p><b>Formula.</b> $$f_{alias}=|f_{in}-k f_s|,\quad k=\text{round}(f_{in}/f_s),\qquad \text{zone}=\left\lceil\frac{f_{in}}{f_s/2}\right\rceil$$ where $f_{in}$ is the input frequency, $f_s$ the sample rate, $k$ the nearest replica index, and the Nyquist zone (odd = upright, even = inverted).</p>
+      <p><b>Substitute.</b> $f_{in}=100$ MHz, $f_s=40$ MHz: $k=\text{round}(100/40)=\text{round}(2.5)$, and $\text{zone}=\lceil 100/20\rceil$.</p>
+      <p><b>Compute.</b> $k=2$ or $3$ (the 2.5 boundary): both give $|100-2\times40|=|100-3\times40|=20$ MHz, so $f_{alias}=20$ MHz $=f_s/2$ exactly (the Nyquist edge). Zone $=\lceil5\rceil=5$, an odd zone, so the spectrum is NOT inverted.</p>
+      <p><b>Explanation.</b> The tone folds down to the very edge of the first Nyquist zone - a degenerate case sitting on the boundary. In practice you nudge $f_s$ (or the tuning) so the band lands comfortably inside a zone, away from the fold point where filtering and any adjacent image become problematic.</p>` },
+      { q: String.raw`A 3rd-order sigma-delta runs at OSR = 64. Estimate the noise-shaping SNR gain over Nyquist (ignore the constant penalty).`, solution: String.raw`<p><b>Formula.</b> $$\Delta\text{SNR}=(6L+3)\times\log_2(\text{OSR})\ \text{dB}$$ (the shaping term), where $L$ is the modulator order and OSR the oversampling ratio; the fixed penalty is $10\log_{10}[\pi^{2L}/(2L+1)]$.</p>
+      <p><b>Substitute.</b> $L=3$, $\text{OSR}=64$: per octave $6L+3=21$ dB; octaves $=\log_2 64=6$; so $\Delta\text{SNR}=21\times6$. Penalty $=10\log_{10}(\pi^{6}/7)$.</p>
+      <p><b>Compute.</b> Shaping gain $=21\times6=126$ dB. Penalty: $\pi^{6}=961.4$, $/7=137.3$, $10\log_{10}137.3=21.4$ dB. Net $\approx126-21\approx105$ dB above the Nyquist-rate baseline.</p>
+      <p><b>Explanation.</b> A 3rd-order loop gains 21 dB per doubling of OSR - vastly more than plain oversampling's 3 dB/octave - which is why $\Sigma\Delta$ converters reach 20+ effective bits at audio/precision rates. The enormous shaping term easily swamps the fixed penalty.</p>` },
+      { q: String.raw`Compute the combined SNR when quantization-limited SNR is 74 dB and jitter-limited SNR is 70 dB.`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}_{tot}=-10\log_{10}\!\left(10^{-\text{SNR}_q/10}+10^{-\text{SNR}_j/10}\right)$$ noise powers add (reciprocal SNRs), where $\text{SNR}_q$ is the quantization-limited and $\text{SNR}_j$ the jitter-limited SNR in dB.</p>
+      <p><b>Substitute.</b> $\text{SNR}_q=74$ dB, $\text{SNR}_j=70$ dB: noise fractions $10^{-74/10}$ and $10^{-70/10}$.</p>
+      <p><b>Compute.</b> $10^{-7.4}=3.98\times10^{-8}$; $10^{-7.0}=1.00\times10^{-7}$; sum $=1.40\times10^{-7}$. $\text{SNR}_{tot}=-10\log_{10}(1.40\times10^{-7})=68.5$ dB.</p>
+      <p><b>Explanation.</b> The combined SNR (68.5 dB) is below the worse of the two contributors, and jitter dominates because its noise power is larger. Rule of thumb: when two noise sources are within a few dB, the total sits ~1-3 dB below the smaller SNR - you must fix the dominant one to improve overall performance.</p>` }
     ],
     realWorld: String.raw`<p>Every SDR, oscilloscope, cellular receiver, and digital audio device lives or dies by its ADC. Direct-sampling receivers (RFSoC, high-speed 5G radios) push pipeline/RF ADCs to multi-GSPS while battling aperture jitter that limits high-frequency SNR. Audio and precision instrumentation exploit sigma-delta to reach 24-bit resolution cheaply. ADC vendors specify ENOB, SFDR, SINAD, and NSD (noise spectral density) as the true figures of merit; a "16-bit" part delivering 12 ENOB at the frequency you actually use is a common design trap. Undersampling is a favorite trick in IF-sampling receivers, deliberately aliasing an IF band into the first Nyquist zone to relax converter speed.</p>`,
     related: ['dac', 'sdr', 'noise', 'noise-floor', 'rfsoc']
@@ -447,12 +580,14 @@ CONTENT.topics.push(
     tags: ['dac', 'zoh', 'sinc', 'images', 'reconstruction', 'nyquist-zones', 'rf-sampling'],
     summary: String.raw`A DAC converts a discrete-time sequence into a continuous waveform; the zero-order hold imposes a sinc-shaped frequency response, creates spectral images at multiples of fs, and requires reconstruction/anti-imaging filtering (or inverse-sinc pre-emphasis) for accurate output.`,
     prerequisites: ['adc', 'sdr', 'comm-basics'],
-    intro: String.raw`<p>A <b>Digital-to-Analog Converter</b> is the transmit-side counterpart of the ADC. Given a sequence of codes at rate $f_s$, it produces a continuous voltage or current. Almost all practical DACs hold each sample constant for one sample period - a <b>zero-order hold (ZOH)</b> - which is convenient to build but has two important spectral consequences: it multiplies the desired spectrum by a $\text{sinc}$ envelope (causing high-frequency <b>droop</b>), and it leaves <b>spectral images</b> of the baseband centered at every multiple of $f_s$. Reconstructing a clean analog signal therefore requires an <b>anti-imaging (reconstruction) filter</b> and, for flat response, <b>inverse-sinc pre-emphasis</b>.</p>
+    intro: String.raw`<p><b>Why is the DAC harder than it looks?</b> It seems trivial - just turn numbers back into voltages. But a computer can only output <i>held</i> values, one per sample, producing a blocky staircase rather than a smooth wave. That staircase is not the signal you asked for: it carries copies (images) of your signal at higher frequencies and a built-in high-frequency roll-off. So every DAC is really a two-step act - generate the staircase, then <i>reconstruct</i> the smooth analog waveform hiding inside it. Understanding the staircase's spectrum is the whole game, and modern radios even weaponize it to synthesize RF directly.</p>
+    <p>A <b>Digital-to-Analog Converter</b> is the transmit-side counterpart of the ADC. Given a sequence of codes at rate $f_s$, it produces a continuous voltage or current. Almost all practical DACs hold each sample constant for one sample period - a <b>zero-order hold (ZOH)</b> - which is convenient to build but has two important spectral consequences: it multiplies the desired spectrum by a $\text{sinc}$ envelope (causing high-frequency <b>droop</b>), and it leaves <b>spectral images</b> of the baseband centered at every multiple of $f_s$. Reconstructing a clean analog signal therefore requires an <b>anti-imaging (reconstruction) filter</b> and, for flat response, <b>inverse-sinc pre-emphasis</b>.</p>
     <p>Modern <b>RF-sampling DACs</b> turn the image structure into a feature: by intentionally using a higher Nyquist zone, they synthesize RF directly without an analog upconversion mixer.</p>`,
     sections: [
       {
         h: 'Zero-Order Hold and the Sinc Response',
-        html: String.raw`<p>Mathematically the DAC output is the ideal impulse train (samples) convolved with a rectangular pulse $h(t)$ of width $T_s=1/f_s$. Convolution in time is multiplication in frequency, and the Fourier transform of a rectangle of width $T_s$ is</p>
+        html: String.raw`<div class="callout tip"><b>Where the sinc comes from, intuitively:</b> holding each sample flat for one period is the same as smearing an ideal spike into a rectangle of width $T_s$. In the frequency domain, a rectangle in time <i>is</i> a sinc, and multiplying by it gently tilts down your high frequencies (droop) while leaving weakened copies of the spectrum at every multiple of $f_s$ (images). Everything else in this topic is just managing those two side-effects of the hold.</div>
+        <p>Mathematically the DAC output is the ideal impulse train (samples) convolved with a rectangular pulse $h(t)$ of width $T_s=1/f_s$. Convolution in time is multiplication in frequency, and the Fourier transform of a rectangle of width $T_s$ is</p>
         $$H(f)=T_s\,\frac{\sin(\pi f T_s)}{\pi f T_s}=T_s\,\text{sinc}(f/f_s),$$
         <p>a sinc envelope with nulls at every multiple of $f_s$. The magnitude falls as frequency rises across the first Nyquist zone - this is <b>ZOH droop</b>. At the Nyquist edge $f=f_s/2$ the attenuation is $\text{sinc}(1/2)=\dfrac{\sin(\pi/2)}{\pi/2}=\dfrac{2}{\pi}=0.637$, i.e. $20\log_{10}(0.637)=-3.92$ dB.</p>
         <div class="callout"><b>Key numbers:</b> droop at $f=0.1f_s$ is $-0.14$ dB; at $0.25f_s$ it is $-0.91$ dB; at $0.4f_s$ it is $-2.42$ dB; at $0.5f_s$ (Nyquist) it is $-3.92$ dB.</div>`
@@ -505,6 +640,17 @@ CONTENT.topics.push(
           <li><b>Clock jitter</b> - modulates output timing, again worse at high output frequency (RF-sampling modes).</li>
         </ul>
         <p>Figures of merit mirror the ADC: SFDR, SINAD/ENOB, NSD, and IMD for two-tone tests.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<ul>
+          <li><b>The hold shapes everything:</b> a ZOH imposes $H(f)=\text{sinc}(f/f_s)$ - a droop reaching $-3.92$ dB at Nyquist - and leaves spectral images at $nf_s\pm f_0$, with the first at $f_s-f_0$ being the strongest and hardest to filter.</li>
+          <li><b>Two fixes for droop:</b> inverse-sinc pre-emphasis (boosts highs digitally, costs headroom) or interpolation (raise $f_s$ so the signal sits low in the band where droop is negligible) - interpolation is usually preferred.</li>
+          <li><b>Interpolation's real payoff:</b> pushing images far from the signal turns a demanding sharp reconstruction filter into a trivial analog lowpass.</li>
+          <li><b>Images as a feature:</b> RF-sampling DACs use a higher-Nyquist-zone image (boosted by mix-mode/RZ) to synthesize RF directly, deleting the analog upconverter.</li>
+          <li><b>Same noise ceiling as the ADC:</b> quantization SNR is $6.02N+1.76$ dB; real performance is set by DNL/INL, glitch energy, settling, and jitter (worse at high output frequency).</li>
+          <li><b>You can now compute droop</b> at any fraction $\alpha=f/f_s$ and locate every image - the two questions every transmit-filter design turns on.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -560,6 +706,30 @@ CONTENT.topics.push(
         <text x="20" y="115" fill="#9aa7b5" font-size="9">Interpolation pushes images away; inverse-sinc flattens droop; LPF removes images.</text>
         </svg>`,
         caption: 'Digital interpolation and inverse-sinc pre-emphasis relax the analog reconstruction filter and correct ZOH droop.'
+      },
+      {
+        title: String.raw`Current-steering reconstruction: code to smooth analog`,
+        svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+        <defs><marker id="arr3-dac" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="12" y="18" fill="#e6edf3" font-size="13">DAC reconstruction mechanism</text>
+        <rect x="18" y="50" width="60" height="30" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="24" y="69" fill="#e6edf3" font-size="8">code N-bit</text>
+        <rect x="96" y="50" width="78" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="102" y="66" fill="#e6edf3" font-size="8">current cells</text><text x="102" y="77" fill="#9aa7b5" font-size="7">steer to sum</text>
+        <rect x="192" y="50" width="66" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="198" y="66" fill="#e6edf3" font-size="8">ZOH hold</text><text x="198" y="77" fill="#9aa7b5" font-size="7">staircase</text>
+        <rect x="276" y="50" width="72" height="30" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="282" y="66" fill="#e6edf3" font-size="8">recon LPF</text><text x="282" y="77" fill="#9aa7b5" font-size="7">anti-image</text>
+        <rect x="366" y="50" width="72" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="372" y="69" fill="#e6edf3" font-size="8">smooth out</text>
+        <line x1="78" y1="65" x2="96" y2="65" stroke="#9aa7b5" marker-end="url(#arr3-dac)"/>
+        <line x1="174" y1="65" x2="192" y2="65" stroke="#9aa7b5" marker-end="url(#arr3-dac)"/>
+        <line x1="258" y1="65" x2="276" y2="65" stroke="#9aa7b5" marker-end="url(#arr3-dac)"/>
+        <line x1="348" y1="65" x2="366" y2="65" stroke="#9aa7b5" marker-end="url(#arr3-dac)"/>
+        <text x="20" y="112" fill="#63e6be" font-size="9">held staircase (ZOH)</text>
+        <polyline points="30,175 30,150 70,150 70,130 110,130 110,120 150,120 150,140 190,140 190,165 230,165" fill="none" stroke="#4dabf7" stroke-width="1.5"/>
+        <path d="M30,165 Q70,132 110,120 T190,150 Q210,160 230,162" fill="none" stroke="#ffa94d" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="250" y="140" fill="#ffa94d" font-size="9">LPF -> smooth</text>
+        <text x="250" y="156" fill="#4dabf7" font-size="9">staircase (before)</text>
+        <text x="20" y="212" fill="#9aa7b5" font-size="9">Steered currents build a held staircase; the LPF removes images and the</text>
+        <text x="20" y="226" fill="#9aa7b5" font-size="9">sinc(f/fs) droop of the hold is corrected by inverse-sinc / interpolation.</text>
+        </svg>`,
+        caption: 'Reconstruction path: the code steers weighted currents into a summing node, the ZOH forms a staircase, and the anti-image LPF smooths it to analog; the ZOH imposes a sinc(f/fs) droop.'
       }
     ],
     equations: [
@@ -626,12 +796,30 @@ CONTENT.topics.push(
       { q: String.raw`The reconstruction filter's job is to:`, options: [String.raw`add droop`, String.raw`remove spectral images above Nyquist`, String.raw`interpolate`, String.raw`quantize`], answer: 1, explain: String.raw`It is an anti-imaging lowpass passing only the first Nyquist zone.` }
     ],
     numericals: [
-      { q: String.raw`A DAC runs at $f_s=100$ MHz and outputs a 40 MHz tone. Find the ZOH droop at the tone and the frequency of the first image.`, solution: String.raw`$\alpha=40/100=0.4$. Droop $=20\log_{10}(\sin(0.4\pi)/(0.4\pi))=20\log_{10}(0.951/1.257)=20\log_{10}0.757=-2.42$ dB. First image at $f_s-f_0=100-40=60$ MHz.` },
-      { q: String.raw`What inverse-sinc boost (dB) is needed at $0.45f_s$ to flatten the response?`, solution: String.raw`Droop at $\alpha=0.45$: $\sin(0.45\pi)/(0.45\pi)=0.9877/1.4137=0.6987$, i.e. $-3.11$ dB. Inverse-sinc must boost by $+3.11$ dB.` },
-      { q: String.raw`A signal of 5 MHz bandwidth is generated at $f_s=20$ MHz, then at $f_s=160$ MHz after 8x interpolation. Compare the reconstruction-filter transition needed.`, solution: String.raw`At 20 MHz: signal edge 5 MHz, first image at $20-5=15$ MHz, transition band 5 to 15 MHz (ratio 3:1, hard). At 160 MHz: image at $160-5=155$ MHz, transition 5 to 155 MHz (31:1, trivial). Interpolation makes the analog filter simple.` },
-      { q: String.raw`A 14-bit DAC: give the ideal SNR and the amplitude of an image at $f_s-f_0$ where the sinc envelope gives -8 dB relative to baseband, if baseband tone is 0 dBFS.`, solution: String.raw`Ideal SNR $=6.02\times14+1.76=86.0$ dB. Image amplitude $=0-8=-8$ dBFS (before the reconstruction filter), which the anti-imaging LPF must further suppress to meet spectral masks.` },
-      { q: String.raw`An RF-sampling DAC at $f_s=6$ GSPS wants to output at 4 GHz. Which Nyquist zone and what is the equivalent baseband frequency?`, solution: String.raw`Zones: 1 (0-3 GHz), 2 (3-6 GHz). 4 GHz lies in zone 2. Baseband image frequency $=f_s-f_{RF}=6-4=2$ GHz (the digital signal is generated at 2 GHz; its zone-2 image at 4 GHz is selected by a bandpass filter, using mix-mode to boost it).` },
-      { q: String.raw`Compute the droop difference between DC and $0.1f_s$ for a plain ZOH.`, solution: String.raw`At DC droop = 0 dB. At $\alpha=0.1$: $\sin(0.1\pi)/(0.1\pi)=0.309/0.314=0.9836$, droop $=20\log_{10}0.9836=-0.14$ dB. Difference $\approx 0.14$ dB - negligible, showing why keeping signals well below Nyquist avoids the need for correction.` }
+      { q: String.raw`A DAC runs at $f_s=100$ MHz and outputs a 40 MHz tone. Find the ZOH droop at the tone and the frequency of the first image.`, solution: String.raw`<p><b>Formula.</b> $$\text{droop}=20\log_{10}\!\left(\frac{\sin(\pi\alpha)}{\pi\alpha}\right),\ \alpha=\frac{f_0}{f_s};\qquad f_{image,1}=f_s-f_0$$ where $\alpha$ is the tone's fraction of $f_s$ and $f_{image,1}$ is the first (strongest) image.</p>
+      <p><b>Substitute.</b> $f_0=40$ MHz, $f_s=100$ MHz: $\alpha=0.4$, so $\text{droop}=20\log_{10}(\sin(0.4\pi)/(0.4\pi))$ and $f_{image,1}=100-40$.</p>
+      <p><b>Compute.</b> $\sin(0.4\pi)=0.9511$, $0.4\pi=1.2566$, ratio $=0.7568$; $20\log_{10}0.7568=-2.42$ dB. First image at $60$ MHz.</p>
+      <p><b>Explanation.</b> At $0.4f_s$ the ZOH already attenuates the wanted tone by 2.4 dB, and the first image sits only 20 MHz away at 60 MHz - a tight transition band for the reconstruction filter. Both problems ease if the signal is kept well below Nyquist (via interpolation).</p>` },
+      { q: String.raw`What inverse-sinc boost (dB) is needed at $0.45f_s$ to flatten the response?`, solution: String.raw`<p><b>Formula.</b> $$\text{boost}=-\,\text{droop}(\alpha)=-20\log_{10}\!\left(\frac{\sin(\pi\alpha)}{\pi\alpha}\right),\quad \alpha=\frac{f}{f_s}$$ the inverse-sinc pre-emphasis must exactly cancel the ZOH droop, where $\alpha$ is the fraction of $f_s$.</p>
+      <p><b>Substitute.</b> $\alpha=0.45$: $\text{droop}=20\log_{10}(\sin(0.45\pi)/(0.45\pi))$.</p>
+      <p><b>Compute.</b> $\sin(0.45\pi)=0.9877$, $0.45\pi=1.4137$, ratio $=0.6987$; droop $=20\log_{10}0.6987=-3.11$ dB. Required boost $=+3.11$ dB.</p>
+      <p><b>Explanation.</b> The pre-emphasis FIR must lift $0.45f_s$ content by 3.11 dB so the cascade is flat. That boost consumes DAC headroom (peak backoff), which is why interpolating to keep signals below ~$0.4f_s$ is preferred over aggressive inverse-sinc near Nyquist.</p>` },
+      { q: String.raw`A signal of 5 MHz bandwidth is generated at $f_s=20$ MHz, then at $f_s=160$ MHz after 8x interpolation. Compare the reconstruction-filter transition needed.`, solution: String.raw`<p><b>Formula.</b> $$f_{stop}=f_s-f_{edge},\qquad \text{transition ratio}=\frac{f_{stop}}{f_{edge}}$$ where $f_{edge}$ is the signal band edge, $f_{stop}=f_s-f_{edge}$ the first image edge, and the ratio measures how gentle the analog filter can be.</p>
+      <p><b>Substitute.</b> $f_{edge}=5$ MHz. Case A: $f_s=20$ MHz $\Rightarrow f_{stop}=20-5$. Case B: $f_s=160$ MHz $\Rightarrow f_{stop}=160-5$.</p>
+      <p><b>Compute.</b> A: image at $15$ MHz, transition $5\to15$ MHz, ratio $3:1$ (steep, hard). B: image at $155$ MHz, transition $5\to155$ MHz, ratio $31:1$ (very gentle).</p>
+      <p><b>Explanation.</b> 8x interpolation pushes the first image from 15 MHz out to 155 MHz, turning a demanding sharp reconstruction filter into a trivial analog lowpass. This is exactly why transmit DACs run far faster than the signal bandwidth requires - it trades cheap digital rate for expensive analog selectivity.</p>` },
+      { q: String.raw`A 14-bit DAC: give the ideal SNR and the amplitude of an image at $f_s-f_0$ where the sinc envelope gives -8 dB relative to baseband, if baseband tone is 0 dBFS.`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}_{ideal}=6.02N+1.76\ \text{dB};\qquad P_{image}=P_{baseband}+H_{sinc,dB}$$ where $N$ is the DAC resolution, $P_{baseband}$ the wanted-tone level (dBFS), and $H_{sinc,dB}$ the (negative) ZOH envelope attenuation at the image.</p>
+      <p><b>Substitute.</b> $N=14$: $\text{SNR}=6.02\times14+1.76$. Image: $P_{baseband}=0$ dBFS, $H_{sinc,dB}=-8$ dB, so $P_{image}=0+(-8)$.</p>
+      <p><b>Compute.</b> $\text{SNR}_{ideal}=84.28+1.76=86.0$ dB. $P_{image}=-8$ dBFS (as presented at the DAC output, before the reconstruction filter).</p>
+      <p><b>Explanation.</b> An 8 dB-down image is far too strong to leave in-band, so the anti-imaging LPF must add tens of dB of rejection to meet emission masks. The 86 dB ideal SNR is the noise ceiling; real spurs (images, glitch, INL) usually set the achievable SFDR lower.</p>` },
+      { q: String.raw`An RF-sampling DAC at $f_s=6$ GSPS wants to output at 4 GHz. Which Nyquist zone and what is the equivalent baseband frequency?`, solution: String.raw`<p><b>Formula.</b> $$\text{zone}=\left\lceil\frac{f_{RF}}{f_s/2}\right\rceil,\qquad f_{base}=|f_{RF}-k f_s|$$ where $f_{RF}$ is the desired output, $f_s$ the DAC rate, and $f_{base}$ the digital tone whose image lands at $f_{RF}$.</p>
+      <p><b>Substitute.</b> $f_{RF}=4$ GHz, $f_s=6$ GHz: $\text{zone}=\lceil 4/3\rceil$; $f_{base}=|4-1\times6|$ (nearest multiple $k=1$).</p>
+      <p><b>Compute.</b> Zones are 1 (0-3 GHz) and 2 (3-6 GHz); $\lceil 4/3\rceil=2$, so 4 GHz is in zone 2. $f_{base}=|4-6|=2$ GHz.</p>
+      <p><b>Explanation.</b> Generate the waveform digitally at 2 GHz; its zone-2 image at 4 GHz is selected by a bandpass reconstruction filter and boosted by mix-mode operation. This is direct-RF synthesis with no analog upconverter - the image structure that plagues baseband DACs becomes the feature.</p>` },
+      { q: String.raw`Compute the droop difference between DC and $0.1f_s$ for a plain ZOH.`, solution: String.raw`<p><b>Formula.</b> $$\text{droop}(\alpha)=20\log_{10}\!\left(\frac{\sin(\pi\alpha)}{\pi\alpha}\right),\quad \Delta=\text{droop}(0)-\text{droop}(0.1)$$ where $\alpha=f/f_s$ and $\text{droop}(0)=0$ dB (sinc$\to1$ at DC).</p>
+      <p><b>Substitute.</b> $\alpha=0.1$: $\text{droop}(0.1)=20\log_{10}(\sin(0.1\pi)/(0.1\pi))$.</p>
+      <p><b>Compute.</b> $\sin(0.1\pi)=0.3090$, $0.1\pi=0.3142$, ratio $=0.9836$; droop $=20\log_{10}0.9836=-0.14$ dB. Difference $\Delta=0-(-0.14)=0.14$ dB.</p>
+      <p><b>Explanation.</b> Only 0.14 dB of droop across the lowest tenth of the band - essentially negligible. This confirms the design rule: keep signals well below Nyquist (large interpolation) and the ZOH sinc roll-off needs no correction at all.</p>` }
     ],
     realWorld: String.raw`<p>Transmit DACs sit at the heart of every signal generator, cellular basestation, and radar transmitter. Traditional designs run the DAC at baseband/IF and use an analog upconverter; modern RF-sampling DACs (in RFSoC and standalone parts) generate multi-GHz RF directly using higher-Nyquist-zone images and mix-mode/RZ envelopes, collapsing the transmit chain. Vendors provide programmable inverse-sinc and interpolation filters on-chip so designers can trade headroom, filter complexity, and flatness. In audio, oversampling DACs push images to hundreds of kHz where a simple analog filter suffices. Understanding the sinc envelope and image structure is essential to meeting spectral emission masks without over-designing the analog reconstruction filter.</p>`,
     related: ['adc', 'sdr', 'ad9361', 'rfsoc', 'comm-basics']
@@ -644,7 +832,8 @@ CONTENT.topics.push(
     tags: ['ad9361', 'transceiver', 'zero-if', 'agile', 'pluto', 'usrp', 'calibration', 'lvds'],
     summary: String.raw`The AD9361 is a highly integrated 2x2 agile RF transceiver covering roughly 70 MHz to 6 GHz with up to 56 MHz channel bandwidth, combining LNAs, mixers, baseband filters, 12-bit ADCs/DACs, fractional-N synthesizers, AGC, and on-chip DC/LO/IQ calibration in a single device controlled via SPI.`,
     prerequisites: ['sdr', 'adc', 'dac', 'pll'],
-    intro: String.raw`<p>The Analog Devices <b>AD9361</b> is the archetypal integrated SDR front end: a complete <b>direct-conversion (zero-IF) 2x2 MIMO transceiver</b> on one chip. It spans roughly <b>70 MHz to 6 GHz</b> in local-oscillator frequency, supports channel bandwidths from under 200 kHz to <b>56 MHz</b>, and integrates essentially everything between the antenna and the digital baseband: low-noise amplifiers, quadrature mixers, tunable analog baseband filters, <b>12-bit ADCs and DACs</b>, <b>fractional-N PLL synthesizers</b>, gain control, and a suite of <b>on-chip calibration engines</b> that tame the classic zero-IF impairments.</p>
+    intro: String.raw`<p><b>Why learn one specific chip?</b> Because the AD9361 is where the abstract SDR ideal - "digitize near the antenna, do the rest in software" - became a single part you can buy and program. Before it, building a tunable wideband radio meant a shelf of discrete mixers, VCOs, filters, and converters, each hand-matched. The AD9361 folds that whole shelf into one SPI-controlled device that self-calibrates its own analog imperfections. It is the canonical teaching example of integrated zero-IF, and mastering it means understanding how every SDR concept lands in real silicon.</p>
+    <p>The Analog Devices <b>AD9361</b> is the archetypal integrated SDR front end: a complete <b>direct-conversion (zero-IF) 2x2 MIMO transceiver</b> on one chip. It spans roughly <b>70 MHz to 6 GHz</b> in local-oscillator frequency, supports channel bandwidths from under 200 kHz to <b>56 MHz</b>, and integrates essentially everything between the antenna and the digital baseband: low-noise amplifiers, quadrature mixers, tunable analog baseband filters, <b>12-bit ADCs and DACs</b>, <b>fractional-N PLL synthesizers</b>, gain control, and a suite of <b>on-chip calibration engines</b> that tame the classic zero-IF impairments.</p>
     <p>Because it collapses an entire radio into a software-configurable part, the AD9361 powers the <b>ADALM-PLUTO</b> learning SDR and the Ettus <b>USRP B200/B210</b>, among many commercial radios. Mastery means understanding its architecture, its calibration flow, and its data/control interfaces.</p>`,
     sections: [
       {
@@ -660,7 +849,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Zero-IF Impairments and On-Chip Calibration',
-        html: String.raw`<p>Being direct-conversion, the AD9361 inherits DC offset, LO leakage, and IQ imbalance - and solves them with hardware calibration engines that run at initialization and can track over temperature:</p>
+        html: String.raw`<div class="callout tip"><b>Why calibration is the price of integration:</b> zero-IF is chosen precisely because it needs no bulky image filter - but that same choice dumps the wanted signal right on top of DC, where analog circuits misbehave most (offsets, leakage, mismatch). The bargain is: accept those near-DC gremlins, then hunt them down in silicon with automatic calibration loops. Without the calibrations below, an integrated zero-IF radio would be unusable; with them, it rivals a superhet.</div>
+        <p>Being direct-conversion, the AD9361 inherits DC offset, LO leakage, and IQ imbalance - and solves them with hardware calibration engines that run at initialization and can track over temperature:</p>
         <ul>
           <li><b>DC-offset calibration</b> (RX): measures and cancels the static DC term that would otherwise sit in the channel center; separate tracking handles baseband and RF-induced offsets.</li>
           <li><b>Quadrature (IQ) calibration</b>: corrects gain/phase mismatch between I and Q on both RX and TX, maximizing image rejection.</li>
@@ -710,6 +900,17 @@ CONTENT.topics.push(
           <li>Configure the <b>ENSM</b> for FDD or TDD and start streaming IQ over LVDS/CMOS.</li>
         </ul>
         <p>Vendor tools (ADI's filter wizard, no-OS drivers, IIO framework) generate the register sets; the flexibility means the same silicon serves GPS-band narrowband receivers and wideband LTE/radar experiments.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<ul>
+          <li><b>What it is:</b> a 2x2 direct-conversion (zero-IF) transceiver spanning ~70 MHz-6 GHz with up to 56 MHz bandwidth, folding LNAs, quadrature mixers, tunable filters, 12-bit ADCs/DACs, fractional-N PLLs, and AGC into one SPI-controlled part.</li>
+          <li><b>Why calibration is central:</b> on-chip DC-offset, IQ, and TX LO-leakage engines are what make an integrated zero-IF radio usable - they turn ~40 dB image rejection into ~54 dB and null the DC/carrier spurs.</li>
+          <li><b>The LO math:</b> $f_{LO}=f_{ref}(N+F/M)$ - you can now pick the integer/fractional divide for any band, and know why delta-sigma dithering tames fractional spurs.</li>
+          <li><b>Data vs control:</b> SPI configures; LVDS (or CMOS) carries IQ; the ENSM sequences sleep/RX/TX for TDD/FDD - and the on-chip FIR/decimation sets the host data rate so the link stays in budget.</li>
+          <li><b>Where it fits:</b> it powers the ADALM-PLUTO and USRP B200/B210, the reference platforms for GNU Radio/UHD/MATLAB; AD9364 is the 1x1 variant, AD9363 the cost/range-reduced one.</li>
+          <li><b>Bring-up recipe:</b> set LO, set sample rate/filter, program FIR/decimation, run calibrations, configure AGC/ENSM, stream - a sequence you can now follow end to end.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -773,6 +974,33 @@ CONTENT.topics.push(
         <line x1="325" y1="80" x2="400" y2="80" stroke="#9aa7b5"/><text x="335" y="75" fill="#9aa7b5" font-size="8">USB/Eth</text>
         </svg>`,
         caption: 'Typical system: an FPGA/SoC configures the AD9361 over SPI and control pins and streams IQ over LVDS, forwarding to a host running GNU Radio/UHD.'
+      },
+      {
+        title: String.raw`AGC and calibration feedback loops`,
+        svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+        <defs><marker id="arr3-ad9361" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="12" y="16" fill="#e6edf3" font-size="13">AD9361 AGC + calibration loops</text>
+        <polygon points="16,66 32,57 32,75" fill="#4dabf7"/>
+        <rect x="42" y="52" width="46" height="28" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="46" y="70" fill="#e6edf3" font-size="8">LNA/PGA</text>
+        <rect x="104" y="52" width="42" height="28" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="108" y="70" fill="#e6edf3" font-size="8">mixer</text>
+        <rect x="162" y="52" width="40" height="28" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="167" y="70" fill="#e6edf3" font-size="8">ADC</text>
+        <rect x="218" y="52" width="70" height="28" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="222" y="70" fill="#e6edf3" font-size="8">DC / IQ corr</text>
+        <line x1="32" y1="66" x2="42" y2="66" stroke="#9aa7b5" marker-end="url(#arr3-ad9361)"/>
+        <line x1="88" y1="66" x2="104" y2="66" stroke="#9aa7b5" marker-end="url(#arr3-ad9361)"/>
+        <line x1="146" y1="66" x2="162" y2="66" stroke="#9aa7b5" marker-end="url(#arr3-ad9361)"/>
+        <line x1="202" y1="66" x2="218" y2="66" stroke="#9aa7b5" marker-end="url(#arr3-ad9361)"/>
+        <line x1="288" y1="66" x2="320" y2="66" stroke="#9aa7b5" marker-end="url(#arr3-ad9361)"/><text x="324" y="70" fill="#63e6be" font-size="9">IQ out</text>
+        <rect x="120" y="120" width="90" height="28" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="126" y="138" fill="#e6edf3" font-size="8">peak/pwr det</text>
+        <line x1="182" y1="80" x2="182" y2="120" stroke="#9aa7b5" marker-end="url(#arr3-ad9361)"/><text x="186" y="104" fill="#9aa7b5" font-size="7">measure level</text>
+        <rect x="120" y="168" width="90" height="26" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="126" y="185" fill="#e6edf3" font-size="8">AGC engine</text>
+        <line x1="165" y1="148" x2="165" y2="168" stroke="#9aa7b5" marker-end="url(#arr3-ad9361)"/>
+        <path d="M120,181 L60,181 L60,80" stroke="#63e6be" fill="none" marker-end="url(#arr3-ad9361)"/><text x="62" y="200" fill="#63e6be" font-size="7">set gain (no clip)</text>
+        <rect x="330" y="120" width="96" height="28" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="336" y="138" fill="#e6edf3" font-size="8">cal engine</text>
+        <path d="M330,134 L253,134 L253,80" stroke="#b197fc" fill="none" marker-end="url(#arr3-ad9361)"/><text x="256" y="104" fill="#b197fc" font-size="7">tune DC/IQ</text>
+        <text x="330" y="170" fill="#9aa7b5" font-size="8">DC-offset, IQ,</text><text x="330" y="184" fill="#9aa7b5" font-size="8">TX LO-leak cal</text>
+        <text x="16" y="222" fill="#9aa7b5" font-size="9">AGC feeds gain back to keep the ADC filled; cal engines drive residual DC/IQ to zero.</text>
+        </svg>`,
+        caption: 'AD9361 feedback loops: peak/power detectors drive the AGC engine to set front-end gain (fill the ADC without clipping), while calibration engines measure and null DC offset, IQ imbalance, and TX LO leakage.'
       }
     ],
     equations: [
@@ -835,11 +1063,26 @@ CONTENT.topics.push(
       { q: String.raw`On-chip decimation/FIR mainly serves to:`, options: [String.raw`increase phase noise`, String.raw`shape the channel and set the host data rate`, String.raw`generate the LO`, String.raw`amplify the RF`], answer: 1, explain: String.raw`It provides selectivity and reduces the rate over the data port.` }
     ],
     numericals: [
-      { q: String.raw`An AD9361 uses $f_{ref}=40$ MHz. Find the integer/fractional divide to synthesize an LO of 2.45 GHz.`, solution: String.raw`$N+F/M=f_{LO}/f_{ref}=2450/40=61.25$. So $N=61$, fractional part $0.25=F/M$ (e.g. $F/M=1/4$). The fractional-N PLL locks the VCO to 2.45 GHz.` },
-      { q: String.raw`For a 20 MHz LTE-like channel, choose an AD9361 sample rate and comment on the on-chip filtering.`, solution: String.raw`Use $f_s=30.72$ MS/s (Nyquist 15.36 MHz > 10 MHz half-bandwidth) or 61.44 MS/s with more decimation. Set analog baseband LPF just above 10 MHz and let the programmable FIR give sharp selectivity; decimate to fit the host link.` },
-      { q: String.raw`After IQ calibration the residual mismatch is 0.2% gain, 0.2 deg phase. Estimate IRR.`, solution: String.raw`$\varepsilon=0.002$, $\psi=0.2^\circ=0.00349$ rad. IRR $=1/[(0.001)^2+(0.001745)^2]=1/[1e-6+3.045e-6]=1/4.045e-6=2.47\times10^5=54$ dB. Calibration turns ~40 dB into ~54 dB.` },
-      { q: String.raw`Give the ideal SNR of the AD9361 converters and the extra dynamic range gained by decimating a 61.44 MS/s stream to a 200 kHz channel.`, solution: String.raw`Ideal SNR $=6.02\times12+1.76=74.0$ dB. OSR $=61.44e6/(2\times100e3)=307$; processing gain $=10\log_{10}307=24.9$ dB, so effective in-band SNR ceiling $\approx 74+24.9\approx 99$ dB (limited by analog/thermal noise in practice).` },
-      { q: String.raw`Two AD9361 receive channels stream at 30.72 MS/s, 12-bit. What is the total LVDS payload data rate?`, solution: String.raw`Per channel: $30.72e6\times12\times2(I,Q)=737$ Mb/s. Two channels: $1.47$ Gb/s payload, comfortably within an LVDS DDR data port and typical FPGA links.` }
+      { q: String.raw`An AD9361 uses $f_{ref}=40$ MHz. Find the integer/fractional divide to synthesize an LO of 2.45 GHz.`, solution: String.raw`<p><b>Formula.</b> $$f_{LO}=f_{ref}\left(N+\frac{F}{M}\right)\;\Rightarrow\; N+\frac{F}{M}=\frac{f_{LO}}{f_{ref}}$$ where $N$ is the integer divide, $F/M$ the fractional part, $f_{ref}$ the PLL reference, and $f_{LO}$ the local-oscillator frequency.</p>
+      <p><b>Substitute.</b> $f_{LO}=2450$ MHz, $f_{ref}=40$ MHz: $$N+\frac{F}{M}=\frac{2450}{40}.$$</p>
+      <p><b>Compute.</b> $2450/40=61.25$, so $N=61$ and $F/M=0.25=1/4$.</p>
+      <p><b>Explanation.</b> The fractional-N PLL locks the VCO at exactly 2.45 GHz using a non-integer divide; the 0.25 fraction gives fine frequency resolution unreachable with integer-N. A delta-sigma modulator dithers $F/M$ so the fractional spurs are randomized rather than sitting at discrete offsets.</p>` },
+      { q: String.raw`For a 20 MHz LTE-like channel, choose an AD9361 sample rate and comment on the on-chip filtering.`, solution: String.raw`<p><b>Formula.</b> $$\frac{f_s}{2}>\frac{B}{2}\quad(\text{complex baseband}),\qquad B_{BB}\gtrsim \frac{B}{2}$$ where $B$ is the channel width, $f_s/2$ the complex Nyquist edge, and $B_{BB}$ the analog baseband LPF corner (one-sided, since the zero-IF channel spans $\pm B/2$).</p>
+      <p><b>Substitute.</b> $B=20$ MHz, half-bandwidth $B/2=10$ MHz. Try $f_s=30.72$ MS/s: Nyquist $=15.36$ MHz. Set $B_{BB}\approx10$-$11$ MHz.</p>
+      <p><b>Compute.</b> $15.36$ MHz $>10$ MHz, so 30.72 MS/s comfortably passes the channel (61.44 MS/s with more decimation also works). Analog LPF just above 10 MHz + programmable FIR for sharp selectivity, then decimate to fit the host link.</p>
+      <p><b>Explanation.</b> The zero-IF channel occupies $\pm10$ MHz around DC, so the complex Nyquist of 15.36 MHz leaves a healthy guard band. Letting the gentle analog LPF do coarse anti-alias and the digital FIR do the sharp edge is the standard division of labor - it keeps the analog simple and reconfigurable in software.</p>` },
+      { q: String.raw`After IQ calibration the residual mismatch is 0.2% gain, 0.2 deg phase. Estimate IRR.`, solution: String.raw`<p><b>Formula.</b> $$\text{IRR}=\frac{1}{(\varepsilon/2)^2+(\psi/2)^2},\qquad \text{IRR}_{dB}=10\log_{10}\text{IRR}$$ where $\varepsilon$ is the residual fractional gain mismatch and $\psi$ the residual phase error (radians) after calibration.</p>
+      <p><b>Substitute.</b> $\varepsilon=0.002$, $\psi=0.2^\circ=0.003491$ rad: $$\text{IRR}=\frac{1}{(0.001)^2+(0.001745)^2}.$$</p>
+      <p><b>Compute.</b> $(0.001)^2=1.0\times10^{-6}$; $(0.001745)^2=3.046\times10^{-6}$; sum $=4.046\times10^{-6}$. $\text{IRR}=2.47\times10^{5}$; $10\log_{10}(2.47\times10^{5})=53.9\approx54$ dB.</p>
+      <p><b>Explanation.</b> On-chip quadrature calibration cuts the residual mismatch tenfold versus the uncalibrated ~40 dB case, lifting image rejection to ~54 dB. That headroom is what lets the AD9361 carry higher-order QAM whose image specs an uncalibrated zero-IF part could not meet.</p>` },
+      { q: String.raw`Give the ideal SNR of the AD9361 converters and the extra dynamic range gained by decimating a 61.44 MS/s stream to a 200 kHz channel.`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}_{ideal}=6.02N+1.76\ \text{dB};\quad \text{OSR}=\frac{f_s}{2B};\quad \text{SNR}_{eff}=\text{SNR}_{ideal}+10\log_{10}(\text{OSR})$$ where $N=12$ bits, $f_s$ the ADC rate, and $B$ the channel bandwidth.</p>
+      <p><b>Substitute.</b> $N=12$: $\text{SNR}_{ideal}=6.02\times12+1.76$. $f_s=61.44\times10^{6}$, $B=200\times10^{3}$: $\text{OSR}=61.44\times10^{6}/(2\times100\times10^{3})$.</p>
+      <p><b>Compute.</b> $\text{SNR}_{ideal}=72.24+1.76=74.0$ dB. $\text{OSR}=61.44\times10^{6}/200\times10^{3}=307.2$; gain $=10\log_{10}307.2=24.9$ dB. $\text{SNR}_{eff}\approx74.0+24.9\approx99$ dB.</p>
+      <p><b>Explanation.</b> Decimating a wide 61.44 MS/s capture down to a 200 kHz channel discards ~99.7% of the quantization noise, lifting the in-band ceiling from 74 dB toward 99 dB. In practice analog/thermal noise, not quantization, becomes the limit well before 99 dB - a reminder that processing gain only helps when quantization is the dominant noise.</p>` },
+      { q: String.raw`Two AD9361 receive channels stream at 30.72 MS/s, 12-bit. What is the total LVDS payload data rate?`, solution: String.raw`<p><b>Formula.</b> $$R=f_s\times N_{bits}\times 2_{(I,Q)}\times N_{ch}$$ where $f_s$ is the per-channel sample rate, $N_{bits}=12$, the factor 2 covers I and Q, and $N_{ch}$ the channel count.</p>
+      <p><b>Substitute.</b> $f_s=30.72\times10^{6}$, $N_{bits}=12$, $N_{ch}=2$: per channel $30.72\times10^{6}\times12\times2$; total $\times2$.</p>
+      <p><b>Compute.</b> Per channel $=30.72\times10^{6}\times24=737$ Mb/s. Two channels $=1.47$ Gb/s.</p>
+      <p><b>Explanation.</b> 1.47 Gb/s of payload sits comfortably within an LVDS DDR data port and typical FPGA links, so no further decimation is forced here. Compare with the 2.95 Gb/s at 61.44 MS/s that approaches USB 3.0's limit - sample rate directly sets whether the link is the bottleneck.</p>` }
     ],
     realWorld: String.raw`<p>The AD9361 defined the "radio-on-a-chip" era. It is the front end of the Ettus USRP B200/B210 (paired with a Xilinx Spartan/Artix FPGA and driven by UHD/GNU Radio) and, in its AD9363 form, of the ADALM-PLUTO used in thousands of universities and by hobbyists. Commercial software radios, spectrum monitors, and small-cell prototypes lean on it because a single SPI-controlled part covers HF-to-6 GHz with wide bandwidth and self-calibration. Its successors (AD9371/9375, ADRV9009) extend bandwidth and add observation receivers/DPD for cellular power amplifiers, but the AD9361 remains the canonical teaching device for integrated zero-IF SDR front ends.</p>`,
     related: ['sdr', 'adc', 'dac', 'pll', 'rfsoc']
@@ -852,7 +1095,8 @@ CONTENT.topics.push(
     tags: ['rfsoc', 'zynq', 'rf-sampling', 'gsps', 'direct-rf', 'phased-array', '5g', 'mimo'],
     summary: String.raw`The Xilinx/AMD RFSoC integrates gigasample-per-second RF-sampling ADCs and DACs, hardened digital up/down converters, programmable FPGA logic, and multicore Arm processors on a single Zynq UltraScale+ device, enabling direct RF sampling that eliminates analog mixers for many-channel phased-array, massive-MIMO, 5G, radar, and EW systems.`,
     prerequisites: ['sdr', 'adc', 'dac', 'ad9361'],
-    intro: String.raw`<p>The <b>RFSoC</b> (RF System-on-Chip) is the Zynq UltraScale+ family variant from Xilinx/AMD that embeds <b>gigasample-per-second (GSPS) RF-sampling data converters</b> directly into a heterogeneous SoC alongside FPGA programmable logic and multicore Arm processors. It represents the culmination of the SDR philosophy: converters fast enough to <b>sample RF directly</b>, removing the analog mixer and its LO, IQ-imbalance, and image problems, while the on-chip FPGA and hardened DSP handle channelization at line rate.</p>
+    intro: String.raw`<p><b>Why does the RFSoC exist?</b> The SDR dream was always to "digitize at the antenna" - but for decades converters were too slow to sample RF directly, so we needed an analog mixer to drag the signal down to a manageable frequency first. What happens when converters finally reach gigasamples per second? The mixer becomes unnecessary: you sample the RF itself, and every impairment the mixer introduced (LO leakage, IQ-imbalance images, mixer spurs) simply vanishes. Now push that further - put dozens of those fast converters, plus the FPGA to process them and the CPUs to control them, on <i>one die</i>. That is the RFSoC: the SDR ideal taken to its physical conclusion for many-channel systems.</p>
+    <p>The <b>RFSoC</b> (RF System-on-Chip) is the Zynq UltraScale+ family variant from Xilinx/AMD that embeds <b>gigasample-per-second (GSPS) RF-sampling data converters</b> directly into a heterogeneous SoC alongside FPGA programmable logic and multicore Arm processors. It represents the culmination of the SDR philosophy: converters fast enough to <b>sample RF directly</b>, removing the analog mixer and its LO, IQ-imbalance, and image problems, while the on-chip FPGA and hardened DSP handle channelization at line rate.</p>
     <p>Where an AD9361 integrates one zero-IF radio, an RFSoC integrates <b>many direct-RF channels</b> plus the digital processing and control processors - ideal for <b>phased arrays, massive MIMO, multiband radar, and electronic warfare</b>, where channel count and bandwidth dominate.</p>`,
     sections: [
       {
@@ -880,7 +1124,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Hardened DDC/DUC and Data Reduction',
-        html: String.raw`<p>A single 4 GSPS 14-bit ADC produces $4\times10^9\times14=56$ Gb/s of raw data - untenable to route in fabric for many channels. The RFSoC therefore places <b>hardened DDC (RX) and DUC (TX)</b> blocks adjacent to each converter:</p>
+        html: String.raw`<div class="callout tip"><b>The problem in one image:</b> sampling RF directly is like drinking from a fire hose - a single converter can spew tens of gigabits per second, and you may have a dozen of them. You cannot pour that into the FPGA fabric; the wires and logic would melt. So each converter gets a dedicated, hardwired "reducer" (the DDC/DUC) sitting right next to it that keeps only the narrow channel you actually want and hands the fabric a trickle instead of a flood.</div>
+        <p>A single 4 GSPS 14-bit ADC produces $4\times10^9\times14=56$ Gb/s of raw data - untenable to route in fabric for many channels. The RFSoC therefore places <b>hardened DDC (RX) and DUC (TX)</b> blocks adjacent to each converter:</p>
         <ul>
           <li>The DDC mixes the wanted band to baseband with a fine-resolution NCO and decimates it, delivering a manageable complex IQ stream to the fabric.</li>
           <li>The DUC interpolates and mixes up, feeding the DAC; mix-mode selects the RF Nyquist zone.</li>
@@ -922,6 +1167,17 @@ CONTENT.topics.push(
           <li><b>Satellite/ground stations and test instruments</b> - wideband multichannel processing.</li>
         </ul>
         <p><b>Design considerations:</b> converter aperture jitter and clock distribution dominate high-frequency SNR; thermal management for GSPS converters + FPGA is significant; the tool flow (Vivado, PYNQ, RFSoC data-converter IP) configures the DDC/DUC, NCOs, and calibration. Careful <b>multi-tile synchronization (MTS)</b> aligns converters across tiles for phase-coherent arrays.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<ul>
+          <li><b>The integration leap:</b> GSPS RF-sampling ADCs/DACs, hardened DDC/DUC, FPGA fabric, and Arm cores on one Zynq UltraScale+ die - the converter becomes a peripheral, not a separate chip.</li>
+          <li><b>Direct RF sampling:</b> sampling at RF deletes the analog mixer/LO and with it LO leakage, IQ-imbalance images, and mixer spurs; all frequency translation becomes digital (NCO), so retuning is instantaneous and drift-free.</li>
+          <li><b>The data problem and its fix:</b> raw GSPS streams (tens of Gb/s each) are unroutable, so hardened DDC/DUC decimate/interpolate at the converter - reducing rate by ~$M/2$ for complex output - before data enters the fabric.</li>
+          <li><b>The jitter price:</b> $\text{SNR}=-20\log_{10}(2\pi f_{in}t_j)$ forces sub-100-fs clocking at multi-GHz inputs; jitter, not bits, usually limits SNR at RF.</li>
+          <li><b>Why arrays love it:</b> shared clocking + digital NCOs + MTS give deterministic phase coherence, and on-die FPGA beamforming realizes $10\log_{10}N$ dB array gain - transformative for 5G massive-MIMO, radar, and EW.</li>
+          <li><b>When to choose it:</b> RFSoC wins on channel count and instantaneous bandwidth; AD9361-class parts still win on size/power/cost for one or two channels - they are complementary, not competitors.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -978,6 +1234,38 @@ CONTENT.topics.push(
         <text x="140" y="165" fill="#9aa7b5" font-size="9">Shared clock + digital NCOs keep all channels phase-coherent for steering.</text>
         </svg>`,
         caption: 'Digital beamforming: per-element RF-sampling converters feed on-die FPGA beamforming; phase coherence comes from shared clocking and digital NCOs.'
+      },
+      {
+        title: String.raw`Multi-tile RX/TX datapath (converter to PL and back)`,
+        svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+        <defs><marker id="arr3-rfsoc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="12" y="16" fill="#e6edf3" font-size="13">RFSoC tile datapath</text>
+        <polygon points="12,54 28,45 28,63" fill="#4dabf7"/><text x="6" y="80" fill="#9aa7b5" font-size="7">RF in</text>
+        <rect x="34" y="40" width="58" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="40" y="55" fill="#e6edf3" font-size="8">RF-ADC</text><text x="40" y="66" fill="#9aa7b5" font-size="7">GSPS tile</text>
+        <rect x="104" y="40" width="70" height="30" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="110" y="55" fill="#e6edf3" font-size="8">DDC</text><text x="110" y="66" fill="#9aa7b5" font-size="7">NCO+decim M</text>
+        <rect x="188" y="40" width="66" height="30" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="194" y="55" fill="#e6edf3" font-size="8">AXI-Stream</text><text x="194" y="66" fill="#9aa7b5" font-size="7">IQ to PL</text>
+        <rect x="270" y="40" width="70" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="276" y="55" fill="#e6edf3" font-size="8">PL DSP</text><text x="276" y="66" fill="#9aa7b5" font-size="7">beamform/filt</text>
+        <line x1="92" y1="55" x2="104" y2="55" stroke="#9aa7b5" marker-end="url(#arr3-rfsoc)"/>
+        <line x1="174" y1="55" x2="188" y2="55" stroke="#9aa7b5" marker-end="url(#arr3-rfsoc)"/>
+        <line x1="254" y1="55" x2="270" y2="55" stroke="#9aa7b5" marker-end="url(#arr3-rfsoc)"/>
+        <rect x="270" y="130" width="70" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="276" y="145" fill="#e6edf3" font-size="8">PL DSP</text><text x="276" y="156" fill="#9aa7b5" font-size="7">waveform gen</text>
+        <rect x="188" y="130" width="66" height="30" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="194" y="145" fill="#e6edf3" font-size="8">AXI-Stream</text><text x="194" y="156" fill="#9aa7b5" font-size="7">IQ to tile</text>
+        <rect x="104" y="130" width="70" height="30" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="110" y="145" fill="#e6edf3" font-size="8">DUC</text><text x="110" y="156" fill="#9aa7b5" font-size="7">interp+NCO</text>
+        <rect x="34" y="130" width="58" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="40" y="145" fill="#e6edf3" font-size="8">RF-DAC</text><text x="40" y="156" fill="#9aa7b5" font-size="7">mix-mode</text>
+        <polygon points="12,136 28,145 28,127" fill="#ff6b6b" transform="translate(-6,0)"/><text x="6" y="170" fill="#9aa7b5" font-size="7">RF out</text>
+        <line x1="270" y1="145" x2="254" y2="145" stroke="#9aa7b5" marker-end="url(#arr3-rfsoc)"/>
+        <line x1="188" y1="145" x2="174" y2="145" stroke="#9aa7b5" marker-end="url(#arr3-rfsoc)"/>
+        <line x1="104" y1="145" x2="92" y2="145" stroke="#9aa7b5" marker-end="url(#arr3-rfsoc)"/>
+        <line x1="34" y1="145" x2="20" y2="145" stroke="#9aa7b5" marker-end="url(#arr3-rfsoc)"/>
+        <text x="360" y="55" fill="#63e6be" font-size="9">RX: ADC tile -></text>
+        <text x="360" y="70" fill="#9aa7b5" font-size="8">DDC decimates,</text>
+        <text x="360" y="83" fill="#9aa7b5" font-size="8">AXI-Stream carries IQ</text>
+        <text x="360" y="96" fill="#9aa7b5" font-size="8">into PL fabric.</text>
+        <text x="360" y="140" fill="#ffa94d" font-size="9">TX: mirror path</text>
+        <text x="360" y="155" fill="#9aa7b5" font-size="8">DUC interpolates +</text>
+        <text x="360" y="168" fill="#9aa7b5" font-size="8">NCO up to RF-DAC.</text>
+        </svg>`,
+        caption: 'Per-tile datapath: RF-ADC to hardened DDC (NCO mix + decimate) to AXI-Stream into the PL for DSP/beamforming; the transmit mirror runs PL DSP to AXI-Stream to DUC (interpolate + NCO) to the mix-mode RF-DAC.'
       }
     ],
     equations: [
@@ -1039,12 +1327,30 @@ CONTENT.topics.push(
       { q: String.raw`A dominant physical challenge in RFSoC design is:`, options: [String.raw`SPI configuration`, String.raw`clock distribution/jitter and thermal management`, String.raw`choosing the antenna color`, String.raw`baseband DC coupling`], answer: 1, explain: String.raw`GSPS converters demand low-jitter clocks and careful thermal design.` }
     ],
     numericals: [
-      { q: String.raw`A single RFSoC ADC runs at 4.096 GSPS, 12-bit. Find the raw data rate and the delivered rate after a DDC decimation of 128 (complex).`, solution: String.raw`Raw $=4.096e9\times12=49.2$ Gb/s. After DDC: $f_{out}=4.096e9/128=32$ MS/s; complex 12-bit rate $=32e6\times12\times2=768$ Mb/s per channel - a ~64x reduction, routable in fabric.` },
-      { q: String.raw`What clock jitter is needed for 60 dB SNR when directly sampling a 2.4 GHz signal?`, solution: String.raw`$60=-20\log_{10}(2\pi f_{in}t_j)\Rightarrow 2\pi f_{in}t_j=10^{-3}$. $t_j=10^{-3}/(2\pi\times2.4e9)=6.6\times10^{-14}$ s $=66$ fs rms. Sub-100 fs clocking is required.` },
-      { q: String.raw`An RFSoC DAC at $f_s=6$ GSPS must output 4.5 GHz. Which Nyquist zone, and what digital baseband frequency generates it?`, solution: String.raw`Zones: 1 (0-3), 2 (3-6). 4.5 GHz is in zone 2. $f_{base}=|4.5-1\times6|=1.5$ GHz (generate digitally at 1.5 GHz; its zone-2 image at 4.5 GHz is boosted by mix-mode and selected by a bandpass filter).` },
-      { q: String.raw`A 64-element digital array uses one RFSoC subsystem. What beamforming SNR gain over a single element is achievable (ideal coherent combining)?`, solution: String.raw`$G=10\log_{10}(64)=18.1$ dB. Achieving it requires phase-coherent channels (shared clock, calibrated NCOs, MTS).` },
-      { q: String.raw`Eight RFSoC ADC channels each at 2.5 GSPS 14-bit feed hardened DDCs decimating by 40. Compare raw vs post-DDC aggregate rates.`, solution: String.raw`Raw per ch $=2.5e9\times14=35$ Gb/s; eight $=280$ Gb/s (impractical in fabric). Post-DDC: $f_{out}=2.5e9/40=62.5$ MS/s; complex 14-bit $=62.5e6\times14\times2=1.75$ Gb/s/ch; eight $=14$ Gb/s - now routable/processable.` },
-      { q: String.raw`If an RFSoC ADC has SNR of 55 dB (jitter-limited) at 3 GHz and 62 dB quantization-limited, find the combined SNR.`, solution: String.raw`Noise powers: $10^{-55/10}=3.16e-6$, $10^{-62/10}=6.31e-7$. Sum $=3.79e-6$. Combined $=-10\log_{10}(3.79e-6)=54.2$ dB - jitter dominates, as expected at RF.` }
+      { q: String.raw`A single RFSoC ADC runs at 4.096 GSPS, 12-bit. Find the raw data rate and the delivered rate after a DDC decimation of 128 (complex).`, solution: String.raw`<p><b>Formula.</b> $$R_{raw}=f_{s,ADC}\times N_{bits};\qquad f_{out}=\frac{f_{s,ADC}}{M},\quad R_{fabric}=f_{out}\times N_{bits}\times 2_{(I,Q)}$$ where $M$ is the DDC decimation, and the factor 2 accounts for the complex (I,Q) output.</p>
+      <p><b>Substitute.</b> $f_{s,ADC}=4.096\times10^{9}$, $N_{bits}=12$, $M=128$: $R_{raw}=4.096\times10^{9}\times12$; $f_{out}=4.096\times10^{9}/128$; $R_{fabric}=f_{out}\times12\times2$.</p>
+      <p><b>Compute.</b> $R_{raw}=49.15\times10^{9}=49.2$ Gb/s. $f_{out}=32$ MS/s; $R_{fabric}=32\times10^{6}\times24=768$ Mb/s per channel.</p>
+      <p><b>Explanation.</b> The hardened DDC cuts 49.2 Gb/s down to 0.77 Gb/s (~64x, since $128/2$ for the complex output), turning an unroutable raw stream into something the fabric can carry and process. Note the raw rate counts real samples while the output is complex, so the ratio is $M/2$, not $M$.</p>` },
+      { q: String.raw`What clock jitter is needed for 60 dB SNR when directly sampling a 2.4 GHz signal?`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}=-20\log_{10}(2\pi f_{in}t_j)\;\Rightarrow\; t_j=\frac{10^{-\text{SNR}/20}}{2\pi f_{in}}$$ where $t_j$ is the rms aperture jitter, $f_{in}$ the RF input frequency, and SNR the jitter-limited SNR in dB.</p>
+      <p><b>Substitute.</b> $\text{SNR}=60$ dB, $f_{in}=2.4\times10^{9}$ Hz: $2\pi f_{in}t_j=10^{-60/20}=10^{-3}$, so $$t_j=\frac{10^{-3}}{2\pi\times2.4\times10^{9}}.$$</p>
+      <p><b>Compute.</b> $2\pi\times2.4\times10^{9}=1.508\times10^{10}$. $t_j=10^{-3}/1.508\times10^{10}=6.63\times10^{-14}$ s $=66$ fs rms.</p>
+      <p><b>Explanation.</b> Even a modest 60 dB SNR at 2.4 GHz demands sub-100-fs clock jitter - orders of magnitude tighter than baseband ADCs need. This is the central clocking challenge of direct-RF sampling and drives the RFSoC's low-jitter clock-distribution design.</p>` },
+      { q: String.raw`An RFSoC DAC at $f_s=6$ GSPS must output 4.5 GHz. Which Nyquist zone, and what digital baseband frequency generates it?`, solution: String.raw`<p><b>Formula.</b> $$\text{zone}=\left\lceil\frac{f_{RF}}{f_s/2}\right\rceil,\qquad f_{base}=|f_{RF}-k f_s|$$ where $f_{RF}$ is the target output, $f_s$ the DAC rate, $k$ the nearest multiple, and $f_{base}$ the digitally generated tone.</p>
+      <p><b>Substitute.</b> $f_{RF}=4.5$ GHz, $f_s=6$ GHz: $\text{zone}=\lceil 4.5/3\rceil$; $f_{base}=|4.5-1\times6|$.</p>
+      <p><b>Compute.</b> Zones 1 (0-3 GHz) and 2 (3-6 GHz); $\lceil 4.5/3\rceil=2$, so zone 2. $f_{base}=|4.5-6|=1.5$ GHz.</p>
+      <p><b>Explanation.</b> The DAC generates the waveform digitally at 1.5 GHz; its zone-2 image at 4.5 GHz is boosted by mix-mode (RZ) operation and isolated by a bandpass reconstruction filter. Direct-RF synthesis at 4.5 GHz with no analog mixer - the hallmark of the RFSoC transmit path.</p>` },
+      { q: String.raw`A 64-element digital array uses one RFSoC subsystem. What beamforming SNR gain over a single element is achievable (ideal coherent combining)?`, solution: String.raw`<p><b>Formula.</b> $$G_{array}=10\log_{10}(N)\ \text{dB}$$ where $N$ is the number of phase-coherent elements; coherent voltage summing ($\times N$) over incoherent noise power ($\times N$) yields an SNR improvement of $N$.</p>
+      <p><b>Substitute.</b> $N=64$: $$G_{array}=10\log_{10}64.$$</p>
+      <p><b>Compute.</b> $\log_{10}64=1.806$, so $G_{array}=18.1$ dB.</p>
+      <p><b>Explanation.</b> Digitally combining 64 coherent channels buys ~18 dB of array gain - but only if phase coherence is real: shared clock, calibrated NCOs, and multi-tile synchronization. Any residual phase error between elements erodes the coherent sum and this ideal gain.</p>` },
+      { q: String.raw`Eight RFSoC ADC channels each at 2.5 GSPS 14-bit feed hardened DDCs decimating by 40. Compare raw vs post-DDC aggregate rates.`, solution: String.raw`<p><b>Formula.</b> $$R_{raw}=N_{ch}\,f_{s}\,N_{bits};\quad f_{out}=\frac{f_s}{M},\quad R_{post}=N_{ch}\,f_{out}\,N_{bits}\times 2_{(I,Q)}$$ with $N_{ch}$ channels, ADC rate $f_s$, resolution $N_{bits}$, decimation $M$, and complex (I,Q) output.</p>
+      <p><b>Substitute.</b> $N_{ch}=8$, $f_s=2.5\times10^{9}$, $N_{bits}=14$, $M=40$: raw per ch $=2.5\times10^{9}\times14$; $f_{out}=2.5\times10^{9}/40$; post per ch $=f_{out}\times14\times2$.</p>
+      <p><b>Compute.</b> Raw per ch $=35$ Gb/s; $\times8=280$ Gb/s (impractical in fabric). $f_{out}=62.5$ MS/s; post per ch $=62.5\times10^{6}\times28=1.75$ Gb/s; $\times8=14$ Gb/s - routable/processable.</p>
+      <p><b>Explanation.</b> Hardened DDCs shrink the aggregate from an impossible 280 Gb/s to a manageable 14 Gb/s (a 20x cut, = $M/2$ for complex output). This converter-adjacent decimation is exactly why one RFSoC can host eight-plus wideband channels that could never be routed at raw rate.</p>` },
+      { q: String.raw`If an RFSoC ADC has SNR of 55 dB (jitter-limited) at 3 GHz and 62 dB quantization-limited, find the combined SNR.`, solution: String.raw`<p><b>Formula.</b> $$\text{SNR}_{tot}=-10\log_{10}\!\left(10^{-\text{SNR}_j/10}+10^{-\text{SNR}_q/10}\right)$$ noise powers add, where $\text{SNR}_j$ is the jitter-limited and $\text{SNR}_q$ the quantization-limited SNR in dB.</p>
+      <p><b>Substitute.</b> $\text{SNR}_j=55$ dB, $\text{SNR}_q=62$ dB: noise fractions $10^{-55/10}$ and $10^{-62/10}$.</p>
+      <p><b>Compute.</b> $10^{-5.5}=3.16\times10^{-6}$; $10^{-6.2}=6.31\times10^{-7}$; sum $=3.79\times10^{-6}$. $\text{SNR}_{tot}=-10\log_{10}(3.79\times10^{-6})=54.2$ dB.</p>
+      <p><b>Explanation.</b> The combined 54.2 dB is dominated by jitter (the weaker 55 dB term), pulling only ~0.8 dB below it while the 62 dB quantization term barely contributes. At multi-GHz RF, jitter is almost always the limiting noise - improving the clock, not the ADC bits, is what raises SNR.</p>` }
     ],
     realWorld: String.raw`<p>RFSoC (Xilinx/AMD Zynq UltraScale+ RFSoC, spanning Gen 1 through Gen 3) is the workhorse of modern digital-beamforming systems. 5G massive-MIMO radios use it to run dozens of coherent transmit/receive chains with on-die beamforming, collapsing what once needed racks of hardware. Defense radar and electronic-warfare systems exploit its direct-RF capture and instantaneous NCO retuning across wide bands. Research platforms such as the ZCU111/ZCU216 evaluation boards and the open PYNQ framework (Python + overlays) have made RFSoC accessible for teaching direct-RF SDR. The design tradeoffs - sub-100-fs clock jitter, aggressive thermal design, and moving multi-hundred-Gb/s aggregate data - define a new class of RF engineering where converter, DSP, and processor co-design on a single die.</p>`,
     related: ['sdr', 'adc', 'dac', 'ad9361', 'antenna-gain']

@@ -6,7 +6,7 @@ CONTENT.topics.push(
     category: 'Interfaces & Protocols',
     tags: ['spi', 'serial', 'synchronous', 'full-duplex', 'cpol', 'cpha', 'master-slave', 'on-board'],
     summary: String.raw`The Serial Peripheral Interface is a four-wire, full-duplex, synchronous, master-driven on-board bus that clocks one bit per SCLK edge with no addressing, acknowledgement, or flow control.`,
-    diagram: { svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+    diagram: [{ svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-spi" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="18" y="70" width="110" height="110" rx="6" fill="#1c232e" stroke="#4dabf7"/>
 <text x="73" y="94" fill="#e6edf3" text-anchor="middle" font-weight="bold">Master</text>
@@ -28,8 +28,52 @@ CONTENT.topics.push(
 <text x="425" y="202" fill="#e6edf3" text-anchor="middle" font-size="11">Slave n</text>
 <text x="270" y="222" fill="#9aa7b5" text-anchor="middle" font-size="10">shared SCLK/MOSI/MISO; a dedicated SS line selects exactly one slave</text>
 </svg>`, caption: String.raw`SPI: one master drives shared SCLK/MOSI/MISO to several slaves, selecting exactly one at a time via its dedicated active-low SS line.` },
+      { title: String.raw`Shift-register ring: full-duplex byte swap`, svg: String.raw`<svg viewBox="0 0 540 240" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-spi" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="30" y="55" width="200" height="60" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="130" y="78" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Master 8-bit register</text>
+<text x="130" y="100" fill="#63e6be" text-anchor="middle" font-size="11" letter-spacing="3">1 0 1 1 0 0 1 0</text>
+<rect x="310" y="55" width="200" height="60" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="410" y="78" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Slave 8-bit register</text>
+<text x="410" y="100" fill="#ffa94d" text-anchor="middle" font-size="11" letter-spacing="3">0 1 0 0 1 1 0 1</text>
+<line x1="230" y1="72" x2="310" y2="72" stroke="#63e6be" marker-end="url(#arr2-spi)"/>
+<text x="270" y="66" fill="#63e6be" text-anchor="middle" font-size="9">MOSI</text>
+<line x1="310" y1="98" x2="230" y2="98" stroke="#ffa94d" marker-end="url(#arr2-spi)"/>
+<text x="270" y="112" fill="#ffa94d" text-anchor="middle" font-size="9">MISO</text>
+<path d="M130 115 Q130 155 270 155 Q410 155 410 115" fill="none" stroke="#b197fc" stroke-dasharray="5 3"/>
+<text x="270" y="172" fill="#b197fc" text-anchor="middle" font-size="10">the two registers form one 16-bit ring</text>
+<rect x="60" y="185" width="420" height="45" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="270" y="204" fill="#e6edf3" text-anchor="middle" font-size="10">each SCLK edge: 1 bit out of master + 1 bit into master (simultaneously)</text>
+<text x="270" y="221" fill="#9aa7b5" text-anchor="middle" font-size="9">after 8 edges the two bytes have swapped &#8212; full-duplex, zero overhead</text>
+</svg>`, caption: String.raw`Shift-register ring: the master's and slave's 8-bit registers are joined by MOSI and MISO into one circulating loop. Every SCLK edge shifts one bit out on MOSI and one bit in on MISO, so after 8 edges the two bytes have swapped &#8212; a read and a write always co-occur.` },
+      { title: String.raw`CPOL/CPHA: the four SPI modes`, svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<rect x="20" y="30" width="250" height="90" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="145" y="50" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">CPOL = clock idle level</text>
+<text x="145" y="72" fill="#63e6be" text-anchor="middle" font-size="10">CPOL=0 &#8594; idles LOW</text>
+<text x="145" y="90" fill="#ffa94d" text-anchor="middle" font-size="10">CPOL=1 &#8594; idles HIGH</text>
+<text x="145" y="110" fill="#9aa7b5" text-anchor="middle" font-size="9">sets the resting SCLK level</text>
+<rect x="290" y="30" width="230" height="90" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="405" y="50" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">CPHA = sampling edge</text>
+<text x="405" y="72" fill="#63e6be" text-anchor="middle" font-size="10">CPHA=0 &#8594; sample 1st edge</text>
+<text x="405" y="90" fill="#ffa94d" text-anchor="middle" font-size="10">CPHA=1 &#8594; sample 2nd edge</text>
+<text x="405" y="110" fill="#9aa7b5" text-anchor="middle" font-size="9">shift on the other edge</text>
+<rect x="20" y="140" width="120" height="60" rx="6" fill="#1c232e" stroke="#b197fc"/>
+<text x="80" y="165" fill="#e6edf3" text-anchor="middle" font-size="10">Mode 0</text>
+<text x="80" y="182" fill="#9aa7b5" text-anchor="middle" font-size="9">CPOL0 CPHA0</text>
+<rect x="150" y="140" width="120" height="60" rx="6" fill="#1c232e" stroke="#b197fc"/>
+<text x="210" y="165" fill="#e6edf3" text-anchor="middle" font-size="10">Mode 1</text>
+<text x="210" y="182" fill="#9aa7b5" text-anchor="middle" font-size="9">CPOL0 CPHA1</text>
+<rect x="280" y="140" width="120" height="60" rx="6" fill="#1c232e" stroke="#b197fc"/>
+<text x="340" y="165" fill="#e6edf3" text-anchor="middle" font-size="10">Mode 2</text>
+<text x="340" y="182" fill="#9aa7b5" text-anchor="middle" font-size="9">CPOL1 CPHA0</text>
+<rect x="410" y="140" width="110" height="60" rx="6" fill="#1c232e" stroke="#b197fc"/>
+<text x="465" y="165" fill="#e6edf3" text-anchor="middle" font-size="10">Mode 3</text>
+<text x="465" y="182" fill="#9aa7b5" text-anchor="middle" font-size="9">CPOL1 CPHA1</text>
+<text x="270" y="220" fill="#9aa7b5" text-anchor="middle" font-size="10">both ends must match the same mode; Mode 0 is by far the most common</text>
+</svg>`, caption: String.raw`The two configuration bits CPOL (clock idle level) and CPHA (which edge samples) combine into four modes 0&#8211;3. Master and slave must agree on the same mode or every bit is misread; Mode 0 (CPOL=0, CPHA=0) dominates.` }],
     prerequisites: ['comm-basics', 'rs232', 'rs422'],
-    intro: String.raw`<p>The <b>Serial Peripheral Interface (SPI)</b> is a de-facto industry standard introduced by Motorola in the 1980s for short-reach, chip-to-chip communication on a single printed-circuit board. It is <b>synchronous</b> (a dedicated clock line accompanies the data), <b>full-duplex</b> (data flows in both directions simultaneously on separate lines), and <b>single-master, multiple-slave</b>. Its defining virtue is brutal simplicity: there is no addressing scheme, no acknowledgement, no error-detection field, no arbitration, and no defined maximum speed - the master simply toggles a clock and both sides shift bits.</p>
+    intro: String.raw`<p><b>Why SPI exists.</b> A microcontroller on a board needs to talk to nearby chips — an ADC, a flash, a sensor, a display — quickly and cheaply. A parallel bus would cost too many pins; a full protocol like a UART or a networked bus would add framing, addressing, and error-handling that a 5 cm on-board trace simply does not need. SPI solves this by stripping the interface down to the bare minimum: a shared clock, two data lines, and a select line, with the master toggling the clock and both sides shifting bits. The problem it targets is <em>fast, trivially cheap chip-to-chip data movement on one board</em>, and it wins by omitting everything — addressing, acknowledgement, error checking — that would cost bits or wires.</p>
+<p>The <b>Serial Peripheral Interface (SPI)</b> is a de-facto industry standard introduced by Motorola in the 1980s for short-reach, chip-to-chip communication on a single printed-circuit board. It is <b>synchronous</b> (a dedicated clock line accompanies the data), <b>full-duplex</b> (data flows in both directions simultaneously on separate lines), and <b>single-master, multiple-slave</b>. Its defining virtue is brutal simplicity: there is no addressing scheme, no acknowledgement, no error-detection field, no arbitration, and no defined maximum speed - the master simply toggles a clock and both sides shift bits.</p>
     <p>Because a bit is transferred on every clock edge and there is <b>zero protocol overhead</b> (no start/stop/parity bits, no headers), SPI delivers a payload throughput exactly equal to the clock frequency in bits per second. That efficiency, plus trivial hardware (a pair of shift registers and a clock), makes SPI the workhorse for ADCs/DACs, flash memory, sensors, displays, and radio transceivers such as the AD9361. The cost of that simplicity is that everything the protocol omits - addressing, acknowledgement, integrity checking - must be handled by the application layer or done without.</p>`,
     sections: [
       {
@@ -139,6 +183,18 @@ CONTENT.topics.push(
           <tr><td>Typical rate</td><td>10s of MHz</td><td>0.1-3.4 MHz</td><td>&le;~1 Mbps</td><td>&le;~10 Mbps</td></tr>
           <tr><td>Reach</td><td>On-board (cm)</td><td>On-board (cm)</td><td>~15 m</td><td>~1200 m</td></tr>
         </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">SPI's whole character follows from one design choice: omit everything that costs bits or wires. That makes it the fastest and simplest on-board bus — and the least forgiving.</div>
+        <ul>
+          <li><b>Four wires, one master, no addressing.</b> SCLK (master-only), MOSI, MISO, and one SS per slave; a slave is chosen by pulling its SS low, so device count is limited by the master's spare GPIO pins.</li>
+          <li><b>Full-duplex shift-register ring.</b> Master and slave registers form a loop — every SCLK edge shifts one bit out on MOSI and one in on MISO, so a read and a write always co-occur.</li>
+          <li><b>Two bits set the timing: CPOL and CPHA.</b> They pick the clock idle level and the sampling edge, giving four modes; both ends must match or every bit is misread. Mode 0 dominates.</li>
+          <li><b>Zero overhead ⇒ throughput = clock rate.</b> No start/stop/parity/address/CRC, so $R = f_{SCLK}$ and efficiency is 100% — 25% more payload than an 8N1 UART at the same bit rate.</li>
+          <li><b>No safety net.</b> No ACK, no flow control, no error detection; integrity rests on short controlled layout, conservative clocking, and any app-layer read-back or CRC.</li>
+          <li><b>Short reach, real speed ceiling.</b> Single-ended and unterminated (on-board only); at high $f_{SCLK}$ the MISO round-trip, not the shift register, caps the read rate. Variants (3-wire, Dual/Quad/QSPI) trade duplex or pins for pins or throughput.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -227,11 +283,26 @@ CONTENT.topics.push(
       { q: String.raw`Compared with standard 4-wire SPI, Quad SPI (QSPI):`, options: ['Adds a CRC to every frame', 'Uses 4 data lines for up to 4x throughput but is half-duplex', 'Doubles the reach to metres', 'Adds a 7-bit address field'], answer: 1, explain: String.raw`QSPI uses four data lines (IO0-IO3) carrying data in the same direction, giving up to 4x throughput at the expense of full-duplex - the standard fast-read mode for NOR flash.` }
     ],
     numericals: [
-      { q: String.raw`An SPI ADC is read as a 16-bit word at $f_{SCLK}=25$ MHz. What is the frame time and the payload throughput?`, solution: String.raw`Frame time $T = N/f_{SCLK} = 16/(25\times10^6) = 0.64\ \mu s$. Throughput $R = f_{SCLK} = 25$ Mbit/s (overhead-free). If words are read back-to-back with no gap, sample rate $\approx 1/0.64\ \mu s \approx 1.56$ Msps.` },
-      { q: String.raw`A serial flash needs an 8-bit opcode, 24-bit address, then 256 data bytes read over standard SPI at 40 MHz. Estimate the transfer time (ignore SS gaps).`, solution: String.raw`Total bits $= 8 + 24 + 256\times8 = 8 + 24 + 2048 = 2080$ bits. Time $= 2080/(40\times10^6) = 52\ \mu s$. Because SPI has zero overhead, every bit is either command, address, or data.` },
-      { q: String.raw`Compare payload efficiency of SPI vs an 8N1 UART, both clocking 8-bit data words.`, solution: String.raw`SPI: $\eta = N/(N+0) = 8/8 = 1 = 100\%$. UART 8N1: $\eta = 8/(8+1+1) = 8/10 = 80\%$. At the same raw bit rate SPI delivers 25% more payload ($1/0.8 = 1.25$).` },
-      { q: String.raw`A slave's datasheet lists a max clock-to-output delay $t_{co}=8$ ns on MISO and requires 4 ns setup at the master. Round-trip trace delay is 3 ns. What is the approximate maximum reliable $f_{SCLK}$ for reads?`, solution: String.raw`The MISO data must be valid at the master before its sampling edge. Budget $= t_{co} + t_{trace} + t_{su} = 8 + 3 + 4 = 15$ ns. This must fit within (roughly) half a clock period for mode-0 sampling, so $T_{clk}/2 \ge 15$ ns $\Rightarrow T_{clk}\ge 30$ ns $\Rightarrow f_{SCLK}\le 1/30\text{ns} \approx 33$ MHz. The round-trip, not the shift register, sets the limit.` },
-      { q: String.raw`Four SPI sensors share SCLK/MOSI/MISO in independent mode. How many master GPIO lines are needed just for chip selects, and why can't they share one?`, solution: String.raw`Four SS lines - one per sensor - because there is no address field; selection is by asserting a unique SS low. Sharing one SS would select all four, causing multiple slaves to drive MISO simultaneously (contention). Total independent-mode pins: 3 shared + 4 SS = 7.` }
+      { q: String.raw`An SPI ADC is read as a 16-bit word at $f_{SCLK}=25$ MHz. What is the frame time and the payload throughput?`, solution: String.raw`<p><b>Formula.</b> $$T_{frame} = \frac{N}{f_{SCLK}}, \qquad R = f_{SCLK}$$ where $N$ is the word length in bits and $f_{SCLK}$ the clock; SPI has zero framing overhead so throughput equals the clock rate.</p>
+<p><b>Substitute.</b> $$T_{frame} = \frac{16}{25\times10^6}, \qquad R = 25\times10^6$$</p>
+<p><b>Compute.</b> $T_{frame} = 6.4\times10^{-7}\ \text{s} = 0.64\ \mu s$; $R = 25$ Mbit/s. Back-to-back sample rate $= 1/0.64\ \mu s \approx 1.56$ Msps.</p>
+<p><b>Explanation.</b> A 16-bit conversion clears in 0.64 µs, and because SPI carries pure payload the throughput is the full 25 Mbit/s. Sanity check: doubling the clock would halve the frame time and double the sample rate, as expected for an overhead-free bus.</p>` },
+      { q: String.raw`A serial flash needs an 8-bit opcode, 24-bit address, then 256 data bytes read over standard SPI at 40 MHz. Estimate the transfer time (ignore SS gaps).`, solution: String.raw`<p><b>Formula.</b> $$N_{bits} = N_{op} + N_{addr} + 8\,N_{data}, \qquad T = \frac{N_{bits}}{f_{SCLK}}$$ summing every clocked bit (opcode + address + data bytes) and dividing by the clock, since SPI adds no other bits.</p>
+<p><b>Substitute.</b> $$N_{bits} = 8 + 24 + 8\times256, \qquad T = \frac{N_{bits}}{40\times10^6}$$</p>
+<p><b>Compute.</b> $N_{bits} = 8 + 24 + 2048 = 2080$ bits. $T = 2080/(40\times10^6) = 52\ \mu s$.</p>
+<p><b>Explanation.</b> The whole transaction takes 52 µs, and every one of the 2080 bits is useful (command, address, or data) because SPI has zero framing overhead. Sanity check: the 2048 data bits alone are $2048/40\text{M} = 51.2\ \mu s$, so the 32 command/address bits add only 0.8 µs — a negligible tax for a large read.</p>` },
+      { q: String.raw`Compare payload efficiency of SPI vs an 8N1 UART, both clocking 8-bit data words.`, solution: String.raw`<p><b>Formula.</b> $$\eta = \frac{N_{data}}{N_{data} + N_{overhead}}$$ the payload fraction; SPI has $N_{overhead}=0$, while 8N1 spends 1 start + 1 stop bit per byte.</p>
+<p><b>Substitute.</b> $$\eta_{SPI} = \frac{8}{8+0}, \qquad \eta_{8N1} = \frac{8}{8+1+1}$$</p>
+<p><b>Compute.</b> $\eta_{SPI} = 8/8 = 1 = 100\%$; $\eta_{8N1} = 8/10 = 0.8 = 80\%$.</p>
+<p><b>Explanation.</b> SPI is 100% efficient because it wraps no framing bits around the data; the UART wastes 20% on start/stop. At the same raw bit rate SPI therefore delivers $1/0.8 = 1.25$ (25%) more payload — the quantitative meaning of "zero protocol overhead."</p>` },
+      { q: String.raw`A slave's datasheet lists a max clock-to-output delay $t_{co}=8$ ns on MISO and requires 4 ns setup at the master. Round-trip trace delay is 3 ns. What is the approximate maximum reliable $f_{SCLK}$ for reads?`, solution: String.raw`<p><b>Formula.</b> The MISO data must be valid before the master's sampling edge, so the round-trip budget must fit within (roughly) half a clock period in Mode 0: $$t_{budget} = t_{co} + t_{trace} + t_{su} \le \frac{T_{clk}}{2}, \qquad f_{SCLK} = \frac{1}{T_{clk}}$$</p>
+<p><b>Substitute.</b> $$t_{budget} = 8 + 3 + 4\ \text{ns}, \qquad \frac{T_{clk}}{2} \ge 15\ \text{ns}$$</p>
+<p><b>Compute.</b> $t_{budget} = 15$ ns $\Rightarrow T_{clk} \ge 30$ ns $\Rightarrow f_{SCLK} \le 1/30\text{ns} \approx 33$ MHz.</p>
+<p><b>Explanation.</b> Reads are reliable up to about 33 MHz, set by the MISO round-trip (clock-to-out + trace + setup), not by the shift register itself. This is why fast SPI parts quote a lower read clock than write clock, and why trace length matters at high $f_{SCLK}$.</p>` },
+      { q: String.raw`Four SPI sensors share SCLK/MOSI/MISO in independent mode. How many master GPIO lines are needed just for chip selects, and why can't they share one?`, solution: String.raw`<p><b>Formula.</b> With no address field, independent-mode SPI needs one select line per slave plus the three shared lines: $$N_{SS} = N_{slaves}, \qquad N_{pins} = 3 + N_{slaves}$$</p>
+<p><b>Substitute.</b> $$N_{SS} = 4, \qquad N_{pins} = 3 + 4$$</p>
+<p><b>Compute.</b> $N_{SS} = 4$ chip-select lines; $N_{pins} = 7$ total (SCLK + MOSI + MISO + 4 SS).</p>
+<p><b>Explanation.</b> Four SS lines are required because selection is purely by pulling one SS low, with no address to disambiguate. Sharing one SS would enable all four at once, so multiple slaves would drive the shared MISO simultaneously (bus contention). This is why SPI device count is limited by the master's spare GPIOs, not by an address space.</p>` }
     ],
     realWorld: String.raw`<p>SPI is ubiquitous in embedded and avionics-adjacent hardware. In an SDR platform, the host controller configures an <b>AD9361</b> RF transceiver entirely through its SPI register map - setting LO frequencies, gains, and filter bandwidths - while the wideband IQ data flows over a separate high-speed interface. Board designers pick SPI for its raw speed to <b>QSPI NOR flash</b> holding FPGA bitstreams (fast boot), for streaming from high-resolution ADCs, and for driving TFT displays. The engineering discipline SPI demands is timing: because there is no acknowledgement or error check, integrators verify setup/hold across temperature, keep SCLK conservative, match trace lengths, and add application-layer read-back or CRC where data integrity is safety-relevant. Its very austerity - no addressing, no ACK, no CRC - is what makes it fast and cheap, and simultaneously why it never leaves the board.</p>`,
     related: ['rs232', 'rs422', 'axi', 'sdr', 'ad9361']
@@ -242,7 +313,7 @@ CONTENT.topics.push(
     category: 'Interfaces & Protocols',
     tags: ['axi', 'amba', 'arm', 'valid-ready', 'burst', 'memory-mapped', 'soc', 'fpga', 'interconnect'],
     summary: String.raw`AXI is ARM's high-performance AMBA on-chip interconnect protocol built on five independent VALID/READY-handshaked channels, supporting bursts, out-of-order and outstanding transactions between memory-mapped managers and subordinates.`,
-    diagram: { svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+    diagram: [{ svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-axi" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <rect x="14" y="70" width="104" height="120" rx="6" fill="#1c232e" stroke="#4dabf7"/>
 <text x="66" y="126" fill="#e6edf3" text-anchor="middle" font-weight="bold">Manager</text>
@@ -276,8 +347,49 @@ CONTENT.topics.push(
 <text x="270" y="225" fill="#e6edf3" text-anchor="middle" font-size="10">5 channels: AR, R (read) &#183; AW, W, B (write)</text>
 <text x="270" y="242" fill="#9aa7b5" text-anchor="middle" font-size="10">each carries its own VALID/READY handshake</text>
 </svg>`, caption: String.raw`AXI: a manager talks through the interconnect to a subordinate over five independent channels (AR, R, AW, W, B), each with its own VALID/READY handshake.` },
+      { title: String.raw`VALID/READY handshake rules`, svg: String.raw`<svg viewBox="0 0 540 240" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-axi" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="20" y="55" width="150" height="90" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="95" y="80" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Source</text>
+<text x="95" y="100" fill="#63e6be" text-anchor="middle" font-size="9">asserts VALID</text>
+<text x="95" y="116" fill="#9aa7b5" text-anchor="middle" font-size="9">as soon as data ready</text>
+<text x="95" y="132" fill="#9aa7b5" text-anchor="middle" font-size="9">(must NOT wait for READY)</text>
+<rect x="370" y="55" width="150" height="90" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="445" y="80" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Destination</text>
+<text x="445" y="100" fill="#ffa94d" text-anchor="middle" font-size="9">asserts READY</text>
+<text x="445" y="116" fill="#9aa7b5" text-anchor="middle" font-size="9">when it can accept</text>
+<text x="445" y="132" fill="#9aa7b5" text-anchor="middle" font-size="9">(may wait / de-assert freely)</text>
+<line x1="170" y1="85" x2="370" y2="85" stroke="#63e6be" marker-end="url(#arr2-axi)"/>
+<text x="270" y="79" fill="#63e6be" text-anchor="middle" font-size="10">xVALID + payload</text>
+<line x1="370" y1="115" x2="170" y2="115" stroke="#ffa94d" marker-end="url(#arr2-axi)"/>
+<text x="270" y="109" fill="#ffa94d" text-anchor="middle" font-size="10">xREADY</text>
+<rect x="60" y="165" width="420" height="65" rx="6" fill="#1c232e" stroke="#b197fc"/>
+<text x="270" y="185" fill="#e6edf3" text-anchor="middle" font-size="10">TRANSFER = both VALID and READY high on a rising clock edge</text>
+<text x="270" y="203" fill="#9aa7b5" text-anchor="middle" font-size="9">VALID, once high, must stay high (payload stable) until READY completes it</text>
+<text x="270" y="219" fill="#9aa7b5" text-anchor="middle" font-size="9">holding READY low = wait states = backpressure (flow control)</text>
+</svg>`, caption: String.raw`VALID/READY rule: the source raises VALID as soon as it has data (never waiting for READY) and holds it stable until the handshake completes; the destination raises READY when it can accept. Transfer happens only when both are high on a rising clock edge; a held-low READY inserts wait states.` },
+      { title: String.raw`Read and write transaction flows`, svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-axi" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="20" y="25" width="500" height="95" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="40" y="45" fill="#4dabf7" text-anchor="start" font-weight="bold" font-size="11">READ (AR &#8594; R burst)</text>
+<line x1="60" y1="70" x2="200" y2="70" stroke="#4dabf7" marker-end="url(#arr3-axi)"/>
+<text x="130" y="63" fill="#e6edf3" text-anchor="middle" font-size="9">AR: address</text>
+<line x1="480" y1="95" x2="220" y2="95" stroke="#63e6be" marker-end="url(#arr3-axi)"/>
+<text x="350" y="88" fill="#63e6be" text-anchor="middle" font-size="9">R: beat, beat, &#8230; RLAST (each with RRESP)</text>
+<text x="270" y="112" fill="#9aa7b5" text-anchor="middle" font-size="9">one address handshake launches N read-data beats</text>
+<rect x="20" y="135" width="500" height="105" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="40" y="155" fill="#ffa94d" text-anchor="start" font-weight="bold" font-size="11">WRITE (AW &#8594; W beats &#8594; B)</text>
+<line x1="60" y1="178" x2="200" y2="178" stroke="#ffa94d" marker-end="url(#arr3-axi)"/>
+<text x="130" y="171" fill="#e6edf3" text-anchor="middle" font-size="9">AW: address</text>
+<line x1="60" y1="200" x2="260" y2="200" stroke="#ffa94d" marker-end="url(#arr3-axi)"/>
+<text x="160" y="215" fill="#e6edf3" text-anchor="middle" font-size="9">W: beat, beat, &#8230; WLAST (WSTRB per byte)</text>
+<line x1="480" y1="200" x2="300" y2="200" stroke="#63e6be" marker-end="url(#arr3-axi)"/>
+<text x="390" y="193" fill="#63e6be" text-anchor="middle" font-size="9">B: one BRESP</text>
+<text x="270" y="233" fill="#9aa7b5" text-anchor="middle" font-size="9">write needs channel B to confirm the burst landed; read carries RRESP per beat</text>
+</svg>`, caption: String.raw`A read is one AR address handshake followed by N R-beats (each with RRESP, last flagged RLAST). A write is one AW address handshake, then N W-beats (WSTRB byte-strobes, last flagged WLAST), then a single B response confirming the burst &#8212; reads and writes run on independent channels.` }],
     prerequisites: ['spi', 'comm-basics', 'sdr'],
-    intro: String.raw`<p>The <b>Advanced eXtensible Interface (AXI)</b> is part of ARM's <b>AMBA</b> (Advanced Microcontroller Bus Architecture) family. Introduced as AXI3 and refined into <b>AXI4</b>, it is the dominant <b>on-chip interconnect</b> for SoCs and FPGAs: it connects CPUs, DMA engines, DDR memory controllers, accelerators, and peripherals inside a single die. Unlike SPI - a handful of wires bit-banging serial data on-board - AXI is a wide, parallel, <b>memory-mapped</b>, high-throughput fabric measured in gigabytes per second.</p>
+    intro: String.raw`<p><b>Why AXI exists.</b> Inside a modern SoC or FPGA, a CPU, DMA engine, DDR controller, and a dozen accelerators must all move data to each other at gigabytes per second — and DRAM has long, variable latency that would stall a naive bus dead. Older shared buses forced address and data to share one path and completed one transfer at a time, so a single slow memory access throttled everything. The problem AXI solves is <em>sustaining high on-chip bandwidth despite memory latency, across IP blocks from many vendors</em>. Its answer is to split reads and writes into independent address/data channels that can pipeline and overlap, put a single universal VALID/READY handshake on every channel, and allow many outstanding, out-of-order transactions so the pipeline never drains waiting on one slow response.</p>
+<p>The <b>Advanced eXtensible Interface (AXI)</b> is part of ARM's <b>AMBA</b> (Advanced Microcontroller Bus Architecture) family. Introduced as AXI3 and refined into <b>AXI4</b>, it is the dominant <b>on-chip interconnect</b> for SoCs and FPGAs: it connects CPUs, DMA engines, DDR memory controllers, accelerators, and peripherals inside a single die. Unlike SPI - a handful of wires bit-banging serial data on-board - AXI is a wide, parallel, <b>memory-mapped</b>, high-throughput fabric measured in gigabytes per second.</p>
     <p>AXI's defining ideas are (1) <b>five independent channels</b> that separate the address, data, and response phases of reads and writes, so they can overlap and pipeline; and (2) a single, universal <b>VALID/READY handshake</b> on every channel that provides two-way flow control - the source asserts VALID when it has data, the destination asserts READY when it can accept, and transfer occurs only when both are high on a rising clock edge. This decoupling lets AXI support pipelined <b>bursts</b> (up to 256 beats in AXI4), multiple <b>outstanding transactions</b>, and <b>out-of-order</b> completion, which are the levers that hide memory latency and sustain high bandwidth. The three profiles - full <b>AXI4</b> (bursts), <b>AXI4-Lite</b> (single beat, register access), and <b>AXI4-Stream</b> (no addresses, pure data flow) - cover everything from a control register to a video pipeline.</p>`,
     sections: [
       {
@@ -405,6 +517,18 @@ CONTENT.topics.push(
           <tr><td>Redundancy</td><td>None (in base)</td><td>None</td><td>Dual-redundant bus</td></tr>
           <tr><td>Bandwidth</td><td>GB/s</td><td>10s of Mbit/s</td><td>1 Mbit/s (deterministic)</td></tr>
         </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">AXI is built from two simple ideas — separate channels and one universal handshake — that together buy pipelining, backpressure, and latency-hiding at GB/s.</div>
+        <ul>
+          <li><b>Five independent channels.</b> AR + R (read); AW, W + B (write). Splitting address from data lets a manager issue the next address while previous data still flows — the source of AXI's pipelining and concurrent reads/writes.</li>
+          <li><b>One handshake everywhere: VALID/READY.</b> The source raises VALID as soon as it has data (never waiting for READY) and holds it; the destination raises READY when it can accept. Transfer occurs only when both are high on a clock edge; holding READY low is the built-in flow control.</li>
+          <li><b>Bursts amortise the address.</b> One AR/AW handshake launches 1–256 beats (LEN+1) delimited by xLAST; a 256-beat burst is ~99.6% efficient versus ~50% for a single-beat access.</li>
+          <li><b>IDs give outstanding, out-of-order transactions.</b> ARID/AWID tag requests so responses (RID/BID) can return in any order; same-ID stays ordered. Keeping enough outstanding hides DRAM latency so the pipeline never drains.</li>
+          <li><b>Three profiles, one family.</b> AXI4 (full bursts), AXI4-Lite (single-beat registers), AXI4-Stream (address-less data flow); ACE adds cache coherency. Peak $BW = W_{bytes}\times f_{clk}$.</li>
+          <li><b>On-chip only, no CRC.</b> The die is a controlled environment, so the only status is the 2-bit RRESP/BRESP; integrity for safety-critical use comes from ECC and higher-layer extensions, not the base handshake.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -501,11 +625,26 @@ CONTENT.topics.push(
       { q: String.raw`A "narrow" AXI transfer is one where:`, options: ['The address channel is disabled', 'AxSIZE is smaller than the full data-bus width, so only some byte lanes are active', 'The burst uses WRAP', 'Only reads are allowed'], answer: 1, explain: String.raw`A narrow transfer sets AxSIZE below the bus width, activating a subset of byte lanes (which lanes depends on address and burst type); an unaligned transfer starts off an AxSIZE boundary.` }
     ],
     numericals: [
-      { q: String.raw`A full AXI4 write burst on a 64-bit bus has AWLEN = 15. How many bytes are written, and how many data beats occur?`, solution: String.raw`Beats $= $ AWLEN $+1 = 16$. Bytes/beat $= 64/8 = 8$. Total $D_{burst} = 16\times8 = 128$ bytes over 16 W-channel beats, launched by a single AW address handshake.` },
-      { q: String.raw`Compute the peak bandwidth of a 512-bit AXI bus running at 300 MHz.`, solution: String.raw`$W_{bytes} = 512/8 = 64$. $BW = 64\times300\times10^6 = 1.92\times10^{10} = 19.2$ GB/s peak (one beat/cycle, no wait states).` },
-      { q: String.raw`A subordinate returns read data 80 ns after accepting an address. The bus runs at 200 MHz. How many outstanding read transactions keep the read-data channel fully utilised?`, solution: String.raw`$T_{beat} = 1/f_{clk} = 5$ ns. $D_{min} = \lceil L/T_{beat}\rceil = \lceil 80/5\rceil = 16$ outstanding transactions. With 16 in flight, responses arrive one per beat and the data channel never idles.` },
-      { q: String.raw`Compare bus efficiency of a single-beat AXI4-Lite access versus a 128-beat AXI4 burst, counting one address cycle overhead each.`, solution: String.raw`Lite: $\eta = 1/(1+1) = 50\%$ (one data beat per address cycle). Burst: $\eta = 128/(128+1) = 128/129 \approx 99.2\%$. The burst is far more efficient because the address cost is shared across many beats.` },
-      { q: String.raw`A DMA reads 4 KB from DRAM over a 128-bit AXI4 bus using maximum-length bursts. How many bursts and beats are required (assume no 4KB boundary issue), and how long at 250 MHz with no wait states?`, solution: String.raw`Bytes/beat $= 16$. Beats needed $= 4096/16 = 256$ beats - exactly one maximum 256-beat AXI4 burst. Time $= 256\ \text{beats}\times(1/250\text{MHz}) = 256\times4\text{ns} = 1.024\ \mu s$ (plus one address cycle).` }
+      { q: String.raw`A full AXI4 write burst on a 64-bit bus has AWLEN = 15. How many bytes are written, and how many data beats occur?`, solution: String.raw`<p><b>Formula.</b> $$N_{beats} = \text{AWLEN} + 1, \qquad W_{bytes} = \frac{W_{bits}}{8}, \qquad D_{burst} = N_{beats}\times W_{bytes}$$ where AWLEN is zero-based (length = AWLEN+1) and $W_{bits}$ is the data-bus width.</p>
+<p><b>Substitute.</b> $$N_{beats} = 15 + 1, \qquad W_{bytes} = \frac{64}{8}, \qquad D_{burst} = 16\times8$$</p>
+<p><b>Compute.</b> $N_{beats} = 16$ beats; $W_{bytes} = 8$; $D_{burst} = 128$ bytes.</p>
+<p><b>Explanation.</b> One AW address handshake launches 16 W-channel beats carrying 128 bytes. Note AWLEN is zero-based, so 15 means 16 beats — a common off-by-one to watch. The single address cycle amortised over 16 beats is why bursts sustain bandwidth.</p>` },
+      { q: String.raw`Compute the peak bandwidth of a 512-bit AXI bus running at 300 MHz.`, solution: String.raw`<p><b>Formula.</b> $$BW = W_{bytes}\times f_{clk} = \frac{W_{bits}}{8}\times f_{clk}$$ (bytes per beat times beats per second, one beat/cycle with no wait states).</p>
+<p><b>Substitute.</b> $$BW = \frac{512}{8}\times 300\times10^6$$</p>
+<p><b>Compute.</b> $W_{bytes} = 64$; $BW = 64\times300\times10^6 = 1.92\times10^{10} = 19.2$ GB/s.</p>
+<p><b>Explanation.</b> The bus peaks at 19.2 GB/s. This is the ceiling with zero wait states; every cycle READY is held low or every address-phase gap only reduces it. It is the wide, parallel data path that gives AXI its GB/s class throughput versus serial buses.</p>` },
+      { q: String.raw`A subordinate returns read data 80 ns after accepting an address. The bus runs at 200 MHz. How many outstanding read transactions keep the read-data channel fully utilised?`, solution: String.raw`<p><b>Formula.</b> $$T_{beat} = \frac{1}{f_{clk}}, \qquad D_{min} = \left\lceil \frac{L}{T_{beat}} \right\rceil$$ where $L$ is the round-trip latency and $T_{beat}$ the beat time; enough transactions must be in flight to fill every beat-slot during one latency.</p>
+<p><b>Substitute.</b> $$T_{beat} = \frac{1}{200\times10^6}, \qquad D_{min} = \left\lceil \frac{80\ \text{ns}}{T_{beat}} \right\rceil$$</p>
+<p><b>Compute.</b> $T_{beat} = 5$ ns; $D_{min} = \lceil 80/5\rceil = 16$ outstanding transactions.</p>
+<p><b>Explanation.</b> With 16 reads in flight, their responses arrive one per beat and the read-data channel never idles. Fewer than 16 and the pipeline drains during the 80 ns latency, wasting bandwidth — precisely why AXI supports many outstanding, out-of-order transactions.</p>` },
+      { q: String.raw`Compare bus efficiency of a single-beat AXI4-Lite access versus a 128-beat AXI4 burst, counting one address cycle overhead each.`, solution: String.raw`<p><b>Formula.</b> Charging one address cycle per burst of $N$ data beats gives $$\eta = \frac{N}{N + 1}$$ (data cycles over data + address cycles).</p>
+<p><b>Substitute.</b> $$\eta_{\text{Lite}} = \frac{1}{1+1}, \qquad \eta_{\text{burst}} = \frac{128}{128+1}$$</p>
+<p><b>Compute.</b> $\eta_{\text{Lite}} = 1/2 = 50\%$; $\eta_{\text{burst}} = 128/129 \approx 99.2\%$.</p>
+<p><b>Explanation.</b> A single-beat access wastes half its cycles on the address; a 128-beat burst amortises that one address cycle to under 1% overhead. This is why bursts are essential for sustained throughput and why AXI4-Lite (single-beat) is used only for low-rate register access.</p>` },
+      { q: String.raw`A DMA reads 4 KB from DRAM over a 128-bit AXI4 bus using maximum-length bursts. How many bursts and beats are required (assume no 4KB boundary issue), and how long at 250 MHz with no wait states?`, solution: String.raw`<p><b>Formula.</b> $$W_{bytes} = \frac{W_{bits}}{8}, \quad N_{beats} = \frac{\text{bytes}}{W_{bytes}}, \quad N_{bursts} = \left\lceil \frac{N_{beats}}{256} \right\rceil, \quad T = N_{beats}\times\frac{1}{f_{clk}}$$ with 256 the AXI4 maximum burst length.</p>
+<p><b>Substitute.</b> $$W_{bytes} = \frac{128}{8}, \quad N_{beats} = \frac{4096}{16}, \quad T = 256\times\frac{1}{250\times10^6}$$</p>
+<p><b>Compute.</b> $W_{bytes} = 16$; $N_{beats} = 256$ beats, i.e. exactly one 256-beat burst; $T = 256\times4\ \text{ns} = 1.024\ \mu s$.</p>
+<p><b>Explanation.</b> The 4 KB transfer maps to exactly one 256-beat burst, moving in 1.024 µs plus a single address cycle. Sanity check: $256\times16 = 4096$ bytes confirms the beat count, and one maximum-length burst is the most efficient way to move a 4 KB page without crossing the 4 KB boundary.</p>` }
     ],
     realWorld: String.raw`<p>AXI is the connective tissue of virtually every modern SoC and FPGA. On a Xilinx/AMD RFSoC used for SDR, the ADC/DAC blocks stream wideband IQ samples into the programmable logic over <b>AXI4-Stream</b> (TVALID/TREADY backpressure naturally handles rate mismatches), DSP blocks are configured through <b>AXI4-Lite</b> register maps, and captured buffers are DMA'd to DDR over full <b>AXI4</b> bursts. An ARM Cortex CPU, its cache/DMA, the DDR controller, and every accelerator all talk over an AXI interconnect. Designers tune performance by choosing bus width, burst length, and outstanding-transaction depth to keep the DRAM pipeline full - exactly the levers the equations above quantify. Because it is a controlled on-chip environment, AXI spends no bits on CRC or redundancy; integrity for safety-critical designs is added by ECC memory and higher-layer AMBA extensions, not the base handshake. Its VALID/READY discipline - simple, universal, per-channel - is what makes disparate IP blocks from different vendors interoperate cleanly inside one chip.</p>`,
     related: ['spi', 'mil-std-1553', 'sdr', 'rfsoc']
@@ -516,7 +655,7 @@ CONTENT.topics.push(
     category: 'Interfaces & Protocols',
     tags: ['1553', 'avionics', 'manchester', 'dual-redundant', 'deterministic', 'bus-controller', 'remote-terminal', 'military'],
     summary: String.raw`MIL-STD-1553B is a deterministic, dual-redundant 1 Mbps Manchester-II, transformer-coupled avionics data bus in which a single Bus Controller commands up to 31 Remote Terminals using 20-bit-time command, data, and status words.`,
-    diagram: { svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+    diagram: [{ svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-1553" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <line x1="40" y1="70" x2="500" y2="70" stroke="#63e6be"/>
 <text x="270" y="63" fill="#63e6be" text-anchor="middle" font-size="10">Bus A (dual-redundant twisted pair)</text>
@@ -547,8 +686,43 @@ CONTENT.topics.push(
 <text x="270" y="215" fill="#9aa7b5" text-anchor="middle" font-size="10">BC commands up to 31 RTs over transformer-coupled stubs (&#9711;); BM listens passively</text>
 <text x="270" y="233" fill="#9aa7b5" text-anchor="middle" font-size="10">dual-redundant Bus A / Bus B, terminated at both ends</text>
 </svg>`, caption: String.raw`MIL-STD-1553B: a Bus Controller commands up to 31 Remote Terminals (plus a passive Bus Monitor) over a transformer-coupled, dual-redundant Bus A / Bus B.` },
+      { title: String.raw`Word encoding: 20 bit-times`, svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<rect x="30" y="55" width="90" height="55" rx="6" fill="#1c232e" stroke="#b197fc"/>
+<text x="75" y="78" fill="#e6edf3" text-anchor="middle" font-size="11">Sync</text>
+<text x="75" y="95" fill="#b197fc" text-anchor="middle" font-size="10">3 bit-times</text>
+<rect x="130" y="55" width="290" height="55" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="275" y="78" fill="#e6edf3" text-anchor="middle" font-size="11">16 Manchester-II data bits</text>
+<text x="275" y="95" fill="#63e6be" text-anchor="middle" font-size="10">16 bit-times</text>
+<rect x="430" y="55" width="80" height="55" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="470" y="78" fill="#e6edf3" text-anchor="middle" font-size="11">Parity</text>
+<text x="470" y="95" fill="#ffa94d" text-anchor="middle" font-size="10">1 bit-time</text>
+<text x="270" y="135" fill="#e6edf3" text-anchor="middle" font-size="10">3 + 16 + 1 = 20 bit-times = 20 &#181;s at 1 Mbps (1 &#181;s/bit)</text>
+<rect x="30" y="150" width="480" height="55" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="270" y="170" fill="#9aa7b5" text-anchor="middle" font-size="9">sync = INVALID-Manchester pattern (holds a level 1.5 bit-times, no mid-bit edge)</text>
+<text x="270" y="186" fill="#9aa7b5" text-anchor="middle" font-size="9">&#8594; unmistakable as a word boundary; data bits each have a legal mid-bit transition</text>
+<text x="270" y="201" fill="#9aa7b5" text-anchor="middle" font-size="9">Command/Status sync = opposite polarity of Data sync (tells word type)</text>
+</svg>`, caption: String.raw`Every 1553 word is exactly 20 bit-times: a 3-bit-time invalid-Manchester sync (no legal mid-bit edge, so it cannot be confused with data), 16 Manchester-II data bits, and 1 odd-parity bit &#8212; 20 &#181;s at 1 Mbps.` },
+      { title: String.raw`Command/response timing`, svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-1553" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="20" y="45" width="150" height="70" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="95" y="72" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Bus Controller</text>
+<text x="95" y="92" fill="#9aa7b5" text-anchor="middle" font-size="9">sole initiator</text>
+<rect x="370" y="45" width="150" height="70" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="445" y="72" fill="#e6edf3" text-anchor="middle" font-weight="bold" font-size="11">Remote Terminal</text>
+<text x="445" y="92" fill="#9aa7b5" text-anchor="middle" font-size="9">responds only when told</text>
+<line x1="170" y1="65" x2="370" y2="65" stroke="#4dabf7" marker-end="url(#arr2-1553)"/>
+<text x="270" y="59" fill="#4dabf7" text-anchor="middle" font-size="9">1. Command (+ data if receive)</text>
+<line x1="255" y1="90" x2="285" y2="90" stroke="#b197fc"/>
+<text x="270" y="105" fill="#b197fc" text-anchor="middle" font-size="9">2. gap: response time 4&#8211;12 &#181;s</text>
+<line x1="370" y1="112" x2="170" y2="112" stroke="#63e6be" marker-end="url(#arr2-1553)"/>
+<text x="270" y="128" fill="#63e6be" text-anchor="middle" font-size="9">3. Status word (+ data if transmit)</text>
+<rect x="60" y="150" width="420" height="45" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="270" y="169" fill="#e6edf3" text-anchor="middle" font-size="10">no valid Status within ~14 &#181;s timeout &#8594; BC declares no-response</text>
+<text x="270" y="186" fill="#9aa7b5" text-anchor="middle" font-size="9">BC then retries, often on the redundant bus &#8212; bounded, deterministic latency</text>
+</svg>`, caption: String.raw`Command/response timing: the BC sends a command, the RT waits its 4&#8211;12 &#181;s response time, then replies with a Status word (plus data on a transmit command). If no valid Status returns within the ~14 &#181;s no-response timeout, the BC flags an error and retries, possibly on the redundant bus.` }],
     prerequisites: ['mil-std-1553', 'comm-basics', 'rs485'],
-    intro: String.raw`<p><b>MIL-STD-1553</b> is a US military standard (first issued 1973; the widely used <b>1553B</b> notice dates to 1978) defining a <b>digital, command/response, time-division multiplexed serial data bus</b> for military aircraft, and later spacecraft, ships, and ground vehicles. Where SPI is on-board simplicity and AXI is on-chip bandwidth, 1553 is about <b>determinism and fault tolerance</b> in a hostile, safety-critical environment: it must carry avionics data (attitude, navigation, weapons, engine) reliably for decades.</p>
+    intro: String.raw`<p><b>Why MIL-STD-1553 exists.</b> In a combat aircraft, subsystems — navigation, radar, weapons, engine, displays — must exchange data over cabling threaded through a violently noisy airframe, and a <em>missed or late</em> message can be catastrophic. Commercial best-effort buses cannot promise that a given value will be refreshed by a hard deadline, and they are not built to survive EMI or a physical fault. The problem 1553 solves is <em>deterministic, fault-tolerant data exchange in a hostile, safety-critical environment, for decades</em>. Its answers are a single Bus Controller that schedules every transfer (so timing is bounded and there is never contention), a self-clocking transformer-coupled physical layer that shrugs off noise and ground faults, and two fully redundant buses so a failed message is simply retried on the alternate.</p>
+<p><b>MIL-STD-1553</b> is a US military standard (first issued 1973; the widely used <b>1553B</b> notice dates to 1978) defining a <b>digital, command/response, time-division multiplexed serial data bus</b> for military aircraft, and later spacecraft, ships, and ground vehicles. Where SPI is on-board simplicity and AXI is on-chip bandwidth, 1553 is about <b>determinism and fault tolerance</b> in a hostile, safety-critical environment: it must carry avionics data (attitude, navigation, weapons, engine) reliably for decades.</p>
     <p>Its architecture is deliberately centralized: a single <b>Bus Controller (BC)</b> is the sole initiator, scheduling every transfer; up to <b>31 Remote Terminals (RTs)</b> respond only when commanded; and optional <b>Bus Monitors (BM)</b> passively record traffic. The physical layer is a <b>shielded twisted-pair, transformer-coupled, dual-redundant</b> bus running <b>1 Mbps</b> using self-clocking <b>Manchester II</b> biphase encoding. Every transfer is built from fixed <b>20-bit-time words</b> (3 bit-times of sync + 16 data bits + 1 parity bit), and each word therefore lasts exactly <b>20 microseconds</b>. Because the BC schedules all traffic and the timing is fixed, message latency is bounded and predictable - the property that makes 1553 trusted for flight-critical control long after faster commercial buses appeared.</p>`,
     sections: [
       {
@@ -711,6 +885,18 @@ CONTENT.topics.push(
           <tr><td>Redundancy</td><td>Dual-redundant (Bus A/B)</td><td>None</td><td>None (base)</td></tr>
           <tr><td>Determinism</td><td>Bounded / scheduled</td><td>Master-timed</td><td>Handshake-gated</td></tr>
         </table>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip">Every feature of 1553 serves one goal: guaranteed, survivable data delivery. It trades bandwidth away for determinism and fault tolerance — exactly the bargain avionics wants.</div>
+        <ul>
+          <li><b>Centralized command/response.</b> One Bus Controller initiates every transfer; up to 31 Remote Terminals respond only when commanded, so there is never contention and timing is fully scheduled.</li>
+          <li><b>Self-clocked Manchester II.</b> Every bit has a mid-bit transition, so the clock rides in the data (no clock wire) and there is no DC content — ideal for transformer coupling.</li>
+          <li><b>Fixed 20-bit-time words.</b> 3 sync + 16 data + 1 parity = 20 µs at 1 Mbps; the sync is a deliberate invalid-Manchester pattern (opposite polarity for Command/Status vs Data) that marks word boundaries unmistakably.</li>
+          <li><b>Layered integrity.</b> Odd parity per word + Manchester validity + the Status word's error bits + a no-response timeout — defense in depth rather than a single CRC.</li>
+          <li><b>Physical fault tolerance.</b> Shielded twisted pair, transformer-coupled for isolation and common-mode rejection, and <em>dual-redundant</em> Bus A/B so a failed message retries on the alternate.</li>
+          <li><b>Determinism by construction.</b> Fixed word timing + a sole initiator + a pre-planned minor/major frame schedule make worst-case latency bounded and computable — why a 1 Mbps bus still flies safely after 40+ years, and the reason to keep bus load well below 100%.</li>
+        </ul>`
       }
     ],
     keyPoints: [
@@ -812,12 +998,30 @@ CONTENT.topics.push(
       { q: String.raw`The Instrumentation bit in a 1553 Status word is:`, options: ['Set to signal an error', 'Always logic 0, distinguishing status from a command word', 'The parity bit', 'The broadcast flag'], answer: 1, explain: String.raw`The Instrumentation bit is always logic 0 in the Status word, which (with the shared Command/Status sync) helps distinguish a Status word from a Command word.` }
     ],
     numericals: [
-      { q: String.raw`How long does it take to transmit a single 1553 data word, and what fraction of that time is actual payload?`, solution: String.raw`Word time $= 20\ \mu s$ (3 sync + 16 data + 1 parity at 1 us/bit). Payload = 16 data bits = $16\ \mu s$. Fraction $= 16/20 = 80\%$; the 3-us sync and 1-us parity are the 20% overhead of a single word.` },
-      { q: String.raw`Compute the total time for a BC-to-RT message carrying 20 data words, taking response time 8 us and intermessage gap 4 us.`, solution: String.raw`Words $= 1$ command $+ 20$ data $+ 1$ status $= 22$ words. Word time $= 22\times20 = 440\ \mu s$. Add $T_{resp}=8$ and $T_{gap}=4$: $T_{msg} = 440 + 8 + 4 = 452\ \mu s$.` },
-      { q: String.raw`What is the effective payload throughput of that 20-data-word message?`, solution: String.raw`Payload bits $= 16\times20 = 320$ bits. $R_{eff} = 320 / (452\times10^{-6}) \approx 708$ kbit/s, i.e. about 71% of the 1 Mbps raw rate. Overhead comes from the command/status words, sync/parity, response time, and gap.` },
-      { q: String.raw`If a 20 ms minor frame is loaded to at most 75% with maximum (692 us) messages, how many such messages fit per minor frame?`, solution: String.raw`Available time $= 0.75\times20\ \text{ms} = 15\ \text{ms} = 15000\ \mu s$. Messages $= \lfloor 15000/692 \rfloor = \lfloor 21.7 \rfloor = 21$ maximum messages per minor frame, leaving margin for retries and growth.` },
-      { q: String.raw`A designer needs to poll 30 RTs, each returning 4 data words (RT-to-BC), every 50 ms. Estimate the bus load (use ~8 us response + 4 us gap per message).`, solution: String.raw`Each RT-to-BC message: 1 command + 1 status + 4 data $= 6$ words $= 120\ \mu s$, plus $8+4 = 12\ \mu s$ overhead $= 132\ \mu s$. Thirty RTs: $30\times132 = 3960\ \mu s \approx 3.96\ \text{ms}$ of traffic per 50 ms frame. Load $= 3.96/50 \approx 7.9\%$ - comfortably low, leaving ample scheduling margin.` },
-      { q: String.raw`Why can 1553 guarantee a worst-case latency that a best-effort commercial bus cannot?`, solution: String.raw`Because every word has fixed 20-us timing, only the BC transmits commands (no contention), and the BC runs a pre-planned minor/major frame schedule. The time each message occupies is known exactly, so the maximum delay before any parameter is refreshed is bounded and computable at design time - determinism by construction, not by statistical best effort.` }
+      { q: String.raw`How long does it take to transmit a single 1553 data word, and what fraction of that time is actual payload?`, solution: String.raw`<p><b>Formula.</b> $$T_{word} = N\,T_{bit} = (3 + 16 + 1)\,T_{bit}, \qquad f = \frac{N_{data}}{N}$$ where $T_{bit} = 1/(1\ \text{Mbps}) = 1\ \mu s$, $N=20$ bit-times, and $N_{data}=16$ payload bits.</p>
+<p><b>Substitute.</b> $$T_{word} = 20\times 1\ \mu s, \qquad f = \frac{16}{20}$$</p>
+<p><b>Compute.</b> $T_{word} = 20\ \mu s$; payload $= 16\ \mu s$; $f = 16/20 = 80\%$.</p>
+<p><b>Explanation.</b> A word takes 20 µs and 80% of it is payload; the 3 µs sync and 1 µs parity are the 20% per-word overhead. Sanity check: $3+16+1 = 20$ bit-times at 1 µs each — this is the atomic timing unit from which all 1553 message timing is built.</p>` },
+      { q: String.raw`Compute the total time for a BC-to-RT message carrying 20 data words, taking response time 8 us and intermessage gap 4 us.`, solution: String.raw`<p><b>Formula.</b> $$T_{msg} = (1 + N_{data} + 1)\,T_{word} + T_{resp} + T_{gap}$$ counting one command word, $N_{data}$ data words, one status word (each $T_{word}=20\ \mu s$), plus the RT response time and intermessage gap.</p>
+<p><b>Substitute.</b> $$T_{msg} = (1 + 20 + 1)\times20\ \mu s + 8\ \mu s + 4\ \mu s$$</p>
+<p><b>Compute.</b> Words $= 22$; word time $= 22\times20 = 440\ \mu s$; $T_{msg} = 440 + 8 + 4 = 452\ \mu s$.</p>
+<p><b>Explanation.</b> The full 20-data-word message occupies 452 µs. The command and status words plus the response/gap times are the fixed per-message overhead — the reason 1553 packs data into longer messages where possible to raise efficiency.</p>` },
+      { q: String.raw`What is the effective payload throughput of that 20-data-word message?`, solution: String.raw`<p><b>Formula.</b> $$R_{eff} = \frac{16\,N_{data}}{T_{msg}}$$ payload bits (16 per data word) divided by the total message time from the previous result.</p>
+<p><b>Substitute.</b> $$R_{eff} = \frac{16\times20}{452\times10^{-6}\ \text{s}}$$</p>
+<p><b>Compute.</b> Payload $= 320$ bits; $R_{eff} = 320/(452\times10^{-6}) \approx 708$ kbit/s.</p>
+<p><b>Explanation.</b> The 20-data-word message delivers ~708 kbit/s, about 71% of the 1 Mbps raw bus. The shortfall is the command/status words, sync/parity, response time, and gap — overhead that shrinks (as a fraction) the more data words a message carries.</p>` },
+      { q: String.raw`If a 20 ms minor frame is loaded to at most 75% with maximum (692 us) messages, how many such messages fit per minor frame?`, solution: String.raw`<p><b>Formula.</b> $$T_{avail} = \rho\,T_{frame}, \qquad N = \left\lfloor \frac{T_{avail}}{T_{msg}} \right\rfloor$$ where $\rho=0.75$ is the target load, $T_{frame}=20$ ms the minor frame, and $T_{msg}=692\ \mu s$ a maximum message.</p>
+<p><b>Substitute.</b> $$T_{avail} = 0.75\times20\ \text{ms}, \qquad N = \left\lfloor \frac{15000\ \mu s}{692\ \mu s} \right\rfloor$$</p>
+<p><b>Compute.</b> $T_{avail} = 15\ \text{ms} = 15000\ \mu s$; $N = \lfloor 21.7 \rfloor = 21$ messages.</p>
+<p><b>Explanation.</b> Twenty-one maximum messages fit in a 75%-loaded minor frame, leaving the remaining 25% for retries and future growth. Keeping load below ~70–80% is standard 1553 practice so the deterministic schedule still has slack — determinism only holds if the frame is not overbooked.</p>` },
+      { q: String.raw`A designer needs to poll 30 RTs, each returning 4 data words (RT-to-BC), every 50 ms. Estimate the bus load (use ~8 us response + 4 us gap per message).`, solution: String.raw`<p><b>Formula.</b> $$T_{one} = (1 + 1 + N_{data})\,T_{word} + T_{resp} + T_{gap}, \qquad \text{load} = \frac{N_{RT}\,T_{one}}{T_{frame}}$$ per RT-to-BC message: command + status + $N_{data}$ data words, plus response and gap; summed over $N_{RT}$ RTs against the frame period.</p>
+<p><b>Substitute.</b> $$T_{one} = (1 + 1 + 4)\times20\ \mu s + 8\ \mu s + 4\ \mu s, \qquad \text{load} = \frac{30\times T_{one}}{50\ \text{ms}}$$</p>
+<p><b>Compute.</b> $T_{one} = 6\times20 + 12 = 120 + 12 = 132\ \mu s$; total $= 30\times132 = 3960\ \mu s \approx 3.96\ \text{ms}$; load $= 3.96/50 \approx 7.9\%$.</p>
+<p><b>Explanation.</b> Polling all 30 RTs uses only ~7.9% of the 50 ms frame, leaving vast scheduling margin. This shows how comfortably 1553 handles a realistic sensor-poll cycle, and why its determinism is easy to guarantee when frames are lightly loaded.</p>` },
+      { q: String.raw`Why can 1553 guarantee a worst-case latency that a best-effort commercial bus cannot?`, solution: String.raw`<p><b>Formula.</b> Worst-case latency for a parameter is the frame period plus, at most, all the message time ahead of it in that frame: $$L_{wc} = T_{frame} + \sum_{k} T_{msg,k}$$ Because each $T_{msg,k}$ is a fixed, known quantity (from the word-timing formulas above), the whole sum is bounded and computable at design time.</p>
+<p><b>Substitute.</b> Every term is deterministic: word time is fixed at $T_{word}=20\ \mu s$, only the BC issues commands (no contention/backoff), and the frame schedule is pre-planned, so each $T_{msg,k}$ is a constant rather than a random variable.</p>
+<p><b>Compute.</b> The sum evaluates to a single finite number — the guaranteed upper bound $L_{wc}$ on refresh latency for that parameter — with no statistical tail.</p>
+<p><b>Explanation.</b> A best-effort commercial bus has contention, arbitration backoff, and variable queueing, so its latency has a long, unbounded statistical tail. 1553 replaces all of that with fixed 20 µs words, a single sole initiator, and a pre-planned minor/major frame schedule, so worst-case latency is bounded by construction — the property avionics certification requires.</p>` }
     ],
     realWorld: String.raw`<p>MIL-STD-1553B is the nervous system of military aircraft. On an F-16 or F/A-18, the mission computer acts as Bus Controller and polls Remote Terminals embedded in the inertial navigation unit, radar, stores-management (weapons), displays, and engine controllers - all on a dual-redundant transformer-coupled twisted pair threaded through the airframe. Flight-critical parameters (attitude, air data) are scheduled in every minor frame so their latency is bounded and certifiable; slower housekeeping (built-in test, configuration) rides once per major frame. The bus survives combat-grade EMI and single-point stub faults precisely because of Manchester self-clocking (no DC, robust sync), transformer isolation, and Bus A/B redundancy. The same standard extends to satellites, launch vehicles, and ground combat systems, and its ecosystem includes derivatives and higher-rate successors, yet legacy 1553 endures because avionics values determinism and proven reliability over raw speed - a 1 Mbps bus that has flown safely for over forty years. Its trade against SPI and AXI is stark: it sacrifices bandwidth for guaranteed timing and fault tolerance in an environment where a missed deadline can be catastrophic.</p>`,
     related: ['rs485', 'spi', 'axi', 'comm-basics']

@@ -6,7 +6,7 @@ CONTENT.topics.push(
     category: 'Spread Spectrum & Coding',
     tags: ['convolutional', 'FEC', 'trellis', 'Viterbi', 'constraint length', 'free distance', 'puncturing', 'generator polynomials'],
     summary: String.raw`A convolutional code encodes a continuous data stream by sliding it through a shift register and forming output bits as modulo-2 sums tapped off by generator polynomials, producing structured redundancy whose memory is decoded on a trellis by the Viterbi or BCJR algorithm.`,
-    diagram: {
+    diagram: [{
       svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-convolutional-codes" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <text x="12" y="20" fill="#e6edf3">rate 1/2, K=3 encoder &#8212; generators (7,5)&#8323;</text>
@@ -32,6 +32,68 @@ CONTENT.topics.push(
 </svg>`,
       caption: String.raw`Input bit u shifts through registers D&#8321;,D&#8322;; two XOR taps (g&#8321;,g&#8322;) form the rate-1/2 output pair (v&#8321;,v&#8322;).`
     },
+    {
+      title: String.raw`State diagram of the (7,5)&#8323; encoder`,
+      svg: String.raw`<svg viewBox="0 0 540 300" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr2-convolutional-codes" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<text x="12" y="20" fill="#e6edf3">4 states (s&#8321;s&#8322;); edge label = input / output v&#8321;v&#8322;</text>
+<text x="12" y="36" fill="#9aa7b5">solid = input 0, dashed = input 1</text>
+<rect x="60" y="70" width="60" height="34" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="80" y="92" fill="#e6edf3">00</text>
+<rect x="420" y="70" width="60" height="34" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="440" y="92" fill="#e6edf3">10</text>
+<rect x="60" y="210" width="60" height="34" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="80" y="232" fill="#e6edf3">01</text>
+<rect x="420" y="210" width="60" height="34" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="440" y="232" fill="#e6edf3">11</text>
+<path d="M120,80 L420,80" fill="none" stroke="#9aa7b5" stroke-dasharray="5,3" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="250" y="72" fill="#ffa94d">1 / 11</text>
+<path d="M60,84 C10,84 10,240 60,220" fill="none" stroke="#9aa7b5" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="6" y="150" fill="#9aa7b5">0 / 00</text>
+<path d="M440,104 L440,210" fill="none" stroke="#9aa7b5" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="446" y="160" fill="#b197fc">1 / 01</text>
+<path d="M420,94 L120,224" fill="none" stroke="#9aa7b5" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="250" y="150" fill="#63e6be">0 / 10</text>
+<path d="M120,224 L420,234" fill="none" stroke="#9aa7b5" stroke-dasharray="5,3" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="250" y="252" fill="#b197fc">1 / 00</text>
+<path d="M420,224 L120,100" fill="none" stroke="#9aa7b5" stroke-dasharray="5,3" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="250" y="188" fill="#ffa94d">1 / 10</text>
+<path d="M120,214 C160,190 160,110 120,94" fill="none" stroke="#9aa7b5" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="164" y="150" fill="#63e6be">0 / 11</text>
+<path d="M480,224 C530,224 530,90 482,84" fill="none" stroke="#9aa7b5" stroke-dasharray="5,3" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="500" y="150" fill="#b197fc">1 / 01</text>
+<path d="M470,206 C500,180 500,120 476,104" fill="none" stroke="#9aa7b5" marker-end="url(#arr2-convolutional-codes)"/>
+<text x="486" y="150" fill="#ffa94d">0 / 01</text>
+</svg>`,
+      caption: String.raw`The four register states and their transitions. From each state, input 0 (solid) and input 1 (dashed) each fire one edge, labelled input/output. The lowest-weight loop 00&#8594;10&#8594;01&#8594;00 emits 11,10,11 (weight 5 = d_free).`
+    },
+    {
+      title: String.raw`Trellis section (states &#215; time)`,
+      svg: String.raw`<svg viewBox="0 0 540 260" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr3-convolutional-codes" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<text x="12" y="20" fill="#e6edf3">trellis: 4 states unrolled over time; branch label = output v&#8321;v&#8322;</text>
+<text x="12" y="36" fill="#9aa7b5">solid = input 0, dashed = input 1</text>
+<text x="30" y="66" fill="#4dabf7">00</text><text x="30" y="116" fill="#ffa94d">10</text><text x="30" y="166" fill="#63e6be">01</text><text x="30" y="216" fill="#b197fc">11</text>
+<text x="90" y="248" fill="#9aa7b5">t</text><text x="230" y="248" fill="#9aa7b5">t+1</text><text x="370" y="248" fill="#9aa7b5">t+2</text><text x="500" y="248" fill="#9aa7b5">t+3</text>
+<circle cx="95" cy="62" r="5" fill="#4dabf7"/><circle cx="95" cy="112" r="5" fill="#ffa94d"/><circle cx="95" cy="162" r="5" fill="#63e6be"/><circle cx="95" cy="212" r="5" fill="#b197fc"/>
+<circle cx="235" cy="62" r="5" fill="#4dabf7"/><circle cx="235" cy="112" r="5" fill="#ffa94d"/><circle cx="235" cy="162" r="5" fill="#63e6be"/><circle cx="235" cy="212" r="5" fill="#b197fc"/>
+<circle cx="375" cy="62" r="5" fill="#4dabf7"/><circle cx="375" cy="112" r="5" fill="#ffa94d"/><circle cx="375" cy="162" r="5" fill="#63e6be"/><circle cx="375" cy="212" r="5" fill="#b197fc"/>
+<circle cx="505" cy="62" r="5" fill="#4dabf7"/><circle cx="505" cy="112" r="5" fill="#ffa94d"/><circle cx="505" cy="162" r="5" fill="#63e6be"/><circle cx="505" cy="212" r="5" fill="#b197fc"/>
+<line x1="100" y1="62" x2="230" y2="62" stroke="#9aa7b5"/><text x="150" y="56" fill="#9aa7b5">00</text>
+<line x1="100" y1="62" x2="230" y2="112" stroke="#9aa7b5" stroke-dasharray="5,3"/><text x="150" y="92" fill="#9aa7b5">11</text>
+<line x1="100" y1="112" x2="230" y2="162" stroke="#9aa7b5"/><text x="150" y="140" fill="#9aa7b5">10</text>
+<line x1="100" y1="112" x2="230" y2="212" stroke="#9aa7b5" stroke-dasharray="5,3"/><text x="150" y="176" fill="#9aa7b5">01</text>
+<line x1="100" y1="162" x2="230" y2="62" stroke="#9aa7b5"/><text x="150" y="108" fill="#9aa7b5">11</text>
+<line x1="100" y1="212" x2="230" y2="162" stroke="#9aa7b5" stroke-dasharray="5,3"/><text x="150" y="200" fill="#9aa7b5">00</text>
+<line x1="240" y1="62" x2="370" y2="62" stroke="#9aa7b5"/>
+<line x1="240" y1="62" x2="370" y2="112" stroke="#9aa7b5" stroke-dasharray="5,3"/>
+<line x1="240" y1="112" x2="370" y2="162" stroke="#9aa7b5"/>
+<line x1="240" y1="112" x2="370" y2="212" stroke="#9aa7b5" stroke-dasharray="5,3"/>
+<line x1="240" y1="162" x2="370" y2="62" stroke="#9aa7b5"/>
+<line x1="240" y1="212" x2="370" y2="162" stroke="#9aa7b5" stroke-dasharray="5,3"/>
+<line x1="380" y1="62" x2="505" y2="62" stroke="#9aa7b5" marker-end="url(#arr3-convolutional-codes)"/>
+<line x1="380" y1="112" x2="505" y2="162" stroke="#9aa7b5" marker-end="url(#arr3-convolutional-codes)"/>
+<line x1="380" y1="162" x2="505" y2="62" stroke="#9aa7b5" marker-end="url(#arr3-convolutional-codes)"/>
+<line x1="380" y1="212" x2="505" y2="162" stroke="#9aa7b5" stroke-dasharray="5,3" marker-end="url(#arr3-convolutional-codes)"/>
+</svg>`,
+      caption: String.raw`The state diagram unrolled in time: a column of four states per step with two outgoing branches each. Viterbi runs left-to-right along this trellis, keeping one survivor path per state.`
+    }],
     prerequisites: ['channel-coding', 'fec', 'convolution', 'ber'],
     intro: String.raw`<p>A <strong>convolutional code</strong> is a forward-error-correction code with <em>memory</em>: unlike a block code that maps each independent $k$-bit block to an $n$-bit codeword, a convolutional encoder feeds a continuous stream of information bits through a shift register and produces output bits that depend not only on the current input but on a window of past inputs. The name comes directly from the operation performed — each output stream is the <strong>convolution</strong> (modulo 2) of the input sequence with a fixed impulse response, the <em>generator sequence</em>. This memory is what gives the code its power: errors are corrected by exploiting correlations that span many bits, and the maximum-likelihood decoder (the Viterbi algorithm) searches a trellis of encoder states rather than a table of isolated codewords.</p>
     <p>Convolutional codes dominated point-to-point digital communications for decades — deep-space links (the Voyager and Galileo missions), GSM, IS-95, 802.11a/g, DVB, and satellite modems all used them, most famously the rate-1/2, constraint-length-7 code with generators $(171,133)_8$. Even in the modern era of Turbo and LDPC codes, convolutional codes live on as the constituent encoders inside Turbo codes and as tail-biting codes in LTE/5G control channels. This topic builds the encoder from the shift register up, develops the tree, state, and trellis pictures, defines the all-important <strong>free distance</strong> $d_{free}$, and connects the structure to Viterbi/BCJR decoding, puncturing, and coding gain.</p>`,
@@ -81,7 +143,8 @@ CONTENT.topics.push(
       },
       {
         h: 'Free distance and the distance spectrum',
-        html: String.raw`<p>For a block code the error-correcting power is set by the minimum Hamming distance $d_{min}$. For a convolutional code the analogous, decisive quantity is the <strong>free distance</strong> $d_{free}$: the minimum Hamming weight of any nonzero codeword, equivalently the minimum Hamming distance between any two distinct code sequences. Because the code is linear, this equals the smallest weight of any path that leaves the all-zero state and later re-merges with it.</p>
+        html: String.raw`<p><em>Intuition first:</em> imagine two possible transmitted sequences that agree for a while, then split apart, then come back together. The number of coded bits in which they differ over that excursion is how "far apart" they are — and the closest such pair is the weak point an attacker (noise) will exploit. That closest spacing is the free distance.</p>
+        <p>For a block code the error-correcting power is set by the minimum Hamming distance $d_{min}$. For a convolutional code the analogous, decisive quantity is the <strong>free distance</strong> $d_{free}$: the minimum Hamming weight of any nonzero codeword, equivalently the minimum Hamming distance between any two distinct code sequences. Because the code is linear, this equals the smallest weight of any path that leaves the all-zero state and later re-merges with it.</p>
         <p>The number of random errors a Viterbi decoder can correct is</p>
         <p>$$ t = \left\lfloor \frac{d_{free}-1}{2} \right\rfloor. $$</p>
         <p>Larger $d_{free}$ means the correct path stays farther (in Hamming distance) from wrong paths, so more channel errors are needed to fool the decoder. Values for standard rate-1/2 codes: $(7,5)_8$, $K=3 \Rightarrow d_{free}=5$; $K=5 \Rightarrow d_{free}=7$; the $(171,133)_8$, $K=7$ code $\Rightarrow d_{free}=10$. The <strong>distance spectrum</strong> $\{A_d\}$ (number of paths of each weight $d$) and the information-weight spectrum feed the union bound on bit error rate.</p>
@@ -118,6 +181,18 @@ CONTENT.topics.push(
           <tr><td>Best at</td><td>burst errors (with RS), high code rates</td><td>random errors, streaming, low latency</td></tr>
         </table>
         <p>They are complementary and were classically <strong>concatenated</strong>: an inner convolutional code (Viterbi-decoded, good against random errors) followed by an outer Reed–Solomon block code (good against the residual bursts the Viterbi decoder emits), with an interleaver between them. The Voyager deep-space standard used exactly this — RS(255,223) over convolutional $(171,133)$ — a scheme that ruled until Turbo and LDPC codes arrived.</p>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip"><p>Pulling the pieces together — if the topic has landed, you should be able to explain each of these in a sentence:</p>
+        <ul>
+          <li><strong>Why "convolutional".</strong> Each output stream is the mod-2 convolution of the input with a fixed generator sequence; the encoder is a linear time-invariant filter over GF(2) with <em>memory</em>, so outputs depend on a window of past bits, not an isolated block.</li>
+          <li><strong>The parameters and how they interlock.</strong> Rate $R_c=k/n$, memory $m$, constraint length $K=m+1$, and states $2^m=2^{K-1}$ — and why larger $K$ means a stronger code but exponentially costlier Viterbi decoding.</li>
+          <li><strong>The three pictures.</strong> Tree (exhaustive, exponential), state diagram (compact, $2^m$ nodes), and trellis (state diagram unrolled in time) — and why the trellis, by merging equivalent paths, is what makes efficient decoding possible.</li>
+          <li><strong>Free distance is the master quantity.</strong> $d_{free}$ plays the role $d_{min}$ plays for block codes: it sets $t=\lfloor(d_{free}-1)/2\rfloor$ and the asymptotic coding gain $\approx 10\log_{10}(R_c d_{free})$.</li>
+          <li><strong>Decoding choices.</strong> Viterbi finds the best sequence (add–compare–select, ~2 dB from soft over hard decisions); BCJR gives per-bit soft outputs and lives on inside Turbo codes.</li>
+          <li><strong>Practical levers.</strong> Puncturing trades $d_{free}$ for higher rate from one mother code; traceback $\approx 5K$–$6K$ enables streaming; catastrophic generators (shared factors) must be avoided.</li>
+        </ul></div>`
       }
     ],
     keyPoints: [
@@ -229,13 +304,47 @@ CONTENT.topics.push(
       { q: String.raw`A catastrophic convolutional encoder is one where:`, options: [String.raw`the rate exceeds 1`, String.raw`finite input errors can cause infinite output errors`, String.raw`$d_{free}=0$ always`, String.raw`the trellis has one state`], answer: 1, explain: String.raw`It arises when the generator polynomials share a common factor and must be avoided.` }
     ],
     numericals: [
-      { q: String.raw`A rate-1/2 convolutional encoder has generators $g_1=(1+D+D^2)$ and $g_2=(1+D^2)$. Encode the input $u=1\,0\,1\,1$ (assume the register starts at 0 and flush with two zeros).`, solution: String.raw`Process bit by bit with state $(s_1 s_2)$ initially $00$. Outputs $v_1=u\oplus s_1\oplus s_2$, $v_2=u\oplus s_2$.\n\n1) $u=1$, state $00$: $v_1=1\oplus0\oplus0=1$, $v_2=1\oplus0=1$ → $11$; new state $10$.\n2) $u=0$, state $10$: $v_1=0\oplus1\oplus0=1$, $v_2=0\oplus0=0$ → $10$; new state $01$.\n3) $u=1$, state $01$: $v_1=1\oplus0\oplus1=0$, $v_2=1\oplus1=0$ → $00$; new state $10$.\n4) $u=1$, state $10$: $v_1=1\oplus1\oplus0=0$, $v_2=1\oplus0=1$ → $01$; new state $11$.\nFlush $u=0$, state $11$: $v_1=0\oplus1\oplus1=0$, $v_2=0\oplus1=1$ → $01$; state $01$.\nFlush $u=0$, state $01$: $v_1=0\oplus0\oplus1=1$, $v_2=0\oplus1=1$ → $11$; state $00$.\n\nCodeword: $11\ 10\ 00\ 01\ 01\ 11$.` },
-      { q: String.raw`A code has $d_{free}=10$. Find the number of correctable random errors $t$.`, solution: String.raw`$t=\lfloor(d_{free}-1)/2\rfloor=\lfloor 9/2\rfloor = 4$ errors.` },
-      { q: String.raw`Estimate the asymptotic soft-decision coding gain of a rate-1/2 code with $d_{free}=10$.`, solution: String.raw`$G\approx 10\log_{10}(R_c\,d_{free}) = 10\log_{10}(0.5\times 10)=10\log_{10}5 \approx 6.99\approx 7$ dB.` },
-      { q: String.raw`A rate-1/3 encoder with constraint length $K=9$ is Viterbi-decoded. How many states, and roughly what traceback depth?`, solution: String.raw`States $=2^{K-1}=2^8=256$. Traceback depth $\approx 5K$ to $6K = 45$ to $54$ branches.` },
-      { q: String.raw`A rate-1/2 mother code is punctured to rate 3/4. Out of every 6 coded bits, how many are transmitted?`, solution: String.raw`Rate $3/4$ means 3 information bits produce 4 transmitted bits. The mother code produces $3\times 2 = 6$ coded bits; $6-4=2$ are punctured (deleted). So 4 of every 6 coded bits are sent.` },
-      { q: String.raw`For a $(3,1,2)$ code (rate 1/3, $m=2$) each input bit produces how many coded bits, and what is the overhead ratio?`, solution: String.raw`Each input bit yields $n=3$ coded bits. Overhead $=(n-k)/k=(3-1)/1=2$, i.e. 200% redundancy; useful throughput is $R_c=1/3$ of the channel bit rate.` },
-      { q: String.raw`Compute the free distance of the $(7,5)_8$, $K=3$ code by finding the lowest-weight path that leaves and re-merges with state $00$.`, solution: String.raw`Input $1$ then $0,0$ traces states $00\to10\to01\to00$ emitting $11,10,11$ = weight $2+1+2=5$. No lower-weight nonzero path re-merges sooner, so $d_{free}=5$ (correcting $t=\lfloor4/2\rfloor=2$ errors).` }
+      { q: String.raw`A rate-1/2 convolutional encoder has generators $g_1=(1+D+D^2)$ and $g_2=(1+D^2)$. Encode the input $u=1\,0\,1\,1$ (assume the register starts at 0 and flush with two zeros).`, solution: String.raw`<p><b>Formula.</b> With state $(s_1 s_2)$ holding the two most recent past bits, each step emits $$ v_1=u\oplus s_1\oplus s_2,\qquad v_2=u\oplus s_2, $$ then the register shifts: $s_2\!\leftarrow\!s_1$, $s_1\!\leftarrow\!u$. Here $u$ is the current input, $\oplus$ is XOR (mod-2 add), and $v_1,v_2$ are the coded output pair.</p>
+<p><b>Substitute.</b> Start at state $00$ and process $u=1,0,1,1$ then two flush zeros, plugging each $(u,s_1,s_2)$ into the two equations:</p>
+<p>1) $u=1$, state $00$: $v_1=1\oplus0\oplus0$, $v_2=1\oplus0$.<br>
+2) $u=0$, state $10$: $v_1=0\oplus1\oplus0$, $v_2=0\oplus0$.<br>
+3) $u=1$, state $01$: $v_1=1\oplus0\oplus1$, $v_2=1\oplus1$.<br>
+4) $u=1$, state $10$: $v_1=1\oplus1\oplus0$, $v_2=1\oplus0$.<br>
+flush $u=0$, state $11$: $v_1=0\oplus1\oplus1$, $v_2=0\oplus1$.<br>
+flush $u=0$, state $01$: $v_1=0\oplus0\oplus1$, $v_2=0\oplus1$.</p>
+<p><b>Compute.</b> Evaluating each pair and tracking the next state:</p>
+<p>1) $\to 11$, next state $10$.<br>
+2) $\to 10$, next state $01$.<br>
+3) $\to 00$, next state $10$.<br>
+4) $\to 01$, next state $11$.<br>
+flush 1) $\to 01$, next state $01$.<br>
+flush 2) $\to 11$, next state $00$.<br>
+Codeword $=11\ 10\ 00\ 01\ 01\ 11$ (12 coded bits).</p>
+<p><b>Explanation.</b> Four input bits plus two flush bits give six steps, and at rate 1/2 that is $6\times2=12$ output bits — consistent with the doubling a rate-1/2 code applies. The two flush zeros drive the register back to state $00$ (zero-termination), so a Viterbi decoder knows the trellis both starts and ends at the all-zero state.</p>` },
+      { q: String.raw`A code has $d_{free}=10$. Find the number of correctable random errors $t$.`, solution: String.raw`<p><b>Formula.</b> $$ t=\left\lfloor\frac{d_{free}-1}{2}\right\rfloor, $$ where $d_{free}$ is the free distance (minimum weight of any nonzero code path) and $t$ is the guaranteed number of correctable random errors; $\lfloor\cdot\rfloor$ is the floor.</p>
+<p><b>Substitute.</b> $$ t=\left\lfloor\frac{10-1}{2}\right\rfloor=\left\lfloor\frac{9}{2}\right\rfloor. $$</p>
+<p><b>Compute.</b> $9/2=4.5$, so $t=\lfloor 4.5\rfloor=4$ errors.</p>
+<p><b>Explanation.</b> The correct code path stays $d_{free}=10$ away from any wrong path, so up to 4 flipped coded bits still leave the received sequence closer to the truth. This is the convolutional analogue of the block-code rule $t=\lfloor(d_{min}-1)/2\rfloor$, with $d_{free}$ standing in for $d_{min}$.</p>` },
+      { q: String.raw`Estimate the asymptotic soft-decision coding gain of a rate-1/2 code with $d_{free}=10$.`, solution: String.raw`<p><b>Formula.</b> $$ G_{coding}\approx 10\log_{10}(R_c\,d_{free})\ \text{dB}, $$ where $R_c$ is the code rate and $d_{free}$ the free distance; the product $R_c d_{free}$ is the effective SNR-improvement factor for soft-decision decoding.</p>
+<p><b>Substitute.</b> $$ G_{coding}\approx 10\log_{10}(0.5\times 10)=10\log_{10}5. $$</p>
+<p><b>Compute.</b> $\log_{10}5=0.699$, so $G_{coding}\approx 10\times0.699=6.99\approx 7$ dB.</p>
+<p><b>Explanation.</b> Roughly 7 dB of asymptotic gain means the coded link reaches the same BER as an uncoded one at about 7 dB lower $E_b/N_0$. Hard-decision decoding would give ~2 dB less, and real gains at BER $10^{-5}$ fall a little short of this asymptote — a sanity check that ~5–6 dB is what you actually see in practice.</p>` },
+      { q: String.raw`A rate-1/3 encoder with constraint length $K=9$ is Viterbi-decoded. How many states, and roughly what traceback depth?`, solution: String.raw`<p><b>Formula.</b> $$ N_{states}=2^{K-1},\qquad L_{tb}\approx 5K\ \text{to}\ 6K, $$ where $K$ is the constraint length, $N_{states}$ the number of trellis states, and $L_{tb}$ the recommended traceback (survivor-merge) depth in branches.</p>
+<p><b>Substitute.</b> $$ N_{states}=2^{9-1}=2^{8},\qquad L_{tb}\approx 5(9)\ \text{to}\ 6(9). $$</p>
+<p><b>Compute.</b> $N_{states}=2^8=256$ states; $L_{tb}\approx 45$ to $54$ branches.</p>
+<p><b>Explanation.</b> The rate 1/3 does not affect the state count — only $K$ does, since states are register contents. 256 states set both the Viterbi memory and per-step cost, and a traceback of ~45–54 branches ensures the survivor paths have merged so the oldest decoded bit is stable, allowing continuous streaming decoding.</p>` },
+      { q: String.raw`A rate-1/2 mother code is punctured to rate 3/4. Out of every 6 coded bits, how many are transmitted?`, solution: String.raw`<p><b>Formula.</b> For a mother code of rate $R_m=1/n_m$ punctured to rate $R_p=k/n_p$, over $k$ information bits the mother produces $k\,n_m$ coded bits and $k\,n_p$ of them are transmitted; the number deleted is $k\,n_m-k\,n_p$.</p>
+<p><b>Substitute.</b> Take $k=3$ information bits. Mother (rate 1/2) coded bits $=3\times 2=6$; transmitted (rate 3/4) bits $=n_p=4$.</p>
+<p><b>Compute.</b> Punctured (deleted) $=6-4=2$ bits, so $6-2=4$ of every 6 coded bits are transmitted.</p>
+<p><b>Explanation.</b> Puncturing raises the rate from 1/2 to 3/4 by throwing away 2 of every 6 parity bits; the decoder reinserts neutral (erasure) metrics at those positions and runs the same mother trellis. Fewer transmitted bits means less redundancy, so $d_{free}$ and coding gain drop — the price of the higher rate.</p>` },
+      { q: String.raw`For a $(3,1,2)$ code (rate 1/3, $m=2$) each input bit produces how many coded bits, and what is the overhead ratio?`, solution: String.raw`<p><b>Formula.</b> A $(n,k,m)$ code emits $n$ coded bits per $k$ input bits; the fractional overhead is $$ \text{overhead}=\frac{n-k}{k},\qquad R_c=\frac{k}{n}. $$</p>
+<p><b>Substitute.</b> Here $n=3$, $k=1$: coded bits per input $=n=3$; overhead $=(3-1)/1$; $R_c=1/3$.</p>
+<p><b>Compute.</b> Each input bit yields $3$ coded bits; overhead $=2/1=2=200\%$; useful throughput $=R_c=1/3$ of the channel bit rate.</p>
+<p><b>Explanation.</b> The code triples the bit stream, adding two redundant bits for every information bit (200% overhead). That heavy redundancy is why rate-1/3 codes are reserved for very low-SNR links (deep space) where the extra protection is worth the bandwidth or throughput cost.</p>` },
+      { q: String.raw`Compute the free distance of the $(7,5)_8$, $K=3$ code by finding the lowest-weight path that leaves and re-merges with state $00$.`, solution: String.raw`<p><b>Formula.</b> $$ d_{free}=\min_{\text{paths }00\to\cdots\to00}w_H(\mathbf v), $$ the minimum Hamming weight $w_H$ (number of 1s) of the output on any nonzero path that leaves state $00$ and later re-merges with it; the corrigible errors are $t=\lfloor(d_{free}-1)/2\rfloor$.</p>
+<p><b>Substitute.</b> The shortest diverging-then-merging path is input $1,0,0$, tracing states $00\to10\to01\to00$ and emitting the output triple $11,\,10,\,11$. Sum the weights: $w_H=2+1+2$.</p>
+<p><b>Compute.</b> $d_{free}=2+1+2=5$, and $t=\lfloor(5-1)/2\rfloor=\lfloor 2\rfloor=2$ errors.</p>
+<p><b>Explanation.</b> No shorter or lighter nonzero path re-merges with $00$, so $d_{free}=5$ for the standard $(7,5)_8$, $K=3$ code — the textbook value. A free distance of 5 corrects 2 random errors per merging span, matching the general trend that longer constraint lengths buy larger $d_{free}$.</p>` }
     ],
     realWorld: String.raw`<p>Convolutional codes with Viterbi decoding were the workhorse of practical FEC for half a century. NASA's Voyager, Galileo, and Cassini deep-space links used the $(171,133)_8$, $K=7$ code (often concatenated with an outer Reed–Solomon block code and interleaving); GSM, IS-95 CDMA, DVB-S, and 802.11a/g/n all specify punctured convolutional codes for rate adaptation. Soft-decision Viterbi in silicon (add–compare–select units running at hundreds of Mb/s) made ~5 dB of coding gain nearly free. In modern systems the family persists as tail-biting convolutional codes for short 5G/LTE control channels (where Turbo/LDPC block sizes are too large) and, crucially, as the constituent BCJR-decoded encoders inside Turbo codes — the bridge from classical to capacity-approaching coding.</p>`,
     related: ['channel-coding', 'fec', 'viterbi', 'ber', 'eb-no']
@@ -246,7 +355,7 @@ CONTENT.topics.push(
     category: 'Spread Spectrum & Coding',
     tags: ['channel coding', 'FEC', 'ARQ', 'Hamming distance', 'coding gain', 'Shannon', 'interleaving', 'code rate'],
     summary: String.raw`Channel coding adds structured, deliberate redundancy to a bit stream so that the receiver can detect and correct errors introduced by a noisy channel, trading bandwidth or rate for reliability up to the Shannon limit.`,
-    diagram: {
+    diagram: [{
       svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
 <defs><marker id="arr-channel-coding" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
 <text x="12" y="20" fill="#e6edf3">channel coding ADDS structured redundancy (opposite of source coding)</text>
@@ -264,6 +373,48 @@ CONTENT.topics.push(
 </svg>`,
       caption: String.raw`Encoder adds parity, the noisy channel injects errors, the decoder corrects them; source coding does the opposite &#8212; it removes redundancy.`
     },
+    {
+      title: String.raw`Complete coded-link chain`,
+      svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">
+<defs><marker id="arr2-channel-coding" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<text x="12" y="18" fill="#e6edf3">source coding REMOVES redundancy; channel coding ADDS it back</text>
+<rect x="20" y="40" width="90" height="38" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="30" y="60" fill="#e6edf3">source</text><text x="30" y="74" fill="#b197fc">coder (&#8594;H)</text>
+<rect x="140" y="40" width="90" height="38" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="150" y="60" fill="#e6edf3">channel</text><text x="150" y="74" fill="#4dabf7">coder +parity</text>
+<rect x="260" y="40" width="70" height="38" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="272" y="63" fill="#e6edf3">mod</text>
+<rect x="360" y="40" width="90" height="38" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="372" y="60" fill="#e6edf3">channel</text><text x="378" y="74" fill="#ffa94d">+ noise</text>
+<line x1="110" y1="59" x2="138" y2="59" stroke="#9aa7b5" marker-end="url(#arr2-channel-coding)"/>
+<line x1="230" y1="59" x2="258" y2="59" stroke="#9aa7b5" marker-end="url(#arr2-channel-coding)"/>
+<line x1="330" y1="59" x2="358" y2="59" stroke="#9aa7b5" marker-end="url(#arr2-channel-coding)"/>
+<path d="M405,78 L405,120 L360,120" fill="none" stroke="#9aa7b5" marker-end="url(#arr2-channel-coding)"/>
+<rect x="270" y="120" width="90" height="38" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="282" y="143" fill="#e6edf3">demod</text>
+<rect x="150" y="120" width="100" height="38" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="162" y="140" fill="#e6edf3">channel</text><text x="162" y="154" fill="#63e6be">decoder</text>
+<rect x="30" y="120" width="100" height="38" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="42" y="140" fill="#e6edf3">source</text><text x="42" y="154" fill="#b197fc">decoder</text>
+<line x1="270" y1="139" x2="252" y2="139" stroke="#9aa7b5" marker-end="url(#arr2-channel-coding)"/>
+<line x1="150" y1="139" x2="132" y2="139" stroke="#9aa7b5" marker-end="url(#arr2-channel-coding)"/>
+<line x1="30" y1="139" x2="12" y2="139" stroke="#9aa7b5" marker-end="url(#arr2-channel-coding)"/>
+<text x="12" y="200" fill="#9aa7b5">transmitter (top) &#8594; channel &#8594; receiver (bottom) undoes each stage in reverse</text>
+<text x="12" y="222" fill="#e6edf3">redundancy: source coder cuts it toward entropy H; channel coder re-inserts</text>
+<text x="12" y="238" fill="#e6edf3">structured parity so the decoder can undo channel errors.</text>
+</svg>`,
+      caption: String.raw`The full digital link: source coding compresses toward entropy H, channel coding adds structured parity, then modulation and the noisy channel; the receiver reverses each stage &#8212; demodulate, channel-decode (correct), source-decode.`
+    },
+    {
+      title: String.raw`Hard- vs soft-decision decoding`,
+      svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">
+<defs><marker id="arr3-channel-coding" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<text x="12" y="18" fill="#e6edf3">two ways to feed the decoder from the demodulator</text>
+<rect x="20" y="90" width="90" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="30" y="110" fill="#e6edf3">demod</text><text x="30" y="124" fill="#ffa94d">analog y</text>
+<line x1="110" y1="100" x2="150" y2="60" stroke="#9aa7b5" marker-end="url(#arr3-channel-coding)"/>
+<line x1="110" y1="120" x2="150" y2="160" stroke="#9aa7b5" marker-end="url(#arr3-channel-coding)"/>
+<rect x="152" y="42" width="150" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="162" y="60" fill="#e6edf3">HARD: quantize to 0/1</text><text x="162" y="75" fill="#63e6be">Hamming metric</text>
+<rect x="152" y="142" width="150" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="162" y="160" fill="#e6edf3">SOFT: keep amplitude</text><text x="162" y="175" fill="#4dabf7">Euclidean/LLR metric</text>
+<line x1="302" y1="62" x2="360" y2="90" stroke="#9aa7b5" marker-end="url(#arr3-channel-coding)"/>
+<line x1="302" y1="162" x2="360" y2="130" stroke="#9aa7b5" marker-end="url(#arr3-channel-coding)"/>
+<rect x="362" y="90" width="100" height="40" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="374" y="110" fill="#e6edf3">decoder</text><text x="374" y="124" fill="#b197fc">&#8594; bits</text>
+<text x="12" y="206" fill="#9aa7b5">soft decision keeps demodulator confidence &#8594; ~2 dB extra coding gain</text>
+</svg>`,
+      caption: String.raw`Hard decision quantizes the demodulator output to 0/1 and decodes with Hamming distance; soft decision keeps the analog amplitude (confidence) and uses Euclidean/LLR metrics, buying about 2 dB of coding gain.`
+    }],
     prerequisites: ['comm-basics', 'shannon', 'ber', 'noise'],
     intro: String.raw`<p><strong>Channel coding</strong> is the deliberate addition of <em>structured redundancy</em> to transmitted data so that a receiver can detect and correct the errors a noisy channel inevitably causes. It is the mirror image of <a href="#source-coding">source coding</a>: source coding <em>removes</em> redundancy to compress data toward its entropy, while channel coding <em>adds back</em> carefully engineered redundancy to protect data on the way to the receiver. Both are justified — and separated — by Shannon's theorems: source coding down to the entropy $H$, channel coding up to the capacity $C$.</p>
     <p>The promise is profound. Shannon's 1948 noisy-channel coding theorem proved that as long as the information rate $R < C$, codes exist that drive the error probability arbitrarily close to zero — reliability without shouting louder, purely by clever structure. Channel coding is why a mobile phone works at the cell edge, why a scratched Blu-ray still plays, why a spacecraft billions of kilometres away sends back crisp images, and why QR codes survive coffee stains. This umbrella topic frames the whole field: the redundancy idea, Hamming distance and minimum distance, detection versus correction, code rate and overhead, the block/convolutional/Turbo/LDPC families, coding gain, the Shannon limit, FEC versus ARQ, and interleaving against bursts. It cross-links the deeper dives — <a href="#fec">FEC</a>, <a href="#convolutional-codes">convolutional codes</a>, <a href="#viterbi">Viterbi decoding</a>, and <a href="#gold-code">Gold codes</a>.</p>`,
@@ -350,6 +501,18 @@ CONTENT.topics.push(
         </ul>
         <p><strong>Interleaving.</strong> Most codes assume errors are <em>random</em> (independent), but real channels produce <em>bursts</em> (deep fades, scratches). An interleaver permutes the coded bits before transmission and de-interleaves at the receiver, so a burst on the channel is scattered into isolated errors across many codewords — exactly what the code is designed to handle. Depth must exceed the expected burst length; the cost is latency (a full interleaver block must buffer).</p>
         <div class="callout">FEC + interleaving turns a bursty channel into an effectively random one; RS codes (which handle bursts natively at the symbol level) plus interleaving is why CDs survive scratches.</div>`
+      },
+      {
+        h: 'What you should now understand',
+        html: String.raw`<div class="callout tip"><p>This topic is the map of the whole field; you should now be able to place any specific code within it:</p>
+        <ul>
+          <li><strong>The central trade.</strong> Channel coding adds <em>structured</em> redundancy to spread codewords far apart, buying reliability at the cost of rate/bandwidth — the exact mirror image of source coding, which removes redundancy to compress toward entropy $H$.</li>
+          <li><strong>Distance governs everything.</strong> $d_{min}$ (or $d_{free}$ for convolutional codes) sets detection ($d_{min}-1$), correction ($\lfloor(d_{min}-1)/2\rfloor$), and coding gain; for linear codes $d_{min}$ is just the minimum nonzero weight.</li>
+          <li><strong>Rate and its energy cost.</strong> $R_c=k/n$, overhead $(1-R_c)/R_c$, and each coded bit carries only $E_c=R_c E_b$ — so a code must give back more than that penalty, which is why weak codes can lose to uncoded at very low SNR.</li>
+          <li><strong>The four families.</strong> Block (Hamming/BCH/Reed–Solomon), convolutional (trellis/Viterbi), and the capacity-approaching Turbo and LDPC — and roughly what each is best at.</li>
+          <li><strong>Shannon's ceiling.</strong> Reliable communication is possible iff $R<C=B\log_2(1+\mathrm{SNR})$, with an absolute floor of $E_b/N_0\ge \ln 2\approx-1.59$ dB that modern codes approach within a fraction of a dB.</li>
+          <li><strong>Strategies and tools.</strong> FEC (no feedback), ARQ (detect + retransmit), HARQ (both), and interleaving to scatter bursts into the random errors codes are designed for.</li>
+        </ul></div>`
       }
     ],
     keyPoints: [
@@ -472,13 +635,34 @@ CONTENT.topics.push(
       { q: String.raw`Hybrid ARQ (HARQ):`, options: [String.raw`uses neither FEC nor detection`, String.raw`tries FEC first, then retransmits (often incremental redundancy) on failure`, String.raw`is only for broadcast`, String.raw`disables coding at high SNR`], answer: 1, explain: String.raw`HARQ combines FEC and ARQ, the basis of LTE/5G data reliability.` }
     ],
     numericals: [
-      { q: String.raw`A block code has $d_{min}=7$. How many errors can it correct, and how many can it detect (in detection-only mode)?`, solution: String.raw`Correct: $t=\lfloor(7-1)/2\rfloor=3$. Detect: $d_{min}-1=6$ errors.` },
-      { q: String.raw`A $(7,4)$ Hamming code: give its rate, overhead, and correction capability ($d_{min}=3$).`, solution: String.raw`Rate $R_c=4/7\approx 0.571$. Overhead $=(7-4)/4=0.75=75\%$. Correction $t=\lfloor(3-1)/2\rfloor=1$ error.` },
-      { q: String.raw`Compute the Shannon capacity of a channel with $B=1$ MHz and SNR = 30 dB.`, solution: String.raw`SNR (linear) $=10^{30/10}=1000$. $C=10^6\log_2(1+1000)=10^6\log_2(1001)\approx 10^6\times 9.97 \approx 9.97$ Mbit/s.` },
-      { q: String.raw`RS(255,223) over 8-bit symbols: how many symbol errors can it correct, and what is $d_{min}$?`, solution: String.raw`Parity symbols $=255-223=32$. RS corrects $t=(n-k)/2=16$ symbol errors, with $d_{min}=n-k+1=33$ (MDS code).` },
-      { q: String.raw`Estimate the soft-decision asymptotic coding gain of a rate-1/2 code with $d_{free}=6$.`, solution: String.raw`$G\approx 10\log_{10}(R_c\,d_{free})=10\log_{10}(0.5\times 6)=10\log_{10}3\approx 4.77$ dB.` },
-      { q: String.raw`A rate-1/2 code needs $E_b/N_0=5$ dB for BER $10^{-5}$; uncoded BPSK needs $9.6$ dB. Find the coding gain and how much extra path loss it allows.`, solution: String.raw`Coding gain $=9.6-5=4.6$ dB. Since link budget margin scales dB-for-dB, it permits 4.6 dB more path loss (e.g. longer range or a smaller antenna).` },
-      { q: String.raw`Stop-and-wait ARQ: frame $L=1000$ bits, $P_b=10^{-4}$, and $t_{rt}=t_{frame}$. Estimate throughput efficiency.`, solution: String.raw`Frame success $=(1-10^{-4})^{1000}\approx e^{-0.1}\approx 0.905$. Protocol factor $=1/(1+1)=0.5$. $\eta\approx 0.905\times 0.5 \approx 0.45$ (45%).` }
+      { q: String.raw`A block code has $d_{min}=7$. How many errors can it correct, and how many can it detect (in detection-only mode)?`, solution: String.raw`<p><b>Formula.</b> $$ t_{corr}=\left\lfloor\frac{d_{min}-1}{2}\right\rfloor,\qquad e_{det}=d_{min}-1, $$ where $d_{min}$ is the minimum Hamming distance, $t_{corr}$ the correctable errors, and $e_{det}$ the detectable errors when the code is used for detection only.</p>
+<p><b>Substitute.</b> $$ t_{corr}=\left\lfloor\frac{7-1}{2}\right\rfloor=\left\lfloor\frac{6}{2}\right\rfloor,\qquad e_{det}=7-1. $$</p>
+<p><b>Compute.</b> $t_{corr}=\lfloor 3\rfloor=3$ errors; $e_{det}=6$ errors.</p>
+<p><b>Explanation.</b> A $d_{min}=7$ code corrects up to 3 errors or, dedicated to detection, flags up to 6 — detection always reaches farther because it only needs the received word to miss every other codeword, not to fall inside the right decoding sphere.</p>` },
+      { q: String.raw`A $(7,4)$ Hamming code: give its rate, overhead, and correction capability ($d_{min}=3$).`, solution: String.raw`<p><b>Formula.</b> $$ R_c=\frac{k}{n},\quad \text{overhead}=\frac{n-k}{k},\quad t=\left\lfloor\frac{d_{min}-1}{2}\right\rfloor, $$ with $k$ information bits, $n$ coded bits, and $d_{min}$ the minimum distance.</p>
+<p><b>Substitute.</b> $n=7$, $k=4$, $d_{min}=3$: $$ R_c=\frac{4}{7},\quad \text{overhead}=\frac{7-4}{4},\quad t=\left\lfloor\frac{3-1}{2}\right\rfloor. $$</p>
+<p><b>Compute.</b> $R_c=4/7\approx 0.571$; overhead $=3/4=0.75=75\%$; $t=\lfloor 1\rfloor=1$ error.</p>
+<p><b>Explanation.</b> The classic single-error-correcting Hamming code carries 4 data bits in 7, spending 3 parity bits (75% overhead) to correct any single bit flip. It is a perfect code: its radius-1 spheres exactly tile the 128-point space ($2^4$ codewords $\times$ 8 words per sphere $=128=2^7$).</p>` },
+      { q: String.raw`Compute the Shannon capacity of a channel with $B=1$ MHz and SNR = 30 dB.`, solution: String.raw`<p><b>Formula.</b> $$ C=B\log_2\!\left(1+\frac{S}{N}\right)\ \text{bits/s}, $$ where $B$ is the bandwidth and $S/N$ the linear signal-to-noise ratio.</p>
+<p><b>Substitute.</b> Convert 30 dB to linear: $S/N=10^{30/10}=10^{3}=1000$. Then $$ C=10^{6}\log_2(1+1000)=10^{6}\log_2(1001). $$</p>
+<p><b>Compute.</b> $\log_2(1001)=\ln(1001)/\ln 2\approx 9.967$, so $C\approx 10^{6}\times 9.967\approx 9.97$ Mbit/s.</p>
+<p><b>Explanation.</b> About 9.97 Mbit/s is the ceiling no code can beat on this channel. Note the near-linear dependence on $B$ but only logarithmic dependence on SNR: doubling bandwidth roughly doubles capacity, whereas a 3 dB SNR bump adds only ~1 bit/s/Hz — the reason bandwidth is the more powerful lever at high SNR.</p>` },
+      { q: String.raw`RS(255,223) over 8-bit symbols: how many symbol errors can it correct, and what is $d_{min}$?`, solution: String.raw`<p><b>Formula.</b> A Reed–Solomon code is maximum-distance-separable (MDS): $$ d_{min}=n-k+1,\qquad t=\frac{n-k}{2}, $$ with $n$ code symbols, $k$ information symbols, and $t$ correctable symbol errors.</p>
+<p><b>Substitute.</b> $n=255$, $k=223$: parity symbols $n-k=255-223=32$, so $$ d_{min}=255-223+1,\qquad t=\frac{32}{2}. $$</p>
+<p><b>Compute.</b> $d_{min}=33$; $t=16$ symbol errors.</p>
+<p><b>Explanation.</b> RS corrects 16 corrupted 8-bit symbols per 255-symbol block; because it works on symbols, a burst hitting several adjacent bits still counts as only one symbol error — why RS is superb against bursts (CDs, QR codes, DVB) and why deep-space links used it as the outer code.</p>` },
+      { q: String.raw`Estimate the soft-decision asymptotic coding gain of a rate-1/2 code with $d_{free}=6$.`, solution: String.raw`<p><b>Formula.</b> $$ G_{coding}\approx 10\log_{10}(R_c\,d_{free})\ \text{dB}, $$ with $R_c$ the code rate and $d_{free}$ the free distance.</p>
+<p><b>Substitute.</b> $$ G_{coding}\approx 10\log_{10}(0.5\times 6)=10\log_{10}3. $$</p>
+<p><b>Compute.</b> $\log_{10}3=0.477$, so $G_{coding}\approx 10\times0.477=4.77$ dB.</p>
+<p><b>Explanation.</b> A smaller free distance ($6$ vs $10$) yields a smaller gain (~4.8 dB vs ~7 dB), confirming that $d_{free}$ directly sets the asymptotic coding gain. This is a weaker code — typically a shorter constraint length — trading error protection for simpler decoding.</p>` },
+      { q: String.raw`A rate-1/2 code needs $E_b/N_0=5$ dB for BER $10^{-5}$; uncoded BPSK needs $9.6$ dB. Find the coding gain and how much extra path loss it allows.`, solution: String.raw`<p><b>Formula.</b> $$ G_{coding}\,[\text{dB}]=\left(\frac{E_b}{N_0}\right)_{uncoded}-\left(\frac{E_b}{N_0}\right)_{coded}\bigg|_{\text{same BER}}, $$ the horizontal gap between the coded and uncoded BER curves at the target BER, in dB.</p>
+<p><b>Substitute.</b> $$ G_{coding}=9.6\ \text{dB}-5\ \text{dB}. $$</p>
+<p><b>Compute.</b> $G_{coding}=4.6$ dB. Because link-budget margin adds dB-for-dB, this permits $4.6$ dB of extra path loss.</p>
+<p><b>Explanation.</b> The 4.6 dB saved can be spent anywhere in the link budget: ~4.6 dB more path loss means longer range, a smaller/cheaper antenna, or lower transmit power at the same reliability. This is exactly how coding gain translates into engineering value.</p>` },
+      { q: String.raw`Stop-and-wait ARQ: frame $L=1000$ bits, $P_b=10^{-4}$, and $t_{rt}=t_{frame}$. Estimate throughput efficiency.`, solution: String.raw`<p><b>Formula.</b> $$ \eta_{ARQ}=\frac{(1-P_b)^{L}}{1+\dfrac{t_{rt}}{t_{frame}}}, $$ where $(1-P_b)^L$ is the probability a length-$L$ frame is error-free and the denominator is the idle-time (protocol) penalty; $t_{rt}$ is round-trip idle time, $t_{frame}$ the frame time.</p>
+<p><b>Substitute.</b> $$ \eta_{ARQ}=\frac{(1-10^{-4})^{1000}}{1+1}. $$</p>
+<p><b>Compute.</b> $(1-10^{-4})^{1000}\approx e^{-1000\times10^{-4}}=e^{-0.1}\approx 0.905$; protocol factor $=1/2=0.5$; $\eta\approx 0.905\times0.5\approx 0.45$ (45%).</p>
+<p><b>Explanation.</b> Even on a fairly clean channel, stop-and-wait wastes over half its throughput — here the biggest loss is the idle round-trip wait, not retransmissions. This is why long or high-latency links use windowed protocols (go-back-N, selective-repeat) or FEC instead.</p>` }
     ],
     realWorld: String.raw`<p>Channel coding is everywhere in modern life. QR codes and DataMatrix use Reed–Solomon so they scan despite smudges and damage; CDs, DVDs, and Blu-ray layer RS with interleaving (CIRC) to survive scratches; hard drives and SSDs use LDPC/BCH to correct raw media errors. Wireless standards each pick a code to match their channel: GSM and early Wi-Fi used punctured convolutional codes; 3G/4G data used Turbo codes with HARQ; Wi-Fi 802.11n/ac/ax, DVB-S2, and 5G data channels use LDPC, while 5G control channels use polar and tail-biting convolutional codes. Deep-space missions historically concatenated convolutional + Reed–Solomon codes and now use Turbo/LDPC to squeeze every fraction of a dB toward the Shannon limit — the reason a probe running on a few watts, billions of kilometres away, can still return usable data.</p>`,
     related: ['fec', 'convolutional-codes', 'viterbi', 'shannon', 'source-coding']
