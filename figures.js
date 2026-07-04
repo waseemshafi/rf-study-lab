@@ -1339,6 +1339,34 @@ const FIG = (function () {
     slider(card.controls, { label: 'phase difference', min: 0, max: 360, step: 5, value: 90, fmt: v => v + '°' }, v => { phase = v; draw(); });
   };
 
+  // Shift-register encoder schematic (rate-1/2, K=3 convolutional encoder)
+  T.shiftReg = function (host, spec) {
+    const { ctx, w, h } = makeCard(host, spec, 520, 240);
+    const y = 70, bx = 120, bw = 60, bh = 40, gap = 20;
+    ctx.fillStyle = C.dim; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('input bits →', 30, y + bh / 2 + 4);
+    // three register stages
+    const stages = [];
+    for (let i = 0; i < 3; i++) { const x = bx + i * (bw + gap); stages.push(x); ctx.fillStyle = C.box; ctx.strokeStyle = C.blue; ctx.lineWidth = 1.5; ctx.fillRect(x, y, bw, bh); ctx.strokeRect(x, y, bw, bh); ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.fillText('D' + (i + 1), x + bw / 2, y + bh / 2 + 4); }
+    // wires between stages
+    ctx.strokeStyle = C.dim; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(105, y + bh / 2); ctx.lineTo(bx, y + bh / 2); ctx.stroke();
+    for (let i = 0; i < 2; i++) { const x = stages[i] + bw; ctx.beginPath(); ctx.moveTo(x, y + bh / 2); ctx.lineTo(x + gap, y + bh / 2); ctx.stroke(); }
+    // two XOR adders (outputs)
+    const adders = [{ yy: 18, taps: [0, 1, 2], lbl: 'output 1 (g₁)', col: C.teal }, { yy: h - 34, taps: [0, 2], lbl: 'output 2 (g₂)', col: C.orange }];
+    adders.forEach(a => {
+      const ax = stages[2] + bw + 40, ay = a.yy < y ? y - 30 : y + bh + 30;
+      const cxq = ax, cyq = a.yy < y ? y - 28 : y + bh + 28;
+      ctx.strokeStyle = a.col; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(cxq, cyq, 12, 0, TAU); ctx.stroke();
+      ctx.fillStyle = a.col; ctx.textAlign = 'center'; ctx.font = '13px sans-serif'; ctx.fillText('⊕', cxq, cyq + 4);
+      a.taps.forEach(ti => { const sx = stages[ti] + bw / 2; ctx.strokeStyle = a.col; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(sx, a.yy < y ? y : y + bh); ctx.lineTo(sx, cyq); ctx.lineTo(cxq - 12, cyq); ctx.stroke(); ctx.setLineDash([]); });
+      ctx.beginPath(); ctx.moveTo(cxq + 12, cyq); ctx.lineTo(cxq + 46, cyq); ctx.stroke();
+      ctx.fillStyle = a.col; ctx.textAlign = 'left'; ctx.font = '11px sans-serif'; ctx.fillText(a.lbl, cxq + 50, cyq + 4);
+    });
+    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Each input bit produces 2 output bits (rate 1/2), each an XOR of tapped register stages (K=3).', w / 2, h - 6);
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {

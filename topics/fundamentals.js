@@ -257,6 +257,18 @@ $$ N_{dBm} = -174 + 10\log_{10}(B_{Hz}) $$
       html: String.raw`<p>Noise dictates the receiver <strong>sensitivity</strong> — the weakest signal that yields an acceptable SNR or BER. Since the thermal floor is fixed by physics, the only levers are (1) reduce bandwidth to the minimum the signal needs, (2) minimize added noise (low noise figure front-end), (3) increase signal energy via coding gain, processing gain, or antenna gain, and (4) cool the front end (cryogenic receivers). Every dB of noise you fail to control costs a dB of link margin — equivalently, range, data rate, or transmit power.</p>`
     }
   ],
+  keyPoints: [
+    String.raw`Thermal (Johnson-Nyquist) noise power into a matched load: $N = kTB$ — independent of the resistance $R$.`,
+    String.raw`Nyquist open-circuit voltage: $\overline{v_n^2} = 4kTRB$, with $k = 1.38\times10^{-23}$ J/K.`,
+    String.raw`Room-temperature reference density: $kT_0 = -174$ dBm/Hz at $T_0 = 290$ K.`,
+    String.raw`Noise floor in bandwidth $B$: $N_{dBm} = -174 + 10\log_{10}(B_{Hz})$.`,
+    String.raw`Thermal noise is Gaussian (Central Limit Theorem) and white (delta autocorrelation) — the AWGN model.`,
+    String.raw`One-sided PSD is $N_0 = kT$; two-sided is $N_0/2$ — both integrate to $N_0 B$ (mind the 3 dB factor of two).`,
+    String.raw`Shot noise from discrete charge crossing a barrier: $\overline{i_n^2} = 2qI_{DC}B$ (white, Poisson).`,
+    String.raw`Flicker (1/f) noise rises toward DC below a corner frequency; dominates oscillator close-in phase noise.`,
+    String.raw`Any noise maps to an equivalent temperature: $T_e = N/(kB) = T_0(F-1)$.`,
+    String.raw`Lower the floor only by narrowing $B$, cutting added noise (NF), adding gain/coding, or cooling the front end.`
+  ],
   diagram: [
     {
       svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
@@ -422,6 +434,18 @@ $$ S_y(f) = |H(f)|^2\, S_x(f) $$
       html: String.raw`<p>As with noise, PSD comes in two-sided ($S_x(f)$ over all $f$, symmetric for real signals) and one-sided ($G_x(f) = 2S_x(f)$ for $f\ge0$) forms. Total power is the same. Engineering practice uses one-sided when reporting instrument data (positive frequencies only) and two-sided in theoretical derivations. Log conventions: dBm/Hz for absolute power density, dBc/Hz for density relative to a carrier (used for phase noise), and dB/Hz generically.</p>`
     }
   ],
+  keyPoints: [
+    String.raw`PSD $S_x(f)$ shows how average power is distributed over frequency (W/Hz); integrating it gives total power.`,
+    String.raw`Wiener-Khinchin: $S_x(f) = \mathcal{F}\{R_x(\tau)\}$ — PSD and autocorrelation are a Fourier-transform pair.`,
+    String.raw`Total power equals $R_x(0) = \int_{-\infty}^{\infty} S_x(f)\,df$ (Parseval).`,
+    String.raw`White noise has $R_x(\tau) = \tfrac{N_0}{2}\delta(\tau)$, giving a flat PSD — hence "white."`,
+    String.raw`Through an LTI system the PSD scales by the squared magnitude: $S_y(f) = |H(f)|^2 S_x(f)$.`,
+    String.raw`Random polar NRZ has PSD $A^2 T_b\,\mathrm{sinc}^2(fT_b)$, with nulls at multiples of the bit rate $1/T_b$.`,
+    String.raw`Equivalent noise bandwidth: $B_N = \frac{1}{|H(f_0)|^2}\int_0^{\infty}|H(f)|^2\,df$ (one-pole RC gives $\tfrac{\pi}{2}f_c$).`,
+    String.raw`Energy signals have finite energy and an ordinary FT; power signals need the PSD (limit of the periodogram).`,
+    String.raw`The raw periodogram has variance that never shrinks — average (Welch/Bartlett) trading resolution for variance.`,
+    String.raw`One-sided $G_x(f) = 2S_x(f)$; instrument readings scale with RBW, so normalize to 1 Hz to compare to $-174$ dBm/Hz.`
+  ],
   diagram: [
     {
       svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
@@ -584,6 +608,18 @@ $$ T_{sys} = T_A + T_e $$
       h: 'SFDR and dynamic range',
       html: String.raw`<p>The <strong>spurious-free dynamic range</strong> (SFDR) is the ratio between a full-scale signal and the largest spur (harmonic or intermod product) — distinct from the noise floor, which is the random background. Together they bound the usable dynamic range: the noise floor limits how weak a signal you can detect; SFDR limits how strong an interferer you can tolerate before its spurs masquerade as signals. A receiver's total dynamic range is the span from the noise floor up to the compression/intermod ceiling.</p>`
     }
+  ],
+  keyPoints: [
+    String.raw`Effective noise floor: $N_{floor} = -174 + 10\log_{10}(B) + NF$ dBm (thermal + bandwidth + noise figure).`,
+    String.raw`Receiver sensitivity: $S_{min} = -174 + 10\log_{10}(B) + NF + \mathrm{SNR}_{min}$ dBm.`,
+    String.raw`The four levers on sensitivity: narrow $B$, low $NF$ (good LNA), lower required SNR (coding gain), and cool the front end.`,
+    String.raw`Signals below the in-band floor are still recoverable if processing gain lifts post-correlation SNR (e.g. GPS at $-130$ dBm).`,
+    String.raw`System noise temperature referred to the antenna: $T_{sys} = T_A + T_e = T_A + T_0(F-1)$.`,
+    String.raw`Below ~1 GHz and near the horizon/cities, external antenna noise $T_A$ dominates the receiver's own noise.`,
+    String.raw`DANL is the analyzer's own floor (normalized to 1 Hz); reducing RBW lowers the displayed floor by $10\log_{10}$ without changing PSD.`,
+    String.raw`Ideal $N$-bit ADC quantization SNR: $6.02N + 1.76$ dB over the Nyquist band.`,
+    String.raw`Oversampling spreads quantization noise, improving in-band SNR by $10\log_{10}(\mathrm{OSR})$; clock jitter dominates at high IF.`,
+    String.raw`Noise floor limits weak-signal detection; SFDR limits tolerance of strong interferers — together they set dynamic range.`
   ],
   diagram: [
     {
@@ -750,6 +786,18 @@ $$ T_e = \frac{T_h - Y\,T_c}{Y - 1} $$
 </ul>`
     }
   ],
+  keyPoints: [
+    String.raw`Noise factor: $F = \mathrm{SNR}_{in}/\mathrm{SNR}_{out}$ with source at $T_0 = 290$ K; noise figure $NF = 10\log_{10}F$, so $F \ge 1$, $NF \ge 0$ dB.`,
+    String.raw`Noise factor and temperature are interchangeable: $F = 1 + T_e/T_0$, $T_e = T_0(F-1)$.`,
+    String.raw`A passive lossy component at $T_0$ has NF equal to its loss: 3 dB loss = 3 dB NF.`,
+    String.raw`Friis cascade: $F_{total} = F_1 + \frac{F_2-1}{G_1} + \frac{F_3-1}{G_1 G_2} + \cdots$ (linear gains).`,
+    String.raw`Each stage's excess noise is divided by the gain preceding it, so the first stage dominates — put a high-gain, low-NF LNA first.`,
+    String.raw`Loss ahead of the LNA adds 1:1 (in dB) to system NF, since no gain protects it — minimize feed-cable loss.`,
+    String.raw`Very-low-noise devices are quoted in noise temperature (e.g. $NF = 0.5$ dB gives $T_e \approx 35$ K).`,
+    String.raw`Passive mixers have high NF (~conversion loss, 6-8 dB), so an LNA must precede them.`,
+    String.raw`Y-factor method: $Y = P_{hot}/P_{cold}$ gives $T_e = (T_h - Y T_c)/(Y-1)$; the noise source's ENR sets the hot/cold difference.`,
+    String.raw`High front-end gain lowers NF but hurts dynamic range by driving later stages toward compression.`
+  ],
   diagram: [
     {
       svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
@@ -909,6 +957,18 @@ $$ \phi_{rms} = \sqrt{2\int_{f_1}^{f_2}\mathcal{L}(f)\,df}\ \ (\text{rad}), \qqu
       html: String.raw`<p><strong>Measurement:</strong> Direct spectrum-analyzer measurement works for moderate phase noise but is limited by the analyzer's own LO. Better methods use a phase-detector/PLL cross-correlation technique (two independent references, correlate to cancel instrument noise) — the basis of dedicated phase-noise analyzers reaching very low floors.</p>
 <p><strong>Mitigation:</strong> (1) Use the highest-Q resonator affordable; (2) maximize signal power $P_s$ in the sustaining stage (lowers the $FkT/2P_s$ term); (3) select low-flicker devices (SiGe, low $f_c$); (4) in a PLL, optimize the loop bandwidth — a wide loop lets the clean crystal reference suppress the noisy VCO close-in, while a narrow loop lets the VCO dominate far-out, so the crossover is chosen where reference and VCO noise are equal; (5) divide down from a low-noise high-frequency source (division reduces phase noise by $20\log_{10}N$ dB).</p>`
     }
+  ],
+  keyPoints: [
+    String.raw`Phase noise is random short-term phase fluctuation of $v(t) = A\cos(2\pi f_0 t + \phi(t))$, appearing as skirts around the carrier.`,
+    String.raw`Metric $\mathcal{L}(f)$ in dBc/Hz: noise power in 1 Hz at offset $f$, relative to carrier power.`,
+    String.raw`Small-angle relation to phase PSD: $\mathcal{L}(f) = \tfrac{1}{2}S_\phi(f)$ (power split between two sidebands).`,
+    String.raw`Leeson slopes: $-30$ dB/dec ($1/f^3$) close-in, $-20$ dB/dec ($1/f^2$), $-10$ dB/dec ($1/f$), then flat far-out floor.`,
+    String.raw`Close-in phase noise improves as $1/Q^2$: doubling loaded $Q$ gains 6 dB, tenfold gains 20 dB — hence high-Q crystals.`,
+    String.raw`Integrated jitter: $\phi_{rms} = \sqrt{2\int_{f_1}^{f_2}\mathcal{L}(f)\,df}$ rad, then $t_{jitter} = \phi_{rms}/(2\pi f_0)$.`,
+    String.raw`Reciprocal mixing: a strong interferer mixes with the LO phase-noise skirt onto the desired IF, raising the floor.`,
+    String.raw`Phase noise rotates constellation points (EVM $\approx \phi_{rms}$), capping modulation order (1024-QAM needs $\phi_{rms} < 0.5^\circ$).`,
+    String.raw`In OFDM it causes common phase error (pilot-correctable) and intercarrier interference (largely uncorrectable).`,
+    String.raw`Frequency division by $N$ improves phase noise by $20\log_{10}N$ dB; multiplication degrades it by the same.`
   ],
   diagram: [
     {
