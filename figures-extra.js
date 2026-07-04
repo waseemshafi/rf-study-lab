@@ -83,4 +83,13 @@
   // ---- Information theory ----
   add('shannon', { type: 'entropyCoding', title: 'Source entropy', caption: 'Entropy sets the compression side of the theory.', explain: EX('Shannon’s theory has two halves: capacity (the channel) and entropy (the source shown here).') });
   add('source-coding', { type: 'capacity', title: 'The channel side', caption: 'Compression pairs with channel capacity.', explain: EX('Source coding removes redundancy; capacity then says how fast the cleaned bits can be sent.') });
+
+  // ---- Round 10: new topics ----
+  add('am', { type: 'spectrumBuilder', title: 'AM sidebands', caption: 'AM creates a carrier plus two sidebands.', explain: EX('AM places the message as two mirror-image sidebands around the carrier, spanning 2·fm of bandwidth.') });
+  add('fm', { type: 'spectrumBuilder', title: 'FM has many sidebands', caption: 'FM spreads into multiple Bessel sidebands.', explain: EX('Unlike AM’s two sidebands, FM generates a whole family of sidebands — the wider spectrum Carson’s rule estimates.') });
+  add('qpsk', { type: 'berCurve', series: [{ name: 'bpsk' }], title: 'QPSK BER = BPSK BER', caption: 'Per bit, QPSK matches BPSK.', explain: EX('QPSK carries twice the bits in the same band yet has the same per-bit error rate as BPSK — a rare free lunch.') });
+  add('rrc-filter', { type: 'eyeDiagram', title: 'RRC opens the eye', caption: 'Matched RRC filtering yields a clean eye.', explain: EX('With RRC at both ends the eye opens wide and the sampling instant is ISI-free.') });
+  add('bandwidth', { type: 'sincFunction', title: 'Time-bandwidth duality', caption: 'Narrow in time ⇄ wide in frequency.', explain: EX('A short pulse needs a wide bandwidth and vice-versa — you cannot be narrow in both at once.') });
+  add('early-late-correlator', { type: 'autocorr', title: 'The code correlation it tracks', caption: 'The sharp PN peak the gates straddle.', explain: EX('The early/late gates sit either side of this correlation peak; keeping them balanced locks the timing.') });
+  add('polarization', { type: 'emWave', title: 'The wave whose E-field it describes', caption: 'Polarization is the orientation of E.', explain: EX('Polarization simply asks: as this wave goes by, which way does the electric field point (and does it rotate)?') });
 })();

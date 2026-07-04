@@ -1255,9 +1255,100 @@ const FIG = (function () {
     slider(card.controls, { label: 'symbol skew p', min: 0.02, max: 0.98, step: 0.02, value: 0.5, fmt: v => v.toFixed(2) }, v => draw(v));
   };
 
+  // AM: carrier modulated by a message envelope
+  T.amWave = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function draw(m) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [0, 1], yr: [-2.3, 2.3], xlabel: 'time', ylabel: 'amplitude' });
+      const fc = 30, fm = 3, sig = [], eU = [], eL = [];
+      for (let t = 0; t <= 1; t += 0.001) { const env = 1 + m * Math.cos(TAU * fm * t); sig.push([t, env * Math.cos(TAU * fc * t)]); eU.push([t, env]); eL.push([t, -env]); }
+      line(ctx, ax, sig, C.blue, 1.1); line(ctx, ax, eU, C.orange, 2); line(ctx, ax, eL, C.orange, 2);
+      const eff = m * m / (2 + m * m) * 100;
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('m = ' + m.toFixed(2) + (m > 1 ? '  — OVERMODULATED, envelope distorts' : '') + ' · power efficiency ≈ ' + eff.toFixed(0) + '%', ax.x + 8, ax.y + 16);
+    }
+    draw(0.6);
+    slider(card.controls, { label: 'modulation index m', min: 0, max: 1.5, step: 0.05, value: 0.6, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
+  // FM: message and the frequency-modulated carrier
+  T.fmWave = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    function draw(beta) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const fc = 20, fm = 3;
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 74) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [0, 1], yr: [-1.4, 1.4], xlabel: '', ylabel: 'message' });
+      const msg = []; for (let t = 0; t <= 1; t += 0.002) msg.push([t, Math.cos(TAU * fm * t)]); line(ctx, a1, msg, C.teal, 2);
+      const b2 = { x: 52, y: 20 + b1.h + 34, w: w - 72, h: (h - 74) / 2 };
+      const a2 = drawAxes(ctx, b2, { xr: [0, 1], yr: [-1.4, 1.4], xlabel: 'time', ylabel: 'FM signal' });
+      const fw = []; for (let t = 0; t <= 1; t += 0.0008) fw.push([t, Math.cos(TAU * fc * t + beta * Math.sin(TAU * fm * t))]); line(ctx, a2, fw, C.blue, 1.1);
+      const carson = 2 * (beta + 1) * fm;
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('β = ' + beta.toFixed(1) + ' · Carson BW ≈ 2(β+1)·fm = ' + carson.toFixed(0) + ' Hz — the carrier squeezes/stretches with the message', b1.x + 4, b1.y + 12);
+    }
+    draw(3);
+    slider(card.controls, { label: 'modulation index β', min: 0.5, max: 10, step: 0.5, value: 3, fmt: v => v.toFixed(1) }, v => draw(v));
+  };
+
+  // Early-Late gate: the DLL timing discriminator
+  T.earlyLate = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const d = 0.5, R = x => Math.max(0, 1 - Math.abs(x));
+    function draw(eps) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 74) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [-1.5, 1.5], yr: [-0.1, 1.15], xlabel: '', ylabel: 'code corr R(τ)' });
+      const tri = []; for (let x = -1.5; x <= 1.5; x += 0.02) tri.push([x, R(x)]); line(ctx, a1, tri, C.dim, 1.5);
+      [['E', eps - d / 2, C.teal], ['P', eps, C.orange], ['L', eps + d / 2, C.red]].forEach(g => { const X = a1.fx(g[1]), Y = a1.fy(R(g[1])); ctx.fillStyle = g[2]; ctx.beginPath(); ctx.arc(X, Y, 4, 0, TAU); ctx.fill(); ctx.fillText(g[0], X - 3, Y - 8); });
+      const b2 = { x: 52, y: 20 + b1.h + 34, w: w - 72, h: (h - 74) / 2 };
+      const a2 = drawAxes(ctx, b2, { xr: [-1.5, 1.5], yr: [-1.1, 1.1], xlabel: 'timing error ε (chips)', ylabel: 'E − L' });
+      const sc = []; for (let e = -1.5; e <= 1.5; e += 0.02) sc.push([e, R(e - d / 2) - R(e + d / 2)]); line(ctx, a2, sc, C.blue, 2.2);
+      const y0 = a2.fy(0); ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(a2.x, y0); ctx.lineTo(a2.x + a2.w, y0); ctx.stroke();
+      const D = R(eps - d / 2) - R(eps + d / 2); ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(a2.fx(eps), a2.fy(D), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('discriminator (Early − Late) = ' + D.toFixed(2) + ' → the loop drives ε toward 0', b1.x + 4, b1.y + 12);
+    }
+    draw(0.4);
+    slider(card.controls, { label: 'timing error ε', min: -1.2, max: 1.2, step: 0.05, value: 0.4, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
+  // Polarization ellipse from two orthogonal components
+  T.polarizationEllipse = function (host, spec) {
+    const card = makeCard(host, spec, 400, 380);
+    let ratio = 1, phase = 90;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const cx = w / 2, cy = h / 2, S = Math.min(w, h) / 2 - 44;
+      ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(cx - S, cy); ctx.lineTo(cx + S, cy); ctx.moveTo(cx, cy - S); ctx.lineTo(cx, cy + S); ctx.stroke();
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.fillText('Ex', cx + S, cy - 6); ctx.textAlign = 'left'; ctx.fillText('Ey', cx + 6, cy - S + 6);
+      const ph = phase * Math.PI / 180;
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2.5; ctx.beginPath();
+      for (let a = 0; a <= TAU + 0.02; a += 0.02) { const ex = Math.cos(a), ey = ratio * Math.cos(a + ph); const X = cx + ex * S * 0.9, Y = cy - ey * S * 0.9; a ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+      ctx.stroke();
+      const diff = ((phase % 360) + 360) % 360;
+      let type;
+      if (Math.abs(ratio - 1) < 0.06 && (Math.abs(diff - 90) < 4 || Math.abs(diff - 270) < 4)) type = 'Circular';
+      else if (ratio < 0.02 || diff < 4 || Math.abs(diff - 180) < 4 || Math.abs(diff - 360) < 4) type = 'Linear';
+      else type = 'Elliptical';
+      ctx.fillStyle = C.text; ctx.font = '13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(type + ' polarization', 12, 22);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.fillText('|Ey/Ex| = ' + ratio.toFixed(2) + ' · phase diff = ' + phase + '°', 12, 40);
+    }
+    draw();
+    slider(card.controls, { label: 'amplitude Ey/Ex', min: 0, max: 2, step: 0.05, value: 1, fmt: v => v.toFixed(2) }, v => { ratio = v; draw(); });
+    slider(card.controls, { label: 'phase difference', min: 0, max: 360, step: 5, value: 90, fmt: v => v + '°' }, v => { phase = v; draw(); });
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {
+    'am': [{ type: 'amWave', title: 'AM waveform & envelope', caption: 'Raise the modulation index and watch the envelope grow.', explain: EX('<b>What it shows:</b> AM rides the message on the carrier’s amplitude — the orange envelope IS your signal. <b>Try:</b> push m past 1 and the envelope crosses zero (overmodulation), which a simple envelope detector can no longer recover. Note how little power is efficient (≤33%).') }],
+    'fm': [{ type: 'fmWave', title: 'FM waveform', caption: 'The carrier squeezes and stretches with the message.', explain: EX('<b>What it shows:</b> FM puts the message into the carrier’s frequency — tighter cycles where the message is high, looser where it’s low. <b>Try:</b> raise β and the frequency swings harder, widening the spectrum per Carson’s rule (~2(β+1)·fm). That extra bandwidth is what buys FM its noise immunity.') }],
+    'qpsk': [{ type: 'constellation', order: 4, snr: 14, title: 'QPSK constellation', caption: 'Four phases = 2 bits/symbol; lower SNR to see errors.', explain: EX('<b>What it shows:</b> QPSK is two BPSK channels (I and Q) at once — four points, 2 bits each. <b>Try:</b> drop the SNR until the clouds cross the axes. Per-bit error rate is identical to BPSK, but QPSK carries twice the data in the same bandwidth.') }],
+    'rrc-filter': [{ type: 'raisedCosine', title: 'The (raised-cosine) pulse it builds', caption: 'Two RRC filters (Tx×Rx) combine into this zero-ISI shape.', explain: EX('<b>What it shows:</b> a single RRC is not zero-ISI on its own — but an RRC at the transmitter times an RRC at the receiver equals this raised-cosine, which is zero at every neighbouring symbol. <b>Try:</b> β trades excess bandwidth for gentler tails. Splitting it this way also makes the receiver a matched filter.') }],
+    'bandwidth': [{ type: 'spectrumBuilder', title: 'Occupied bandwidth', caption: 'A signal’s spectrum spans a range of frequencies.', explain: EX('<b>What it shows:</b> bandwidth is how much of the frequency axis a signal occupies. <b>Try:</b> add a second tone and the spread widens. Real definitions differ — −3 dB (half-power), null-to-null, or 99% occupied — but all measure this same “width in frequency.”') }],
+    'early-late-correlator': [{ type: 'earlyLate', title: 'Early-Late timing discriminator', caption: 'Drag the timing error — the E−L S-curve pulls it to zero.', explain: EX('<b>What it shows:</b> Early, Prompt and Late correlators sample the code-correlation triangle at ε−d/2, ε, ε+d/2. <b>Try:</b> off-time, Early and Late are unequal, so (Early − Late) is non-zero and pushes the loop back toward perfect alignment (ε=0). This S-curve is the heart of GPS code tracking and symbol-timing recovery.') }],
+    'polarization': [{ type: 'polarizationEllipse', title: 'Polarization ellipse', caption: 'Set the amplitude ratio and phase to trace linear/circular/elliptical.', explain: EX('<b>What it shows:</b> the tip of the E-field traces this shape as the wave passes. <b>Try:</b> equal amplitudes with a 90° phase gives a circle (circular polarization); 0° phase gives a straight line (linear); anything else is an ellipse. Matching the receiver’s polarization to this is what avoids signal loss.') }],
     'shannon': [{ type: 'capacity', title: 'Shannon capacity', caption: 'Drag SNR to read the maximum error-free bit-rate per hertz.', explain: EX('<b>What it shows:</b> Shannon’s ceiling C = B·log₂(1+SNR) — the fastest error-free rate any scheme can ever reach. <b>Try:</b> notice it climbs fast at low SNR then flattens; beyond ~20 dB, more power barely helps, which is why we add bandwidth or antennas (MIMO) to go faster. No code can beat this line.') }],
     'source-coding': [{ type: 'entropyCoding', title: 'Entropy = the compression limit', caption: 'Skew the symbol probabilities and watch how compressible the source becomes.', explain: EX('<b>What it shows:</b> entropy is the average information per symbol — the hard floor for lossless compression. <b>Try:</b> a 50/50 source (entropy 1 bit) can’t be squeezed; make one symbol far more likely and entropy drops, so a coder (like Huffman/ZIP) can represent it in far fewer bits. Predictable = compressible.') }],
     'sinc-function': [{ type: 'sincFunction', title: 'The sinc function', caption: 'Change the width and see the zero crossings move.', explain: EX('<b>What it shows:</b> sinc(x)=sin(πx)/(πx) — the shape behind ideal sampling and pulse shaping. <b>Try:</b> it’s 1 at the centre and exactly zero at every other integer (the teal dots), which is what lets samples not interfere. A wider sinc in time means a narrower rectangle in frequency — the time-frequency duality.') }],

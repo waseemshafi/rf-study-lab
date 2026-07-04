@@ -37,14 +37,14 @@ const CONTENT = {
   ],
   // Canonical display order (nav sorts by this within each category).
   topicOrder: [
-    'comm-basics', 'shannon', 'source-coding', 'noise', 'psd', 'noise-floor', 'noise-figure', 'phase-noise',
+    'comm-basics', 'shannon', 'source-coding', 'bandwidth', 'noise', 'psd', 'noise-floor', 'noise-figure', 'phase-noise',
     'fourier-transform', 'fft', 'sinc-function', 'frequency-spectrum', 'laplace-transform', 'z-transform', 'convolution', 'correlation', 'fir-filters', 'iir-filters', 'nyquist-sampling', 'aliasing',
-    'bpsk', 'dbpsk', 'pulse-shaping', 'eye-diagram', 'matched-filter', 'ber', 'eb-no', 'evm',
-    'pll', 'fll', 'costas-loop',
+    'am', 'fm', 'bpsk', 'qpsk', 'dbpsk', 'pulse-shaping', 'rrc-filter', 'eye-diagram', 'matched-filter', 'ber', 'eb-no', 'evm',
+    'pll', 'fll', 'early-late-correlator', 'costas-loop',
     'dsss', 'frequency-hopping', 'processing-gain', 'jamming-margin', 'pn-codes', 'gold-code', 'channel-coding', 'fec', 'convolutional-codes', 'viterbi',
     'sdr', 'adc', 'dac', 'ad9361', 'rfsoc',
     'rssi', 'path-loss', 'link-budget', 'sensitivity',
-    'antenna', 'antenna-gain', 'antenna-beamwidth', 'antenna-types', 'maxwell'
+    'antenna', 'antenna-gain', 'antenna-beamwidth', 'polarization', 'antenna-types', 'maxwell'
   ],
   topics: []
 };

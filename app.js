@@ -135,6 +135,7 @@ function showView(view) {
   currentTopicId = null;
   buildNav($('#search').value);
   if (view === 'dashboard') renderDashboard();
+  else if (view === 'index') renderIndex();
   else if (view === 'topiclist') renderTopicList();
   maybeCloseSidebar();
   $('#content').scrollTop = 0;
@@ -605,6 +606,101 @@ function buildSuggestions(weak) {
     if (mastery(t.id) === null && !seen.has(t.id)) { seen.add(t.id); out.push(t); }
   });
   return out.slice(0, 10);
+}
+
+/* ============================================================
+   INDEX / BROWSE — search + multiple ways to organize topics
+   ============================================================ */
+let indexMode = 'category';
+function renderIndex() {
+  setBreadcrumb('<b>Browse</b>');
+  const c = $('#content'); c.innerHTML = '';
+  const wrap = el('div', 'container');
+  wrap.innerHTML = `<h2 class="page-title">📇 Browse &amp; Find</h2>
+    <p class="subtitle">All ${CONTENT.topics.length} topics — search across titles, summaries and tags, or switch how they’re organized.</p>`;
+
+  const searchWrap = el('div', 'index-search');
+  searchWrap.innerHTML = `<input type="text" id="index-q" placeholder="🔎 Search topics, summaries, tags…" autocomplete="off">`;
+  wrap.appendChild(searchWrap);
+
+  const modes = [['category', 'By Category'], ['az', 'A–Z'], ['tag', 'By Tag']];
+  const toggle = el('div', 'index-modes');
+  modes.forEach(m => {
+    const b = el('button', 'index-mode' + (indexMode === m[0] ? ' active' : ''), m[1]);
+    b.onclick = () => { indexMode = m[0]; draw(); };
+    toggle.appendChild(b);
+  });
+  wrap.appendChild(toggle);
+
+  const results = el('div', 'index-results');
+  wrap.appendChild(results);
+  c.appendChild(wrap);
+
+  const norm = s => (s || '').toLowerCase();
+  function matches(t, q) {
+    if (!q) return true; q = norm(q);
+    return norm(t.title).includes(q) || norm(t.summary).includes(q) ||
+           norm(t.category).includes(q) || (t.tags || []).some(tag => norm(tag).includes(q));
+  }
+  function row(t) {
+    const m = mastery(t.id);
+    const r = el('div', 'index-item');
+    r.innerHTML = `<span class="dot ${masteryClass(m)}"></span>
+      <span class="ix-title">${t.title}</span>
+      <span class="ix-cat">${t.category}</span>`;
+    r.onclick = () => openTopic(t.id);
+    return r;
+  }
+  function firstLetter(title) {
+    const s = title.replace(/^(the |a |an )/i, '');
+    const ch = s[0].toUpperCase();
+    return /[A-Z]/.test(ch) ? ch : '#';
+  }
+
+  function draw() {
+    toggle.querySelectorAll('.index-mode').forEach((b, i) => b.classList.toggle('active', modes[i][0] === indexMode));
+    const q = $('#index-q').value;
+    const list = CONTENT.topics.filter(t => matches(t, q));
+    results.innerHTML = '';
+
+    if (indexMode === 'tag') {
+      // tag cloud (from the full set), then the current filtered list
+      const tagMap = {};
+      CONTENT.topics.forEach(t => (t.tags || []).forEach(tag => { (tagMap[tag] = tagMap[tag] || []).push(t); }));
+      const cloud = el('div', 'tag-cloud');
+      Object.keys(tagMap).sort().forEach(tag => {
+        const chip = el('span', 'tag-chip', tag + ' <b>' + tagMap[tag].length + '</b>');
+        chip.onclick = () => { $('#index-q').value = tag; draw(); };
+        cloud.appendChild(chip);
+      });
+      results.appendChild(el('div', 'index-group-h', 'Tags — click to filter'));
+      results.appendChild(cloud);
+    }
+
+    if (!list.length) { results.appendChild(el('div', 'empty', 'No topics match “' + q + '”.')); return; }
+
+    if (indexMode === 'category') {
+      CONTENT.categories.forEach(cat => {
+        const inCat = list.filter(t => t.category === cat);
+        if (!inCat.length) return;
+        results.appendChild(el('div', 'index-group-h', cat + ' <span class="pill">' + inCat.length + '</span>'));
+        inCat.forEach(t => results.appendChild(row(t)));
+      });
+    } else if (indexMode === 'az') {
+      const sorted = [...list].sort((a, b) => a.title.replace(/^(the |a |an )/i, '').localeCompare(b.title.replace(/^(the |a |an )/i, '')));
+      let letter = '';
+      sorted.forEach(t => {
+        const L = firstLetter(t.title);
+        if (L !== letter) { letter = L; results.appendChild(el('div', 'index-group-h index-letter', letter)); }
+        results.appendChild(row(t));
+      });
+    } else { // tag mode: show current matches as a flat list under the cloud
+      results.appendChild(el('div', 'index-group-h', (q ? 'Matching “' + q + '”' : 'All topics') + ' <span class="pill">' + list.length + '</span>'));
+      list.forEach(t => results.appendChild(row(t)));
+    }
+  }
+  $('#index-q').addEventListener('input', draw);
+  draw();
 }
 
 /* ============================================================
