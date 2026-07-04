@@ -1993,9 +1993,435 @@ const FIG = (function () {
     slider(card.controls, { label: 'time step', min: 0, max: stages - 1, step: 1, value: stages - 1 }, v => draw(Math.round(v)));
   };
 
+  /* ================= FILTERS & RF FRONT-END (round 19) ================= */
+
+  // Generic filter magnitude response in dB vs log-f. Params: kind lp/hp/bp/notch,
+  // fc or f0 (Hz), order n (for lp/hp), Q (for bp/notch). Butterworth-family shapes.
+  T.filtResp = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const kind = spec.kind || 'lp';
+    const f0base = spec.f0 || spec.fc || 1000;
+    // frequency response magnitude (linear) for a given normalized w = f/f0
+    function mag(f, fc, n, Q) {
+      const x = f / fc;
+      if (kind === 'lp') return 1 / Math.sqrt(1 + Math.pow(x, 2 * n));
+      if (kind === 'hp') return 1 / Math.sqrt(1 + Math.pow(1 / x, 2 * n));
+      if (kind === 'bp') { const d = x - 1 / x; return 1 / Math.sqrt(1 + Q * Q * d * d); }
+      // notch (band-stop): magnitude goes to 0 at f0
+      const d = x - 1 / x; return Math.abs(Q * d) / Math.sqrt(1 + Q * Q * d * d);
+    }
+    let fc = f0base, n = spec.order || 2, Q = spec.Q || 5;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const lo = f0base / 100, hi = f0base * 100;
+      const ax = drawAxes(ctx, box, {
+        xr: [lo, hi], yr: [-60, 6], logx: true, xlabel: 'frequency (Hz)', ylabel: 'magnitude (dB)',
+        xtickfmt: t => t >= 1e6 ? (t / 1e6) + 'M' : t >= 1e3 ? (t / 1e3) + 'k' : t
+      });
+      // response curve
+      const pts = []; for (let e = Math.log10(lo); e <= Math.log10(hi); e += 0.01) { const f = Math.pow(10, e); pts.push([f, dB(mag(f, fc, n, Q) * mag(f, fc, n, Q) + 1e-9)]); }
+      line(ctx, ax, pts, C.blue, 2.5);
+      // -3 dB line and marker
+      ctx.strokeStyle = C.grid; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(-3)); ctx.lineTo(ax.x + ax.w, ax.fy(-3)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('-3 dB', ax.x + 4, ax.fy(-3) - 4);
+      // mark centre / cutoff
+      const markF = fc;
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(markF), ax.y); ctx.lineTo(ax.fx(markF), ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.textAlign = 'center';
+      ctx.fillText((kind === 'bp' || kind === 'notch') ? 'f0' : 'fc', ax.fx(markF), ax.y + ax.h - 6);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      const fLbl = markF >= 1e6 ? (markF / 1e6).toFixed(2) + ' MHz' : markF >= 1e3 ? (markF / 1e3).toFixed(2) + ' kHz' : markF.toFixed(0) + ' Hz';
+      if (kind === 'lp') ctx.fillText('low-pass, order ' + n + ' -> roll-off ' + (20 * n) + ' dB/decade, fc = ' + fLbl, ax.x + 8, ax.y + 16);
+      else if (kind === 'hp') ctx.fillText('high-pass, order ' + n + ' -> ' + (20 * n) + ' dB/dec below fc = ' + fLbl + ' (blocks DC)', ax.x + 8, ax.y + 16);
+      else if (kind === 'bp') { const BW = fc / Q; ctx.fillText('band-pass, Q = ' + Q.toFixed(1) + ' -> BW = f0/Q = ' + (BW >= 1e3 ? (BW / 1e3).toFixed(2) + ' kHz' : BW.toFixed(0) + ' Hz') + ', f0 = ' + fLbl, ax.x + 8, ax.y + 16); }
+      else { const notchDepth = dB(mag(fc, fc, n, Q) * mag(fc, fc, n, Q) + 1e-9); const BW = fc / Q; ctx.fillText('notch: depth ' + notchDepth.toFixed(0) + ' dB at f0 = ' + fLbl + ', reject BW = ' + (BW >= 1e3 ? (BW / 1e3).toFixed(2) + ' kHz' : BW.toFixed(0) + ' Hz'), ax.x + 8, ax.y + 16); }
+    }
+    draw();
+    if (kind === 'lp' || kind === 'hp') {
+      slider(card.controls, { label: (kind === 'lp' ? 'cutoff fc' : 'cutoff fc'), min: f0base / 10, max: f0base * 10, step: f0base / 10, value: f0base, fmt: v => v >= 1e6 ? (v / 1e6).toFixed(1) + ' MHz' : v >= 1e3 ? (v / 1e3).toFixed(1) + ' kHz' : v.toFixed(0) + ' Hz' }, v => { fc = v; draw(); });
+      slider(card.controls, { label: 'order n', min: 1, max: 8, step: 1, value: n }, v => { n = Math.round(v); draw(); });
+    } else {
+      slider(card.controls, { label: 'centre f0', min: f0base / 4, max: f0base * 4, step: f0base / 20, value: f0base, fmt: v => v >= 1e6 ? (v / 1e6).toFixed(2) + ' MHz' : v >= 1e3 ? (v / 1e3).toFixed(2) + ' kHz' : v.toFixed(0) + ' Hz' }, v => { fc = v; draw(); });
+      slider(card.controls, { label: 'quality Q', min: 1, max: 40, step: 1, value: Q }, v => { Q = Math.round(v); draw(); });
+    }
+  };
+
+  // Filter families: Butterworth (maximally flat) vs Chebyshev (ripple, steeper) low-pass
+  T.filtFamily = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    // Chebyshev type-I magnitude: 1/sqrt(1 + eps^2 * Tn(x)^2), Tn = cos(n*acos(x)) for |x|<=1
+    function cheb(n, x) { return Math.abs(x) <= 1 ? Math.cos(n * Math.acos(x)) : Math.cosh(n * Math.acosh(Math.abs(x))); }
+    let n = 4, rippleDb = 1;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0.05, 5], yr: [-60, 6], logx: true, xlabel: 'frequency / fc', ylabel: 'magnitude (dB)' });
+      const eps = Math.sqrt(Math.pow(10, rippleDb / 10) - 1);
+      const butter = [], chebv = [];
+      for (let e = Math.log10(0.05); e <= Math.log10(5); e += 0.008) {
+        const x = Math.pow(10, e);
+        butter.push([x, dB(1 / (1 + Math.pow(x, 2 * n)) + 1e-9)]);
+        const t = cheb(n, x); chebv.push([x, dB(1 / (1 + eps * eps * t * t) + 1e-9)]);
+      }
+      line(ctx, ax, butter, C.blue, 2.4);
+      line(ctx, ax, chebv, C.orange, 2.4);
+      // ripple band marker
+      ctx.strokeStyle = C.grid; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(-rippleDb)); ctx.lineTo(ax.fx(1), ax.fy(-rippleDb)); ctx.stroke(); ctx.setLineDash([]);
+      legend(ctx, box, [{ label: 'Butterworth (flat)', color: C.blue }, { label: 'Chebyshev (ripple)', color: C.orange }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('order ' + n + ': Chebyshev rolls off steeper but ripples ' + rippleDb.toFixed(1) + ' dB in the passband', ax.x + 8, ax.y + ax.h - 12);
+    }
+    draw();
+    slider(card.controls, { label: 'order n', min: 2, max: 8, step: 1, value: 4 }, v => { n = Math.round(v); draw(); });
+    slider(card.controls, { label: 'Chebyshev ripple', min: 0.1, max: 3, step: 0.1, value: 1, fmt: v => v.toFixed(1) + ' dB' }, v => { rippleDb = v; draw(); });
+  };
+
+  // RC low-pass step response: v(t) = 1 - exp(-t/RC); mark 10-90% rise time = 2.2 RC
+  T.rcStep = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function draw(rc) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const tmax = 5 * 2.2e-3; // fixed window in seconds (rc in ms)
+      const ax = drawAxes(ctx, box, { xr: [0, tmax * 1000], yr: [0, 1.1], xlabel: 'time (ms)', ylabel: 'output / input' });
+      // input step
+      ctx.strokeStyle = C.dim; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(1)); ctx.lineTo(ax.x + ax.w, ax.fy(1)); ctx.stroke(); ctx.setLineDash([]);
+      const RC = rc / 1000; // s
+      const pts = []; for (let ms = 0; ms <= tmax * 1000; ms += tmax * 1000 / 400) { const t = ms / 1000; pts.push([ms, 1 - Math.exp(-t / RC)]); }
+      line(ctx, ax, pts, C.blue, 2.5);
+      const tr = 2.2 * RC * 1000; // 10-90% rise time in ms
+      const fc = 1 / (TAU * RC);
+      // mark 90% level
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(0.9)); ctx.lineTo(ax.fx(tr), ax.fy(0.9)); ctx.lineTo(ax.fx(tr), ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(tr), ax.fy(0.9), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('RC = ' + rc.toFixed(2) + ' ms -> rise time (10-90%) = 2.2 RC = ' + tr.toFixed(2) + ' ms', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('cutoff fc = 1/(2 pi RC) = ' + (fc >= 1e3 ? (fc / 1e3).toFixed(2) + ' kHz' : fc.toFixed(0) + ' Hz') + ' -> slower RC = lower fc = longer rise', ax.x + 8, ax.y + 34);
+    }
+    draw(1);
+    slider(card.controls, { label: 'time constant RC', min: 0.1, max: 2, step: 0.05, value: 1, fmt: v => v.toFixed(2) + ' ms' }, v => draw(v));
+  };
+
+  // LNA sensitivity / noise-floor bar: shows floor, +NF, +required-SNR = sensitivity,
+  // with LNA-gain effect on system NF via Friis (2nd stage NF=10 dB).
+  T.lnaSens = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const B = 1e6, snrReq = 10, F2 = lin(10), F1 = lin(2);
+    let gLna = 15;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const G1 = lin(gLna);
+      const Fsys = F1 + (F2 - 1) / G1, nfSys = dB(Fsys);
+      const floor = -174 + 10 * Math.log10(B), withNF = floor + nfSys, sens = withNF + snrReq;
+      const ax = drawAxes(ctx, box, { xr: [0, 4], yr: [-140, -80], xlabel: '', ylabel: 'power (dBm)', xticks: [] });
+      const bar = (i, base, top, col, lbl) => { const bx = ax.fx(i + 0.5) - 40; ctx.fillStyle = col; ctx.fillRect(bx, ax.fy(top), 80, ax.fy(base) - ax.fy(top)); ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(lbl, ax.fx(i + 0.5), ax.y + ax.h + 12); };
+      bar(0, -174 + 10 * Math.log10(B), floor, 'rgba(77,171,247,0.6)', 'kTB floor');
+      bar(1, floor, withNF, 'rgba(255,169,77,0.6)', '+ sys NF');
+      bar(2, withNF, sens, 'rgba(177,151,252,0.6)', '+ SNR req');
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(sens)); ctx.lineTo(ax.x + ax.w, ax.fy(sens)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.teal; ctx.font = '13px sans-serif'; ctx.textAlign = 'right'; ctx.fillText('sensitivity = ' + sens.toFixed(1) + ' dBm', ax.x + ax.w - 6, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('LNA gain ' + gLna + ' dB -> system NF = ' + nfSys.toFixed(2) + ' dB (LNA NF 2 dB, next stage 10 dB)', ax.x + 6, ax.y + 16);
+    }
+    draw();
+    slider(card.controls, { label: 'LNA gain', min: 0, max: 30, step: 1, value: 15, fmt: v => v + ' dB' }, v => { gLna = v; draw(); });
+  };
+
+  // AGC transfer curve: output level vs input level (flat AGC range), slider = loop gain / ref
+  T.agcCurve = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    let ref = -10, loop = 0.85; // loop 0..1 = how hard the AGC clamps
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [-80, 0], yr: [-40, 5], xlabel: 'input level (dBm)', ylabel: 'output level (dBm)' });
+      // AGC: below threshold, gain fixed; above, output = ref + (1-loop)*(in - thresh)
+      const thresh = -60;
+      const pts = []; for (let pin = -80; pin <= 0; pin += 0.5) { let pout; if (pin < thresh) pout = ref + (pin - thresh); else pout = ref + (1 - loop) * (pin - thresh); pts.push([pin, pout]); }
+      // linear (no-AGC) reference
+      const lin0 = []; for (let pin = -80; pin <= 0; pin += 1) lin0.push([pin, ref + (pin - thresh)]);
+      ctx.save(); ctx.setLineDash([4, 3]); line(ctx, ax, lin0, C.dim, 1.5); ctx.restore();
+      line(ctx, ax, pts, C.blue, 2.5);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(thresh), ax.y); ctx.lineTo(ax.fx(thresh), ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('AGC threshold', ax.fx(thresh), ax.y + ax.h - 6);
+      legend(ctx, box, [{ label: 'with AGC', color: C.blue }, { label: 'no AGC', color: C.dim }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('above threshold the output stays nearly flat (slope ' + (1 - loop).toFixed(2) + ') over a wide input range', ax.x + 8, ax.y + 16);
+    }
+    draw();
+    slider(card.controls, { label: 'loop gain', min: 0.3, max: 0.98, step: 0.02, value: 0.85, fmt: v => v.toFixed(2) }, v => { loop = v; draw(); });
+    slider(card.controls, { label: 'reference level', min: -20, max: 0, step: 1, value: -10, fmt: v => v + ' dBm' }, v => { ref = v; draw(); });
+  };
+
+  // AGC time response to an input step: attack/decay of the gain-control envelope
+  T.agcStep = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    let tau = 8; // response time constant (ms-ish, in samples)
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h), N = 200;
+      const ax = drawAxes(ctx, box, { xr: [0, N], yr: [0, 2.2], xlabel: 'time (samples)', ylabel: 'level' });
+      // input: steps up at n=40 (10x), back down at n=130
+      const inp = n => (n < 40 ? 0.3 : n < 130 ? 1.8 : 0.6);
+      const ip = []; for (let n = 0; n < N; n++) ip.push([n, inp(n)]); line(ctx, ax, ip, C.dim, 1.6);
+      // AGC output: envelope relaxes toward a target (~1.0) with time constant tau
+      const target = 1.0; const out = []; let g = 1 / 0.3; // gain to hit target from initial
+      let y = target;
+      for (let n = 0; n < N; n++) { const desiredG = target / Math.max(inp(n), 1e-3); g += (desiredG - g) / tau; y = g * inp(n); out.push([n, y]); }
+      line(ctx, ax, out, C.blue, 2.5);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(target)); ctx.lineTo(ax.x + ax.w, ax.fy(target)); ctx.stroke(); ctx.setLineDash([]);
+      legend(ctx, box, [{ label: 'input level', color: C.dim }, { label: 'AGC output', color: C.blue }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('input jumps up then down; the AGC settles back to the target with time constant ~' + tau.toFixed(0) + ' samples', ax.x + 8, ax.y + 16);
+    }
+    draw();
+    slider(card.controls, { label: 'attack/decay time', min: 2, max: 30, step: 1, value: 8, fmt: v => '~' + v + ' samp' }, v => { tau = v; draw(); });
+  };
+
+  // Mixer spectrum: RF, LO, IF = |fRF - fLO|, sum, and the IMAGE folding to IF.
+  // Reused for image-frequency (spec.showImage forced) and intermediate-frequency.
+  T.mixSpec = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    let fRF = spec.fRF || 100, fLO = spec.fLO || 90;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const IF = Math.abs(fRF - fLO), sum = fRF + fLO, image = fLO - IF === fRF ? fLO + IF : 2 * fLO - fRF;
+      const hi = Math.max(sum, fRF, fLO, image) * 1.15 + 10;
+      const ax = drawAxes(ctx, box, { xr: [0, hi], yr: [0, 1], xlabel: 'frequency (MHz)', ylabel: '', yticks: [] });
+      const tone = (f, col, lbl, hgt) => { if (f < 0 || f > hi) return; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ax.fx(f), ax.fy(0)); ctx.lineTo(ax.fx(f), ax.fy(hgt)); ctx.stroke(); ctx.fillStyle = col; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(lbl, ax.fx(f), ax.fy(hgt) - 4); };
+      tone(fLO, C.purple, 'LO ' + fLO, 0.9);
+      tone(fRF, C.blue, 'RF ' + fRF, 0.8);
+      tone(IF, C.teal, 'IF ' + IF.toFixed(0), 0.7);
+      tone(sum, C.dim, 'sum ' + sum.toFixed(0), 0.5);
+      tone(image, C.red, 'image ' + image.toFixed(0), 0.6);
+      // arrow: image also folds to IF
+      ctx.strokeStyle = C.red; ctx.setLineDash([3, 3]); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(ax.fx(image), ax.fy(0.6)); ctx.lineTo(ax.fx(IF), ax.fy(0.68)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('IF = |RF - LO| = ' + IF.toFixed(0) + ' MHz; the image at ' + image.toFixed(0) + ' MHz also lands on IF (2*IF = ' + (2 * IF).toFixed(0) + ' away)', ax.x + 8, ax.y + 16);
+    }
+    draw();
+    slider(card.controls, { label: 'RF frequency', min: 50, max: 200, step: 1, value: fRF, fmt: v => v + ' MHz' }, v => { fRF = v; draw(); });
+    slider(card.controls, { label: 'LO frequency', min: 50, max: 200, step: 1, value: fLO, fmt: v => v + ' MHz' }, v => { fLO = v; draw(); });
+  };
+
+  // Receiver frequency plan: fixed IF filter, tunable LO lands channels on the IF.
+  // Shows RF band, LO, IF passband, and the image band a preselector must kill.
+  T.rxPlan = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const IF = spec.IF || 45; // MHz fixed
+    let fLO = spec.fLO || 145; // high-side LO
+    const channels = [120, 140, 160, 180, 200];
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, 320], yr: [0, 1], xlabel: 'frequency (MHz)', ylabel: '', yticks: [] });
+      const fRF = fLO - IF, image = fLO + IF;
+      // IF passband (fixed)
+      ctx.fillStyle = 'rgba(99,230,190,0.18)'; ctx.fillRect(ax.fx(IF - 5), ax.y, ax.fx(IF + 5) - ax.fx(IF - 5), ax.h);
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 1.4; ctx.strokeRect(ax.fx(IF - 5), ax.y, ax.fx(IF + 5) - ax.fx(IF - 5), ax.h);
+      ctx.fillStyle = C.teal; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('fixed IF ' + IF, ax.fx(IF), ax.y + 12);
+      // RF channels
+      channels.forEach(ch => { const sel = Math.abs(ch - fRF) < 3; ctx.strokeStyle = sel ? C.blue : C.grid; ctx.lineWidth = sel ? 3 : 2; ctx.beginPath(); ctx.moveTo(ax.fx(ch), ax.fy(0)); ctx.lineTo(ax.fx(ch), ax.fy(sel ? 0.8 : 0.45)); ctx.stroke(); ctx.fillStyle = sel ? C.blue : C.dim; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(ch, ax.fx(ch), ax.fy(sel ? 0.85 : 0.5) - 3); });
+      // LO
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ax.fx(fLO), ax.fy(0)); ctx.lineTo(ax.fx(fLO), ax.fy(0.95)); ctx.stroke(); ctx.fillStyle = C.purple; ctx.textAlign = 'center'; ctx.font = '10px sans-serif'; ctx.fillText('LO ' + fLO, ax.fx(fLO), ax.fy(0.95) - 3);
+      // image band
+      ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(image), ax.fy(0)); ctx.lineTo(ax.fx(image), ax.fy(0.55)); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = C.red; ctx.fillText('image ' + image, ax.fx(image), ax.fy(0.6) - 3);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('tune LO so RF = LO - IF = ' + fRF + ' MHz drops onto the fixed IF; image sits 2*IF = ' + (2 * IF) + ' MHz above', ax.x + 8, ax.y + ax.h - 12);
+    }
+    draw();
+    slider(card.controls, { label: 'LO (tune)', min: 120, max: 250, step: 1, value: fLO, fmt: v => v + ' MHz' }, v => { fLO = v; draw(); });
+  };
+
+  // Harmonic distortion spectrum: tone through y = a1 x + a2 x^2 + a3 x^3, FFT-style bars.
+  T.thdSpec = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const a1 = 1, a2 = 0.15, a3 = 0.08, f0 = 5;
+    function draw(drive) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h), N = 256;
+      const x = []; for (let n = 0; n < N; n++) { const s = drive * Math.cos(TAU * f0 * n / N); x.push(a1 * s + a2 * s * s + a3 * s * s * s); }
+      // DFT magnitude
+      const mag = []; for (let k = 0; k <= 20; k++) { let sr = 0, si = 0; for (let n = 0; n < N; n++) { const a = -TAU * k * n / N; sr += x[n] * Math.cos(a); si += x[n] * Math.sin(a); } mag.push(Math.sqrt(sr * sr + si * si) / (N / 2)); }
+      const fund = mag[f0] || 1e-9;
+      const magdb = mag.map(m => dB((m * m) / (fund * fund) + 1e-12));
+      const ax = drawAxes(ctx, box, { xr: [0, 20], yr: [-70, 6], xlabel: 'harmonic (x fundamental)', ylabel: 'level (dBc)', xticks: [0, 5, 10, 15, 20], xtickfmt: t => (t / f0).toFixed(0) + 'f' });
+      for (let k = 1; k <= 20; k++) { const isH = (k % f0 === 0); ctx.strokeStyle = k === f0 ? C.blue : (isH ? C.orange : C.grid); ctx.lineWidth = isH ? 4 : 1.5; ctx.beginPath(); ctx.moveTo(ax.fx(k), ax.fy(-70)); ctx.lineTo(ax.fx(k), ax.fy(Math.max(-70, magdb[k]))); ctx.stroke(); }
+      // THD from 2f, 3f
+      const p2 = mag[2 * f0] || 0, p3 = mag[3 * f0] || 0; const thd = Math.sqrt(p2 * p2 + p3 * p3) / fund * 100;
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('drive = ' + drive.toFixed(2) + ' -> 2nd & 3rd harmonics rise; THD = ' + thd.toFixed(1) + '%', ax.x + 8, ax.y + 16);
+    }
+    draw(0.7);
+    slider(card.controls, { label: 'drive level', min: 0.1, max: 1.5, step: 0.05, value: 0.7, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
+  // Harmonic distortion time waveform: pure sine vs the distorted output
+  T.thdWave = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const a1 = 1, a2 = 0.15, a3 = 0.08;
+    function draw(drive) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, 1], yr: [-1.8, 1.8], xlabel: 'time', ylabel: 'amplitude' });
+      const pure = [], dist = [];
+      for (let t = 0; t <= 1; t += 0.002) { const s = drive * Math.sin(TAU * 2 * t); pure.push([t, s]); dist.push([t, a1 * s + a2 * s * s + a3 * s * s * s]); }
+      line(ctx, ax, pure, C.dim, 1.6);
+      line(ctx, ax, dist, C.blue, 2.5);
+      legend(ctx, box, [{ label: 'ideal sine', color: C.dim }, { label: 'distorted out', color: C.blue }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('drive = ' + drive.toFixed(2) + ': the a2/a3 terms flatten one side and sharpen the other (clipping-like)', ax.x + 8, ax.y + 16);
+    }
+    draw(0.8);
+    slider(card.controls, { label: 'drive level', min: 0.1, max: 1.5, step: 0.05, value: 0.8, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
+  // Third-order intercept: fundamental (1:1) and IM3 (3:1) lines vs Pin, extrapolated to IIP3.
+  T.ip3Plot = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const gain = 10, iip3 = 0; // dBm input-referred intercept
+    let pin = -30;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [-50, 10], yr: [-110, 25], xlabel: 'input power per tone (dBm)', ylabel: 'output power (dBm)' });
+      // fundamental: Pout = Pin + gain (slope 1)
+      const fund = []; for (let p = -50; p <= 10; p += 1) fund.push([p, p + gain]);
+      // IM3: slope 3, passes through intercept at (iip3, iip3+gain)
+      const im3 = []; for (let p = -50; p <= 10; p += 1) im3.push([p, 3 * (p - iip3) + (iip3 + gain)]);
+      line(ctx, ax, fund, C.blue, 2.4);
+      ctx.save(); ctx.setLineDash([5, 4]); line(ctx, ax, im3, C.red, 2.2); ctx.restore();
+      // intercept point
+      const ipy = iip3 + gain;
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(iip3), ax.fy(ipy), 5, 0, TAU); ctx.fill();
+      ctx.strokeStyle = C.orange; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(iip3), ax.y + ax.h); ctx.lineTo(ax.fx(iip3), ax.fy(ipy)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('IIP3 = ' + iip3 + ' dBm', ax.fx(iip3), ax.y + ax.h - 6);
+      // operating point + markers
+      const pf = pin + gain, pim = 3 * (pin - iip3) + ipy;
+      ctx.fillStyle = C.blue; ctx.beginPath(); ctx.arc(ax.fx(pin), ax.fy(pf), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.red; ctx.beginPath(); ctx.arc(ax.fx(pin), ax.fy(pim), 4, 0, TAU); ctx.fill();
+      legend(ctx, box, [{ label: 'fundamental (1:1)', color: C.blue }, { label: 'IM3 (3:1)', color: C.red }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('Pin = ' + pin + ' dBm: spurious-free range SFDR = ' + (pf - pim).toFixed(0) + ' dB (fundamental over IM3)', ax.x + 8, ax.y + 16);
+    }
+    draw();
+    slider(card.controls, { label: 'input power/tone', min: -50, max: 0, step: 1, value: -30, fmt: v => v + ' dBm' }, v => { pin = v; draw(); });
+  };
+
+  // IP3 two-tone spectrum: f1, f2 and the IM3 products 2f1-f2, 2f2-f1 close in.
+  T.ip3TwoTone = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    let pin = -30; const gain = 10, iip3 = 0, f1 = 98, f2 = 102;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [90, 110], yr: [-110, 25], xlabel: 'frequency (MHz)', ylabel: 'output power (dBm)' });
+      const pf = pin + gain, pim = 3 * (pin - iip3) + (iip3 + gain);
+      const tone = (f, p, col, lbl) => { ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ax.fx(f), ax.fy(-110)); ctx.lineTo(ax.fx(f), ax.fy(p)); ctx.stroke(); ctx.fillStyle = col; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(lbl, ax.fx(f), ax.fy(p) - 4); };
+      tone(f1, pf, C.blue, 'f1'); tone(f2, pf, C.blue, 'f2');
+      tone(2 * f1 - f2, pim, C.red, '2f1-f2'); tone(2 * f2 - f1, pim, C.red, '2f2-f1');
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('two tones make IM3 products right next to them, ' + (pf - pim).toFixed(0) + ' dB down — they fall in-band and cannot be filtered', ax.x + 8, ax.y + ax.h - 12);
+    }
+    draw();
+    slider(card.controls, { label: 'input power/tone', min: -50, max: 0, step: 1, value: -30, fmt: v => v + ' dBm' }, v => { pin = v; draw(); });
+  };
+
+  // Zero-IF: RF folds to DC baseband with I/Q; I/Q imbalance raises the residual image (IRR).
+  T.zifSpec = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    let imbDb = 0.5, phErr = 2; // amplitude imbalance (dB), phase error (deg)
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [-15, 15], yr: [-70, 6], xlabel: 'baseband frequency (MHz)', ylabel: 'level (dBc)' });
+      // wanted signal at +5 MHz; residual image at -5 MHz set by IRR
+      const eps = Math.pow(10, imbDb / 20) - 1, ph = phErr * Math.PI / 180;
+      const irr = -10 * Math.log10((eps * eps + ph * ph) / 4 + 1e-9); // approx image-reject ratio in dB
+      const wanted = 5;
+      const tone = (f, p, col, lbl) => { ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ax.fx(f), ax.fy(-70)); ctx.lineTo(ax.fx(f), ax.fy(p)); ctx.stroke(); ctx.fillStyle = col; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(lbl, ax.fx(f), ax.fy(p) - 4); };
+      // DC line
+      ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(ax.fx(0), ax.y); ctx.lineTo(ax.fx(0), ax.y + ax.h); ctx.stroke();
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('DC', ax.fx(0), ax.y + ax.h - 4);
+      tone(wanted, 0, C.blue, 'wanted');
+      tone(-wanted, -irr, C.red, 'image');
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('I/Q imbalance ' + imbDb.toFixed(2) + ' dB, phase ' + phErr.toFixed(1) + ' deg -> image reject IRR = ' + irr.toFixed(0) + ' dB', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('perfect I/Q would fully cancel the mirror image at -' + wanted + ' MHz', ax.x + 8, ax.y + 34);
+    }
+    draw();
+    slider(card.controls, { label: 'amplitude imbalance', min: 0, max: 3, step: 0.1, value: 0.5, fmt: v => v.toFixed(1) + ' dB' }, v => { imbDb = v; draw(); });
+    slider(card.controls, { label: 'phase error', min: 0, max: 15, step: 0.5, value: 2, fmt: v => v.toFixed(1) + ' deg' }, v => { phErr = v; draw(); });
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {
+    'filters': [
+      { type: 'filtResp', kind: 'lp', fc: 1000, order: 2, title: 'Filter magnitude response', caption: 'Slide the order — the roll-off steepens by 20 dB/decade per order.', explain: EX('<b>What it shows:</b> the magnitude response of a low-pass filter in dB vs log-frequency, with the -3 dB point and cutoff marked. <b>Try:</b> raise the order — each extra order adds 20 dB/decade of roll-off, so a higher-order filter rejects out-of-band signals far harder past fc.') },
+      { type: 'filtFamily', title: 'Butterworth vs Chebyshev', caption: 'Trade a flat passband for a steeper roll-off (with ripple).', explain: EX('<b>What it shows:</b> two classic filter families at the same order — Butterworth is maximally flat in the passband, Chebyshev rolls off steeper but ripples. <b>Try:</b> raise the ripple allowance and the Chebyshev cutoff sharpens; this is the fundamental flatness-vs-selectivity trade in filter design.') }
+    ],
+    'lpf': [
+      { type: 'filtResp', kind: 'lp', fc: 1000, order: 2, title: 'Low-pass response', caption: 'Set the cutoff fc and order; note -20 dB/dec per order past fc.', explain: EX('<b>What it shows:</b> a low-pass passes DC and low frequencies, attenuating above fc at -20*order dB/decade. <b>Try:</b> move fc to slide the corner, and raise the order to steepen the skirt — the two knobs that define any LPF.') },
+      { type: 'rcStep', title: 'RC step (rise time)', caption: 'Slide the time constant RC — rise time = 2.2 RC.', explain: EX('<b>What it shows:</b> the time-domain view of a one-pole RC low-pass responding to a step. <b>Try:</b> a larger RC gives a lower cutoff (fc = 1/(2 pi RC)) and a slower 10-90% rise time of 2.2 RC — the same filter seen in time rather than frequency.') }
+    ],
+    'hpf': [
+      { type: 'filtResp', kind: 'hp', fc: 1000, order: 2, title: 'High-pass response', caption: 'Slide fc — everything below it (including DC) is blocked.', explain: EX('<b>What it shows:</b> a high-pass filter attenuates below fc at -20*order dB/decade, so DC and low frequencies are rejected while highs pass. <b>Try:</b> move fc up and watch more of the low end get cut — this is exactly how AC-coupling blocks a DC offset while passing the signal.') },
+      { type: 'rcStep', title: 'The complementary RC (DC block)', caption: 'The same RC that low-passes also defines the high-pass corner.', explain: EX('<b>What it shows:</b> the RC time constant that sets a low-pass corner also sets the complementary high-pass corner at fc = 1/(2 pi RC). <b>Try:</b> a smaller RC pushes the high-pass corner up, blocking more low-frequency content and DC.') }
+    ],
+    'bpf': [
+      { type: 'filtResp', kind: 'bp', f0: 1000, Q: 5, title: 'Band-pass response', caption: 'Set f0 and Q; bandwidth = f0/Q, printed live.', explain: EX('<b>What it shows:</b> a band-pass passes a band around f0 and rejects both sides, with -3 dB edges. <b>Try:</b> raise Q and the response narrows — bandwidth BW = f0/Q shrinks, so a high-Q filter is selective but only lets a thin slice through.') },
+      { type: 'filtResp', kind: 'bp', f0: 1000, Q: 2, title: 'Narrowband vs wideband', caption: 'Low Q = wide band; high Q = narrow, selective band.', explain: EX('<b>What it shows:</b> the same band-pass with the Q slider spanning wideband to narrowband. <b>Try:</b> drop Q toward 1 for a wide, gentle passband or push it high for a razor-thin selective filter — Q is the single knob trading bandwidth for selectivity.') }
+    ],
+    'notch-filter': [
+      { type: 'filtResp', kind: 'notch', f0: 1000, Q: 10, title: 'Notch (band-stop) response', caption: 'Set f0 and Q; the deep null rejects one frequency.', explain: EX('<b>What it shows:</b> a notch filter is the inverse of a band-pass — it passes everything except a deep null at f0. <b>Try:</b> raise Q and the reject band narrows (BW = f0/Q), so a high-Q notch surgically removes a single interfering tone while barely touching nearby signals.') },
+      { type: 'zifSpec', title: 'Interference rejection', caption: 'A notch pulls one strong tone down, leaving the wanted signal.', explain: EX('<b>What it shows:</b> conceptually, removing an unwanted spectral component while leaving the wanted one — like a notch deleting a mains hum or a jammer tone. <b>Try:</b> the residual depth is set by how well the notch is placed and how sharp it is.') }
+    ],
+    'filter-design': [
+      { type: 'filtResp', kind: 'lp', fc: 1000, order: 3, title: 'Meeting a spec with order', caption: 'Raise the order until the roll-off clears the stopband need.', explain: EX('<b>What it shows:</b> filter design picks the order that meets a required attenuation at a stopband frequency. <b>Try:</b> increase the order until the curve drops past your target at the stopband edge — more order always meets a tougher spec, at the cost of complexity.') },
+      { type: 'filtFamily', title: 'Family choice vs requirement', caption: 'Chebyshev meets a spec at lower order than Butterworth.', explain: EX('<b>What it shows:</b> for a given stopband requirement, Chebyshev meets it at a lower order than Butterworth because it rolls off faster. <b>Try:</b> raise the ripple to steepen the Chebyshev skirt — you trade passband flatness for fewer poles, a core design decision.') }
+    ],
+    'lna': [
+      { type: 'friisNF', title: 'Friis: LNA sets the system NF', caption: 'Raise the LNA gain and watch total NF collapse onto the LNA NF.', explain: EX('<b>What it shows:</b> Friis F_tot = F1 + (F2-1)/G1 — the first stage dominates. <b>Try:</b> as LNA gain rises, the second stage stops mattering and total NF flattens to the LNA alone, which is exactly why a low-noise amp goes first, right at the antenna.') },
+      { type: 'lnaSens', title: 'LNA gain -> sensitivity', caption: 'More LNA gain lowers system NF, lowering the noise floor / sensitivity.', explain: EX('<b>What it shows:</b> sensitivity stacked as thermal floor + system NF + required SNR. <b>Try:</b> raise the LNA gain — the Friis system NF drops, pulling sensitivity lower so the receiver can hear fainter signals and reach farther.') }
+    ],
+    'agc': [
+      { type: 'agcCurve', title: 'AGC transfer curve', caption: 'Above threshold the output stays flat over a wide input range.', explain: EX('<b>What it shows:</b> output level vs input level — below the threshold the gain is fixed, above it the AGC clamps the output nearly flat. <b>Try:</b> raise the loop gain and the flat region gets flatter (smaller slope), holding the output constant across a wide input swing.') },
+      { type: 'agcStep', title: 'AGC step response', caption: 'Slide the attack/decay time to see how fast it settles.', explain: EX('<b>What it shows:</b> the time response when the input level jumps up then down — the AGC pulls the output back toward its target. <b>Try:</b> a shorter time constant reacts fast but can pump on modulation; a longer one is smooth but slow — the attack/decay trade.') }
+    ],
+    'mixer': [
+      { type: 'mixSpec', fRF: 100, fLO: 90, title: 'Mixer output spectrum', caption: 'Slide RF and LO — IF = |RF-LO|, plus the sum and the image.', explain: EX('<b>What it shows:</b> a mixer multiplies RF by LO, producing IF = |RF-LO| and a sum term, and folding the image onto the same IF. <b>Try:</b> move RF and LO and watch IF and the image move; the image sits 2*IF away and is why a preselector is needed before the mixer.') },
+      { type: 'thdSpec', title: 'Mixers are nonlinear', caption: 'The multiplying nonlinearity also creates spurs/harmonics.', explain: EX('<b>What it shows:</b> a mixer relies on a nonlinearity, which also breeds harmonics and spurious tones. <b>Try:</b> raise the drive and watch the extra spectral products grow — real mixers must balance conversion gain against these spurs.') }
+    ],
+    'harmonics': [
+      { type: 'thdSpec', title: 'Harmonic spectrum & THD', caption: 'Raise the drive — 2f, 3f grow and THD climbs.', explain: EX('<b>What it shows:</b> a pure tone through a nonlinearity y = a1 x + a2 x^2 + a3 x^3 spawns harmonics at 2f, 3f... <b>Try:</b> push the drive level and the harmonics rise faster than the fundamental, so total harmonic distortion (THD) grows — the signature of an overdriven amplifier.') },
+      { type: 'thdWave', title: 'Distortion in the waveform', caption: 'Watch the sine flatten on one side as drive increases.', explain: EX('<b>What it shows:</b> the same nonlinearity in the time domain — the even/odd terms flatten one side of the sine and sharpen the other. <b>Try:</b> raise the drive and the output visibly departs from the ideal sine, which is exactly what the harmonic spectrum measures.') }
+    ],
+    'third-order-intercept': [
+      { type: 'ip3Plot', title: 'The IP3 intercept lines', caption: 'Fundamental (1:1) and IM3 (3:1) extrapolate to IIP3.', explain: EX('<b>What it shows:</b> output power of the fundamental (slope 1) and the third-order product (slope 3) vs input power; extended, they cross at the third-order intercept IIP3. <b>Try:</b> move the input power and read the spurious-free range — IM3 grows 3 dB for every 1 dB of input, so it catches up fast.') },
+      { type: 'ip3TwoTone', title: 'Two-tone IM3 products', caption: 'IM3 lands at 2f1-f2 and 2f2-f1, right beside the tones.', explain: EX('<b>What it shows:</b> two closely spaced tones create IM3 products at 2f1-f2 and 2f2-f1 that fall in-band, right next to the wanted signals. <b>Try:</b> raise the drive — the IM3 pair rises 3x faster and cannot be filtered out because it sits inside the passband.') }
+    ],
+    'intermediate-frequency': [
+      { type: 'rxPlan', IF: 45, fLO: 145, title: 'IF frequency plan', caption: 'Tune the LO to land each RF channel on the fixed IF filter.', explain: EX('<b>What it shows:</b> a superhet uses a fixed IF filter and a tunable LO, so RF = LO - IF always drops onto the same IF. <b>Try:</b> tune the LO and watch different RF channels fall onto the fixed IF passband — one high-quality filter serves the whole band.') },
+      { type: 'mixSpec', fRF: 100, fLO: 55, title: 'High-IF vs low-IF trade', caption: 'A larger IF pushes the image further away (easier to reject).', explain: EX('<b>What it shows:</b> the IF = |RF-LO| and the image 2*IF away. <b>Try:</b> a higher IF puts the image further from the RF (easier to filter) but demands a harder IF filter; a lower IF is easier to filter at IF but leaves the image close in — the classic IF-selection trade.') }
+    ],
+    'image-frequency': [
+      { type: 'mixSpec', fRF: 100, fLO: 90, title: 'The image folds onto IF', caption: 'The image at 2*IF from RF converts to the same IF as the signal.', explain: EX('<b>What it shows:</b> both the wanted RF and an image frequency (2*IF away) mix down to the identical IF. <b>Try:</b> move the LO and watch the red image track; without a preselector filter to attenuate it before the mixer, the image interferes with the signal on the same IF.') },
+      { type: 'zifSpec', title: 'Image rejection', caption: 'Imperfect rejection leaves a residual image (IRR).', explain: EX('<b>What it shows:</b> how well the image is suppressed sets the image-reject ratio (IRR). <b>Try:</b> increase the imbalance and the residual image rises; a preselector or an image-reject mixer is what drives this leftover image down.') }
+    ],
+    'superheterodyne': [
+      { type: 'rxPlan', IF: 45, fLO: 145, title: 'Single-conversion plan', caption: 'Tunable LO + fixed IF filter — the superhet idea.', explain: EX('<b>What it shows:</b> the superheterodyne receiver — a tunable LO converts any selected RF channel down to one fixed IF, where a high-quality fixed filter does the selectivity. <b>Try:</b> tune the LO to move the selected channel; note the image band the front-end preselector must reject.') },
+      { type: 'mixSpec', fRF: 100, fLO: 145, title: 'The conversion & its image', caption: 'RF and image both convert to IF; preselect to kill the image.', explain: EX('<b>What it shows:</b> the down-conversion producing the IF plus the troublesome image. <b>Try:</b> a dual- or multi-conversion superhet uses a high first IF to throw the image far away, then a low second IF for tight channel filtering.') }
+    ],
+    'zero-if': [
+      { type: 'zifSpec', title: 'Zero-IF & I/Q imbalance', caption: 'RF folds to DC; I/Q imbalance raises the residual image (IRR).', explain: EX('<b>What it shows:</b> a direct-conversion (zero-IF) receiver mixes the signal straight to DC using I and Q. <b>Try:</b> add amplitude/phase imbalance between I and Q and the mirror-image on the other side of DC rises — the image-reject ratio (IRR) is set by how well I and Q are matched.') },
+      { type: 'mixSpec', fRF: 100, fLO: 100, title: 'DC-offset / self-mixing', caption: 'With LO = RF the wanted signal sits at DC (IF = 0).', explain: EX('<b>What it shows:</b> setting LO = RF makes IF = 0, so the signal lands at DC — the defining feature of zero-IF. <b>Try:</b> note that LO leakage self-mixing then also lands at DC as an offset, the other big zero-IF impairment alongside I/Q imbalance.') }
+    ],
     'normal-distribution': [
       { type: 'ndPdf', title: 'Gaussian pdf & the k-sigma band', caption: 'Slide mu, sigma and k — the shaded band prints its enclosed probability.', explain: EX('<b>What it shows:</b> the normal (Gaussian) pdf. <b>Try:</b> shifting mu slides the bell, sigma widens it, and the k-sigma band shows the famous 68-95-99.7 rule — the enclosed probability depends only on k, not on mu or sigma.') },
       { type: 'ndClt', title: 'Central-limit theorem in action', caption: 'Sum more uniforms and watch a bell emerge from flat noise.', explain: EX('<b>What it shows:</b> the CLT — add up N independent uniform variables and their (normalized) sum converges to a Gaussian. <b>Try:</b> N=1 is flat, but by N=3-4 the bell is already unmistakable. This is why thermal noise, made of countless tiny contributions, is Gaussian.') },

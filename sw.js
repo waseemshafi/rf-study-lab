@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v19';
+const CACHE = 'rfstudy-v20';
 
 const ASSETS = [
   './',
@@ -14,6 +14,7 @@ const ASSETS = [
   'dummies-extra3.js',
   'dummies-extra4.js',
   'dummies-extra5.js',
+  'dummies-extra6.js',
   'figures.js',
   'figures-extra.js',
   'manifest.webmanifest',
@@ -41,6 +42,21 @@ const ASSETS = [
   'topics/rayleigh-distribution.js',
   'topics/awgn.js',
   'topics/trellis-diagram.js',
+  'topics/filters.js',
+  'topics/lpf.js',
+  'topics/hpf.js',
+  'topics/bpf.js',
+  'topics/notch-filter.js',
+  'topics/filter-design.js',
+  'topics/lna.js',
+  'topics/agc.js',
+  'topics/mixer.js',
+  'topics/harmonics.js',
+  'topics/third-order-intercept.js',
+  'topics/intermediate-frequency.js',
+  'topics/image-frequency.js',
+  'topics/superheterodyne.js',
+  'topics/zero-if.js',
   'derivations/fundamentals.js',
   'derivations/signals-systems.js',
   'derivations/modulation-detection.js',
@@ -63,6 +79,8 @@ const ASSETS = [
   'code/proto.js',
   'code/extra3.js',
   'code/extra4.js',
+  'code/extra5.js',
+  'code/extra6.js',
   'vendor/mathjax/tex-svg.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
