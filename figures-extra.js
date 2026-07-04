@@ -9,6 +9,35 @@
   const M = FIG.map;
   const EX = s => s;
   const add = (id, spec) => { if (M[id]) M[id].push(spec); };
+  const addFront = (id, spec) => { if (M[id]) M[id].unshift(spec); };
+
+  // ---- Protocol packet / word / frame STRUCTURE diagrams (shown as Figure 1) ----
+  const uartFrame = { name: 'UART character frame', note: 'parity optional; 8-N-1 omits it', fields: [
+    { l: 'Start', bits: 1 }, { l: 'D0', bits: 1 }, { l: 'D1', bits: 1 }, { l: 'D2', bits: 1 }, { l: 'D3', bits: 1 }, { l: 'D4', bits: 1 }, { l: 'D5', bits: 1 }, { l: 'D6', bits: 1 }, { l: 'D7', bits: 1 }, { l: 'Par', bits: 1 }, { l: 'Stop', bits: 1 } ] };
+  const uartExplain = EX('<b>What it shows:</b> the field-by-field frame the receiver decodes. A low <b>Start</b> bit wakes it up, 8 <b>data</b> bits follow LSB-first, an optional <b>parity</b> bit checks for errors, and a high <b>Stop</b> bit closes the character. 8-N-1 = 10 bits on the wire for 8 data bits.');
+  addFront('rs232', { type: 'packetStructure', words: [uartFrame], title: 'RS-232 frame structure', caption: 'Every field of one transmitted character.', explain: uartExplain });
+  addFront('rs422', { type: 'packetStructure', words: [uartFrame], title: 'RS-422 frame structure', caption: 'Same UART frame, sent differentially.', explain: uartExplain });
+  addFront('rs485', { type: 'packetStructure', words: [uartFrame], title: 'RS-485 frame structure', caption: 'UART frame; higher layers (e.g. Modbus) add the packet.', explain: EX('<b>What it shows:</b> RS-485 carries the same UART character frame, but a higher-layer protocol (like Modbus) wraps these bytes into addressed packets with a CRC, since many devices share the bus.') });
+
+  addFront('lvds', { type: 'packetStructure', words: [{ name: 'FPD-Link serialization (example)', note: '7 bits per pixel clock, per lane', unit: ' bits/clock', fields: [
+    { l: 'b0', bits: 1 }, { l: 'b1', bits: 1 }, { l: 'b2', bits: 1 }, { l: 'b3', bits: 1 }, { l: 'b4', bits: 1 }, { l: 'b5', bits: 1 }, { l: 'b6', bits: 1 } ] }], title: 'LVDS carries serialized data', caption: 'LVDS is electrical — it serializes bits (e.g. 7:1).', explain: EX('<b>What it shows:</b> LVDS itself defines no packet — it is the electrical layer. Standards built on it, like FPD-Link, serialize parallel data (here 7 bits of RGB+control per pixel clock, per lane) onto the fast differential pair.') });
+
+  addFront('spi', { type: 'packetStructure', words: [{ name: 'Typical SPI transaction', note: 'device-defined; CS low throughout', fields: [
+    { l: 'Command', bits: 8 }, { l: 'Address', bits: 24 }, { l: 'Data byte(s)', bits: 24 } ] }], title: 'SPI transaction structure', caption: 'SPI has no fixed packet — devices define it.', explain: EX('<b>What it shows:</b> SPI itself only shifts bits, so the "packet" is whatever the slave device defines — commonly a command byte, then an address, then data, all while chip-select is held low. There is no built-in addressing, length, or acknowledge.') });
+
+  addFront('axi', { type: 'packetStructure', words: [
+    { name: 'Write Address channel (AW)', unit: ' bits (typ.)', fields: [{ l: 'AWID', bits: 4 }, { l: 'AWADDR', bits: 32 }, { l: 'AWLEN', bits: 8 }, { l: 'AWSIZE', bits: 3 }, { l: 'AWBURST', bits: 2 }] },
+    { name: 'Write Data channel (W) — one beat', unit: ' bits (typ.)', fields: [{ l: 'WDATA', bits: 32 }, { l: 'WSTRB', bits: 4 }, { l: 'WLAST', bits: 1 }] },
+    { name: 'Write Response channel (B)', unit: ' bits (typ.)', fields: [{ l: 'BID', bits: 4 }, { l: 'BRESP', bits: 2 }] }
+  ], title: 'AXI channel structure', caption: 'Address, data-burst, and response travel on separate channels.', explain: EX('<b>What it shows:</b> an AXI write splits across channels — send the address & burst control once (AW), stream the data beats (W, last one flags WLAST), then get a response (B). Reads use AR + R. Every channel uses the VALID/READY handshake.') });
+
+  addFront('mil-std-1553', { type: 'packetStructure', words: [
+    { name: 'Command Word', unit: ' bit-times', fields: [{ l: 'Sync', bits: 3 }, { l: 'RT Address', bits: 5 }, { l: 'T/R', bits: 1 }, { l: 'Subaddr/Mode', bits: 5 }, { l: 'Word Count/Mode Code', bits: 5 }, { l: 'P', bits: 1 }] },
+    { name: 'Status Word', unit: ' bit-times', fields: [{ l: 'Sync', bits: 3 }, { l: 'RT Address', bits: 5 }, { l: 'ME', bits: 1 }, { l: 'Instr', bits: 1 }, { l: 'SRQ', bits: 1 }, { l: 'Reserved', bits: 3 }, { l: 'BCR', bits: 1 }, { l: 'Busy', bits: 1 }, { l: 'SSF', bits: 1 }, { l: 'DBC', bits: 1 }, { l: 'TF', bits: 1 }, { l: 'P', bits: 1 }] },
+    { name: 'Data Word', unit: ' bit-times', fields: [{ l: 'Sync', bits: 3 }, { l: 'Data', bits: 16 }, { l: 'P', bits: 1 }] }
+  ], title: 'MIL-STD-1553 word structures', caption: 'The Command, Status and Data words — each 20 bit-times.', explain: EX('<b>What it shows:</b> all three 1553 word types, field by field. The <b>Command Word</b> (from the Bus Controller) names a terminal, direction, subaddress and word count. The <b>Status Word</b> (from the terminal) carries the health bits — ME=Message Error, SRQ=Service Request, BCR=Broadcast Received, Busy, SSF=Subsystem Flag, DBC=Dynamic Bus Control, TF=Terminal Flag. The <b>Data Word</b> wraps 16 payload bits. Each starts with a 3-bit sync and ends with a parity bit.') });
+
+  // ---- Round 11: guarantee every topic has >=3 diagrams (a third figure each) ----
 
   // ---- Fundamentals ----
   add('comm-basics', { type: 'berCurve', series: [{ name: 'bpsk' }], title: 'Reliability vs energy per bit', caption: 'How the error rate falls as you spend more energy per bit.', explain: EX('Communication is a trade of energy for reliability — this BER curve shows the payoff for every extra dB of Eb/N0.') });

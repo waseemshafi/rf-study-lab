@@ -1540,6 +1540,35 @@ const FIG = (function () {
     slider(card.controls, { label: 'stall length', min: 0, max: 3, step: 1, value: 1, fmt: v => v + ' clk' }, v => draw(Math.round(v)));
   };
 
+  // Packet / word / frame bit-field structure diagram
+  T.packetStructure = function (host, spec) {
+    const words = spec.words || [];
+    const rowH = 46, gap = 30, H = 22 + words.length * (rowH + gap);
+    const card = makeCard(host, spec, 560, Math.max(120, H));
+    const { ctx, w, h } = card;
+    const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+    const pal = [C.blue, C.teal, C.orange, C.purple, C.red];
+    const x0 = 14, x1 = w - 14, W = x1 - x0;
+    words.forEach((word, wi) => {
+      const y = 26 + wi * (rowH + gap);
+      const total = word.fields.reduce((a, f) => a + f.bits, 0);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(word.name + (word.note ? '  — ' + word.note : ''), x0, y - 7);
+      ctx.fillStyle = C.dim; ctx.textAlign = 'right'; ctx.fillText(total + (word.unit || ' bits'), x1, y - 7);
+      let cx = x0;
+      word.fields.forEach((f, fi) => {
+        const fw = W * f.bits / total, col = f.c || pal[fi % pal.length];
+        ctx.fillStyle = rgba(col, 0.18); ctx.fillRect(cx, y, fw, rowH);
+        ctx.strokeStyle = col; ctx.lineWidth = 1.4; ctx.strokeRect(cx, y, fw, rowH);
+        ctx.fillStyle = C.text; ctx.textAlign = 'center';
+        if (fw < 24) { ctx.save(); ctx.translate(cx + fw / 2, y + rowH / 2 + 2); ctx.rotate(-Math.PI / 2); ctx.font = '8px sans-serif'; ctx.fillText(f.l, 0, 3); ctx.restore(); }
+        else { ctx.font = (fw < 66 ? '9px' : '11px') + ' sans-serif'; ctx.fillText(f.l, cx + fw / 2, y + rowH / 2); }
+        ctx.fillStyle = C.dim; ctx.font = '8px sans-serif'; ctx.fillText('' + f.bits, cx + fw / 2, y + rowH - 5);
+        cx += fw;
+      });
+    });
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {

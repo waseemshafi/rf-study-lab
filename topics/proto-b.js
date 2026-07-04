@@ -58,7 +58,17 @@ CONTENT.topics.push(
           <li><b>Command/address bytes</b> - device datasheets (e.g., a flash chip's READ opcode plus 3 address bytes) define a private higher-layer format inside the raw SPI stream. SPI itself is agnostic.</li>
           <li>Because it is full-duplex, every transferred byte out is matched by a byte in. A one-directional operation still clocks dummy bytes in the unused direction.</li>
         </ul>
-        <p>The result: SPI's on-wire "format" is <b>pure payload</b>. There is nothing to strip and nothing to insert, which is exactly why its throughput equals the clock rate.</p>`
+        <p>The result: SPI's on-wire "format" is <b>pure payload</b>. There is nothing to strip and nothing to insert, which is exactly why its throughput equals the clock rate.</p>
+        <p>Although SPI defines no protocol framing, a typical device-defined <b>transaction</b> follows a recognisable structure, delimited entirely by the SS line. A common flash/register access looks like:</p>
+        <table class="data">
+          <tr><th>Phase</th><th>On which line</th><th>Typical size</th><th>Purpose</th></tr>
+          <tr><td>1. Assert CS/SS</td><td>SS (master, active-low)</td><td>—</td><td>Selects the slave and marks the start of the transaction</td></tr>
+          <tr><td>2. Command / opcode byte</td><td>MOSI</td><td>0–1 byte (device-defined)</td><td>Optional instruction (e.g. READ, WRITE, register access)</td></tr>
+          <tr><td>3. Address byte(s)</td><td>MOSI</td><td>0–4 bytes (device-defined)</td><td>Optional target address / register index</td></tr>
+          <tr><td>4. Data byte(s)</td><td>MOSI and/or MISO</td><td>N bytes</td><td>Payload written and/or read (full-duplex: both directions clock together)</td></tr>
+          <tr><td>5. Deassert CS/SS</td><td>SS</td><td>—</td><td>Ends the transaction and returns the slave to idle</td></tr>
+        </table>
+        <p>Every one of these phases is <b>defined by the device datasheet, not by SPI</b> — the command, address, and data widths are conventions the two ends agree on. On the wire it is just a run of clocked bits between SS-assert and SS-deassert.</p>`
       },
       {
         h: 'Error Checking, Integrity and Reliability',
@@ -209,6 +219,16 @@ CONTENT.topics.push(
           <li><b>B - Write Response channel</b> (subordinate -> manager): a single response (BRESP) acknowledging the whole write burst.</li>
         </ul>
         <p>Because address and data are on <b>separate channels</b>, a manager can issue the next address while data for the previous transaction is still flowing - this is the source of AXI's pipelining. Reads have no separate response channel (RRESP rides on each read-data beat); writes need channel B because the subordinate must confirm the write landed.</p>
+        <p>Each channel carries its own payload signals plus the universal <code>xVALID</code>/<code>xREADY</code> handshake pair. The key signals per channel:</p>
+        <table class="data">
+          <tr><th>Channel</th><th>Direction</th><th>Key payload signals</th><th>Handshake</th></tr>
+          <tr><td><b>AR</b> - Read Address</td><td>manager &rarr; subordinate</td><td>ARADDR, ARLEN (beats-1), ARSIZE (bytes/beat), ARBURST (FIXED/INCR/WRAP), ARID, ARPROT, ARCACHE</td><td>ARVALID / ARREADY</td></tr>
+          <tr><td><b>R</b> - Read Data</td><td>subordinate &rarr; manager</td><td>RDATA, RRESP (OKAY/EXOKAY/SLVERR/DECERR), RLAST, RID</td><td>RVALID / RREADY</td></tr>
+          <tr><td><b>AW</b> - Write Address</td><td>manager &rarr; subordinate</td><td>AWADDR, AWLEN, AWSIZE, AWBURST, AWID, AWPROT, AWCACHE</td><td>AWVALID / AWREADY</td></tr>
+          <tr><td><b>W</b> - Write Data</td><td>manager &rarr; subordinate</td><td>WDATA, WSTRB (per-byte write strobes), WLAST</td><td>WVALID / WREADY</td></tr>
+          <tr><td><b>B</b> - Write Response</td><td>subordinate &rarr; manager</td><td>BRESP (OKAY/EXOKAY/SLVERR/DECERR), BID</td><td>BVALID / BREADY</td></tr>
+        </table>
+        <p><b>Burst / beat structure:</b> one address handshake on AR/AW launches a burst of 1-256 <b>beats</b> (data transfers) on R/W. AxLEN encodes (beats &minus; 1); AxSIZE sets the bytes per beat (up to the full data-bus width); AxBURST sets how the address advances between beats (FIXED, INCR, or WRAP); and <code>xLAST</code> is asserted on the final beat to delimit the burst - there is no length field on the data channel itself. A write burst is: one AW handshake, then N W-beats (last one WLAST=1), then a single B response; a read burst is: one AR handshake, then N R-beats (last one RLAST=1), each carrying its own RRESP.</p>
         <div class="callout"><b>Read vs write independence:</b> the AR/R pair and AW/W/B pair are decoupled, so reads and writes proceed <b>concurrently</b> and can be reordered relative to each other. This full separation of read and write paths is a key differentiator from older shared-bus designs.</div>`
       },
       {
@@ -419,7 +439,59 @@ CONTENT.topics.push(
           <li>The <b>Command word</b>'s 5-bit RT address field allows addresses 0-31; address <b>31 (11111) is reserved for broadcast</b>, so <b>up to 31 uniquely addressable RTs</b> plus broadcast.</li>
           <li>The <b>Transmit/Receive (T/R) bit</b> tells the RT whether to transmit or receive; the 5-bit <b>word count</b> field encodes 1-32 data words (count 0 means 32), so <b>up to 32 data words per message</b>.</li>
           <li>The <b>Status word</b> is the RT's mandatory response, echoing its address and reporting health/error via dedicated bits - this is 1553's built-in acknowledgement.</li>
-        </ul>`
+        </ul>
+        <p>Field by field, each word is exactly <b>20 bit-times</b>. The three bit-field layouts follow.</p>
+        <p><b>Command Word</b> (BC &rarr; RT), 20 bit-times:</p>
+        <table class="data">
+          <tr><th>Field</th><th>Bit-times</th><th>Meaning</th></tr>
+          <tr><td>Sync</td><td>3</td><td>Command/Status sync (invalid-Manchester pattern; positive half then negative half)</td></tr>
+          <tr><td>Remote Terminal Address</td><td>5</td><td>Which RT is addressed (0-30; 31 = broadcast)</td></tr>
+          <tr><td>T/R bit</td><td>1</td><td>Transmit/Receive: 1 = RT transmits, 0 = RT receives</td></tr>
+          <tr><td>Subaddress / Mode</td><td>5</td><td>RT subaddress (data location); values 00000 or 11111 flag a mode command</td></tr>
+          <tr><td>Word Count / Mode Code</td><td>5</td><td>Number of data words 1-32 (00000 = 32), or a mode code when subaddress = 0/31</td></tr>
+          <tr><td>Parity</td><td>1</td><td>Odd parity over the 16 information bits</td></tr>
+        </table>
+        <p><b>Status Word</b> (RT &rarr; BC), 20 bit-times:</p>
+        <table class="data">
+          <tr><th>Field</th><th>Bit-times</th><th>Meaning</th></tr>
+          <tr><td>Sync</td><td>3</td><td>Command/Status sync (same distinctive pattern as the Command word)</td></tr>
+          <tr><td>RT Address</td><td>5</td><td>Echoes the responding RT's own address</td></tr>
+          <tr><td>Message Error</td><td>1</td><td>RT detected an error in the received command/data</td></tr>
+          <tr><td>Instrumentation</td><td>1</td><td>Always logic 0 (distinguishes a status word from a command word)</td></tr>
+          <tr><td>Service Request</td><td>1</td><td>RT requests BC attention/service</td></tr>
+          <tr><td>Reserved</td><td>3</td><td>Reserved bits, set to 0</td></tr>
+          <tr><td>Broadcast Command Received</td><td>1</td><td>Set if the last valid command was a broadcast</td></tr>
+          <tr><td>Busy</td><td>1</td><td>RT is busy and cannot move data right now</td></tr>
+          <tr><td>Subsystem Flag</td><td>1</td><td>A fault/failure in the RT's subsystem</td></tr>
+          <tr><td>Dynamic Bus Control Acceptance</td><td>1</td><td>RT accepts becoming the bus controller</td></tr>
+          <tr><td>Terminal Flag</td><td>1</td><td>A fault/failure within the RT itself</td></tr>
+          <tr><td>Parity</td><td>1</td><td>Odd parity over the 16 information bits</td></tr>
+        </table>
+        <p><b>Data Word</b> (BC or RT), 20 bit-times:</p>
+        <table class="data">
+          <tr><th>Field</th><th>Bit-times</th><th>Meaning</th></tr>
+          <tr><td>Sync</td><td>3</td><td>Data sync (the <em>opposite</em> invalid-Manchester pattern: negative half then positive half)</td></tr>
+          <tr><td>Data</td><td>16</td><td>16 bits of payload (MSB first)</td></tr>
+          <tr><td>Parity</td><td>1</td><td>Odd parity over the 16 data bits</td></tr>
+        </table>
+        <div class="callout"><b>The 3-bit-time sync is a distinctive invalid-Manchester pattern.</b> It deliberately holds one level for 1.5 bit-times then the other for 1.5 bit-times (no legal mid-bit transition), so it can never be mistaken for data. The <b>Command/Status sync is the opposite polarity of the Data sync</b> (Command/Status: high-half then low-half; Data: low-half then high-half), letting the receiver tell a data word from a command/status word purely from the sync.</div>
+        <p><b>Common Mode Codes</b> (carried in the Word Count/Mode Code field when subaddress = 0 or 31):</p>
+        <table class="data">
+          <tr><th>Mode code</th><th>Function</th></tr>
+          <tr><td>00000 (0)</td><td>Dynamic Bus Control</td></tr>
+          <tr><td>00001 (1)</td><td>Synchronize (without data word)</td></tr>
+          <tr><td>00010 (2)</td><td>Transmit Status Word</td></tr>
+          <tr><td>00011 (3)</td><td>Initiate Self-Test</td></tr>
+          <tr><td>00100 (4)</td><td>Transmitter Shutdown</td></tr>
+          <tr><td>00101 (5)</td><td>Override Transmitter Shutdown</td></tr>
+          <tr><td>00110 (6)</td><td>Inhibit Terminal Flag bit</td></tr>
+          <tr><td>00111 (7)</td><td>Override Inhibit Terminal Flag bit</td></tr>
+          <tr><td>01000 (8)</td><td>Reset Remote Terminal</td></tr>
+          <tr><td>10000 (16)</td><td>Transmit Vector Word (with data word)</td></tr>
+          <tr><td>10001 (17)</td><td>Synchronize (with data word)</td></tr>
+          <tr><td>10010 (18)</td><td>Transmit Last Command (with data word)</td></tr>
+          <tr><td>10011 (19)</td><td>Transmit Built-In-Test (BIT) Word (with data word)</td></tr>
+        </table>`
       },
       {
         h: 'Message Formats and Who Initiates',

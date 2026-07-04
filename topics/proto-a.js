@@ -38,6 +38,14 @@ CONTENT.topics.push(
 <li><strong>Parity bit (0 or 1):</strong> optional even/odd parity for a crude single-bit error check.</li>
 <li><strong>Stop bit(s) (1, 1.5, or 2):</strong> the line returns to MARK for at least one bit time, guaranteeing an idle interval and a fresh falling edge for the next start bit.</li>
 </ul>
+<p>Field-by-field, the UART character frame is:</p>
+<table class="data">
+<tr><th>Field</th><th>Width</th><th>Value / order</th><th>Meaning</th></tr>
+<tr><td>Start</td><td>1 bit</td><td>SPACE (0)</td><td>Breaks idle MARK; its falling edge is the frame timing reference</td></tr>
+<tr><td>Data</td><td>5–9 bits (usually 8)</td><td>LSB first</td><td>The payload character</td></tr>
+<tr><td>Parity</td><td>0 or 1 bit</td><td>none / even / odd</td><td>Optional single-bit error check over the data bits</td></tr>
+<tr><td>Stop</td><td>1, 1.5, or 2 bits</td><td>MARK (1)</td><td>Returns line to idle; guarantees a fresh start edge for the next frame</td></tr>
+</table>
 <p>So an 8N1 character occupies <strong>10 bit-times to carry 8 payload bits</strong> — 1 start + 8 data + 1 stop. That framing overhead is the origin of the classic "divide baud by 10 to get bytes/s" rule and of the 80% efficiency figure derived below. With 8E1 (even parity) or 7E1 the overhead grows and efficiency drops.</p>
 <div class="callout"><strong>Rule of thumb:</strong> for 8N1, <em>maximum characters per second $\approx$ baud rate / 10</em>. At 9600 baud that is 960 bytes/s; at 115200 baud, ~11.5 kB/s.</div>`
       },
@@ -76,6 +84,19 @@ CONTENT.topics.push(
 <tr><td>7 / 8</td><td>RTS / CTS</td><td>out / in</td><td>Hardware flow control</td></tr>
 <tr><td>4 / 6</td><td>DTR / DSR</td><td>out / in</td><td>Terminal/set ready</td></tr>
 <tr><td>1 / 9</td><td>DCD / RI</td><td>in / in</td><td>Carrier detect / ring indicator</td></tr>
+</table>
+<p>The full set of RS-232 signal lines, with direction relative to the DTE and their meaning:</p>
+<table class="data">
+<tr><th>Signal</th><th>Name</th><th>Direction (DTE)</th><th>Meaning</th></tr>
+<tr><td>TxD</td><td>Transmit Data</td><td>out</td><td>Serial data sent by the DTE</td></tr>
+<tr><td>RxD</td><td>Receive Data</td><td>in</td><td>Serial data received by the DTE</td></tr>
+<tr><td>RTS</td><td>Request To Send</td><td>out</td><td>DTE asserts to request permission to transmit (flow control)</td></tr>
+<tr><td>CTS</td><td>Clear To Send</td><td>in</td><td>DCE asserts to grant the DTE permission to transmit (flow control)</td></tr>
+<tr><td>DTR</td><td>Data Terminal Ready</td><td>out</td><td>DTE signals it is present and ready</td></tr>
+<tr><td>DSR</td><td>Data Set Ready</td><td>in</td><td>DCE signals it is present and ready</td></tr>
+<tr><td>DCD</td><td>Data Carrier Detect</td><td>in</td><td>DCE has detected a carrier / valid connection</td></tr>
+<tr><td>RI</td><td>Ring Indicator</td><td>in</td><td>DCE (modem) signals an incoming ring</td></tr>
+<tr><td>GND</td><td>Signal Ground</td><td>—</td><td>Common voltage reference for all signals</td></tr>
 </table>
 <p><strong>Flow control</strong> prevents overrun. <em>Hardware</em> flow control uses RTS/CTS: the receiver de-asserts CTS to tell the transmitter to pause. <em>Software</em> flow control uses in-band XON (0x11) / XOFF (0x13) control bytes. The minimal "3-wire" RS-232 uses only TXD, RXD, and GND with no handshaking.</p>`
       },
@@ -229,6 +250,15 @@ $$L_{\max} = \frac{C_{\max}}{C'}.$$
       {
         h: 'Encoding, framing and clocking',
         html: String.raw`<p>RS-422 is a <strong>physical/electrical layer only</strong> — it specifies voltages, impedances, and driver/receiver behaviour, <em>not</em> the data format. In practice it carries the <strong>same asynchronous NRZ UART framing as RS-232</strong> (start bit, 5–8 data bits, optional parity, stop bit), just with differential electrical levels. So an RS-422 link is usually still <strong>asynchronous 8N1-style</strong> with no separate clock: the receiver oversamples and re-synchronises on each start bit exactly as in RS-232.</p>
+<p>The async UART character frame it carries, field by field, is identical to RS-232's — only the electrical levels differ:</p>
+<table class="data">
+<tr><th>Field</th><th>Width</th><th>Value / order</th><th>Meaning</th></tr>
+<tr><td>Start</td><td>1 bit</td><td>SPACE (0)</td><td>Marks the start of a character; its edge is the timing reference</td></tr>
+<tr><td>Data</td><td>5–9 bits (usually 8)</td><td>LSB first</td><td>The payload character</td></tr>
+<tr><td>Parity</td><td>0 or 1 bit</td><td>none / even / odd</td><td>Optional single-bit error check</td></tr>
+<tr><td>Stop</td><td>1, 1.5, or 2 bits</td><td>MARK (1)</td><td>Returns the line to idle before the next frame</td></tr>
+</table>
+<p>The <strong>packet/message structure above this is defined by a higher layer</strong> — for RS-422 the electrical standard says nothing about addressing or message framing; a protocol layered on top (e.g. an application- or fieldbus-specific format) groups these characters into packets.</p>
 <p>The idle/mark state corresponds to a defined differential polarity (B > A). Because only the layer changed and not the protocol, engineers frequently "upgrade" an RS-232 design to RS-422 simply by swapping the transceiver chip and using twisted pair, to gain distance and noise immunity while keeping the UART, drivers, and software unchanged. (Synchronous, clocked variants exist for high-rate applications, but async UART framing dominates.)</p>`
       },
       {
@@ -426,6 +456,15 @@ $$t_{pd} = \frac{L}{v} = \frac{L\sqrt{\varepsilon_r}}{c}.$$
       {
         h: 'Encoding, framing, and clocking',
         html: String.raw`<p>Like RS-422, RS-485 is <strong>only the electrical layer</strong>: it defines differential voltages, bus loading, and driver enable behaviour, not the data format. In practice it carries <strong>asynchronous NRZ UART framing</strong> — the same start/data/parity/stop 8N1-style characters as RS-232 — layered under a protocol like Modbus RTU. There is no clock wire; each receiving node oversamples and re-synchronises on start bits.</p>
+<p>The async UART character frame each byte uses, field by field:</p>
+<table class="data">
+<tr><th>Field</th><th>Width</th><th>Value / order</th><th>Meaning</th></tr>
+<tr><td>Start</td><td>1 bit</td><td>SPACE (0)</td><td>Marks the start of a character; its edge is the timing reference</td></tr>
+<tr><td>Data</td><td>5–9 bits (usually 8)</td><td>LSB first</td><td>The payload character</td></tr>
+<tr><td>Parity</td><td>0 or 1 bit</td><td>none / even / odd</td><td>Optional single-bit error check (Modbus RTU commonly uses even parity)</td></tr>
+<tr><td>Stop</td><td>1, 1.5, or 2 bits</td><td>MARK (1)</td><td>Returns the line to idle before the next frame</td></tr>
+</table>
+<p>Around this UART frame, half-duplex RS-485 adds a <strong>driver-enable (DE) framing</strong> envelope: before its first start bit a node must assert DE, wait a short <em>enable/settle</em> time for the line to reach a valid level, transmit all the character frames of its packet, then <strong>tristate DE promptly after the final stop bit</strong> so another node can drive the bus. Mis-timing this turnaround (tristating mid-byte, or holding DE and colliding with the next talker) is the classic RS-485 fault. The <strong>packet that these characters form is defined by the higher layer</strong> — e.g. Modbus RTU frames a packet as address + function + data + CRC, delimited by a silent gap (see below); RS-485 itself only defines the electrical byte transport.</p>
 <p>The key addition over a simple UART is <strong>bus turnaround timing</strong>. In 2-wire half-duplex, a node must assert its driver enable, wait for the line to settle, send its frame, then <em>promptly tristate</em> before the next node speaks. Modbus RTU, for instance, delimits frames by a <strong>silent interval of at least 3.5 character-times</strong>; the master waits this gap and manages who transmits. Getting the DE/RE̅ toggle timing right (not tristating mid-byte, not colliding with the peer) is the classic RS-485 firmware pitfall.</p>`
       },
       {
@@ -601,6 +640,16 @@ $$t_{\text{turn}} \ge 2\,t_{pd} + t_{\text{driver}}.$$
 <li><strong>Source-synchronous (e.g. FPD-Link, Camera Link):</strong> data pairs plus a forwarded clock pair. The classic display "LVDS" serialises 7 bits per clock across several data lanes (e.g. 3 or 4 data pairs + 1 clock pair for a colour panel).</li>
 <li><strong>Embedded-clock / line-coded (high-speed SerDes):</strong> the clock is recovered from data transitions by a CDR PLL, and <strong>8b/10b</strong> (or similar) coding guarantees enough transitions and DC balance. These forms carry gigabit serial streams on a single pair.</li>
 </ul>
+<p>LVDS itself has <strong>no inherent packet or word structure</strong> — it is purely an electrical layer. Any "structure" comes from the SerDes scheme layered on top. A representative and widely deployed example is <strong>FPD-Link / OpenLDI</strong> (the classic display "LVDS"), which uses <strong>7:1 serialization per pixel clock</strong>: each LVDS data pair carries 7 bits in every pixel-clock period, alongside a forwarded LVDS clock pair. A single-pixel (18-bit RGB666) link uses three data pairs plus one clock pair; a 24-bit RGB888 panel adds a fourth data pair. The per-pixel-clock structure serialised across the pairs is:</p>
+<table class="data">
+<tr><th>LVDS pair</th><th>Bits per pixel clock (7:1)</th><th>Carries</th></tr>
+<tr><td>Data 0</td><td>7</td><td>R0–R5 (red) + one control bit</td></tr>
+<tr><td>Data 1</td><td>7</td><td>G0–G5 (green) + one control bit</td></tr>
+<tr><td>Data 2</td><td>7</td><td>B0–B5 (blue) + the three control/sync bits HSYNC, VSYNC, DE</td></tr>
+<tr><td>Data 3 (RGB888 only)</td><td>7</td><td>R6–R7, G6–G7, B6–B7 (the extra 2 bits per colour) + control</td></tr>
+<tr><td>Clock</td><td>—</td><td>Forwarded pixel clock; receiver PLL multiplies ×7 to recover the 7 bit-phases</td></tr>
+</table>
+<p>So one pixel clock period transports one pixel: its RGB colour bits plus the HSYNC/VSYNC/DE framing/control bits, 7 bits at a time on each pair. High-speed embedded-clock SerDes instead use 8b/10b so the structure becomes 10-bit code groups on a single pair with the clock recovered by a CDR.</p>
 <p>So LVDS spans a range from simple source-synchronous display links to fully clock-embedded gigabit lanes, but in all cases the <em>electrical</em> layer is the same 350 mV current-mode differential signalling.</p>`
       },
       {
