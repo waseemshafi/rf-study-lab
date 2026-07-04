@@ -6,6 +6,29 @@ CONTENT.topics.push(
   category: 'Spread Spectrum & Coding',
   tags: ['FEC', 'iterative decoding', 'RSC', 'interleaver', 'BCJR', 'MAP', 'LLR', 'near-Shannon'],
   summary: String.raw`Turbo codes are parallel-concatenated recursive systematic convolutional codes joined by an interleaver, decoded iteratively by two soft-in soft-out decoders that exchange extrinsic log-likelihood ratios to approach the Shannon limit within a fraction of a dB.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-turbo-codes" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<text x="12" y="20" fill="#e6edf3">parallel concatenation of two RSC encoders (rate 1/3)</text>
+<line x1="8" y1="60" x2="60" y2="60" stroke="#9aa7b5" marker-end="url(#arr-turbo-codes)"/>
+<text x="10" y="52" fill="#9aa7b5">u</text>
+<circle cx="70" cy="60" r="5" fill="#9aa7b5"/>
+<line x1="70" y1="60" x2="470" y2="60" stroke="#9aa7b5" marker-end="url(#arr-turbo-codes)"/>
+<text x="476" y="64" fill="#63e6be">u (systematic)</text>
+<path d="M70,60 L70,110 L120,110" fill="none" stroke="#9aa7b5" marker-end="url(#arr-turbo-codes)"/>
+<rect x="122" y="92" width="90" height="36" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="146" y="115" fill="#e6edf3">RSC 1</text>
+<line x1="212" y1="110" x2="470" y2="110" stroke="#9aa7b5" marker-end="url(#arr-turbo-codes)"/>
+<text x="476" y="114" fill="#4dabf7">parity p&#8321;</text>
+<path d="M70,60 L70,170 L120,170" fill="none" stroke="#9aa7b5" marker-end="url(#arr-turbo-codes)"/>
+<rect x="122" y="152" width="90" height="36" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="132" y="175" fill="#e6edf3">interleaver &#960;</text>
+<line x1="212" y1="170" x2="256" y2="170" stroke="#9aa7b5" marker-end="url(#arr-turbo-codes)"/>
+<rect x="258" y="152" width="90" height="36" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="282" y="175" fill="#e6edf3">RSC 2</text>
+<line x1="348" y1="170" x2="470" y2="170" stroke="#9aa7b5" marker-end="url(#arr-turbo-codes)"/>
+<text x="476" y="174" fill="#ffa94d">parity p&#8322;</text>
+<text x="122" y="216" fill="#9aa7b5">decode: two SISO decoders exchange extrinsic LLRs (&#960; / &#960;&#8315;&#185;)</text>
+</svg>`,
+    caption: String.raw`u is sent systematically and into RSC 1 (&#8594;p&#8321;); the interleaver &#960; permutes u into RSC 2 (&#8594;p&#8322;); two SISO decoders trade extrinsic LLRs.`
+  },
   prerequisites: ['convolutional-codes', 'viterbi', 'fec', 'shannon', 'eb-no'],
   intro: String.raw`<p>In 1993 Claude <b>Berrou</b>, Alain Glavieux and Punya Thitimajshima presented a code at the IEEE ICC that seemed too good to be true: at a rate of 1/2 it reached a bit error rate of $10^{-5}$ within about <b>0.5 dB</b> of the Shannon capacity limit — a gap that decades of coding research had failed to close. The claim was met with open skepticism until independent groups reproduced the curves. Turbo codes did not introduce a fundamentally new algebraic structure; their power comes from a <b>system-level</b> idea: combine two simple, individually mediocre convolutional codes through a large pseudo-random <b>interleaver</b>, then decode not once but <b>iteratively</b>, letting two decoders trade probabilistic "advice" back and forth until they converge on a consistent answer.</p>
 <p>The name "turbo" is an analogy to the turbocharger in an engine: the <b>exhaust</b> (the output) of one decoder is fed back to <b>drive</b> the other, and vice versa. The information passed between them is carefully constructed to be <b>extrinsic</b> — new evidence that a decoder did <i>not</i> already have — so that the feedback loop adds genuine information rather than merely echoing beliefs. This iterative exchange of soft information, formalized as log-likelihood ratios, launched an entire discipline of "turbo-principle" receivers (turbo equalization, turbo multiuser detection) and made near-capacity operation practical for the first time. Turbo codes went on to power 3G (UMTS), 4G (LTE), deep-space links (CCSDS), and satellite return channels (DVB-RCS).</p>`,
@@ -254,6 +277,33 @@ $$ P_b \le \sum_{d\ge d_{\text{free}}} \frac{\tilde w_d}{N}\,Q\!\left(\sqrt{2 d\
   category: 'Spread Spectrum & Coding',
   tags: ['FEC', 'sparse', 'parity-check', 'Tanner graph', 'belief propagation', 'sum-product', 'min-sum', 'near-capacity'],
   summary: String.raw`Low-Density Parity-Check codes are linear block codes defined by a sparse parity-check matrix whose Tanner graph is decoded by iterative belief-propagation (sum-product / min-sum) message passing, achieving near-Shannon performance with a low error floor and highly parallel hardware.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 240" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-ldpc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<text x="12" y="20" fill="#e6edf3">Tanner graph of sparse H &#8212; belief propagation between nodes</text>
+<line x1="8" y1="130" x2="44" y2="130" stroke="#9aa7b5" marker-end="url(#arr-ldpc)"/>
+<text x="6" y="122" fill="#9aa7b5">rx</text>
+<text x="60" y="66" fill="#63e6be">check nodes (rows of H)</text>
+<rect x="120" y="74" width="30" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="128" y="94" fill="#e6edf3">c&#8321;</text>
+<rect x="250" y="74" width="30" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="258" y="94" fill="#e6edf3">c&#8322;</text>
+<rect x="380" y="74" width="30" height="30" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="388" y="94" fill="#e6edf3">c&#8323;</text>
+<text x="60" y="200" fill="#4dabf7">variable nodes (bits / columns)</text>
+<rect x="70" y="150" width="30" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="80" y="170" fill="#e6edf3">v&#8321;</text>
+<rect x="185" y="150" width="30" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="195" y="170" fill="#e6edf3">v&#8322;</text>
+<rect x="300" y="150" width="30" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="310" y="170" fill="#e6edf3">v&#8323;</text>
+<rect x="415" y="150" width="30" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="425" y="170" fill="#e6edf3">v&#8324;</text>
+<line x1="85" y1="150" x2="130" y2="104" stroke="#9aa7b5"/>
+<line x1="200" y1="150" x2="135" y2="104" stroke="#9aa7b5"/>
+<line x1="200" y1="150" x2="262" y2="104" stroke="#9aa7b5"/>
+<line x1="315" y1="150" x2="266" y2="104" stroke="#9aa7b5"/>
+<line x1="315" y1="150" x2="392" y2="104" stroke="#9aa7b5"/>
+<line x1="430" y1="150" x2="396" y2="104" stroke="#9aa7b5"/>
+<line x1="450" y1="165" x2="510" y2="165" stroke="#9aa7b5" marker-end="url(#arr-ldpc)"/>
+<text x="470" y="158" fill="#ffa94d">bits</text>
+<text x="120" y="228" fill="#9aa7b5">LLR messages passed along edges (sum-product / min-sum) until H c&#7488;=0</text>
+</svg>`,
+    caption: String.raw`Sparse H defines a bipartite Tanner graph; variable and check nodes exchange LLR messages (belief propagation) until every parity check is satisfied.`
+  },
   prerequisites: ['channel-coding', 'fec', 'shannon', 'convolutional-codes', 'eb-no'],
   intro: String.raw`<p>Robert <b>Gallager</b> invented Low-Density Parity-Check codes in his 1962 MIT PhD thesis — and the world promptly forgot them for thirty years. The hardware of the day could not run the iterative decoder Gallager himself described, and algebraic block codes (Reed–Solomon, BCH) stole the spotlight. Then, in the mid-1990s, in the wake of the turbo-code earthquake, <b>David MacKay</b> and Radford Neal (and independently others) <b>rediscovered</b> LDPC codes and showed that they too could sail within a fraction of a dB of the <b>Shannon limit</b> — in fact, carefully optimized <b>irregular</b> LDPC codes hold some of the tightest records ever, within <b>~0.04 dB</b> of capacity.</p>
 <p>The defining idea is in the name: the parity-check matrix $\mathbf H$ is <b>low density</b> — almost all of its entries are 0, with only a sparse sprinkling of 1s. Sparsity is not a detail; it is the whole point. A sparse $\mathbf H$ corresponds to a sparse bipartite graph (the <b>Tanner graph</b>) on which a local, message-passing decoder — <b>belief propagation</b> — runs efficiently and, crucially, <i>converges</i> to near-optimal decisions. Where turbo codes achieve capacity through a clever concatenation and a long feedback loop, LDPC codes achieve it through the <b>structure of a sparse graph</b> and purely local computation. Today LDPC codes carry Wi-Fi (802.11n/ac/ax), the 5G-NR data channel, satellite TV (DVB-S2), and 10-gigabit Ethernet (10GBASE-T).</p>`,

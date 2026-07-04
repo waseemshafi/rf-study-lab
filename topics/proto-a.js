@@ -6,6 +6,24 @@ CONTENT.topics.push(
     category: 'Interfaces & Protocols',
     tags: ['rs232', 'serial', 'single-ended', 'uart', 'tia-232', 'async', '8n1', 'point-to-point'],
     summary: String.raw`RS-232 (TIA/EIA-232) is a single-ended, bipolar-voltage, point-to-point asynchronous serial interface that swings roughly $\pm 3$ to $\pm 15$ V about a common ground, reaching about 15 m at rates up to ~115–230 kbps using NRZ 8N1 framing.`,
+    diagram: { svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-rs232" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="20" y="55" width="150" height="110" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="95" y="80" fill="#e6edf3" text-anchor="middle" font-weight="bold">DTE (PC)</text>
+<text x="95" y="96" fill="#9aa7b5" text-anchor="middle" font-size="10">terminal / UART</text>
+<rect x="370" y="55" width="150" height="110" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="445" y="80" fill="#e6edf3" text-anchor="middle" font-weight="bold">DCE (modem)</text>
+<text x="445" y="96" fill="#9aa7b5" text-anchor="middle" font-size="10">peer device</text>
+<line x1="170" y1="78" x2="370" y2="78" stroke="#4dabf7" marker-end="url(#arr-rs232)"/>
+<text x="270" y="73" fill="#e6edf3" text-anchor="middle" font-size="10">TxD &#8594; RxD</text>
+<line x1="370" y1="100" x2="170" y2="100" stroke="#63e6be" marker-end="url(#arr-rs232)"/>
+<text x="270" y="95" fill="#e6edf3" text-anchor="middle" font-size="10">RxD &#8592; TxD</text>
+<line x1="170" y1="122" x2="370" y2="122" stroke="#ffa94d" marker-end="url(#arr-rs232)"/>
+<text x="270" y="117" fill="#e6edf3" text-anchor="middle" font-size="10">RTS &#8594; / &#8592; CTS</text>
+<line x1="170" y1="150" x2="370" y2="150" stroke="#9aa7b5"/>
+<text x="270" y="145" fill="#9aa7b5" text-anchor="middle" font-size="10">GND (common return)</text>
+<text x="270" y="200" fill="#9aa7b5" text-anchor="middle" font-size="10">single-ended, referenced to shared ground &#183; point-to-point</text>
+</svg>`, caption: String.raw`RS-232: two devices (DTE&#8596;DCE) linked point-to-point by single-ended TxD/RxD/RTS/CTS lines all referenced to one shared GND.` },
     prerequisites: ['comm-basics', 'noise', 'bandwidth'],
     intro: String.raw`<p><strong>RS-232</strong> — formally <strong>TIA/EIA-232-F</strong> (originally EIA RS-232-C, and internationally aligned with ITU-T V.24/V.28) — is the oldest and most familiar of the serial-line standards. It was defined in the 1960s to connect <em>Data Terminal Equipment (DTE)</em> such as a terminal or PC to <em>Data Communication Equipment (DCE)</em> such as a modem. Almost every microcontroller UART, PC COM port, industrial console, GPS module, and lab instrument has spoken RS-232 at some point.</p>
 <p>Three properties define RS-232 and explain both its ubiquity and its limits. First, it is <strong>single-ended</strong>: each signal is one wire referenced to a shared ground, so noise picked up on the wire is measured directly against that ground with no cancellation. Second, it uses <strong>large bipolar voltages</strong> (nominally $\pm 5$ to $\pm 12$ V in practice, legal from $\pm 3$ up to $\pm 15$ V) with an unusual <em>inverted</em> logic convention. Third, it is fundamentally a <strong>point-to-point, full-duplex</strong> link between exactly two devices — there is no bus, no addressing, and no arbitration. These choices make RS-232 trivially simple and robust for a short cable to one peer, but they cap its speed, its reach, and its ability to network many nodes.</p>`,
@@ -223,6 +241,30 @@ $$L_{\max} = \frac{C_{\max}}{C'}.$$
     category: 'Interfaces & Protocols',
     tags: ['rs422', 'differential', 'balanced', 'tia-422', 'multidrop', 'point-to-point', 'twisted-pair', 'long-distance'],
     summary: String.raw`RS-422 (TIA/EIA-422) is a balanced differential interface with one driver and up to ten receivers, spanning ~1200 m at 100 kbps or 10 Mbps at ~12 m, using $\pm 2$–$6$ V differential levels over terminated twisted pair for excellent common-mode noise rejection.`,
+    diagram: { svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-rs422" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="18" y="80" width="90" height="60" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="63" y="106" fill="#e6edf3" text-anchor="middle" font-weight="bold">Driver</text>
+<text x="63" y="122" fill="#9aa7b5" text-anchor="middle" font-size="10">1 only</text>
+<line x1="108" y1="98" x2="470" y2="98" stroke="#63e6be"/>
+<line x1="108" y1="122" x2="470" y2="122" stroke="#ffa94d"/>
+<text x="290" y="92" fill="#e6edf3" text-anchor="middle" font-size="10">B (+)</text>
+<text x="290" y="138" fill="#e6edf3" text-anchor="middle" font-size="10">A (&#8722;)</text>
+<text x="290" y="72" fill="#9aa7b5" text-anchor="middle" font-size="10">twisted pair (differential)</text>
+<line x1="470" y1="98" x2="470" y2="122" stroke="#b197fc" stroke-width="2"/>
+<text x="500" y="114" fill="#b197fc" text-anchor="middle" font-size="10">R&#7734;&#8776;Z&#8320;</text>
+<rect x="150" y="160" width="70" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="185" y="187" fill="#e6edf3" text-anchor="middle" font-size="11">Rx 1</text>
+<rect x="255" y="160" width="70" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="290" y="187" fill="#e6edf3" text-anchor="middle" font-size="11">Rx 2</text>
+<rect x="380" y="160" width="90" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="425" y="181" fill="#e6edf3" text-anchor="middle" font-size="11">Rx &#8804;10</text>
+<text x="425" y="196" fill="#9aa7b5" text-anchor="middle" font-size="9">(far-end term.)</text>
+<line x1="185" y1="122" x2="185" y2="160" stroke="#9aa7b5" marker-end="url(#arr-rs422)"/>
+<line x1="290" y1="122" x2="290" y2="160" stroke="#9aa7b5" marker-end="url(#arr-rs422)"/>
+<line x1="425" y1="122" x2="425" y2="160" stroke="#9aa7b5" marker-end="url(#arr-rs422)"/>
+<text x="270" y="224" fill="#9aa7b5" text-anchor="middle" font-size="10">one driver broadcasts to up to 10 receivers; termination at the far end</text>
+</svg>`, caption: String.raw`RS-422: a single differential driver feeds a twisted A/B pair broadcasting to up to 10 receivers, with far-end termination R&#7734;&#8776;Z&#8320;.` },
     prerequisites: ['rs232', 'noise', 'comm-basics'],
     intro: String.raw`<p><strong>RS-422</strong> — formally <strong>TIA/EIA-422-B</strong> (ITU-T V.11) — is the differential answer to RS-232's distance and noise limitations. Instead of one wire against ground, RS-422 sends each signal as the <em>difference between two wires</em> (a balanced pair, labelled A/− and B/+). The receiver looks only at the <strong>voltage difference</strong> $V_{AB}$ between the two wires, ignoring whatever noise or ground shift they share in common. This single change — from single-ended to <em>balanced differential</em> — is what lets RS-422 run kilometres and megabits where RS-232 runs metres and kilobits.</p>
 <p>RS-422 keeps a familiar link shape: it is essentially <strong>point-to-point or one-driver multidrop</strong>. There is exactly one driver on a bus, but up to <strong>ten receivers</strong> may listen. It is typically wired full-duplex using two pairs (one per direction). Compared to its close sibling RS-485, RS-422 does not support multiple drivers/true bus arbitration — its driver is always enabled — which makes it simpler but non-networking.</p>`,
@@ -409,6 +451,29 @@ $$t_{pd} = \frac{L}{v} = \frac{L\sqrt{\varepsilon_r}}{c}.$$
     category: 'Interfaces & Protocols',
     tags: ['rs485', 'differential', 'multidrop', 'bus', 'tia-485', 'half-duplex', 'unit-load', 'modbus', 'tristate'],
     summary: String.raw`RS-485 (TIA/EIA-485) is a balanced differential multidrop bus supporting up to 32 unit loads (256 with fractional-load transceivers) of tristate-able drivers and receivers, half- or full-duplex, reaching ~1200 m at 100 kbps or 10 Mbps at ~12 m over a $120\,\Omega$-terminated twisted pair.`,
+    diagram: { svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-rs485" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<line x1="55" y1="78" x2="485" y2="78" stroke="#63e6be"/>
+<line x1="55" y1="98" x2="485" y2="98" stroke="#ffa94d"/>
+<text x="270" y="70" fill="#9aa7b5" text-anchor="middle" font-size="10">2-wire differential bus (A / B)</text>
+<line x1="55" y1="78" x2="55" y2="98" stroke="#b197fc" stroke-width="2"/>
+<text x="40" y="92" fill="#b197fc" text-anchor="middle" font-size="10">120&#937;</text>
+<line x1="485" y1="78" x2="485" y2="98" stroke="#b197fc" stroke-width="2"/>
+<text x="505" y="92" fill="#b197fc" text-anchor="middle" font-size="10">120&#937;</text>
+<rect x="70" y="125" width="90" height="55" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="115" y="149" fill="#e6edf3" text-anchor="middle" font-size="11">XCVR 1</text>
+<text x="115" y="165" fill="#9aa7b5" text-anchor="middle" font-size="9">DE tri-state</text>
+<rect x="225" y="125" width="90" height="55" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="270" y="149" fill="#e6edf3" text-anchor="middle" font-size="11">XCVR 2</text>
+<text x="270" y="165" fill="#9aa7b5" text-anchor="middle" font-size="9">DE tri-state</text>
+<rect x="380" y="125" width="100" height="55" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="430" y="149" fill="#e6edf3" text-anchor="middle" font-size="11">XCVR &#8804;32 UL</text>
+<text x="430" y="165" fill="#9aa7b5" text-anchor="middle" font-size="9">DE tri-state</text>
+<line x1="115" y1="98" x2="115" y2="125" stroke="#9aa7b5" marker-end="url(#arr-rs485)"/>
+<line x1="270" y1="98" x2="270" y2="125" stroke="#9aa7b5" marker-end="url(#arr-rs485)"/>
+<line x1="430" y1="98" x2="430" y2="125" stroke="#9aa7b5" marker-end="url(#arr-rs485)"/>
+<text x="270" y="200" fill="#9aa7b5" text-anchor="middle" font-size="10">many tri-state transceivers share one bus, 120&#937; both ends; half-duplex turn-taking</text>
+</svg>`, caption: String.raw`RS-485: multiple tri-state (DE) transceivers hang off one 2-wire differential bus terminated 120&#937; at both ends, taking turns half-duplex.` },
     prerequisites: ['rs422', 'rs232', 'noise'],
     intro: String.raw`<p><strong>RS-485</strong> — formally <strong>TIA/EIA-485-A</strong> — is the networking-capable big brother of RS-422. It keeps the same balanced-differential electrical philosophy (decide on $V_B - V_A$, reject common-mode) but adds the one ingredient RS-422 lacks: <strong>multiple drivers can share the same bus</strong>. Each driver has a <strong>tristate (high-impedance) disabled state</strong>, so many nodes can take turns transmitting on a single twisted pair — a true <em>multidrop, multi-master bus</em>.</p>
 <p>This makes RS-485 the backbone of industrial fieldbus networking: <strong>Modbus RTU, PROFIBUS, DMX512</strong> (stage lighting), BACnet MS/TP, and countless proprietary sensor networks all ride on RS-485. Its defining specs are the ability to hang <strong>up to 32 "unit loads"</strong> on the bus (extendable to 128 or 256 with fractional-unit-load transceivers), a wide <strong>$-7$ V to $+12$ V common-mode range</strong>, half- or full-duplex operation, and the familiar RS-422 rate/length envelope of 10 Mbps at 12 m down to 100 kbps at 1200 m.</p>`,
@@ -605,6 +670,24 @@ $$t_{\text{turn}} \ge 2\,t_{pd} + t_{\text{driver}}.$$
     category: 'Interfaces & Protocols',
     tags: ['lvds', 'differential', 'current-mode', 'tia-644', 'high-speed', 'fpd-link', 'serdes', 'low-power', 'displays'],
     summary: String.raw`LVDS (Low-Voltage Differential Signaling, TIA/EIA-644) is a current-mode differential interface with a ~350 mV swing on a $100\,\Omega$-terminated pair about a ~1.2 V common mode, delivering gigabit rates at very low power and low EMI over short point-to-point links (displays, FPD-Link, camera links, backplanes).`,
+    diagram: { svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-lvds" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="20" y="75" width="120" height="70" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="80" y="103" fill="#e6edf3" text-anchor="middle" font-weight="bold">Driver</text>
+<text x="80" y="120" fill="#9aa7b5" text-anchor="middle" font-size="10">current source</text>
+<text x="80" y="134" fill="#63e6be" text-anchor="middle" font-size="10">~3.5 mA</text>
+<rect x="400" y="75" width="120" height="70" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="460" y="103" fill="#e6edf3" text-anchor="middle" font-weight="bold">Receiver</text>
+<text x="460" y="120" fill="#9aa7b5" text-anchor="middle" font-size="10">comparator</text>
+<text x="460" y="134" fill="#9aa7b5" text-anchor="middle" font-size="10">V&#7580;&#8776;1.2 V</text>
+<line x1="140" y1="95" x2="360" y2="95" stroke="#63e6be" marker-end="url(#arr-lvds)"/>
+<line x1="360" y1="125" x2="140" y2="125" stroke="#ffa94d" marker-end="url(#arr-lvds)"/>
+<text x="250" y="88" fill="#9aa7b5" text-anchor="middle" font-size="10">differential pair (100&#937; traces)</text>
+<line x1="360" y1="95" x2="360" y2="125" stroke="#b197fc" stroke-width="2"/>
+<text x="360" y="150" fill="#b197fc" text-anchor="middle" font-size="10">100&#937;</text>
+<text x="270" y="180" fill="#e6edf3" text-anchor="middle" font-size="10">3.5 mA &#215; 100 &#937; = 350 mV across the termination</text>
+<text x="270" y="198" fill="#9aa7b5" text-anchor="middle" font-size="10">point-to-point SerDes; low swing &#8594; low power, low EMI</text>
+</svg>`, caption: String.raw`LVDS: a ~3.5 mA current-mode driver steers current down a 100&#937; differential pair, developing ~350 mV across the receiver-end termination (point-to-point).` },
     prerequisites: ['rs422', 'noise', 'bandwidth'],
     intro: String.raw`<p><strong>LVDS (Low-Voltage Differential Signaling)</strong> — standardised as <strong>TIA/EIA-644(-A)</strong> and, for the ANSI multipoint variant, IEEE 1596.3 (SCI-LVDS) — is the go-to interface when you need <em>gigabit-class speed at very low power and low EMI</em> over a short distance. Where RS-422/485 optimise for <em>distance and robustness</em> with volt-level swings, LVDS optimises for <em>speed and efficiency</em> with a tiny <strong>~350 mV</strong> differential swing.</p>
 <p>Two ideas define LVDS. First, it is <strong>current-mode</strong>: instead of switching a voltage, the driver steers a nearly constant <strong>~3.5 mA</strong> current through the two wires in one direction or the other, and that current develops the signal across a <strong>100 Ω termination resistor at the receiver</strong> ($V = IR$). Because the current is roughly constant and just changes direction, the power drawn from the supply barely changes with data, and the two wires' currents are equal-and-opposite, so <strong>near-zero net (common-mode) current flows</strong> — which is why LVDS radiates so little EMI and sips power. Second, the low ~350 mV swing about a low ~1.2 V common mode lets edges be fast and the logic run at gigabit rates while staying quiet. LVDS underlies laptop/TV display links (FPD-Link, "LVDS panels"), Camera Link, and countless chip-to-chip and backplane SerDes.</p>`,

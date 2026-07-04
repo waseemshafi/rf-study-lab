@@ -6,6 +6,24 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['fourier', 'spectrum', 'frequency-domain', 'dft', 'fft', 'parseval'],
   summary: String.raw`The Fourier Transform decomposes a signal into its constituent sinusoids, mapping between the time domain and the frequency domain.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-fourier-transform" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9aa7b5"/></marker></defs>
+<rect x="12" y="55" width="96" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="60" y="72" fill="#e6edf3" text-anchor="middle">x(t)</text>
+<text x="60" y="88" fill="#9aa7b5" text-anchor="middle">time signal</text>
+<rect x="170" y="45" width="200" height="60" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="270" y="68" fill="#e6edf3" text-anchor="middle">analysis integral</text>
+<text x="270" y="90" fill="#9aa7b5" text-anchor="middle">&#8747; x(t) e^(&#8722;j2&#960;ft) dt</text>
+<rect x="432" y="55" width="96" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="480" y="72" fill="#e6edf3" text-anchor="middle">X(f)</text>
+<text x="480" y="88" fill="#9aa7b5" text-anchor="middle">spectrum</text>
+<line x1="108" y1="75" x2="168" y2="75" stroke="#9aa7b5" marker-end="url(#arr-fourier-transform)"/>
+<line x1="370" y1="75" x2="430" y2="75" stroke="#9aa7b5" marker-end="url(#arr-fourier-transform)"/>
+<text x="270" y="130" fill="#9aa7b5" text-anchor="middle">correlate x(t) with every complex sinusoid &#8594; magnitude &amp; phase per frequency</text>
+</svg>`,
+    caption: String.raw`x(t) is correlated with every complex exponential by the analysis integral to yield the spectrum X(f).`
+  },
   prerequisites: ['comm-basics', 'convolution'],
   intro: String.raw`<p>The Fourier Transform (FT) is the single most important analytical tool in signal processing. It expresses an arbitrary time-domain signal $x(t)$ as a continuous superposition of complex exponentials $e^{j2\pi ft}$, revealing exactly which frequencies are present and with what amplitude and phase. Whereas the time domain answers <em>what happens when</em>, the frequency domain answers <em>what frequencies are present</em>.</p>
 <p>Because convolution in time becomes multiplication in frequency, the FT turns the messy business of filtering, modulation, and system analysis into simple algebra. Nearly every downstream topic — spectra, sampling, aliasing, PSD, modulation — is a special case or consequence of Fourier theory.</p>`,
@@ -132,6 +150,24 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['laplace', 's-plane', 'transfer-function', 'poles-zeros', 'stability', 'roc'],
   summary: String.raw`The Laplace Transform generalizes the Fourier Transform to a complex frequency $s=\sigma+j\omega$, enabling analysis of stability, transients, and LTI systems via poles and zeros.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-laplace-transform" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9aa7b5"/></marker></defs>
+<rect x="12" y="50" width="90" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="57" y="67" fill="#e6edf3" text-anchor="middle">X(s)</text>
+<text x="57" y="83" fill="#9aa7b5" text-anchor="middle">input</text>
+<rect x="160" y="40" width="210" height="60" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="265" y="63" fill="#e6edf3" text-anchor="middle">system H(s) = N(s)/D(s)</text>
+<text x="265" y="85" fill="#9aa7b5" text-anchor="middle">poles &#215; and zeros &#9675; in s-plane</text>
+<rect x="428" y="50" width="100" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="478" y="67" fill="#e6edf3" text-anchor="middle">Y(s)=H(s)X(s)</text>
+<text x="478" y="83" fill="#9aa7b5" text-anchor="middle">output</text>
+<line x1="102" y1="70" x2="158" y2="70" stroke="#9aa7b5" marker-end="url(#arr-laplace-transform)"/>
+<line x1="370" y1="70" x2="426" y2="70" stroke="#9aa7b5" marker-end="url(#arr-laplace-transform)"/>
+<text x="265" y="135" fill="#b197fc" text-anchor="middle">stable &#8660; all poles in left half-plane (Re s &lt; 0)</text>
+</svg>`,
+    caption: String.raw`H(s) maps input to output; pole locations in the s-plane set stability (all poles in the LHP means stable).`
+  },
   prerequisites: ['fourier-transform', 'convolution'],
   intro: String.raw`<p>The Laplace Transform extends the Fourier Transform by adding an exponential weighting $e^{-\sigma t}$, so it can handle signals that grow, and — crucially — it lets us describe a linear time-invariant (LTI) system by a single rational function $H(s)$, the <strong>transfer function</strong>. The locations of its <strong>poles</strong> and <strong>zeros</strong> in the complex $s$-plane tell us at a glance whether the system is stable, how fast it responds, and how it resonates.</p>
 <p>Control engineers and circuit designers live in the $s$-plane. Solving differential equations becomes algebra; cascading systems becomes multiplication; and the boundary between stability and instability is simply the imaginary ($j\omega$) axis.</p>`,
@@ -254,6 +290,24 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['z-transform', 'z-plane', 'unit-circle', 'digital-filters', 'dtft', 'difference-equation'],
   summary: String.raw`The Z-Transform is the discrete-time counterpart of the Laplace Transform, mapping sample sequences to a complex variable $z$ for the design and stability analysis of digital filters.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-z-transform" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9aa7b5"/></marker></defs>
+<rect x="12" y="50" width="90" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="57" y="67" fill="#e6edf3" text-anchor="middle">X(z)</text>
+<text x="57" y="83" fill="#9aa7b5" text-anchor="middle">x[n] input</text>
+<rect x="160" y="40" width="210" height="60" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="265" y="62" fill="#e6edf3" text-anchor="middle">digital filter H(z)</text>
+<text x="265" y="85" fill="#9aa7b5" text-anchor="middle">z&#8315;&#185; delays, poles/zeros in z-plane</text>
+<rect x="428" y="50" width="100" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="478" y="67" fill="#e6edf3" text-anchor="middle">Y(z)=H(z)X(z)</text>
+<text x="478" y="83" fill="#9aa7b5" text-anchor="middle">y[n] output</text>
+<line x1="102" y1="70" x2="158" y2="70" stroke="#9aa7b5" marker-end="url(#arr-z-transform)"/>
+<line x1="370" y1="70" x2="426" y2="70" stroke="#9aa7b5" marker-end="url(#arr-z-transform)"/>
+<text x="265" y="135" fill="#b197fc" text-anchor="middle">stable &#8660; all poles inside the unit circle (|z| &lt; 1)</text>
+</svg>`,
+    caption: String.raw`A difference equation becomes H(z); poles inside the unit circle (|z| < 1) mean the digital filter is stable.`
+  },
   prerequisites: ['laplace-transform', 'fourier-transform', 'nyquist-sampling'],
   intro: String.raw`<p>The Z-Transform does for discrete-time (sampled) systems what Laplace does for continuous ones. It turns a sequence $x[n]$ into a function $X(z)$ of a complex variable $z$, converting linear difference equations into algebra and representing any digital filter by a rational transfer function $H(z)$ with poles and zeros in the <strong>z-plane</strong>.</p>
 <p>The pivotal geometry is the <strong>unit circle</strong> $|z|=1$: it plays the role the $j\omega$-axis played in Laplace. Poles inside it mean a stable filter; the DTFT lives on it; and the whole discrete frequency axis wraps around it once per sample rate.</p>`,
@@ -380,6 +434,26 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['convolution', 'lti', 'impulse-response', 'filtering', 'convolution-theorem'],
   summary: String.raw`Convolution is the operation that computes the output of an LTI system from its input and impulse response, and equals multiplication in the frequency domain.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 175" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-convolution" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9aa7b5"/></marker></defs>
+<rect x="12" y="35" width="96" height="36" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="60" y="58" fill="#e6edf3" text-anchor="middle">x(t) input</text>
+<rect x="12" y="100" width="96" height="36" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="60" y="123" fill="#e6edf3" text-anchor="middle">h(t) impulse resp.</text>
+<rect x="176" y="55" width="196" height="62" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="274" y="79" fill="#e6edf3" text-anchor="middle">flip h &#8594; slide by t &#8594;</text>
+<text x="274" y="99" fill="#9aa7b5" text-anchor="middle">multiply &#8594; integrate</text>
+<rect x="432" y="68" width="96" height="36" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="480" y="85" fill="#e6edf3" text-anchor="middle">y(t)=x&#8727;h</text>
+<text x="480" y="100" fill="#9aa7b5" text-anchor="middle">output</text>
+<line x1="108" y1="53" x2="174" y2="72" stroke="#9aa7b5" marker-end="url(#arr-convolution)"/>
+<line x1="108" y1="118" x2="174" y2="100" stroke="#9aa7b5" marker-end="url(#arr-convolution)"/>
+<line x1="372" y1="86" x2="430" y2="86" stroke="#9aa7b5" marker-end="url(#arr-convolution)"/>
+<text x="270" y="155" fill="#b197fc" text-anchor="middle">in frequency this is a product: X(f) H(f)</text>
+</svg>`,
+    caption: String.raw`Flip h, slide it across x, multiply and integrate at each shift to build y = x*h (a product X(f)H(f) in frequency).`
+  },
   prerequisites: ['fourier-transform', 'comm-basics'],
   intro: String.raw`<p>Convolution is the mathematical heart of linear time-invariant (LTI) systems. If you know how a system responds to a single impulse — its <strong>impulse response</strong> $h(t)$ — then convolution tells you its response to <em>any</em> input, because every input is a superposition of shifted, scaled impulses. Filtering, echo, blur, smoothing, and channel distortion are all convolutions.</p>
 <p>Its companion fact — the <strong>convolution theorem</strong>, that convolution in time equals multiplication in frequency — is why the Fourier Transform is so powerful: it converts an awkward integral into a simple product, and is the basis of fast (FFT-based) filtering.</p>`,
@@ -494,6 +568,26 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['correlation', 'autocorrelation', 'cross-correlation', 'matched-filter', 'wiener-khinchin'],
   summary: String.raw`Correlation measures the similarity between two signals as a function of relative lag, underlying matched filtering, timing/synchronization, and the link between autocorrelation and power spectrum.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 175" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-correlation" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9aa7b5"/></marker></defs>
+<rect x="12" y="35" width="96" height="36" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="60" y="58" fill="#e6edf3" text-anchor="middle">signal y(t)</text>
+<rect x="12" y="100" width="96" height="36" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="60" y="123" fill="#e6edf3" text-anchor="middle">template x(t)</text>
+<rect x="176" y="55" width="196" height="62" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="274" y="79" fill="#e6edf3" text-anchor="middle">slide by lag &#964; &#8594;</text>
+<text x="274" y="99" fill="#9aa7b5" text-anchor="middle">multiply-accumulate (no flip)</text>
+<rect x="424" y="60" width="104" height="52" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="476" y="82" fill="#e6edf3" text-anchor="middle">R_xy(&#964;)</text>
+<text x="476" y="100" fill="#9aa7b5" text-anchor="middle">peak at best lag</text>
+<line x1="108" y1="53" x2="174" y2="72" stroke="#9aa7b5" marker-end="url(#arr-correlation)"/>
+<line x1="108" y1="118" x2="174" y2="100" stroke="#9aa7b5" marker-end="url(#arr-correlation)"/>
+<line x1="372" y1="86" x2="422" y2="86" stroke="#9aa7b5" marker-end="url(#arr-correlation)"/>
+<text x="270" y="155" fill="#b197fc" text-anchor="middle">the lag of the peak = time offset / delay between the signals</text>
+</svg>`,
+    caption: String.raw`Slide the template past the signal and multiply-accumulate at each lag; the correlation peak locates the best-match offset.`
+  },
   prerequisites: ['convolution', 'fourier-transform', 'psd'],
   intro: String.raw`<p>Correlation asks "how similar are these two signals, and at what time offset are they most alike?" It slides one signal past another and, at each lag, sums the product. The lag giving the largest value tells you <em>where</em> the match is — the basis of radar ranging, GPS code acquisition, timing synchronization, and pattern detection.</p>
 <p>Correlation looks almost identical to convolution but omits the flip. Its self-version, <strong>autocorrelation</strong>, reveals a signal's periodicities and, via the Wiener–Khinchin theorem, is the Fourier partner of the power spectral density.</p>`,
@@ -605,6 +699,28 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['sampling', 'nyquist', 'reconstruction', 'sinc-interpolation', 'bandpass-sampling', 'adc'],
   summary: String.raw`The Nyquist theorem states that a bandlimited signal is perfectly recoverable from samples taken at more than twice its highest frequency.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-nyquist-sampling" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="52" width="78" height="42" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="47" y="70" fill="#e6edf3" text-anchor="middle">x(t)</text>
+<text x="47" y="86" fill="#9aa7b5" text-anchor="middle">band B</text>
+<rect x="130" y="52" width="110" height="42" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="185" y="70" fill="#e6edf3" text-anchor="middle">sample @ fs</text>
+<text x="185" y="86" fill="#9aa7b5" text-anchor="middle">fs &gt; 2B</text>
+<rect x="286" y="52" width="86" height="42" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="329" y="70" fill="#e6edf3" text-anchor="middle">x[n]</text>
+<text x="329" y="86" fill="#9aa7b5" text-anchor="middle">samples</text>
+<rect x="416" y="52" width="116" height="42" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="474" y="70" fill="#e6edf3" text-anchor="middle">sinc interp.</text>
+<text x="474" y="86" fill="#9aa7b5" text-anchor="middle">ideal LPF</text>
+<line x1="86" y1="73" x2="128" y2="73" stroke="#9aa7b5" marker-end="url(#arr-nyquist-sampling)"/>
+<line x1="240" y1="73" x2="284" y2="73" stroke="#9aa7b5" marker-end="url(#arr-nyquist-sampling)"/>
+<line x1="372" y1="73" x2="414" y2="73" stroke="#9aa7b5" marker-end="url(#arr-nyquist-sampling)"/>
+<text x="474" y="128" fill="#b197fc" text-anchor="middle">&#8594; exact x(t)</text>
+</svg>`,
+    caption: String.raw`Sampling at fs > 2B keeps the spectral copies apart, so sinc interpolation reconstructs x(t) exactly.`
+  },
   prerequisites: ['fourier-transform', 'aliasing', 'comm-basics'],
   intro: String.raw`<p>Sampling turns a continuous signal into a sequence of numbers a computer can process. The <strong>Nyquist–Shannon sampling theorem</strong> answers the crucial question: how fast must we sample to lose nothing? The answer — sample faster than twice the highest frequency — is the foundation of all digital audio, communications, and instrumentation.</p>
 <p>Get it right and reconstruction is <em>exact</em>; get it wrong and high frequencies masquerade as low ones (aliasing), an error no later processing can undo. This single inequality, $f_s>2B$, governs the design of every ADC and anti-alias filter.</p>`,
@@ -707,6 +823,24 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['aliasing', 'folding', 'undersampling', 'anti-alias', 'wagon-wheel', 'sampling'],
   summary: String.raw`Aliasing is the irreversible mixing that occurs when a signal is sampled too slowly, causing frequencies above the Nyquist limit to masquerade as lower ones.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-aliasing" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9aa7b5"/></marker></defs>
+<rect x="12" y="52" width="120" height="44" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="72" y="70" fill="#e6edf3" text-anchor="middle">high-f tone</text>
+<text x="72" y="86" fill="#9aa7b5" text-anchor="middle">f_in &gt; fs/2</text>
+<rect x="196" y="46" width="148" height="56" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="270" y="69" fill="#e6edf3" text-anchor="middle">under-sampler fs</text>
+<text x="270" y="90" fill="#9aa7b5" text-anchor="middle">fold about fs/2</text>
+<rect x="408" y="52" width="120" height="44" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="468" y="70" fill="#e6edf3" text-anchor="middle">low-f alias</text>
+<text x="468" y="86" fill="#9aa7b5" text-anchor="middle">|f_in &#8722; k&#183;fs|</text>
+<line x1="132" y1="74" x2="194" y2="74" stroke="#9aa7b5" marker-end="url(#arr-aliasing)"/>
+<line x1="344" y1="74" x2="406" y2="74" stroke="#9aa7b5" marker-end="url(#arr-aliasing)"/>
+<text x="270" y="132" fill="#b197fc" text-anchor="middle">irreversible: the alias is indistinguishable from a real low-f tone</text>
+</svg>`,
+    caption: String.raw`An under-sampler folds a tone above fs/2 down to a lower alias frequency that can never be separated afterward.`
+  },
   prerequisites: ['nyquist-sampling', 'fourier-transform'],
   intro: String.raw`<p>Aliasing is the dark side of sampling. When a signal contains frequencies above the Nyquist frequency $f_s/2$, those components do not simply disappear — they <em>fold</em> back and impersonate lower frequencies, corrupting the samples permanently. The name comes from the fact that a high frequency acquires a false "alias" identity at a lower frequency.</p>
 <p>Understanding exactly which frequency a given input aliases to, and how to prevent it, is essential for anyone designing a sampled system. Unlike most errors, aliasing cannot be undone after sampling — so it must be stopped before the ADC.</p>`,

@@ -6,6 +6,20 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['DFT', 'FFT', 'Cooley-Tukey', 'spectrum', 'butterfly', 'twiddle', 'windowing'],
   summary: String.raw`The FFT is a family of fast algorithms that compute the Discrete Fourier Transform in $O(N\log N)$ operations instead of the direct $O(N^2)$, by recursively splitting the sum into even- and odd-indexed subsequences.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 175" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-fft" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="60" width="86" height="50" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="51" y="82" fill="#e6edf3" text-anchor="middle">N samples</text><text x="51" y="97" fill="#9aa7b5" text-anchor="middle" font-size="10">x[n]</text>
+<rect x="126" y="55" width="96" height="60" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="174" y="78" fill="#e6edf3" text-anchor="middle" font-size="11">split even/odd</text><text x="174" y="94" fill="#9aa7b5" text-anchor="middle" font-size="10">E[k], O[k]</text><text x="174" y="107" fill="#9aa7b5" text-anchor="middle" font-size="10">log₂N stages</text>
+<rect x="254" y="55" width="110" height="60" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="309" y="78" fill="#e6edf3" text-anchor="middle" font-size="11">butterflies</text><text x="309" y="93" fill="#9aa7b5" text-anchor="middle" font-size="10">E ± Wₙᵏ·O</text><text x="309" y="106" fill="#ffa94d" text-anchor="middle" font-size="10">N/2 · log₂N</text>
+<rect x="396" y="60" width="96" height="50" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="444" y="82" fill="#e6edf3" text-anchor="middle" font-size="11">N bins</text><text x="444" y="97" fill="#9aa7b5" text-anchor="middle" font-size="10">X[k]</text>
+<text x="270" y="150" fill="#b197fc" text-anchor="middle" font-size="11">O(N log N) vs direct O(N²)</text>
+<line x1="94" y1="85" x2="124" y2="85" stroke="#9aa7b5" marker-end="url(#arr-fft)"/>
+<line x1="222" y1="85" x2="252" y2="85" stroke="#9aa7b5" marker-end="url(#arr-fft)"/>
+<line x1="364" y1="85" x2="394" y2="85" stroke="#9aa7b5" marker-end="url(#arr-fft)"/>
+</svg>`,
+    caption: String.raw`FFT mechanism: $N$ samples are recursively split into even/odd subsequences and recombined by radix-2 butterflies ($E\pm W_N^k O$), yielding $N$ frequency bins in $O(N\log N)$.`,
+  },
   prerequisites: ['fourier-transform', 'convolution', 'nyquist-sampling', 'frequency-spectrum'],
   intro: String.raw`<p>The <b>Discrete Fourier Transform (DFT)</b> takes $N$ samples of a signal in time and produces $N$ complex numbers describing the amplitude and phase of $N$ evenly-spaced frequency bins. It is the workhorse of digital spectral analysis: every spectrum analyzer display, every OFDM modem, every audio equalizer, and every fast convolution engine rests on it.</p>
 <p>The problem is that the DFT, computed straight from its definition, costs on the order of $N^2$ complex multiply-adds. For $N=1024$ that is about a million operations; for $N=10^6$ it is $10^{12}$ — hopelessly slow in real time. The <b>Fast Fourier Transform (FFT)</b> is not a different transform; it computes <i>exactly</i> the same DFT, but exploits deep symmetry in the twiddle factors to reduce the cost to $O(N\log N)$. For $N=1024$ that is roughly $10^4$ operations — a hundredfold speed-up, and the gap widens without bound as $N$ grows. This single algorithmic insight, popularized by Cooley and Tukey in 1965, is arguably the most important numerical algorithm of the 20th century.</p>`,
@@ -182,6 +196,24 @@ $$ \sum_n |x[n]|^2=\sum_n x[n]\overline{x[n]}=\sum_n x[n]\cdot\frac1N\sum_k \ove
   category: 'Signals & Systems',
   tags: ['FIR', 'linear phase', 'convolution', 'taps', 'windowed sinc', 'Parks-McClellan', 'group delay'],
   summary: String.raw`A Finite Impulse Response filter computes its output as a weighted sum of a finite window of past inputs, $y[n]=\sum_k b_k\,x[n-k]$, making it inherently stable and capable of exactly linear phase.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-fir-filters" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<text x="30" y="40" fill="#e6edf3" text-anchor="middle">x[n]</text>
+<line x1="20" y1="50" x2="500" y2="50" stroke="#9aa7b5" marker-end="url(#arr-fir-filters)"/>
+<rect x="120" y="36" width="34" height="28" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="137" y="55" fill="#e6edf3" text-anchor="middle" font-size="10">z⁻¹</text>
+<rect x="240" y="36" width="34" height="28" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="257" y="55" fill="#e6edf3" text-anchor="middle" font-size="10">z⁻¹</text>
+<rect x="360" y="36" width="34" height="28" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="377" y="55" fill="#e6edf3" text-anchor="middle" font-size="10">z⁻¹</text>
+<line x1="60" y1="50" x2="60" y2="95" stroke="#9aa7b5" marker-end="url(#arr-fir-filters)"/><text x="60" y="88" fill="#63e6be" text-anchor="middle" font-size="10">×b₀</text>
+<line x1="180" y1="50" x2="180" y2="95" stroke="#9aa7b5" marker-end="url(#arr-fir-filters)"/><text x="180" y="88" fill="#63e6be" text-anchor="middle" font-size="10">×b₁</text>
+<line x1="300" y1="50" x2="300" y2="95" stroke="#9aa7b5" marker-end="url(#arr-fir-filters)"/><text x="300" y="88" fill="#63e6be" text-anchor="middle" font-size="10">×b₂</text>
+<line x1="420" y1="50" x2="420" y2="95" stroke="#9aa7b5" marker-end="url(#arr-fir-filters)"/><text x="425" y="88" fill="#63e6be" text-anchor="middle" font-size="10">×b_{N-1}</text>
+<rect x="40" y="100" width="400" height="34" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="240" y="121" fill="#e6edf3" text-anchor="middle">Σ  (sum of weighted taps)</text>
+<line x1="440" y1="117" x2="500" y2="117" stroke="#9aa7b5" marker-end="url(#arr-fir-filters)"/><text x="490" y="110" fill="#e6edf3" text-anchor="middle">y[n]</text>
+<text x="240" y="160" fill="#b197fc" text-anchor="middle" font-size="11">feed-forward only — no feedback ⇒ always stable, linear phase</text>
+</svg>`,
+    caption: String.raw`FIR structure: a tapped delay line ($z^{-1}$) scales each delayed input by $b_k$ and sums them — purely feed-forward, giving $y[n]=\sum_k b_k x[n-k]$.`,
+  },
   prerequisites: ['convolution', 'z-transform', 'sinc-function', 'frequency-spectrum'],
   intro: String.raw`<p>A <b>Finite Impulse Response (FIR)</b> filter builds each output sample from a fixed-length weighted sum of recent input samples — nothing else. Its impulse response is exactly the list of weights (the <b>taps</b>) and lasts only as long as that list: hit it with a single impulse and after $N$ samples the output is dead silent. There is no feedback, so a bounded input can never blow up: <b>every FIR filter is stable</b>, full stop.</p>
 <p>The property that makes FIR filters beloved in communications is <b>exactly linear phase</b>. If the taps are symmetric, every frequency is delayed by the same constant time, so the waveform's shape is preserved — no phase distortion, no smearing of pulse edges, no inter-symbol interference introduced by the filter itself. The price is length: to get a sharp transition band an FIR may need dozens or hundreds of taps, meaning more multiplies per sample and more latency than a comparable IIR filter. FIR filters are the default choice whenever waveform fidelity matters more than raw efficiency: pulse shaping, matched filtering, channelization, and decimation/interpolation.</p>`,
@@ -332,6 +364,25 @@ $$ H(e^{j\omega})=e^{-j\omega M}\Big[b_M+\sum_{m=1}^{M}2b_{M+m}\cos(\omega m)\Bi
   category: 'Signals & Systems',
   tags: ['IIR', 'recursive', 'poles', 'stability', 'Butterworth', 'Chebyshev', 'elliptic', 'biquad'],
   summary: String.raw`An Infinite Impulse Response filter feeds past outputs back into the computation, giving a recursive difference equation whose transfer function $H(z)=B(z)/A(z)$ has poles that must lie inside the unit circle for stability.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 185" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-iir-filters" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<text x="30" y="55" fill="#e6edf3" text-anchor="middle">x[n]</text>
+<line x1="48" y1="55" x2="196" y2="55" stroke="#9aa7b5" marker-end="url(#arr-iir-filters)"/><text x="120" y="46" fill="#63e6be" text-anchor="middle" font-size="10">Σ bₖ x[n−k]</text>
+<circle cx="215" cy="55" r="16" fill="#1c232e" stroke="#ffa94d"/><text x="215" y="60" fill="#e6edf3" text-anchor="middle" font-size="14">Σ</text>
+<line x1="231" y1="55" x2="360" y2="55" stroke="#9aa7b5" marker-end="url(#arr-iir-filters)"/>
+<rect x="360" y="40" width="80" height="30" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="400" y="60" fill="#e6edf3" text-anchor="middle" font-size="11">output y[n]</text>
+<line x1="440" y1="55" x2="510" y2="55" stroke="#9aa7b5" marker-end="url(#arr-iir-filters)"/><text x="500" y="46" fill="#e6edf3" text-anchor="middle">y[n]</text>
+<line x1="400" y1="70" x2="400" y2="120" stroke="#b197fc"/>
+<rect x="300" y="112" width="60" height="30" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="330" y="132" fill="#e6edf3" text-anchor="middle" font-size="10">z⁻¹ ·aₖ</text>
+<line x1="400" y1="127" x2="362" y2="127" stroke="#b197fc"/>
+<line x1="300" y1="127" x2="215" y2="127" stroke="#b197fc"/>
+<line x1="215" y1="127" x2="215" y2="73" stroke="#b197fc" marker-end="url(#arr-iir-filters)"/>
+<text x="255" y="160" fill="#b197fc" text-anchor="middle" font-size="11">feedback loop: −Σ aₖ y[n−k]</text>
+<text x="255" y="176" fill="#9aa7b5" text-anchor="middle" font-size="10">poles must lie inside |z|&lt;1 for stability</text>
+</svg>`,
+    caption: String.raw`IIR structure: feed-forward inputs sum at $\Sigma$, then delayed, scaled past outputs ($z^{-1}\cdot a_k$) are fed back — the feedback loop that gives an infinite response and demands poles inside the unit circle.`,
+  },
   prerequisites: ['z-transform', 'laplace-transform', 'fir-filters', 'convolution'],
   intro: String.raw`<p>An <b>Infinite Impulse Response (IIR)</b> filter computes each output from a weighted sum of past <i>inputs</i> <b>and</b> past <i>outputs</i>. That feedback path is the whole story: it lets a handful of coefficients create a response that, in principle, rings on forever — an <i>infinite</i> impulse response. The same feedback that gives IIR its efficiency also gives it its dangers: poles that can escape the unit circle and make the filter unstable, and a phase response that is inherently nonlinear.</p>
 <p>The payoff is dramatic economy. A recursive filter of order 4–8 can achieve a transition sharpness that would demand a hundred or more FIR taps. IIR filters are the digital cousins of the classic analog prototypes — <b>Butterworth</b>, <b>Chebyshev</b>, <b>elliptic</b> — and are typically designed by warping an analog design into the digital domain with the <b>bilinear transform</b>. They are implemented as cascades of second-order <b>biquad</b> sections to keep the arithmetic well-conditioned. Choose IIR when computational efficiency, low order, and steep roll-off matter more than exact phase linearity — the mirror image of the FIR trade-off.</p>`,

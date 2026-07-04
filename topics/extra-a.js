@@ -6,6 +6,23 @@ CONTENT.topics.push(
   category: 'Fundamentals',
   tags: ['information theory', 'capacity', 'entropy', 'SNR', 'Shannon-Hartley', 'spectral efficiency'],
   summary: String.raw`Shannon's channel model and capacity theorem set the ultimate limit on error-free data rate, given by $C = B\log_2(1+\mathrm{SNR})$ bits per second.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-shannon" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="55" width="70" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="43" y="79" fill="#e6edf3" text-anchor="middle">Source</text>
+<rect x="108" y="55" width="86" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="151" y="74" fill="#e6edf3" text-anchor="middle">Encoder</text><text x="151" y="88" fill="#9aa7b5" text-anchor="middle" font-size="10">compress+FEC</text>
+<rect x="224" y="45" width="110" height="60" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="279" y="66" fill="#e6edf3" text-anchor="middle">Noisy channel</text><text x="279" y="88" fill="#ffa94d" text-anchor="middle" font-size="11">C=B·log₂(1+SNR)</text>
+<rect x="364" y="55" width="86" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="407" y="79" fill="#e6edf3" text-anchor="middle">Decoder</text>
+<rect x="480" y="55" width="52" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="506" y="79" fill="#e6edf3" text-anchor="middle">Sink</text>
+<text x="279" y="34" fill="#b197fc" text-anchor="middle" font-size="11">+ noise (N₀B)</text>
+<line x1="78" y1="75" x2="106" y2="75" stroke="#9aa7b5" marker-end="url(#arr-shannon)"/>
+<line x1="194" y1="75" x2="222" y2="75" stroke="#9aa7b5" marker-end="url(#arr-shannon)"/>
+<line x1="334" y1="75" x2="362" y2="75" stroke="#9aa7b5" marker-end="url(#arr-shannon)"/>
+<line x1="450" y1="75" x2="478" y2="75" stroke="#9aa7b5" marker-end="url(#arr-shannon)"/>
+<line x1="279" y1="45" x2="279" y2="40" stroke="#b197fc" marker-end="url(#arr-shannon)"/>
+</svg>`,
+    caption: String.raw`Shannon's channel model: source coded and protected, sent through a noisy channel of capacity $C=B\log_2(1+\mathrm{SNR})$, then decoded to the sink.`,
+  },
   prerequisites: ['comm-basics', 'noise', 'psd'],
   intro: String.raw`<p>In 1948 Claude Shannon founded information theory with a single, astonishing claim: every noisy channel has a finite number — its <b>capacity</b> $C$ — such that reliable (arbitrarily low error) communication is possible at any rate below $C$ and impossible above it. Before Shannon, engineers believed that noise forced an unavoidable trade: to get fewer errors you had to slow down without bound. Shannon proved instead that as long as you stay under $C$, you can drive the error probability to zero by clever coding. This page builds the channel model, defines information and entropy, and derives the celebrated <b>Shannon–Hartley</b> formula $C=B\log_2(1+\mathrm{SNR})$ from first principles.</p>`,
   sections: [
@@ -200,6 +217,18 @@ CONTENT.topics.push(
   category: 'Fundamentals',
   tags: ['compression', 'entropy', 'Huffman', 'prefix code', 'lossless', 'lossy', 'redundancy'],
   summary: String.raw`Source coding compresses data by removing redundancy; the entropy $H=-\sum p\log_2 p$ is the hard limit on average bits per symbol for lossless compression.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-source-coding" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="50" width="120" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="68" y="70" fill="#e6edf3" text-anchor="middle">Symbols</text><text x="68" y="86" fill="#9aa7b5" text-anchor="middle" font-size="10">fixed 8 bits each</text>
+<rect x="176" y="45" width="150" height="56" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="251" y="66" fill="#e6edf3" text-anchor="middle">Entropy coder</text><text x="251" y="82" fill="#9aa7b5" text-anchor="middle" font-size="10">Huffman: freq→short</text><text x="251" y="95" fill="#ffa94d" text-anchor="middle" font-size="10">L̄ ≥ H</text>
+<rect x="374" y="50" width="120" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="434" y="70" fill="#e6edf3" text-anchor="middle">Fewer bits</text><text x="434" y="86" fill="#9aa7b5" text-anchor="middle" font-size="10">→ toward H bits</text>
+<text x="251" y="130" fill="#b197fc" text-anchor="middle" font-size="11">compression ratio CR = 8 / H̄</text>
+<line x1="128" y1="73" x2="174" y2="73" stroke="#9aa7b5" marker-end="url(#arr-source-coding)"/>
+<line x1="326" y1="73" x2="372" y2="73" stroke="#9aa7b5" marker-end="url(#arr-source-coding)"/>
+</svg>`,
+    caption: String.raw`Source coding: redundant symbols pass through an entropy (Huffman) coder that assigns short codes to frequent symbols, shrinking the stream toward the entropy floor $H$.`,
+  },
   prerequisites: ['comm-basics', 'shannon'],
   intro: String.raw`<p><b>Source coding</b> — data compression — is the first processing stage in Shannon's model. Its job is to represent a message with as few bits as possible by stripping out <b>redundancy</b>: the predictable, repetitive, or perceptually irrelevant parts. Shannon's source-coding theorem sets a precise floor — the <b>entropy</b> $H$ — that no lossless coder can beat on average, and Huffman coding gets essentially all the way there. This page builds entropy as the compression limit, constructs prefix and Huffman codes, and separates lossless from lossy compression, with ZIP, JPEG, and MP3 as running examples.</p>`,
   sections: [
@@ -375,6 +404,24 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['sinc', 'Fourier transform', 'sampling', 'reconstruction', 'pulse shaping', 'Gibbs'],
   summary: String.raw`The sinc function $\mathrm{sinc}(x)=\sin(\pi x)/(\pi x)$ is the Fourier transform of a rectangle and the ideal interpolation kernel for reconstructing sampled signals.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-sinc-function" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#b197fc"/></marker></defs>
+<text x="120" y="24" fill="#9aa7b5" text-anchor="middle" font-size="11">frequency domain</text>
+<rect x="40" y="80" width="70" height="50" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="120" y="112" fill="#e6edf3" text-anchor="middle" font-size="11">rect (box)</text>
+<line x1="40" y1="130" x2="200" y2="130" stroke="#9aa7b5"/>
+<text x="420" y="24" fill="#9aa7b5" text-anchor="middle" font-size="11">time domain</text>
+<path d="M330,130 Q345,130 352,110 Q360,60 370,60 Q380,60 388,110 Q395,130 410,130 Q425,130 432,118 Q440,105 448,118 Q455,130 470,130 Q485,130 492,122 Q498,116 505,122" fill="none" stroke="#63e6be" stroke-width="1.5"/>
+<line x1="330" y1="130" x2="510" y2="130" stroke="#9aa7b5"/>
+<text x="420" y="150" fill="#e6edf3" text-anchor="middle" font-size="11">sinc</text>
+<line x1="215" y1="105" x2="320" y2="105" stroke="#b197fc" marker-end="url(#arr-sinc-function)"/>
+<line x1="320" y1="115" x2="215" y2="115" stroke="#b197fc" marker-end="url(#arr-sinc-function)"/>
+<text x="267" y="95" fill="#ffa94d" text-anchor="middle" font-size="14">↔</text>
+<text x="267" y="135" fill="#9aa7b5" text-anchor="middle" font-size="10">Fourier dual</text>
+</svg>`,
+    caption: String.raw`Fourier duality: a rectangle (brick-wall box) in one domain transforms to a sinc in the other — the rect$\leftrightarrow$sinc pair.`,
+  },
   prerequisites: ['fourier-transform', 'nyquist-sampling', 'convolution'],
   intro: String.raw`<p>The <b>sinc function</b> is the single most important shape in signal processing. It is the Fourier transform of a rectangular pulse, the impulse response of an ideal low-pass filter, and the interpolation kernel that perfectly reconstructs a band-limited signal from its samples. Wherever a signal is band-limited or a spectrum is brick-wall flat, a sinc appears in the other domain. This page defines it, maps its zeros and lobes, proves the rectangle↔sinc transform pair, and shows its central role in sampling, reconstruction, pulse shaping, and the Gibbs phenomenon.</p>`,
   sections: [
@@ -538,6 +585,26 @@ CONTENT.topics.push(
   category: 'Signals & Systems',
   tags: ['spectrum', 'Fourier', 'amplitude', 'phase', 'PSD', 'bandwidth', 'spectrum analyzer'],
   summary: String.raw`A frequency spectrum shows how a signal's energy is distributed over frequency — its amplitude and phase versus frequency — and is the Fourier-domain view of a time signal.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-frequency-spectrum" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="8" y="70" width="90" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="53" y="90" fill="#e6edf3" text-anchor="middle">Signal</text><text x="53" y="105" fill="#9aa7b5" text-anchor="middle" font-size="10">x(t)</text>
+<path d="M18,93 Q28,78 38,93 Q48,108 58,93 Q68,78 78,93 Q83,101 88,93" fill="none" stroke="#63e6be" stroke-width="1.2"/>
+<rect x="150" y="65" width="140" height="56" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="220" y="88" fill="#e6edf3" text-anchor="middle">Fourier analyzer</text><text x="220" y="104" fill="#9aa7b5" text-anchor="middle" font-size="10">X(f)=∫x(t)e^{−j2πft}dt</text>
+<rect x="342" y="55" width="190" height="90" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+<text x="437" y="72" fill="#e6edf3" text-anchor="middle" font-size="11">amplitude vs frequency</text>
+<line x1="360" y1="130" x2="520" y2="130" stroke="#9aa7b5"/>
+<line x1="360" y1="130" x2="360" y2="82" stroke="#9aa7b5"/>
+<line x1="390" y1="130" x2="390" y2="95" stroke="#ffa94d" stroke-width="2"/>
+<line x1="430" y1="130" x2="430" y2="82" stroke="#ffa94d" stroke-width="2"/>
+<line x1="470" y1="130" x2="470" y2="110" stroke="#ffa94d" stroke-width="2"/>
+<line x1="500" y1="130" x2="500" y2="118" stroke="#ffa94d" stroke-width="2"/>
+<text x="437" y="142" fill="#9aa7b5" text-anchor="middle" font-size="9">f →</text>
+<line x1="98" y1="93" x2="148" y2="93" stroke="#9aa7b5" marker-end="url(#arr-frequency-spectrum)"/>
+<line x1="290" y1="93" x2="340" y2="93" stroke="#9aa7b5" marker-end="url(#arr-frequency-spectrum)"/>
+</svg>`,
+    caption: String.raw`A time signal passes through a Fourier analyzer to reveal its spectrum — amplitude (and phase) plotted against frequency as spectral lines.`,
+  },
   prerequisites: ['fourier-transform', 'sinc-function', 'psd'],
   intro: String.raw`<p>A signal can be viewed two ways: as a <b>waveform</b> (amplitude versus time) or as a <b>spectrum</b> (content versus frequency). The spectrum answers "which frequencies are present, how strong, and in what phase?" It is the Fourier transform made visible, and it is how engineers read bandwidth, harmonics, noise, and interference. This page defines amplitude and phase spectra, distinguishes line from continuous and one-sided from two-sided spectra, connects the spectrum to the Fourier transform and power spectral density, and explains how to read a spectrum analyzer display.</p>`,
   sections: [

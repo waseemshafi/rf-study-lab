@@ -6,6 +6,28 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['ISI', 'Nyquist', 'raised cosine', 'RRC', 'roll-off', 'bandwidth'],
   summary: String.raw`Pulse shaping designs the transmitted symbol waveform so the signal fits a bandwidth mask while producing zero intersymbol interference at the sampling instants.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-pulse-shaping" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <text x="40" y="30" fill="#e6edf3" text-anchor="middle">symbols</text>
+  <text x="40" y="46" fill="#9aa7b5" text-anchor="middle">a_k</text>
+  <line x1="70" y1="55" x2="120" y2="55" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-pulse-shaping)"/>
+  <rect x="122" y="35" width="120" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="182" y="52" fill="#e6edf3" text-anchor="middle">RRC / raised-</text>
+  <text x="182" y="67" fill="#e6edf3" text-anchor="middle">cosine filter p(t)</text>
+  <line x1="242" y1="55" x2="292" y2="55" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-pulse-shaping)"/>
+  <rect x="294" y="35" width="130" height="40" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="359" y="52" fill="#e6edf3" text-anchor="middle">bandlimited</text>
+  <text x="359" y="67" fill="#e6edf3" text-anchor="middle">waveform s(t)</text>
+  <line x1="424" y1="55" x2="474" y2="55" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-pulse-shaping)"/>
+  <text x="505" y="52" fill="#ffa94d" text-anchor="middle">ISI-free</text>
+  <text x="505" y="67" fill="#9aa7b5" text-anchor="middle">at kT</text>
+  <text x="182" y="105" fill="#9aa7b5" text-anchor="middle">B = (1+&#946;)R_s/2</text>
+  <text x="359" y="105" fill="#9aa7b5" text-anchor="middle">p(kT)=&#948;_{k0}</text>
+  <text x="270" y="135" fill="#b197fc" text-anchor="middle">convolution: s(t) = &#931;_k a_k &#183; p(t &#8722; kT)</text>
+</svg>`,
+    caption: String.raw`Symbol impulses are convolved with an RRC/raised-cosine filter to produce a bandlimited, ISI-free waveform.`
+  },
   prerequisites: ['comm-basics', 'nyquist-sampling', 'fourier-transform', 'convolution'],
   intro: String.raw`<p>Digital symbols are abstract numbers, but a radio must send continuous waveforms of finite bandwidth. If we naively transmit rectangular pulses of duration $T$, their spectrum is a $\text{sinc}$ that spreads energy across an infinite band — unacceptable when channels are packed side by side. If instead we brick-wall filter to a narrow band, the pulses smear in time and each symbol bleeds into its neighbours, producing <em>intersymbol interference (ISI)</em>. Pulse shaping resolves this tension: it band-limits the signal <strong>and</strong> guarantees that, at the correct sampling instants, every symbol except the current one contributes exactly zero. This is the practical embodiment of Nyquist's ISI criterion, realised most often by the raised-cosine and root-raised-cosine families.</p>`,
   sections: [
@@ -170,6 +192,29 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['eye', 'ISI', 'jitter', 'timing margin', 'PAM', 'diagnostics'],
   summary: String.raw`An eye diagram overlays many symbol-period traces of a received signal to reveal ISI, noise margin, timing jitter and the optimal sampling instant at a glance.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-eye-diagram" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <text x="45" y="60" fill="#e6edf3" text-anchor="middle">rx</text>
+  <text x="45" y="76" fill="#e6edf3" text-anchor="middle">waveform</text>
+  <line x1="90" y1="68" x2="132" y2="68" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-eye-diagram)"/>
+  <rect x="134" y="48" width="120" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="194" y="65" fill="#e6edf3" text-anchor="middle">overlay each</text>
+  <text x="194" y="80" fill="#e6edf3" text-anchor="middle">symbol period T</text>
+  <line x1="254" y1="68" x2="296" y2="68" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-eye-diagram)"/>
+  <rect x="300" y="20" width="220" height="130" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <path d="M310,35 C350,35 350,80 410,80 C470,80 470,35 510,35" fill="none" stroke="#9aa7b5" stroke-width="1.3"/>
+  <path d="M310,125 C350,125 350,80 410,80 C470,80 470,125 510,125" fill="none" stroke="#9aa7b5" stroke-width="1.3"/>
+  <line x1="410" y1="42" x2="410" y2="118" stroke="#ffa94d" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <line x1="404" y1="55" x2="416" y2="55" stroke="#ffa94d" stroke-width="1.5"/>
+  <line x1="404" y1="105" x2="416" y2="105" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="410" y="16" fill="#ffa94d" text-anchor="middle">sampling instant</text>
+  <text x="470" y="84" fill="#b197fc" text-anchor="middle">opening</text>
+  <text x="470" y="98" fill="#b197fc" text-anchor="middle">= margin</text>
+  <text x="410" y="168" fill="#9aa7b5" text-anchor="middle">height &#8776; noise margin, width &#8776; timing margin</text>
+</svg>`,
+    caption: String.raw`Overlaying every symbol period forms the eye; its opening gives the noise/timing margin at the optimal sampling instant.`
+  },
   prerequisites: ['pulse-shaping', 'comm-basics', 'noise'],
   intro: String.raw`<p>The eye diagram is the oscilloscope of digital communications. Take the recovered baseband waveform, slice it into segments one (or two) symbol periods long, and overlay them all on the same time axis. Random data means every possible symbol transition is superimposed, and the persistence forms a shape with a central open region — the "eye". A wide-open eye means clean, easily-detected symbols; a closing eye means ISI, noise and jitter are eating the margins. Because it collapses timing, amplitude and distortion information into one picture, the eye diagram is the fastest qualitative diagnostic a communications engineer has.</p>`,
   sections: [
@@ -323,6 +368,29 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['BER', 'SER', 'Q-function', 'waterfall', 'coding', 'EVM'],
   summary: String.raw`Bit error rate is the fraction of received bits that are wrong, the fundamental figure of merit that ties modulation choice, Eb/N0, coding and channel together.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-ber" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <text x="38" y="52" fill="#e6edf3" text-anchor="middle">rx</text>
+  <text x="38" y="68" fill="#e6edf3" text-anchor="middle">signal</text>
+  <line x1="66" y1="60" x2="100" y2="60" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-ber)"/>
+  <rect x="102" y="40" width="96" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="150" y="57" fill="#e6edf3" text-anchor="middle">matched</text>
+  <text x="150" y="72" fill="#e6edf3" text-anchor="middle">filter</text>
+  <line x1="198" y1="60" x2="230" y2="60" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-ber)"/>
+  <rect x="232" y="40" width="100" height="40" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="282" y="57" fill="#e6edf3" text-anchor="middle">threshold</text>
+  <text x="282" y="72" fill="#e6edf3" text-anchor="middle">decision</text>
+  <line x1="332" y1="60" x2="364" y2="60" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-ber)"/>
+  <rect x="366" y="40" width="108" height="40" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="420" y="57" fill="#e6edf3" text-anchor="middle">compare vs</text>
+  <text x="420" y="72" fill="#e6edf3" text-anchor="middle">sent bits</text>
+  <line x1="474" y1="60" x2="506" y2="60" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-ber)"/>
+  <text x="282" y="115" fill="#b197fc" text-anchor="middle">BER = (bit errors) / (total bits)</text>
+  <text x="420" y="115" fill="#9aa7b5" text-anchor="middle">error count</text>
+</svg>`,
+    caption: String.raw`The receiver matched-filters, makes a threshold decision, and compares to the sent bits: BER = errors/total.`
+  },
   prerequisites: ['bpsk', 'noise', 'eb-no', 'comm-basics'],
   intro: String.raw`<p>Bit error rate (BER) is the single most important performance number in digital communications: of all the bits sent, what fraction arrive wrong? It is the currency in which every design decision is paid — modulation order, transmit power, coding, bandwidth, and receiver quality all ultimately show up as a point on a BER-versus-$E_b/N_0$ curve. A well-designed link targets a BER low enough (e.g. $10^{-6}$ raw, or $10^{-12}$ after coding) that the application sees essentially error-free data. Understanding BER means understanding the Q-function relationships for each modulation, the "waterfall" shape of the curves, how coding shifts them, and how many bits you must actually observe to measure a small BER with confidence.</p>`,
   sections: [
@@ -490,6 +558,29 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['Eb/N0', 'SNR', 'Shannon', 'spectral efficiency', 'link budget'],
   summary: String.raw`Eb/N0 is the energy per information bit divided by the noise power spectral density, the normalized, modulation-fair metric against which BER performance is measured.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-eb-no" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="14" y="42" width="70" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="49" y="66" fill="#e6edf3" text-anchor="middle">Tx</text>
+  <line x1="84" y1="62" x2="120" y2="62" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-eb-no)"/>
+  <rect x="122" y="42" width="110" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="177" y="59" fill="#e6edf3" text-anchor="middle">channel</text>
+  <text x="177" y="74" fill="#9aa7b5" text-anchor="middle">+ N_0</text>
+  <line x1="232" y1="62" x2="268" y2="62" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-eb-no)"/>
+  <rect x="270" y="42" width="70" height="40" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="305" y="66" fill="#e6edf3" text-anchor="middle">Rx</text>
+  <line x1="305" y1="82" x2="305" y2="104" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-eb-no)"/>
+  <rect x="240" y="106" width="130" height="38" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="305" y="130" fill="#e6edf3" text-anchor="middle">E_b/N_0</text>
+  <line x1="370" y1="125" x2="404" y2="125" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-eb-no)"/>
+  <rect x="406" y="106" width="126" height="38" rx="6" fill="#1c232e" stroke="#b197fc" stroke-width="1.5"/>
+  <text x="469" y="124" fill="#e6edf3" text-anchor="middle">Q(&#8730;(2E_b/N_0))</text>
+  <text x="469" y="138" fill="#9aa7b5" text-anchor="middle">&#8594; BER</text>
+  <text x="270" y="26" fill="#9aa7b5" text-anchor="middle">E_b/N_0 = SNR &#183; B/R_b</text>
+</svg>`,
+    caption: String.raw`Tx through a noisy channel to Rx; the resulting Eb/N0 feeds Q(&#8730;(2Eb/N0)) to predict BER.`
+  },
   prerequisites: ['noise', 'ber', 'comm-basics', 'psd'],
   intro: String.raw`<p>$E_b/N_0$ ("ebno") is the great equaliser of digital communications. Raw signal-to-noise ratio (SNR) mixes together the effects of bandwidth, symbol rate and modulation order, making it impossible to compare, say, BPSK against 64-QAM fairly. $E_b/N_0$ strips those out by normalising to the <em>energy carried by one information bit</em> against the <em>noise density per hertz</em>. The result is a dimensionless ratio that lets every modulation be plotted on the same axis, that reveals the ultimate Shannon limit of $-1.59$ dB, and that ties directly to the BER waterfall curves. If SNR is what a spectrum analyser shows, $E_b/N_0$ is what the theory is written in.</p>`,
   sections: [

@@ -6,6 +6,32 @@ CONTENT.topics.push(
     category: 'Spread Spectrum & Coding',
     tags: ['convolutional', 'FEC', 'trellis', 'Viterbi', 'constraint length', 'free distance', 'puncturing', 'generator polynomials'],
     summary: String.raw`A convolutional code encodes a continuous data stream by sliding it through a shift register and forming output bits as modulo-2 sums tapped off by generator polynomials, producing structured redundancy whose memory is decoded on a trellis by the Viterbi or BCJR algorithm.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-convolutional-codes" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<text x="12" y="20" fill="#e6edf3">rate 1/2, K=3 encoder &#8212; generators (7,5)&#8323;</text>
+<line x1="14" y1="72" x2="60" y2="72" stroke="#9aa7b5" marker-end="url(#arr-convolutional-codes)"/>
+<text x="10" y="66" fill="#9aa7b5">u</text>
+<rect x="62" y="56" width="60" height="32" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="74" y="76" fill="#e6edf3">D&#8321;</text>
+<rect x="150" y="56" width="60" height="32" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="162" y="76" fill="#e6edf3">D&#8322;</text>
+<line x1="122" y1="72" x2="150" y2="72" stroke="#9aa7b5" marker-end="url(#arr-convolutional-codes)"/>
+<text x="70" y="46" fill="#9aa7b5">s&#8321;</text><text x="158" y="46" fill="#9aa7b5">s&#8322;</text>
+<circle cx="300" cy="128" r="12" fill="#1c232e" stroke="#63e6be"/><text x="295" y="132" fill="#e6edf3">&#8853;</text>
+<circle cx="380" cy="128" r="12" fill="#1c232e" stroke="#ffa94d"/><text x="375" y="132" fill="#e6edf3">&#8853;</text>
+<path d="M40,72 L40,110 L288,110 L288,120" fill="none" stroke="#63e6be" marker-end="url(#arr-convolutional-codes)"/>
+<path d="M92,88 L92,128 L288,128" fill="none" stroke="#63e6be" marker-end="url(#arr-convolutional-codes)"/>
+<path d="M180,88 L180,148 L300,148 L300,140" fill="none" stroke="#63e6be" marker-end="url(#arr-convolutional-codes)"/>
+<path d="M40,72 L40,168 L368,168 L368,138" fill="none" stroke="#ffa94d" marker-end="url(#arr-convolutional-codes)"/>
+<path d="M180,88 L180,188 L380,188 L380,140" fill="none" stroke="#ffa94d" marker-end="url(#arr-convolutional-codes)"/>
+<line x1="312" y1="128" x2="470" y2="128" stroke="#9aa7b5" marker-end="url(#arr-convolutional-codes)"/>
+<line x1="392" y1="128" x2="392" y2="128" stroke="#9aa7b5"/>
+<text x="326" y="122" fill="#63e6be">g&#8321;=1+D+D&#178;</text>
+<text x="410" y="150" fill="#ffa94d">g&#8322;=1+D&#178;</text>
+<text x="478" y="124" fill="#e6edf3">v&#8321;</text><text x="478" y="144" fill="#e6edf3">v&#8322;</text>
+<line x1="392" y1="128" x2="470" y2="148" stroke="#9aa7b5" marker-end="url(#arr-convolutional-codes)"/>
+</svg>`,
+      caption: String.raw`Input bit u shifts through registers D&#8321;,D&#8322;; two XOR taps (g&#8321;,g&#8322;) form the rate-1/2 output pair (v&#8321;,v&#8322;).`
+    },
     prerequisites: ['channel-coding', 'fec', 'convolution', 'ber'],
     intro: String.raw`<p>A <strong>convolutional code</strong> is a forward-error-correction code with <em>memory</em>: unlike a block code that maps each independent $k$-bit block to an $n$-bit codeword, a convolutional encoder feeds a continuous stream of information bits through a shift register and produces output bits that depend not only on the current input but on a window of past inputs. The name comes directly from the operation performed — each output stream is the <strong>convolution</strong> (modulo 2) of the input sequence with a fixed impulse response, the <em>generator sequence</em>. This memory is what gives the code its power: errors are corrected by exploiting correlations that span many bits, and the maximum-likelihood decoder (the Viterbi algorithm) searches a trellis of encoder states rather than a table of isolated codewords.</p>
     <p>Convolutional codes dominated point-to-point digital communications for decades — deep-space links (the Voyager and Galileo missions), GSM, IS-95, 802.11a/g, DVB, and satellite modems all used them, most famously the rate-1/2, constraint-length-7 code with generators $(171,133)_8$. Even in the modern era of Turbo and LDPC codes, convolutional codes live on as the constituent encoders inside Turbo codes and as tail-biting codes in LTE/5G control channels. This topic builds the encoder from the shift register up, develops the tree, state, and trellis pictures, defines the all-important <strong>free distance</strong> $d_{free}$, and connects the structure to Viterbi/BCJR decoding, puncturing, and coding gain.</p>`,
@@ -220,6 +246,24 @@ CONTENT.topics.push(
     category: 'Spread Spectrum & Coding',
     tags: ['channel coding', 'FEC', 'ARQ', 'Hamming distance', 'coding gain', 'Shannon', 'interleaving', 'code rate'],
     summary: String.raw`Channel coding adds structured, deliberate redundancy to a bit stream so that the receiver can detect and correct errors introduced by a noisy channel, trading bandwidth or rate for reliability up to the Shannon limit.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 540 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-channel-coding" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<text x="12" y="20" fill="#e6edf3">channel coding ADDS structured redundancy (opposite of source coding)</text>
+<line x1="8" y1="80" x2="52" y2="80" stroke="#9aa7b5" marker-end="url(#arr-channel-coding)"/>
+<text x="8" y="70" fill="#9aa7b5">data</text>
+<rect x="54" y="60" width="96" height="40" rx="6" fill="#1c232e" stroke="#4dabf7"/><text x="70" y="78" fill="#e6edf3">encoder</text><text x="66" y="93" fill="#9aa7b5">+parity</text>
+<line x1="150" y1="80" x2="200" y2="80" stroke="#9aa7b5" marker-end="url(#arr-channel-coding)"/>
+<rect x="202" y="60" width="110" height="40" rx="6" fill="#1c232e" stroke="#ffa94d"/><text x="216" y="78" fill="#e6edf3">channel</text><text x="222" y="93" fill="#ffa94d">+ noise</text>
+<line x1="312" y1="80" x2="362" y2="80" stroke="#9aa7b5" marker-end="url(#arr-channel-coding)"/>
+<rect x="364" y="60" width="110" height="40" rx="6" fill="#1c232e" stroke="#63e6be"/><text x="376" y="78" fill="#e6edf3">decoder</text><text x="372" y="93" fill="#63e6be">corrects</text>
+<line x1="474" y1="80" x2="522" y2="80" stroke="#9aa7b5" marker-end="url(#arr-channel-coding)"/>
+<text x="486" y="70" fill="#9aa7b5">data</text>
+<rect x="54" y="150" width="120" height="34" rx="6" fill="#1c232e" stroke="#b197fc"/><text x="66" y="171" fill="#e6edf3">source coding</text>
+<text x="184" y="171" fill="#9aa7b5">REMOVES redundancy &#8594; compress toward entropy H</text>
+</svg>`,
+      caption: String.raw`Encoder adds parity, the noisy channel injects errors, the decoder corrects them; source coding does the opposite &#8212; it removes redundancy.`
+    },
     prerequisites: ['comm-basics', 'shannon', 'ber', 'noise'],
     intro: String.raw`<p><strong>Channel coding</strong> is the deliberate addition of <em>structured redundancy</em> to transmitted data so that a receiver can detect and correct the errors a noisy channel inevitably causes. It is the mirror image of <a href="#source-coding">source coding</a>: source coding <em>removes</em> redundancy to compress data toward its entropy, while channel coding <em>adds back</em> carefully engineered redundancy to protect data on the way to the receiver. Both are justified — and separated — by Shannon's theorems: source coding down to the entropy $H$, channel coding up to the capacity $C$.</p>
     <p>The promise is profound. Shannon's 1948 noisy-channel coding theorem proved that as long as the information rate $R < C$, codes exist that drive the error probability arbitrarily close to zero — reliability without shouting louder, purely by clever structure. Channel coding is why a mobile phone works at the cell edge, why a scratched Blu-ray still plays, why a spacecraft billions of kilometres away sends back crisp images, and why QR codes survive coffee stains. This umbrella topic frames the whole field: the redundancy idea, Hamming distance and minimum distance, detection versus correction, code rate and overhead, the block/convolutional/Turbo/LDPC families, coding gain, the Shannon limit, FEC versus ARQ, and interleaving against bursts. It cross-links the deeper dives — <a href="#fec">FEC</a>, <a href="#convolutional-codes">convolutional codes</a>, <a href="#viterbi">Viterbi decoding</a>, and <a href="#gold-code">Gold codes</a>.</p>`,

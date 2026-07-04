@@ -6,6 +6,28 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['AM', 'DSB', 'SSB', 'VSB', 'envelope detection', 'modulation index', 'sidebands', 'analog modulation'],
   summary: String.raw`Amplitude modulation encodes a message onto the envelope of a sinusoidal carrier, trading power efficiency for the simplicity of envelope detection.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-am" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <text x="20" y="46" fill="#9aa7b5">m(t)</text>
+  <text x="20" y="130" fill="#9aa7b5">carrier</text>
+  <rect x="120" y="30" width="110" height="50" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="175" y="52" fill="#e6edf3" text-anchor="middle">Modulator</text>
+  <text x="175" y="68" fill="#9aa7b5" text-anchor="middle">×(1+m·cos)</text>
+  <rect x="300" y="30" width="110" height="50" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="355" y="52" fill="#e6edf3" text-anchor="middle">Envelope</text>
+  <text x="355" y="68" fill="#9aa7b5" text-anchor="middle">detector (RC)</text>
+  <rect x="460" y="30" width="60" height="50" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="490" y="60" fill="#e6edf3" text-anchor="middle">m(t)</text>
+  <line x1="55" y1="42" x2="118" y2="50" stroke="#9aa7b5" marker-end="url(#arr-am)"/>
+  <line x1="80" y1="126" x2="175" y2="82" stroke="#9aa7b5" marker-end="url(#arr-am)"/>
+  <line x1="230" y1="55" x2="298" y2="55" stroke="#9aa7b5" marker-end="url(#arr-am)"/>
+  <text x="264" y="46" fill="#b197fc" text-anchor="middle">AM s(t)</text>
+  <line x1="410" y1="55" x2="458" y2="55" stroke="#9aa7b5" marker-end="url(#arr-am)"/>
+  <text x="270" y="175" fill="#9aa7b5" text-anchor="middle">envelope A_c[1+m·cos] carries the message; carrier is pure overhead</text>
+</svg>`,
+    caption: String.raw`AM mechanism: message and carrier multiply in the modulator to ride the envelope, which an RC envelope detector recovers.`
+  },
   prerequisites: ['comm-basics', 'fourier-transform', 'frequency-spectrum', 'bandwidth'],
   intro: String.raw`<p>Amplitude modulation (AM) is the oldest and conceptually simplest way to carry information on a radio wave: let the <em>amplitude</em> of a high-frequency carrier follow the shape of a low-frequency message. If the message is $m(t)$ and the carrier is $A_c\cos(\omega_c t)$, standard (full-carrier) AM transmits $s(t)=A_c[1+k_a m(t)]\cos(\omega_c t)$, so the carrier's envelope traces $A_c[1+k_a m(t)]$. This single idea underpins a whole family — DSB-SC, SSB and VSB — that differ only in which parts of the spectrum are kept. AM's enduring appeal is the <strong>envelope detector</strong>: a diode, a capacitor and a resistor recover the message with no local oscillator, which is why broadcast AM survived for a century. Its enduring weakness is <strong>power efficiency</strong>: in standard AM most of the transmitted power sits in a carrier that conveys no information, capping efficiency at $33\%$.</p>`,
   sections: [
@@ -222,6 +244,28 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['FM', 'frequency modulation', 'modulation index', 'Carson rule', 'Bessel', 'capture effect', 'pre-emphasis', 'constant envelope'],
   summary: String.raw`Frequency modulation encodes the message in the carrier's instantaneous frequency, giving a constant-envelope signal that trades bandwidth for a large SNR improvement.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-fm" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="20" y="35" width="70" height="50" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="55" y="65" fill="#e6edf3" text-anchor="middle">m(t)</text>
+  <rect x="140" y="35" width="120" height="50" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="200" y="57" fill="#e6edf3" text-anchor="middle">VCO / freq</text>
+  <text x="200" y="73" fill="#9aa7b5" text-anchor="middle">modulator</text>
+  <rect x="310" y="35" width="130" height="50" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="375" y="57" fill="#e6edf3" text-anchor="middle">Limiter +</text>
+  <text x="375" y="73" fill="#9aa7b5" text-anchor="middle">discriminator</text>
+  <rect x="475" y="35" width="55" height="50" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="502" y="65" fill="#e6edf3" text-anchor="middle">m(t)</text>
+  <line x1="90" y1="60" x2="138" y2="60" stroke="#9aa7b5" marker-end="url(#arr-fm)"/>
+  <line x1="260" y1="60" x2="308" y2="60" stroke="#9aa7b5" marker-end="url(#arr-fm)"/>
+  <text x="284" y="50" fill="#b197fc" text-anchor="middle">FM s(t)</text>
+  <line x1="440" y1="60" x2="473" y2="60" stroke="#9aa7b5" marker-end="url(#arr-fm)"/>
+  <text x="200" y="115" fill="#9aa7b5" text-anchor="middle">f_i = f_c + k_f·m(t)</text>
+  <text x="270" y="170" fill="#9aa7b5" text-anchor="middle">constant envelope; discriminator differentiates phase → recovers m(t)</text>
+</svg>`,
+    caption: String.raw`FM mechanism: the message drives a VCO to set the instantaneous frequency; a limiter-discriminator differentiates the phase back to m(t).`
+  },
   prerequisites: ['comm-basics', 'am', 'fourier-transform', 'bandwidth', 'noise'],
   intro: String.raw`<p>Frequency modulation (FM) leaves the carrier amplitude alone and instead varies its <em>instantaneous frequency</em> in proportion to the message. Because the envelope is constant, FM is immune to the amplitude noise and fading that plague AM, and it can be amplified by efficient saturating (Class-C) power amplifiers. FM is an <strong>angle modulation</strong>: the information lives in the phase/frequency of $s(t)=A_c\cos[\omega_c t+\phi(t)]$, and it is fundamentally <em>nonlinear</em> — its spectrum is not a simple frequency-shifted copy of the message but an infinite set of Bessel-weighted sidebands. FM's defining bargain is that by spreading over more bandwidth (governed by the modulation index $\beta$ and summarised by Carson's rule) it buys a disproportionate improvement in output SNR. This wideband trade of bandwidth for noise immunity is why FM gave hi-fi broadcast radio and why it underlies the capture effect that lets the strongest signal win.</p>`,
   sections: [
@@ -446,6 +490,33 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['QPSK', 'digital modulation', 'I/Q', 'constellation', 'Gray coding', 'BER', 'offset QPSK', 'PAPR', 'phase shift keying'],
   summary: String.raw`QPSK sends two bits per symbol using four carrier phases, structured as two orthogonal BPSK streams on the I and Q axes, doubling spectral efficiency at the same per-bit BER as BPSK.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-qpsk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="15" y="85" width="90" height="45" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="60" y="103" fill="#e6edf3" text-anchor="middle">bits</text>
+  <text x="60" y="119" fill="#9aa7b5" text-anchor="middle">serial→parallel</text>
+  <rect x="150" y="35" width="120" height="45" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="210" y="55" fill="#e6edf3" text-anchor="middle">I arm</text>
+  <text x="210" y="71" fill="#9aa7b5" text-anchor="middle">× cos(ω_c t)</text>
+  <rect x="150" y="135" width="120" height="45" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="210" y="155" fill="#e6edf3" text-anchor="middle">Q arm</text>
+  <text x="210" y="171" fill="#9aa7b5" text-anchor="middle">× (−sin ω_c t)</text>
+  <circle cx="345" cy="107" r="18" fill="#1c232e" stroke="#b197fc"/>
+  <text x="345" y="112" fill="#e6edf3" text-anchor="middle">Σ</text>
+  <rect x="420" y="85" width="100" height="45" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="470" y="112" fill="#e6edf3" text-anchor="middle">QPSK s(t)</text>
+  <line x1="105" y1="100" x2="148" y2="65" stroke="#9aa7b5" marker-end="url(#arr-qpsk)"/>
+  <line x1="105" y1="115" x2="148" y2="152" stroke="#9aa7b5" marker-end="url(#arr-qpsk)"/>
+  <text x="127" y="80" fill="#9aa7b5">I</text>
+  <text x="127" y="150" fill="#9aa7b5">Q</text>
+  <line x1="270" y1="57" x2="332" y2="97" stroke="#9aa7b5" marker-end="url(#arr-qpsk)"/>
+  <line x1="270" y1="157" x2="332" y2="117" stroke="#9aa7b5" marker-end="url(#arr-qpsk)"/>
+  <line x1="363" y1="107" x2="418" y2="107" stroke="#9aa7b5" marker-end="url(#arr-qpsk)"/>
+  <text x="270" y="210" fill="#9aa7b5" text-anchor="middle">two orthogonal BPSK arms; 2 bits/symbol at 4 phases</text>
+</svg>`,
+    caption: String.raw`QPSK mechanism: serial-to-parallel splits bits into I and Q BPSK arms modulated on cos and −sin, then summed — two orthogonal BPSK streams.`
+  },
   prerequisites: ['bpsk', 'comm-basics', 'ber', 'eb-no', 'matched-filter'],
   intro: String.raw`<p>Quadrature Phase Shift Keying (QPSK) is the workhorse of digital communications: it carries <strong>two bits per symbol</strong> by choosing one of four carrier phases, typically $\{45°,135°,225°,315°\}$. The deep insight is that QPSK is nothing more than <em>two independent BPSK signals sent simultaneously on orthogonal carriers</em> — a cosine (in-phase, I) and a sine (quadrature, Q) — that do not interfere because $\cos$ and $\sin$ are orthogonal over a symbol. This orthogonality is what lets QPSK achieve <strong>twice the spectral efficiency of BPSK</strong> (2 bit/s/Hz) while, with Gray coding, keeping exactly the <strong>same bit error rate per bit</strong>: $\text{BER}=Q(\sqrt{2E_b/N_0})$. From that single I/Q idea flow all the practical variants — offset QPSK and $\pi/4$-QPSK to tame envelope transitions, and the PAPR concerns that shape real transmitter design.</p>`,
   sections: [
@@ -649,6 +720,31 @@ CONTENT.topics.push(
   category: 'Modulation & Detection',
   tags: ['RRC', 'raised cosine', 'matched filter', 'Nyquist', 'pulse shaping', 'roll-off', 'ISI', 'excess bandwidth'],
   summary: String.raw`The root-raised-cosine filter splits a Nyquist raised-cosine response equally between transmitter and receiver so their cascade is ISI-free while the receiver is simultaneously a matched filter.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-rrc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="15" y="45" width="70" height="48" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="50" y="74" fill="#e6edf3" text-anchor="middle">Tx bits</text>
+  <rect x="120" y="45" width="90" height="48" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="165" y="67" fill="#e6edf3" text-anchor="middle">RRC</text>
+  <text x="165" y="83" fill="#9aa7b5" text-anchor="middle">√H_RC</text>
+  <rect x="245" y="45" width="90" height="48" rx="6" fill="#1c232e" stroke="#9aa7b5"/>
+  <text x="290" y="74" fill="#e6edf3" text-anchor="middle">channel</text>
+  <rect x="370" y="45" width="90" height="48" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="415" y="63" fill="#e6edf3" text-anchor="middle">RRC</text>
+  <text x="415" y="79" fill="#9aa7b5" text-anchor="middle">matched</text>
+  <circle cx="500" cy="69" r="14" fill="#1c232e" stroke="#b197fc"/>
+  <text x="500" y="73" fill="#e6edf3" text-anchor="middle">↓</text>
+  <line x1="85" y1="69" x2="118" y2="69" stroke="#9aa7b5" marker-end="url(#arr-rrc)"/>
+  <line x1="210" y1="69" x2="243" y2="69" stroke="#9aa7b5" marker-end="url(#arr-rrc)"/>
+  <line x1="335" y1="69" x2="368" y2="69" stroke="#9aa7b5" marker-end="url(#arr-rrc)"/>
+  <line x1="460" y1="69" x2="484" y2="69" stroke="#9aa7b5" marker-end="url(#arr-rrc)"/>
+  <text x="500" y="105" fill="#9aa7b5" text-anchor="middle">sample</text>
+  <text x="270" y="150" fill="#b197fc" text-anchor="middle">RRC × RRC = raised cosine (Nyquist, zero-ISI)</text>
+  <text x="270" y="175" fill="#9aa7b5" text-anchor="middle">a lone RRC is NOT zero-ISI; only the Tx+Rx cascade is</text>
+</svg>`,
+    caption: String.raw`RRC mechanism: identical √H_RC filters at Tx and Rx; their cascade forms the Nyquist raised cosine while the Rx is a matched filter.`
+  },
   prerequisites: ['pulse-shaping', 'matched-filter', 'nyquist-sampling', 'convolution', 'fourier-transform'],
   intro: String.raw`<p>The root-raised-cosine (RRC) filter answers a subtle engineering demand: a digital receiver wants <em>two</em> things at once — <strong>zero intersymbol interference</strong> (ISI) at the sampling instants, and a <strong>matched filter</strong> that maximises SNR. These pull in different directions, because the zero-ISI (Nyquist) property is a constraint on the <em>end-to-end</em> pulse, whereas matched filtering is a constraint on the <em>receive</em> filter alone. The elegant resolution: take the raised-cosine (RC) filter — the standard Nyquist pulse — and split it into two identical square-root halves, $H_{RRC}(f)=\sqrt{H_{RC}(f)}$, placing one at the transmitter and one at the receiver. Their cascade reconstitutes the full raised cosine (so the <em>system</em> is ISI-free), and because both halves are identical, the receive RRC is exactly matched to the transmit RRC (so SNR is maximised). The price is a crucial subtlety: a <em>single</em> RRC pulse is <strong>not</strong> zero-ISI — only the Tx+Rx cascade is.</p>`,
   sections: [

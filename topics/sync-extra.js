@@ -7,6 +7,23 @@ CONTENT.topics.push(
     category: 'Synchronization',
     tags: ['oscillator', 'PLL', 'phase noise', 'tuning', 'varactor', 'Kvco'],
     summary: String.raw`A VCO is an oscillator whose instantaneous output frequency is a (nominally linear) function of an applied control voltage, acting as the frequency-to-phase integrator at the heart of every analog PLL.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+        <defs><marker id="arr-vco" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="14" y="70" fill="#e6edf3">V<tspan baseline-shift="sub" font-size="9">ctrl</tspan></text>
+        <line x1="60" y1="70" x2="118" y2="70" stroke="#9aa7b5" marker-end="url(#arr-vco)"/>
+        <rect x="120" y="44" width="150" height="52" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+        <text x="195" y="66" fill="#e6edf3" text-anchor="middle">VCO</text>
+        <text x="195" y="84" fill="#9aa7b5" text-anchor="middle">gain K<tspan baseline-shift="sub" font-size="9">vco</tspan> (Hz/V)</text>
+        <text x="195" y="118" fill="#9aa7b5" text-anchor="middle">LC tank + varactor C(V)</text>
+        <line x1="270" y1="70" x2="340" y2="70" stroke="#9aa7b5" marker-end="url(#arr-vco)"/>
+        <rect x="342" y="44" width="164" height="52" rx="6" fill="#1c232e" stroke="#63e6be"/>
+        <text x="424" y="66" fill="#e6edf3" text-anchor="middle">output</text>
+        <text x="424" y="84" fill="#9aa7b5" text-anchor="middle">f = f<tspan baseline-shift="sub" font-size="9">0</tspan> + K<tspan baseline-shift="sub" font-size="9">vco</tspan>·V<tspan baseline-shift="sub" font-size="9">ctrl</tspan></text>
+        <text x="305" y="30" fill="#ffa94d" text-anchor="middle">phase = ∫ f dt  →  1/s integrator</text>
+      </svg>`,
+      caption: String.raw`Control voltage tunes an LC-tank/varactor VCO: output frequency f = f0 + Kvco·Vctrl, and phase is its time-integral (1/s).`
+    },
     prerequisites: ['comm-basics', 'phase-noise', 'pll'],
     intro: String.raw`<p>A <b>Voltage-Controlled Oscillator (VCO)</b> converts a control <i>voltage</i> into an oscillation <i>frequency</i>. It is the actuator of an analog phase-locked loop: the loop filter drives the VCO's tuning port, and the VCO's phase is the quantity that is ultimately aligned to the reference. Understanding the VCO means understanding two things deeply: (1) its <b>tuning law</b> $f_{out}=f_0+K_{vco}V_{ctrl}$ and the crucial fact that <b>frequency is the derivative of phase</b>, so the VCO behaves as a $1/s$ integrator in the phase domain; and (2) its <b>phase noise</b>, described by Leeson's model, which sets the ultimate spectral purity of any synthesizer built around it.</p>`,
     sections: [
@@ -205,6 +222,29 @@ CONTENT.topics.push(
     category: 'Synchronization',
     tags: ['DDS', 'phase accumulator', 'LUT', 'SFDR', 'CORDIC', 'digital PLL'],
     summary: String.raw`An NCO synthesises a sinusoid entirely in the digital domain by accumulating phase from a frequency control word and mapping accumulated phase to amplitude, forming the core of direct digital synthesis (DDS) and the digital equivalent of a VCO.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+        <defs><marker id="arr-nco" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="10" y="62" fill="#e6edf3">FCW</text>
+        <line x1="46" y1="58" x2="86" y2="58" stroke="#9aa7b5" marker-end="url(#arr-nco)"/>
+        <rect x="88" y="34" width="132" height="52" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+        <text x="154" y="55" fill="#e6edf3" text-anchor="middle">phase accum.</text>
+        <text x="154" y="73" fill="#9aa7b5" text-anchor="middle">N-bit, + each clk</text>
+        <line x1="220" y1="58" x2="262" y2="58" stroke="#9aa7b5" marker-end="url(#arr-nco)"/>
+        <text x="241" y="50" fill="#ffa94d" text-anchor="middle">θ</text>
+        <rect x="264" y="34" width="120" height="52" rx="6" fill="#1c232e" stroke="#63e6be"/>
+        <text x="324" y="55" fill="#e6edf3" text-anchor="middle">sine LUT</text>
+        <text x="324" y="73" fill="#9aa7b5" text-anchor="middle">phase→ampl</text>
+        <line x1="384" y1="58" x2="426" y2="58" stroke="#9aa7b5" marker-end="url(#arr-nco)"/>
+        <rect x="428" y="34" width="100" height="52" rx="6" fill="#1c232e" stroke="#b197fc"/>
+        <text x="478" y="55" fill="#e6edf3" text-anchor="middle">DAC</text>
+        <text x="478" y="73" fill="#9aa7b5" text-anchor="middle">samples→out</text>
+        <text x="180" y="118" fill="#9aa7b5">clock f<tspan baseline-shift="sub" font-size="9">clk</tspan></text>
+        <line x1="175" y1="112" x2="154" y2="90" stroke="#9aa7b5" marker-end="url(#arr-nco)"/>
+        <text x="270" y="150" fill="#ffa94d" text-anchor="middle">f<tspan baseline-shift="sub" font-size="9">out</tspan> = FCW·f<tspan baseline-shift="sub" font-size="9">clk</tspan>/2<tspan baseline-shift="super" font-size="9">N</tspan>   ·   Δf = f<tspan baseline-shift="sub" font-size="9">clk</tspan>/2<tspan baseline-shift="super" font-size="9">N</tspan></text>
+      </svg>`,
+      caption: String.raw`FCW drives an N-bit phase accumulator (discrete integrator) → sine LUT → DAC; f_out = FCW·f_clk/2^N with resolution f_clk/2^N.`
+    },
     prerequisites: ['nyquist-sampling', 'vco', 'dac'],
     intro: String.raw`<p>A <b>Numerically-Controlled Oscillator (NCO)</b> is the digital counterpart of the analog <a href="#vco">VCO</a>. Instead of a voltage tuning an analog tank, an integer <b>frequency control word (FCW)</b> is repeatedly added to an $N$-bit <b>phase accumulator</b> on every clock; the accumulator's value is a linearly ramping phase, and a <b>phase-to-amplitude converter</b> (a LUT or a CORDIC engine) turns that phase into sample values of $\cos$ and $\sin$. Followed by a DAC this becomes <b>Direct Digital Synthesis (DDS)</b>. The NCO's beauty is exactness: output frequency $f_{out}=\text{FCW}\cdot f_{clk}/2^N$ is perfectly linear in FCW, frequency resolution is $f_{clk}/2^N$ (sub-milli-hertz is routine), and phase/frequency can be changed instantaneously and continuously. Its limitations are equally characteristic: it cannot exceed Nyquist ($f_{out}<f_{clk}/2$), and <b>phase truncation</b> and finite amplitude quantisation create <b>spurious tones</b> that bound the spurious-free dynamic range (SFDR).</p>`,
     sections: [
@@ -366,7 +406,7 @@ CONTENT.topics.push(
       { front: String.raw`Does increasing $W$ improve frequency resolution?`, back: String.raw`No — resolution depends on $N$. Increasing $W$ improves spectral purity (SFDR), not tuning resolution.` }
     ],
     mcqs: [
-      { q: String.raw`An NCO has $N=32$, $f_{clk}=100$ MHz. What FCW gives $f_{out}=10$ MHz?`, options: [String.raw`$\approx 4.29\times10^7$`, String.raw`$\approx 4.29\times10^8$`, String.raw`$10^7$`, String.raw`$2^{31}$`], answer: 0, explain: String.raw`FCW $=f_{out}2^N/f_{clk}=10^7\times2^{32}/10^8=0.1\times2^{32}\approx4.29\times10^8$... wait: $0.1\times4.295\times10^9=4.295\times10^8$. So option (a) $4.29\times10^7$ is off by 10x; the correct value is $4.29\times10^8$. Recompute: $2^{32}=4.2949\times10^9$; $\times0.1=4.295\times10^8$.` },
+      { q: String.raw`An NCO has $N=32$, $f_{clk}=100$ MHz. What FCW gives $f_{out}=10$ MHz?`, options: [String.raw`$\approx 4.29\times10^7$`, String.raw`$\approx 4.29\times10^8$`, String.raw`$10^7$`, String.raw`$2^{31}$`], answer: 1, explain: String.raw`FCW $=f_{out}2^N/f_{clk}=10^7\times2^{32}/10^8=0.1\times2^{32}=0.1\times4.2949\times10^9\approx4.29\times10^8$.` },
       { q: String.raw`The NCO frequency resolution is:`, options: [String.raw`$f_{clk}/2^W$`, String.raw`$f_{clk}/2^N$`, String.raw`$\text{FCW}/2^N$`, String.raw`$f_{clk}\cdot2^N$`], answer: 1, explain: String.raw`Resolution is set by the accumulator width: $\Delta f=f_{clk}/2^N$ (smallest FCW step of 1).` },
       { q: String.raw`Using only the top 14 phase bits of the accumulator, the worst-case SFDR is about:`, options: [String.raw`14 dBc`, String.raw`42 dBc`, String.raw`84 dBc`, String.raw`168 dBc`], answer: 2, explain: String.raw`SFDR $\approx6.02\times W=6.02\times14\approx84$ dBc.` },
       { q: String.raw`The maximum NCO output frequency is limited by:`, options: [String.raw`LUT depth`, String.raw`The Nyquist limit $f_{clk}/2$`, String.raw`The DAC resolution`, String.raw`Accumulator width $N$`], answer: 1, explain: String.raw`Output must satisfy $f_{out}<f_{clk}/2$; beyond Nyquist the output aliases.` },
@@ -397,6 +437,31 @@ CONTENT.topics.push(
     category: 'Synchronization',
     tags: ['CFO', 'Doppler', 'OFDM', 'ICI', 'Schmidl-Cox', 'derotation', 'synchronization'],
     summary: String.raw`Carrier Frequency Offset is the residual frequency mismatch between transmit and receive local oscillators (plus Doppler), which rotates the received constellation at rate $2\pi\Delta f\,t$ and, in OFDM, destroys subcarrier orthogonality.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 530 190" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+        <defs><marker id="arr-cfo" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="8" y="66" fill="#e6edf3">rx y(t)</text>
+        <text x="8" y="82" fill="#9aa7b5">·e</text>
+        <text x="24" y="76" fill="#9aa7b5" font-size="9">j2πΔf·t</text>
+        <line x1="60" y1="62" x2="108" y2="62" stroke="#9aa7b5" marker-end="url(#arr-cfo)"/>
+        <circle cx="130" cy="62" r="20" fill="#1c232e" stroke="#4dabf7"/>
+        <text x="130" y="67" fill="#e6edf3" text-anchor="middle" font-size="16">×</text>
+        <line x1="152" y1="62" x2="210" y2="62" stroke="#9aa7b5" marker-end="url(#arr-cfo)"/>
+        <rect x="212" y="40" width="150" height="46" rx="6" fill="#1c232e" stroke="#63e6be"/>
+        <text x="287" y="60" fill="#e6edf3" text-anchor="middle">derotated x̂(t)</text>
+        <text x="287" y="77" fill="#9aa7b5" text-anchor="middle">·e<tspan baseline-shift="super" font-size="9">−j2πΔf̂·t</tspan></text>
+        <rect x="88" y="120" width="128" height="46" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+        <text x="152" y="140" fill="#e6edf3" text-anchor="middle">NCO derotator</text>
+        <text x="152" y="157" fill="#9aa7b5" text-anchor="middle">e<tspan baseline-shift="super" font-size="9">−j2πΔf̂·t</tspan></text>
+        <line x1="152" y1="120" x2="140" y2="86" stroke="#ffa94d" marker-end="url(#arr-cfo)"/>
+        <rect x="300" y="120" width="150" height="46" rx="6" fill="#1c232e" stroke="#b197fc"/>
+        <text x="375" y="140" fill="#e6edf3" text-anchor="middle">CFO estimator</text>
+        <text x="375" y="157" fill="#9aa7b5" text-anchor="middle">pilots / CP autocorr.</text>
+        <line x1="300" y1="143" x2="218" y2="143" stroke="#b197fc" marker-end="url(#arr-cfo)"/>
+        <text x="258" y="136" fill="#9aa7b5" text-anchor="middle" font-size="10">Δf̂</text>
+      </svg>`,
+      caption: String.raw`An NCO-driven derotator multiplies rx by e^{−j2πΔf̂·t}; a CFO estimator (pilots/CP autocorrelation) supplies Δf̂ to null the 2πΔf·t spin.`
+    },
     prerequisites: ['bpsk', 'fft', 'vco'],
     intro: String.raw`<p><b>Carrier Frequency Offset (CFO)</b> is the difference $\Delta f=f_{Tx}-f_{Rx}$ between the transmitter's and receiver's local-oscillator frequencies, augmented by any <b>Doppler shift</b> from relative motion. No two independent oscillators are ever exactly equal — a modest 10 ppm crystal at 2.4 GHz already produces up to 24 kHz of offset. After downconversion this leftover offset multiplies the baseband signal by $e^{j2\pi\Delta f\,t}$, so the received constellation <b>spins</b> at $2\pi\Delta f$ rad/s. In single-carrier systems this rotates symbols (and, if uncorrected, collapses BER); in <a href="#fft">OFDM</a> it is far more damaging because it breaks the <b>orthogonality</b> of subcarriers, producing <b>inter-carrier interference (ICI)</b> and a <b>common phase error (CPE)</b>. Estimating and correcting CFO — with pilots, preambles (Schmidl-Cox), or cyclic-prefix autocorrelation (Moose), then derotating with an <a href="#nco">NCO</a> — is a mandatory front-end synchronisation task.</p>`,
     sections: [
@@ -582,6 +647,31 @@ CONTENT.topics.push(
     category: 'Synchronization',
     tags: ['DLL', 'delay line', 'clock deskew', 'multiphase clock', 'jitter', 'FPGA'],
     summary: String.raw`A clock DLL aligns an output clock edge to a reference by adjusting a voltage-controlled delay line rather than an oscillator, giving a first-order, unconditionally stable loop with no jitter accumulation.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 530 190" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+        <defs><marker id="arr-dll" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+        <text x="8" y="52" fill="#e6edf3">ref clk</text>
+        <line x1="52" y1="48" x2="98" y2="48" stroke="#9aa7b5" marker-end="url(#arr-dll)"/>
+        <rect x="100" y="26" width="176" height="46" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+        <text x="188" y="46" fill="#e6edf3" text-anchor="middle">voltage-ctrl delay line</text>
+        <text x="188" y="63" fill="#9aa7b5" text-anchor="middle">t<tspan baseline-shift="sub" font-size="9">d</tspan> = t<tspan baseline-shift="sub" font-size="9">d0</tspan> + K<tspan baseline-shift="sub" font-size="9">DL</tspan>·V</text>
+        <line x1="276" y1="48" x2="330" y2="48" stroke="#63e6be" marker-end="url(#arr-dll)"/>
+        <text x="360" y="52" fill="#63e6be">output clk</text>
+        <rect x="300" y="90" width="150" height="44" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+        <text x="375" y="110" fill="#e6edf3" text-anchor="middle">phase detector</text>
+        <text x="375" y="126" fill="#9aa7b5" text-anchor="middle">compares edges</text>
+        <rect x="96" y="90" width="150" height="44" rx="6" fill="#1c232e" stroke="#b197fc"/>
+        <text x="171" y="110" fill="#e6edf3" text-anchor="middle">loop filter</text>
+        <text x="171" y="126" fill="#9aa7b5" text-anchor="middle">charge pump + C</text>
+        <line x1="303" y1="90" x2="315" y2="66" stroke="#ffa94d" marker-end="url(#arr-dll)"/>
+        <line x1="300" y1="112" x2="246" y2="112" stroke="#9aa7b5" marker-end="url(#arr-dll)"/>
+        <line x1="171" y1="90" x2="171" y2="72" stroke="#b197fc" marker-end="url(#arr-dll)"/>
+        <text x="200" y="106" fill="#9aa7b5" font-size="10" text-anchor="middle">up/dn</text>
+        <text x="150" y="83" fill="#9aa7b5" font-size="10">V (delay ctrl)</text>
+        <text x="265" y="176" fill="#ffa94d" text-anchor="middle">first-order loop: delay line = pure gain (no VCO / no 1/s)</text>
+      </svg>`,
+      caption: String.raw`A phase detector compares ref and delayed edges; a loop filter tunes a voltage-controlled delay line (t_d = t_d0 + K_DL·V) — a first-order loop, no VCO.`
+    },
     prerequisites: ['pll', 'vco', 'nco'],
     intro: String.raw`<p>A <b>Delay-Locked Loop (DLL)</b> aligns the phase of an output clock to a reference clock by controlling a <b>voltage-controlled delay line (VCDL)</b> — a chain of buffers whose total delay is tuned — instead of a <a href="#vco">VCO</a>. A phase detector compares the reference edge to the delayed output edge and steers the delay so the two align (typically to one full clock period, i.e. zero effective skew). Because a delay line contributes a <b>pure gain</b> in the phase domain (no $1/s$ integrator like a VCO), the DLL is a <b>first-order</b> loop: unconditionally stable, no ringing, and — crucially — it does <b>not accumulate jitter</b>, since each reference edge freshly re-times the output. DLLs are the workhorse for clock <b>de-skew</b>, precise <b>phase alignment</b>, and <b>multiphase clock generation</b> inside FPGAs, DDR memory interfaces, and SoCs. This topic focuses on the clock/delay-line DLL; the code-tracking early-late DLL used in spread-spectrum receivers is covered separately in <a href="#early-late-correlator">early-late correlator</a>.</p>`,
     sections: [

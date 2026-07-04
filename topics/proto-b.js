@@ -6,6 +6,28 @@ CONTENT.topics.push(
     category: 'Interfaces & Protocols',
     tags: ['spi', 'serial', 'synchronous', 'full-duplex', 'cpol', 'cpha', 'master-slave', 'on-board'],
     summary: String.raw`The Serial Peripheral Interface is a four-wire, full-duplex, synchronous, master-driven on-board bus that clocks one bit per SCLK edge with no addressing, acknowledgement, or flow control.`,
+    diagram: { svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-spi" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="18" y="70" width="110" height="110" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="73" y="94" fill="#e6edf3" text-anchor="middle" font-weight="bold">Master</text>
+<text x="73" y="112" fill="#9aa7b5" text-anchor="middle" font-size="9">SCLK / MOSI</text>
+<text x="73" y="125" fill="#9aa7b5" text-anchor="middle" font-size="9">MISO / SS&#215;n</text>
+<line x1="128" y1="88" x2="360" y2="88" stroke="#63e6be" marker-end="url(#arr-spi)"/>
+<text x="240" y="83" fill="#e6edf3" text-anchor="middle" font-size="10">SCLK + MOSI (shared)</text>
+<line x1="360" y1="108" x2="128" y2="108" stroke="#ffa94d" marker-end="url(#arr-spi)"/>
+<text x="240" y="103" fill="#e6edf3" text-anchor="middle" font-size="10">MISO (shared, tri-state)</text>
+<line x1="128" y1="135" x2="360" y2="135" stroke="#b197fc" marker-end="url(#arr-spi)"/>
+<text x="240" y="130" fill="#b197fc" text-anchor="middle" font-size="10">SS1</text>
+<line x1="128" y1="158" x2="360" y2="200" stroke="#b197fc" marker-end="url(#arr-spi)"/>
+<text x="240" y="180" fill="#b197fc" text-anchor="middle" font-size="10">SS2 &#8230; SSn (one per slave)</text>
+<rect x="365" y="60" width="120" height="42" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="425" y="86" fill="#e6edf3" text-anchor="middle" font-size="11">Slave 1</text>
+<rect x="365" y="118" width="120" height="42" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="425" y="144" fill="#e6edf3" text-anchor="middle" font-size="11">Slave 2</text>
+<rect x="365" y="176" width="120" height="42" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="425" y="202" fill="#e6edf3" text-anchor="middle" font-size="11">Slave n</text>
+<text x="270" y="222" fill="#9aa7b5" text-anchor="middle" font-size="10">shared SCLK/MOSI/MISO; a dedicated SS line selects exactly one slave</text>
+</svg>`, caption: String.raw`SPI: one master drives shared SCLK/MOSI/MISO to several slaves, selecting exactly one at a time via its dedicated active-low SS line.` },
     prerequisites: ['comm-basics', 'rs232', 'rs422'],
     intro: String.raw`<p>The <b>Serial Peripheral Interface (SPI)</b> is a de-facto industry standard introduced by Motorola in the 1980s for short-reach, chip-to-chip communication on a single printed-circuit board. It is <b>synchronous</b> (a dedicated clock line accompanies the data), <b>full-duplex</b> (data flows in both directions simultaneously on separate lines), and <b>single-master, multiple-slave</b>. Its defining virtue is brutal simplicity: there is no addressing scheme, no acknowledgement, no error-detection field, no arbitration, and no defined maximum speed - the master simply toggles a clock and both sides shift bits.</p>
     <p>Because a bit is transferred on every clock edge and there is <b>zero protocol overhead</b> (no start/stop/parity bits, no headers), SPI delivers a payload throughput exactly equal to the clock frequency in bits per second. That efficiency, plus trivial hardware (a pair of shift registers and a clock), makes SPI the workhorse for ADCs/DACs, flash memory, sensors, displays, and radio transceivers such as the AD9361. The cost of that simplicity is that everything the protocol omits - addressing, acknowledgement, integrity checking - must be handled by the application layer or done without.</p>`,
@@ -220,6 +242,40 @@ CONTENT.topics.push(
     category: 'Interfaces & Protocols',
     tags: ['axi', 'amba', 'arm', 'valid-ready', 'burst', 'memory-mapped', 'soc', 'fpga', 'interconnect'],
     summary: String.raw`AXI is ARM's high-performance AMBA on-chip interconnect protocol built on five independent VALID/READY-handshaked channels, supporting bursts, out-of-order and outstanding transactions between memory-mapped managers and subordinates.`,
+    diagram: { svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-axi" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<rect x="14" y="70" width="104" height="120" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="66" y="126" fill="#e6edf3" text-anchor="middle" font-weight="bold">Manager</text>
+<text x="66" y="144" fill="#9aa7b5" text-anchor="middle" font-size="9">(master)</text>
+<rect x="215" y="55" width="110" height="150" rx="6" fill="#1c232e" stroke="#b197fc"/>
+<text x="270" y="126" fill="#e6edf3" text-anchor="middle" font-weight="bold">Inter-</text>
+<text x="270" y="144" fill="#e6edf3" text-anchor="middle" font-weight="bold">connect</text>
+<rect x="422" y="70" width="104" height="120" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="474" y="126" fill="#e6edf3" text-anchor="middle" font-weight="bold">Subordinate</text>
+<text x="474" y="144" fill="#9aa7b5" text-anchor="middle" font-size="9">(slave)</text>
+<line x1="118" y1="80" x2="215" y2="80" stroke="#ffa94d" marker-end="url(#arr-axi)"/>
+<text x="166" y="75" fill="#ffa94d" text-anchor="middle" font-size="9">AW</text>
+<line x1="118" y1="100" x2="215" y2="100" stroke="#ffa94d" marker-end="url(#arr-axi)"/>
+<text x="166" y="95" fill="#ffa94d" text-anchor="middle" font-size="9">W</text>
+<line x1="215" y1="120" x2="118" y2="120" stroke="#63e6be" marker-end="url(#arr-axi)"/>
+<text x="166" y="115" fill="#63e6be" text-anchor="middle" font-size="9">B</text>
+<line x1="118" y1="145" x2="215" y2="145" stroke="#4dabf7" marker-end="url(#arr-axi)"/>
+<text x="166" y="140" fill="#4dabf7" text-anchor="middle" font-size="9">AR</text>
+<line x1="215" y1="165" x2="118" y2="165" stroke="#63e6be" marker-end="url(#arr-axi)"/>
+<text x="166" y="160" fill="#63e6be" text-anchor="middle" font-size="9">R</text>
+<line x1="325" y1="80" x2="422" y2="80" stroke="#ffa94d" marker-end="url(#arr-axi)"/>
+<text x="373" y="75" fill="#ffa94d" text-anchor="middle" font-size="9">AW</text>
+<line x1="325" y1="100" x2="422" y2="100" stroke="#ffa94d" marker-end="url(#arr-axi)"/>
+<text x="373" y="95" fill="#ffa94d" text-anchor="middle" font-size="9">W</text>
+<line x1="422" y1="120" x2="325" y2="120" stroke="#63e6be" marker-end="url(#arr-axi)"/>
+<text x="373" y="115" fill="#63e6be" text-anchor="middle" font-size="9">B</text>
+<line x1="325" y1="145" x2="422" y2="145" stroke="#4dabf7" marker-end="url(#arr-axi)"/>
+<text x="373" y="140" fill="#4dabf7" text-anchor="middle" font-size="9">AR</text>
+<line x1="422" y1="165" x2="325" y2="165" stroke="#63e6be" marker-end="url(#arr-axi)"/>
+<text x="373" y="160" fill="#63e6be" text-anchor="middle" font-size="9">R</text>
+<text x="270" y="225" fill="#e6edf3" text-anchor="middle" font-size="10">5 channels: AR, R (read) &#183; AW, W, B (write)</text>
+<text x="270" y="242" fill="#9aa7b5" text-anchor="middle" font-size="10">each carries its own VALID/READY handshake</text>
+</svg>`, caption: String.raw`AXI: a manager talks through the interconnect to a subordinate over five independent channels (AR, R, AW, W, B), each with its own VALID/READY handshake.` },
     prerequisites: ['spi', 'comm-basics', 'sdr'],
     intro: String.raw`<p>The <b>Advanced eXtensible Interface (AXI)</b> is part of ARM's <b>AMBA</b> (Advanced Microcontroller Bus Architecture) family. Introduced as AXI3 and refined into <b>AXI4</b>, it is the dominant <b>on-chip interconnect</b> for SoCs and FPGAs: it connects CPUs, DMA engines, DDR memory controllers, accelerators, and peripherals inside a single die. Unlike SPI - a handful of wires bit-banging serial data on-board - AXI is a wide, parallel, <b>memory-mapped</b>, high-throughput fabric measured in gigabytes per second.</p>
     <p>AXI's defining ideas are (1) <b>five independent channels</b> that separate the address, data, and response phases of reads and writes, so they can overlap and pipeline; and (2) a single, universal <b>VALID/READY handshake</b> on every channel that provides two-way flow control - the source asserts VALID when it has data, the destination asserts READY when it can accept, and transfer occurs only when both are high on a rising clock edge. This decoupling lets AXI support pipelined <b>bursts</b> (up to 256 beats in AXI4), multiple <b>outstanding transactions</b>, and <b>out-of-order</b> completion, which are the levers that hide memory latency and sustain high bandwidth. The three profiles - full <b>AXI4</b> (bursts), <b>AXI4-Lite</b> (single beat, register access), and <b>AXI4-Stream</b> (no addresses, pure data flow) - cover everything from a control register to a video pipeline.</p>`,
@@ -460,6 +516,37 @@ CONTENT.topics.push(
     category: 'Interfaces & Protocols',
     tags: ['1553', 'avionics', 'manchester', 'dual-redundant', 'deterministic', 'bus-controller', 'remote-terminal', 'military'],
     summary: String.raw`MIL-STD-1553B is a deterministic, dual-redundant 1 Mbps Manchester-II, transformer-coupled avionics data bus in which a single Bus Controller commands up to 31 Remote Terminals using 20-bit-time command, data, and status words.`,
+    diagram: { svg: String.raw`<svg viewBox="0 0 540 250" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+<defs><marker id="arr-1553" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+<line x1="40" y1="70" x2="500" y2="70" stroke="#63e6be"/>
+<text x="270" y="63" fill="#63e6be" text-anchor="middle" font-size="10">Bus A (dual-redundant twisted pair)</text>
+<line x1="40" y1="92" x2="500" y2="92" stroke="#ffa94d"/>
+<text x="270" y="107" fill="#ffa94d" text-anchor="middle" font-size="10">Bus B</text>
+<line x1="40" y1="70" x2="40" y2="92" stroke="#b197fc" stroke-width="2"/>
+<line x1="500" y1="70" x2="500" y2="92" stroke="#b197fc" stroke-width="2"/>
+<text x="24" y="86" fill="#b197fc" text-anchor="middle" font-size="9">term</text>
+<rect x="45" y="130" width="110" height="55" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+<text x="100" y="153" fill="#e6edf3" text-anchor="middle" font-size="11" font-weight="bold">Bus</text>
+<text x="100" y="170" fill="#e6edf3" text-anchor="middle" font-size="11" font-weight="bold">Controller</text>
+<rect x="185" y="130" width="80" height="55" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="225" y="155" fill="#e6edf3" text-anchor="middle" font-size="11">RT 1</text>
+<text x="225" y="172" fill="#9aa7b5" text-anchor="middle" font-size="9">terminal</text>
+<rect x="295" y="130" width="80" height="55" rx="6" fill="#1c232e" stroke="#63e6be"/>
+<text x="335" y="155" fill="#e6edf3" text-anchor="middle" font-size="11">RT &#8804;31</text>
+<rect x="405" y="130" width="95" height="55" rx="6" fill="#1c232e" stroke="#9aa7b5"/>
+<text x="452" y="155" fill="#e6edf3" text-anchor="middle" font-size="11">Bus</text>
+<text x="452" y="172" fill="#9aa7b5" text-anchor="middle" font-size="10">Monitor</text>
+<line x1="100" y1="92" x2="100" y2="130" stroke="#9aa7b5" marker-end="url(#arr-1553)"/>
+<circle cx="100" cy="111" r="5" fill="none" stroke="#b197fc"/>
+<line x1="225" y1="92" x2="225" y2="130" stroke="#9aa7b5" marker-end="url(#arr-1553)"/>
+<circle cx="225" cy="111" r="5" fill="none" stroke="#b197fc"/>
+<line x1="335" y1="92" x2="335" y2="130" stroke="#9aa7b5" marker-end="url(#arr-1553)"/>
+<circle cx="335" cy="111" r="5" fill="none" stroke="#b197fc"/>
+<line x1="452" y1="92" x2="452" y2="130" stroke="#9aa7b5" marker-end="url(#arr-1553)"/>
+<circle cx="452" cy="111" r="5" fill="none" stroke="#b197fc"/>
+<text x="270" y="215" fill="#9aa7b5" text-anchor="middle" font-size="10">BC commands up to 31 RTs over transformer-coupled stubs (&#9711;); BM listens passively</text>
+<text x="270" y="233" fill="#9aa7b5" text-anchor="middle" font-size="10">dual-redundant Bus A / Bus B, terminated at both ends</text>
+</svg>`, caption: String.raw`MIL-STD-1553B: a Bus Controller commands up to 31 Remote Terminals (plus a passive Bus Monitor) over a transformer-coupled, dual-redundant Bus A / Bus B.` },
     prerequisites: ['mil-std-1553', 'comm-basics', 'rs485'],
     intro: String.raw`<p><b>MIL-STD-1553</b> is a US military standard (first issued 1973; the widely used <b>1553B</b> notice dates to 1978) defining a <b>digital, command/response, time-division multiplexed serial data bus</b> for military aircraft, and later spacecraft, ships, and ground vehicles. Where SPI is on-board simplicity and AXI is on-chip bandwidth, 1553 is about <b>determinism and fault tolerance</b> in a hostile, safety-critical environment: it must carry avionics data (attitude, navigation, weapons, engine) reliably for decades.</p>
     <p>Its architecture is deliberately centralized: a single <b>Bus Controller (BC)</b> is the sole initiator, scheduling every transfer; up to <b>31 Remote Terminals (RTs)</b> respond only when commanded; and optional <b>Bus Monitors (BM)</b> passively record traffic. The physical layer is a <b>shielded twisted-pair, transformer-coupled, dual-redundant</b> bus running <b>1 Mbps</b> using self-clocking <b>Manchester II</b> biphase encoding. Every transfer is built from fixed <b>20-bit-time words</b> (3 bit-times of sync + 16 data bits + 1 parity bit), and each word therefore lasts exactly <b>20 microseconds</b>. Because the BC schedules all traffic and the timing is fixed, message latency is bounded and predictable - the property that makes 1553 trusted for flight-critical control long after faster commercial buses appeared.</p>`,

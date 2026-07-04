@@ -6,6 +6,24 @@ CONTENT.topics.push(
   category: 'Spread Spectrum & Coding',
   tags: [ String.raw`spread spectrum`, String.raw`DSSS`, String.raw`correlation`, String.raw`SNR`, String.raw`pulse compression`, String.raw`GPS` ],
   summary: String.raw`Processing gain is the ratio of spread (transmitted) bandwidth to information bandwidth, quantifying how much despreading correlation raises the post-correlator SNR of a spread-spectrum or matched-filter receiver.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-processing-gain" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <text x="60" y="52" fill="#e6edf3" text-anchor="middle">spread signal</text>
+  <text x="60" y="68" fill="#9aa7b5" text-anchor="middle">+ noise / jammer</text>
+  <line x1="126" y1="60" x2="168" y2="60" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-processing-gain)"/>
+  <rect x="170" y="40" width="150" height="40" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="245" y="57" fill="#e6edf3" text-anchor="middle">correlator / despread</text>
+  <text x="245" y="72" fill="#e6edf3" text-anchor="middle">&#215; PN replica c(t)</text>
+  <line x1="320" y1="60" x2="362" y2="60" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-processing-gain)"/>
+  <rect x="364" y="40" width="150" height="40" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="439" y="57" fill="#e6edf3" text-anchor="middle">SNR boosted</text>
+  <text x="439" y="72" fill="#ffa94d" text-anchor="middle">by G_p</text>
+  <text x="245" y="112" fill="#9aa7b5" text-anchor="middle">signal adds coherently, noise/jammer incoherently</text>
+  <text x="270" y="138" fill="#b197fc" text-anchor="middle">G_p = W/R = R_c/R_b = N ; (S/N)_out = G_p (S/N)_in</text>
+</svg>`,
+    caption: String.raw`Despreading the wideband signal against a PN replica collapses it coherently, lifting output SNR by the processing gain Gp.`
+  },
   prerequisites: [ 'dsss', 'correlation', 'matched-filter', 'eb-no' ],
   intro: String.raw`<p>Spread-spectrum systems deliberately occupy a bandwidth far larger than the information rate requires. That seems wasteful until you see what the receiver gets for it: <strong>processing gain</strong> $G_p$. When the receiver correlates the wideband received signal against a synchronized replica of the spreading code, the wanted signal collapses (despreads) back to its narrow information bandwidth and adds up <em>coherently</em>, while noise, interference and jamming — uncorrelated with the code — spread out and add up <em>incoherently</em>. The result is that the signal-to-noise ratio at the correlator output is higher than at its input by the factor $G_p$.</p>
 <p>Processing gain is the single number that underpins the three headline benefits of spread spectrum: interference (and jam) rejection, low probability of intercept, and multiple access (CDMA). It is also, mathematically, the same integration/correlation gain that a matched filter delivers and that a radar earns from pulse compression. Master $G_p$ and a large part of spread-spectrum, radar and communications theory becomes one idea seen from different angles.</p>`,
@@ -177,6 +195,28 @@ CONTENT.topics.push(
   category: 'Spread Spectrum & Coding',
   tags: [ String.raw`anti-jam`, String.raw`spread spectrum`, String.raw`processing gain`, String.raw`electronic warfare`, String.raw`J/S`, String.raw`frequency hopping` ],
   summary: String.raw`Jamming margin is the amount by which a jammer can exceed the wanted signal at the receiver input before a spread-spectrum link fails, equal to the processing gain minus implementation losses minus the demodulator's required SNR.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-jamming-margin" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="40" y1="150" x2="510" y2="150" stroke="#9aa7b5" stroke-width="1"/>
+  <text x="24" y="60" fill="#9aa7b5" text-anchor="middle" transform="rotate(-90 24 90)">dB</text>
+  <rect x="70" y="30" width="80" height="120" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="110" y="95" fill="#e6edf3" text-anchor="middle">G_p</text>
+  <text x="110" y="168" fill="#9aa7b5" text-anchor="middle">processing gain</text>
+  <text x="175" y="95" fill="#e6edf3" text-anchor="middle">&#8722;</text>
+  <rect x="200" y="110" width="80" height="40" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="240" y="134" fill="#e6edf3" text-anchor="middle">SNR_req</text>
+  <text x="305" y="95" fill="#e6edf3" text-anchor="middle">&#8722;</text>
+  <rect x="330" y="126" width="80" height="24" rx="6" fill="#1c232e" stroke="#f783ac" stroke-width="1.5"/>
+  <text x="370" y="143" fill="#e6edf3" text-anchor="middle">L_sys</text>
+  <text x="435" y="95" fill="#e6edf3" text-anchor="middle">=</text>
+  <rect x="455" y="60" width="55" height="90" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="482" y="105" fill="#63e6be" text-anchor="middle">M_j</text>
+  <text x="482" y="168" fill="#9aa7b5" text-anchor="middle">margin</text>
+  <text x="270" y="20" fill="#b197fc" text-anchor="middle">M_j = G_p &#8722; L_sys &#8722; (S/N)_req = (J/S)_max</text>
+</svg>`,
+    caption: String.raw`Jamming margin is what remains of processing gain after subtracting the required SNR and implementation loss.`
+  },
   prerequisites: [ 'processing-gain', 'dsss', 'eb-no', 'frequency-hopping' ],
   intro: String.raw`<p>Processing gain tells you how much a spread-spectrum receiver suppresses interference. <strong>Jamming margin</strong> $M_j$ turns that into an operational number: how much stronger than your signal can a jammer be at the antenna and still leave the link working? It is the anti-jam <em>headroom</em> — the difference between the interference rejection you bought (processing gain, less real-world losses) and the signal quality your demodulator actually demands.</p>
 <p>Jamming margin is the currency of electronic-warfare link design. A radio might advertise 30 dB of processing gain, but after subtracting a couple of dB of implementation loss and the 10 dB of SNR the modem needs, the jammer can only be about 18 dB stronger than the signal before the link breaks. Understanding exactly what goes into $M_j$ — and how the jammer-to-signal ratio at the receiver is set by transmit powers, ranges and antenna gains — lets you predict burn-through, size a jammer, or specify an anti-jam waveform.</p>`,
@@ -353,6 +393,28 @@ CONTENT.topics.push(
   category: 'RF Link & Metrics',
   tags: [ String.raw`sensitivity`, String.raw`noise floor`, String.raw`noise figure`, String.raw`MDS`, String.raw`link budget`, String.raw`Eb/N0` ],
   summary: String.raw`Receiver sensitivity is the minimum input signal power (in dBm) that delivers the required signal quality, equal to the thermal noise floor plus noise figure plus the required SNR in the signal bandwidth.`,
+  diagram: {
+    svg: String.raw`<svg viewBox="0 0 540 150" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-sensitivity" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <rect x="14" y="42" width="118" height="42" rx="6" fill="#1c232e" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="73" y="60" fill="#e6edf3" text-anchor="middle">kTB floor</text>
+  <text x="73" y="76" fill="#9aa7b5" text-anchor="middle">&#8722;174+10logB</text>
+  <line x1="132" y1="63" x2="164" y2="63" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-sensitivity)"/>
+  <rect x="166" y="42" width="96" height="42" rx="6" fill="#1c232e" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="214" y="60" fill="#e6edf3" text-anchor="middle">+ NF</text>
+  <text x="214" y="76" fill="#9aa7b5" text-anchor="middle">rx penalty</text>
+  <line x1="262" y1="63" x2="294" y2="63" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-sensitivity)"/>
+  <rect x="296" y="42" width="110" height="42" rx="6" fill="#1c232e" stroke="#f783ac" stroke-width="1.5"/>
+  <text x="351" y="60" fill="#e6edf3" text-anchor="middle">+ (S/N)_req</text>
+  <text x="351" y="76" fill="#9aa7b5" text-anchor="middle">demod need</text>
+  <line x1="406" y1="63" x2="438" y2="63" stroke="#9aa7b5" stroke-width="1.5" marker-end="url(#arr-sensitivity)"/>
+  <rect x="440" y="42" width="92" height="42" rx="6" fill="#1c232e" stroke="#63e6be" stroke-width="1.5"/>
+  <text x="486" y="60" fill="#63e6be" text-anchor="middle">S_min</text>
+  <text x="486" y="76" fill="#9aa7b5" text-anchor="middle">(dBm)</text>
+  <text x="270" y="120" fill="#b197fc" text-anchor="middle">S_min = &#8722;174 + 10log10(B) + NF + (S/N)_req</text>
+</svg>`,
+    caption: String.raw`Stacking the kTB thermal floor, the noise figure and the required SNR gives receiver sensitivity in dBm.`
+  },
   prerequisites: [ 'noise-floor', 'noise-figure', 'eb-no', 'ber' ],
   intro: String.raw`<p><strong>Receiver sensitivity</strong> answers the most practical question in radio: how weak a signal can this receiver still decode? Expressed as a power in dBm, it is the input level at which the demodulator just meets its target performance — a specified BER, packet error rate, or SNR. Everything above sensitivity works; everything below it fails. Sensitivity, together with transmit power and antenna gains, sets the maximum range of a link through the link budget.</p>
 <p>The beauty of the sensitivity equation is that it decomposes cleanly into three physically meaningful pieces: the <em>thermal noise floor</em> (set by temperature and bandwidth, an inescapable floor from physics), the <em>noise figure</em> (how much the receiver's own electronics degrade that floor), and the <em>required SNR or $E_b/N_0$</em> (how much cleaner than noise the signal must be for your modulation and coding). Master these three and you can compute, compare and improve the sensitivity of any receiver — and explain why LoRa reaches kilometres where Wi-Fi reaches metres.</p>`,

@@ -6,6 +6,27 @@ CONTENT.topics.push(
     category: 'Fundamentals',
     tags: ['bandwidth', 'nyquist', 'occupied-bandwidth', 'noise-bandwidth', 'half-power', 'fractional-bandwidth', 'data-rate'],
     summary: String.raw`Bandwidth is the width of the frequency band a signal occupies (or a system passes), but the exact number depends on which of several precise definitions — null-to-null, −3 dB, occupied, noise-equivalent, or Nyquist — you apply.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-bandwidth" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="40" y1="170" x2="510" y2="170" stroke="#9aa7b5"/>
+  <line x1="270" y1="170" x2="270" y2="35" stroke="#9aa7b5" stroke-dasharray="3 3"/>
+  <text x="500" y="188" fill="#9aa7b5">f</text>
+  <path d="M40,170 Q120,168 200,120 Q245,70 270,45 Q295,70 340,120 Q420,168 500,170" fill="none" stroke="#4dabf7" stroke-width="2"/>
+  <path d="M200,120 Q245,70 270,45 Q295,70 340,120 Z" fill="#4dabf7" fill-opacity="0.12" stroke="none"/>
+  <line x1="223" y1="90" x2="317" y2="90" stroke="#63e6be" marker-end="url(#arr-bandwidth)"/>
+  <line x1="317" y1="90" x2="223" y2="90" stroke="#63e6be" marker-end="url(#arr-bandwidth)"/>
+  <text x="270" y="83" fill="#63e6be" text-anchor="middle">−3 dB</text>
+  <line x1="200" y1="140" x2="340" y2="140" stroke="#ffa94d" marker-end="url(#arr-bandwidth)"/>
+  <line x1="340" y1="140" x2="200" y2="140" stroke="#ffa94d" marker-end="url(#arr-bandwidth)"/>
+  <text x="270" y="133" fill="#ffa94d" text-anchor="middle">null-to-null</text>
+  <line x1="150" y1="162" x2="390" y2="162" stroke="#b197fc" marker-end="url(#arr-bandwidth)"/>
+  <line x1="390" y1="162" x2="150" y2="162" stroke="#b197fc" marker-end="url(#arr-bandwidth)"/>
+  <text x="270" y="156" fill="#b197fc" text-anchor="middle">99% occupied</text>
+  <text x="270" y="210" fill="#9aa7b5" text-anchor="middle">one spectrum, several labelled widths — always name the definition</text>
+</svg>`,
+      caption: String.raw`Bandwidth mechanism: a single PSD carries several distinct labelled widths — −3 dB, null-to-null, and 99% occupied — that differ by 2× or more.`
+    },
     prerequisites: ['comm-basics', 'frequency-spectrum', 'sinc-function', 'psd'],
     intro: String.raw`<p><strong>Bandwidth</strong> is one of the most used and most abused words in communications. Loosely it means "how much frequency space a signal takes up," but that single phrase hides at least half a dozen different, precisely defined quantities that can differ by factors of two or more for the very same waveform. A pulse whose null-to-null bandwidth is 2 MHz might have a −3 dB bandwidth of 900 kHz, a 99% occupied bandwidth of 1.8 MHz, and a noise-equivalent bandwidth of 1 MHz. Getting exam questions and real link budgets right depends entirely on knowing <em>which</em> definition is in play.</p>
 <p>Bandwidth matters because it is the currency of both <strong>capacity</strong> and <strong>cost</strong>. Shannon tells us capacity grows with bandwidth; Nyquist tells us the symbol rate we can push through a band; regulators sell it by the megahertz; and every extra hertz a receiver accepts lets in more noise power ($N_0 B$). This topic assembles all the standard definitions, shows how each is measured, works an example for each, and nails the two relationships every engineer must have reflexively: the Nyquist link between bandwidth and symbol rate, and the factor-of-two between baseband and RF (passband) bandwidth.</p>`,
@@ -194,6 +215,37 @@ CONTENT.topics.push(
     category: 'Synchronization',
     tags: ['early-late', 'code-tracking', 'dll', 'timing-recovery', 'correlator', 'gps', 'discriminator', 's-curve'],
     summary: String.raw`The early-late gate tracks symbol or code timing by correlating the received signal against Early, Prompt, and Late replicas and driving a delay-locked loop with the Early−Late discriminator, whose S-curve is zero exactly at perfect alignment.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-early-late-correlator" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <text x="18" y="115" fill="#9aa7b5">rx code</text>
+  <rect x="90" y="20" width="120" height="38" rx="6" fill="#1c232e" stroke="#4dabf7"/>
+  <text x="150" y="43" fill="#e6edf3" text-anchor="middle">Early corr</text>
+  <rect x="90" y="96" width="120" height="38" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="150" y="119" fill="#e6edf3" text-anchor="middle">Prompt (data)</text>
+  <rect x="90" y="172" width="120" height="38" rx="6" fill="#1c232e" stroke="#63e6be"/>
+  <text x="150" y="195" fill="#e6edf3" text-anchor="middle">Late corr</text>
+  <circle cx="285" cy="39" r="16" fill="#1c232e" stroke="#b197fc"/>
+  <text x="285" y="44" fill="#e6edf3" text-anchor="middle">−</text>
+  <text x="285" y="18" fill="#9aa7b5" text-anchor="middle">E−L</text>
+  <rect x="330" y="20" width="95" height="38" rx="6" fill="#1c232e" stroke="#b197fc"/>
+  <text x="377" y="43" fill="#e6edf3" text-anchor="middle">loop filter</text>
+  <rect x="450" y="20" width="75" height="38" rx="6" fill="#1c232e" stroke="#ffa94d"/>
+  <text x="487" y="38" fill="#e6edf3" text-anchor="middle">code</text>
+  <text x="487" y="52" fill="#9aa7b5" text-anchor="middle">NCO</text>
+  <line x1="60" y1="110" x2="88" y2="42" stroke="#9aa7b5" marker-end="url(#arr-early-late-correlator)"/>
+  <line x1="60" y1="112" x2="88" y2="115" stroke="#9aa7b5" marker-end="url(#arr-early-late-correlator)"/>
+  <line x1="60" y1="114" x2="88" y2="188" stroke="#9aa7b5" marker-end="url(#arr-early-late-correlator)"/>
+  <line x1="210" y1="39" x2="268" y2="39" stroke="#9aa7b5" marker-end="url(#arr-early-late-correlator)"/>
+  <line x1="210" y1="191" x2="285" y2="55" stroke="#9aa7b5" marker-end="url(#arr-early-late-correlator)"/>
+  <line x1="301" y1="39" x2="328" y2="39" stroke="#9aa7b5" marker-end="url(#arr-early-late-correlator)"/>
+  <line x1="425" y1="39" x2="448" y2="39" stroke="#9aa7b5" marker-end="url(#arr-early-late-correlator)"/>
+  <path d="M487,58 L487,150 L152,150 L152,134" fill="none" stroke="#9aa7b5" stroke-dasharray="3 3" marker-end="url(#arr-early-late-correlator)"/>
+  <text x="360" y="145" fill="#9aa7b5" text-anchor="middle">adjust replica timing</text>
+  <text x="150" y="225" fill="#9aa7b5" text-anchor="middle">S-curve E−L = 0 at perfect alignment; Prompt despreads the data</text>
+</svg>`,
+      caption: String.raw`Early-late mechanism: Early, Prompt, Late correlators feed an E−L discriminator through a loop filter to a code NCO that adjusts replica timing.`
+    },
     prerequisites: ['correlation', 'matched-filter', 'pll', 'pn-codes'],
     intro: String.raw`<p>A coherent receiver recovers <em>carrier</em> phase with a PLL/Costas loop, but it must independently recover <em>timing</em>: the precise instant to sample each symbol, or the exact code phase of a spreading sequence. Sampling even a fraction of a symbol early or late collapses the eye and destroys the matched-filter SNR. The <strong>early-late gate</strong> (and its code-tracking cousin, the <strong>delay-locked loop, DLL</strong>) is the classic feedback mechanism that finds and holds that instant.</p>
 <p>The idea is beautifully symmetric. The matched-filter/correlation output as a function of timing offset is a peak — triangular for a chip/symbol, a raised-cosine-like hump for shaped pulses. You cannot measure "am I at the peak?" directly because the peak is flat to first order. Instead you probe <em>either side</em>: correlate with an <strong>Early</strong> replica advanced by half a chip and a <strong>Late</strong> replica delayed by half a chip. If Early and Late correlations are equal you are centred; if Early &gt; Late you are late and must advance; if Late &gt; Early you are early and must retard. The difference Early−Late is a <strong>discriminator</strong> whose characteristic (the S-curve) crosses zero at perfect alignment and has the right slope to close a tracking loop. The <strong>Prompt</strong> correlator sits at the centre and delivers the actual data/despread output. This structure — three correlators, a discriminator, a loop filter, and a numerically controlled oscillator (NCO) adjusting the replica timing — is exactly a PLL redrawn in the timing domain, and it is the beating heart of every GPS receiver and most symbol synchronizers.</p>`,
@@ -375,6 +427,27 @@ CONTENT.topics.push(
     category: 'Antennas & Electromagnetics',
     tags: ['polarization', 'circular-polarization', 'axial-ratio', 'faraday-rotation', 'plf', 'cross-pol', 'diversity'],
     summary: String.raw`Polarization is the time-varying orientation of a wave's electric field — linear, circular, or elliptical — and matching it between transmit and receive antennas is essential, with the polarization loss factor $\mathrm{PLF}=|\cos\psi|^2$ quantifying the penalty for a mismatch.`,
+    diagram: {
+      svg: String.raw`<svg viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+  <defs><marker id="arr-polarization" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa7b5"/></marker></defs>
+  <line x1="120" y1="115" x2="120" y2="30" stroke="#4dabf7" stroke-width="2" marker-end="url(#arr-polarization)"/>
+  <text x="120" y="22" fill="#4dabf7" text-anchor="middle">Ey</text>
+  <line x1="120" y1="115" x2="205" y2="115" stroke="#63e6be" stroke-width="2" marker-end="url(#arr-polarization)"/>
+  <text x="215" y="119" fill="#63e6be">Ex</text>
+  <text x="120" y="150" fill="#9aa7b5" text-anchor="middle">two orthogonal E-components</text>
+  <text x="120" y="168" fill="#9aa7b5" text-anchor="middle">(amplitude ratio + phase δ)</text>
+  <ellipse cx="400" cy="105" rx="90" ry="45" fill="#b197fc" fill-opacity="0.10" stroke="#b197fc" stroke-width="2" transform="rotate(-25 400 105)"/>
+  <line x1="335" y1="135" x2="465" y2="75" stroke="#ffa94d" stroke-dasharray="4 3"/>
+  <line x1="378" y1="66" x2="422" y2="144" stroke="#ffa94d" stroke-dasharray="4 3"/>
+  <path d="M470,80 A90,45 0 0 1 455,130" fill="none" stroke="#b197fc" marker-end="url(#arr-polarization)"/>
+  <text x="400" y="55" fill="#ffa94d" text-anchor="middle">E_max / E_min = AR</text>
+  <text x="400" y="185" fill="#e6edf3" text-anchor="middle">polarization ellipse</text>
+  <line x1="240" y1="105" x2="300" y2="105" stroke="#9aa7b5" marker-end="url(#arr-polarization)"/>
+  <text x="270" y="98" fill="#9aa7b5" text-anchor="middle">δ, Ey/Ex</text>
+  <text x="270" y="215" fill="#9aa7b5" text-anchor="middle">δ=0→linear (V/H); Ex=Ey, δ=±90°→circular; else elliptical</text>
+</svg>`,
+      caption: String.raw`Polarization mechanism: two orthogonal E-components (Ex, Ey) with relative phase δ set the polarization ellipse — linear (V/H), circular, or elliptical.`
+    },
     prerequisites: ['maxwell', 'antenna', 'antenna-gain', 'link-budget'],
     intro: String.raw`<p>An electromagnetic wave is a transverse oscillation: its electric field $\vec E$ points perpendicular to the direction of travel and oscillates in time. <strong>Polarization</strong> describes how the tip of that $\vec E$ vector moves as the wave passes a fixed point — whether it stays on a line (linear), traces a circle (circular), or sweeps an ellipse (elliptical). It is a property as fundamental as frequency or amplitude, and getting it wrong can cost you 3, 20, or even an infinite number of decibels of received signal.</p>
 <p>Polarization matters because antennas are polarization-sensitive: a receive antenna only captures the component of the incoming field aligned with its own polarization. A vertical dipole is deaf to a horizontally polarized wave; a right-hand circular antenna rejects a left-hand circular wave. This lets engineers <em>reuse</em> the same frequency twice (vertical and horizontal, or LHCP and RHCP) to double capacity, gives satellites immunity to the random rotation their signals suffer crossing the ionosphere, and provides a diversity dimension that MIMO and dual-pol radar exploit. This topic builds polarization from Maxwell's transverse fields, shows how the relative phase and amplitude of two orthogonal components set the polarization state, defines the axial ratio and cross-pol figures engineers actually measure, derives the polarization loss factor, and explains Faraday rotation and why satellites overwhelmingly choose circular polarization.</p>`,
