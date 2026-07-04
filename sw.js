@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v18';
+const CACHE = 'rfstudy-v19';
 
 const ASSETS = [
   './',
@@ -13,6 +13,7 @@ const ASSETS = [
   'dummies-extra2.js',
   'dummies-extra3.js',
   'dummies-extra4.js',
+  'dummies-extra5.js',
   'figures.js',
   'figures-extra.js',
   'manifest.webmanifest',
@@ -35,6 +36,11 @@ const ASSETS = [
   'topics/proto-b.js',
   'topics/sync-extra.js',
   'topics/coding-extra.js',
+  'topics/normal-distribution.js',
+  'topics/error-function.js',
+  'topics/rayleigh-distribution.js',
+  'topics/awgn.js',
+  'topics/trellis-diagram.js',
   'derivations/fundamentals.js',
   'derivations/signals-systems.js',
   'derivations/modulation-detection.js',
@@ -56,6 +62,7 @@ const ASSETS = [
   'code/extra2.js',
   'code/proto.js',
   'code/extra3.js',
+  'code/extra4.js',
   'vendor/mathjax/tex-svg.js',
   'icons/icon-192.png',
   'icons/icon-512.png',

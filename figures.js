@@ -1739,9 +1739,288 @@ const FIG = (function () {
     ctx.fillStyle = C.dim; ctx.textAlign = 'center'; ctx.font = '11px sans-serif'; ctx.fillText('two recursive encoders (one on interleaved bits) → rate-1/3: systematic + parity 1 + parity 2', w / 2, h - 8);
   };
 
+  // Normal distribution: Gaussian pdf with mu/sigma, shaded +/-k-sigma band + enclosed probability
+  T.ndPdf = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    let mu = 0, sig = 1, kk = 1;
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const lo = -6, hi = 6, ymax = 1 / (0.5 * Math.sqrt(TAU)) * 1.1;
+      const ax = drawAxes(ctx, box, { xr: [lo, hi], yr: [0, ymax], xlabel: 'x', ylabel: 'probability density' });
+      const pdf = x => Math.exp(-((x - mu) * (x - mu)) / (2 * sig * sig)) / (sig * Math.sqrt(TAU));
+      // shaded band mu +/- k*sigma
+      ctx.save(); ctx.beginPath(); ctx.rect(ax.x, ax.y, ax.w, ax.h); ctx.clip();
+      ctx.fillStyle = 'rgba(99,230,190,0.30)';
+      const a = mu - kk * sig, b = mu + kk * sig;
+      ctx.beginPath(); ctx.moveTo(ax.fx(a), ax.fy(0));
+      for (let x = a; x <= b; x += 0.02) ctx.lineTo(ax.fx(x), ax.fy(pdf(x)));
+      ctx.lineTo(ax.fx(b), ax.fy(0)); ctx.closePath(); ctx.fill(); ctx.restore();
+      // curve
+      const pts = []; for (let x = lo; x <= hi; x += 0.02) pts.push([x, pdf(x)]); line(ctx, ax, pts, C.blue, 2.5);
+      // mean marker
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(mu), ax.fy(0)); ctx.lineTo(ax.fx(mu), ax.fy(pdf(mu))); ctx.stroke(); ctx.setLineDash([]);
+      const prob = 1 - 2 * Q(kk); // P(|x-mu| < k*sigma), sigma-independent
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('mu = ' + mu.toFixed(1) + ', sigma = ' + sig.toFixed(2) + '  ->  P(|x-mu| < ' + kk.toFixed(1) + 'sigma) = ' + (prob * 100).toFixed(1) + '%', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.teal; ctx.font = '11px sans-serif';
+      ctx.fillText('68-95-99.7 rule: 1sigma~68%, 2sigma~95%, 3sigma~99.7%', ax.x + 8, ax.y + 34);
+    }
+    draw();
+    slider(card.controls, { label: 'mean mu', min: -3, max: 3, step: 0.1, value: 0, fmt: v => v.toFixed(1) }, v => { mu = v; draw(); });
+    slider(card.controls, { label: 'std dev sigma', min: 0.5, max: 2.5, step: 0.05, value: 1, fmt: v => v.toFixed(2) }, v => { sig = v; draw(); });
+    slider(card.controls, { label: 'band k', min: 0.5, max: 3, step: 0.5, value: 1, fmt: v => v.toFixed(1) + ' sigma' }, v => { kk = v; draw(); });
+  };
+
+  // Central-Limit demo: histogram of sum of N uniforms approaches a bell
+  T.ndClt = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    function draw(N) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const trials = 6000, bins = 41;
+      // sum of N uniforms(0,1): mean N/2, variance N/12 -> normalize to zero mean, unit-ish spread
+      const mean = N / 2, sd = Math.sqrt(N / 12);
+      const lim = 4, hist = new Array(bins).fill(0);
+      for (let t = 0; t < trials; t++) {
+        let s = 0; for (let i = 0; i < N; i++) s += Math.random();
+        const z = (s - mean) / sd; const bi = Math.floor((z / lim + 1) / 2 * bins);
+        if (bi >= 0 && bi < bins) hist[bi]++;
+      }
+      const yr = [0, 0.5];
+      const ax = drawAxes(ctx, box, { xr: [-lim, lim], yr, xlabel: 'normalized sum (z)', ylabel: 'probability density' });
+      ctx.fillStyle = 'rgba(77,171,247,0.35)';
+      for (let bi = 0; bi < bins; bi++) {
+        const x0 = -lim + bi / bins * 2 * lim, x1 = -lim + (bi + 1) / bins * 2 * lim;
+        const dens = hist[bi] / trials / ((2 * lim) / bins);
+        ctx.fillRect(ax.fx(x0), ax.fy(dens), ax.fx(x1) - ax.fx(x0) - 1, ax.fy(0) - ax.fy(dens));
+      }
+      const pts = []; for (let x = -lim; x <= lim; x += 0.04) pts.push([x, Math.exp(-x * x / 2) / Math.sqrt(TAU)]); line(ctx, ax, pts, C.orange, 2.5);
+      legend(ctx, box, [{ label: 'N uniforms', color: C.blue }, { label: 'Gaussian limit', color: C.orange }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('sum of N = ' + N + ' uniform' + (N > 1 ? 's' : '') + (N === 1 ? ' -> flat (not yet Gaussian)' : ' -> approaching the bell'), ax.x + 8, ax.y + 16);
+    }
+    draw(3);
+    slider(card.controls, { label: 'summed uniforms N', min: 1, max: 12, step: 1, value: 3 }, v => draw(Math.round(v)));
+  };
+
+  // Error function: standard-normal curve with shaded Q(x)/erfc tail region + value
+  T.erfTail = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    function draw(xv) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const lo = -4, hi = 4;
+      const ax = drawAxes(ctx, box, { xr: [lo, hi], yr: [0, 0.46], xlabel: 'x (standard deviations)', ylabel: 'phi(x)' });
+      const phi = x => Math.exp(-x * x / 2) / Math.sqrt(TAU);
+      // shade the tail x >= xv
+      ctx.save(); ctx.beginPath(); ctx.rect(ax.x, ax.y, ax.w, ax.h); ctx.clip();
+      ctx.fillStyle = 'rgba(255,107,107,0.35)';
+      ctx.beginPath(); ctx.moveTo(ax.fx(xv), ax.fy(0));
+      for (let x = xv; x <= hi; x += 0.02) ctx.lineTo(ax.fx(x), ax.fy(phi(x)));
+      ctx.lineTo(ax.fx(hi), ax.fy(0)); ctx.closePath(); ctx.fill(); ctx.restore();
+      const pts = []; for (let x = lo; x <= hi; x += 0.02) pts.push([x, phi(x)]); line(ctx, ax, pts, C.blue, 2.5);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(xv), ax.fy(0)); ctx.lineTo(ax.fx(xv), ax.fy(phi(xv))); ctx.stroke(); ctx.setLineDash([]);
+      const q = Q(xv);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('Q(' + xv.toFixed(2) + ') = ' + q.toExponential(2) + '  (shaded tail area)', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('Q(x) = 0.5*erfc(x/sqrt2); erfc(' + (xv / Math.SQRT2).toFixed(2) + ') = ' + (2 * q).toExponential(2), ax.x + 8, ax.y + 34);
+    }
+    draw(1);
+    slider(card.controls, { label: 'threshold x', min: -1, max: 4, step: 0.05, value: 1, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
+  // Error function: BPSK BER = Q(sqrt(2 Eb/N0)) vs Eb/N0 (dB) with a draggable operating point
+  T.erfBer = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    function draw(mark) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, {
+        xr: [0, 12], yr: [1e-6, 0.5], logy: true, xlabel: 'Eb/N0 (dB)', ylabel: 'BER = Q(sqrt(2 Eb/N0))',
+        ytickfmt: t => t.toExponential(0).replace('e+0', '').replace('e', 'e')
+      });
+      const pts = []; for (let db = 0; db <= 12; db += 0.25) { const b = Q(Math.sqrt(2 * lin(db))); pts.push([db, Math.max(b, 1e-7)]); }
+      line(ctx, ax, pts, C.blue, 2.4);
+      const b0 = Q(Math.sqrt(2 * lin(mark)));
+      const mx = ax.fx(mark), my = ax.fy(Math.max(b0, 1e-7));
+      ctx.strokeStyle = C.dim; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(mx, ax.y); ctx.lineTo(mx, ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(mx, my, 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('Eb/N0 = ' + mark + ' dB  ->  BER = ' + b0.toExponential(2), ax.x + 8, ax.y + ax.h - 12);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('the Q-function turns link SNR into an error probability', ax.x + 8, ax.y + 14);
+    }
+    draw(8);
+    slider(card.controls, { label: 'Eb/N0', min: 0, max: 12, step: 0.5, value: 8, fmt: v => v + ' dB' }, v => draw(v));
+  };
+
+  // Rayleigh distribution: pdf with sigma slider, mark mean = sigma*sqrt(pi/2) and mode = sigma
+  T.rayPdf = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    function draw(sig) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const hi = 6, ymax = (1 / Math.E) / 0.5 * 1.1; // roughly peak at r=sigma
+      const pdf = r => (r / (sig * sig)) * Math.exp(-(r * r) / (2 * sig * sig));
+      let pk = 0; for (let r = 0; r <= hi; r += 0.02) pk = Math.max(pk, pdf(r));
+      const ax = drawAxes(ctx, box, { xr: [0, hi], yr: [0, pk * 1.15], xlabel: 'envelope r', ylabel: 'probability density' });
+      const pts = []; for (let r = 0; r <= hi; r += 0.02) pts.push([r, pdf(r)]); line(ctx, ax, pts, C.blue, 2.5);
+      const mode = sig, mean = sig * Math.sqrt(Math.PI / 2);
+      ctx.strokeStyle = C.teal; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(mode), ax.fy(0)); ctx.lineTo(ax.fx(mode), ax.fy(pdf(mode))); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(mean), ax.fy(0)); ctx.lineTo(ax.fx(mean), ax.fy(pdf(mean))); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.teal; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('mode = sigma', ax.fx(mode), ax.fy(pdf(mode)) - 8);
+      ctx.fillStyle = C.orange; ctx.fillText('mean', ax.fx(mean), ax.fy(pdf(mean)) - 8);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('sigma = ' + sig.toFixed(2) + '  ->  mode = ' + mode.toFixed(2) + ', mean = sigma*sqrt(pi/2) = ' + mean.toFixed(2), ax.x + 8, ax.y + 16);
+    }
+    draw(1);
+    slider(card.controls, { label: 'scale sigma', min: 0.4, max: 2.2, step: 0.05, value: 1, fmt: v => v.toFixed(2) }, v => draw(v));
+  };
+
+  // Rayleigh: envelope-vs-time from two Gaussian quadratures + threshold line (deep fades)
+  T.rayEnv = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const N = 300, I = [], Qd = [];
+    // correlated-ish random walk of the two quadratures for a smooth fading envelope
+    (function () { let i = gauss(), q = gauss(); for (let n = 0; n < N; n++) { i = 0.92 * i + 0.39 * gauss(); q = 0.92 * q + 0.39 * gauss(); I.push(i); Qd.push(q); } })();
+    const env = I.map((v, n) => Math.sqrt(v * v + Qd[n] * Qd[n]));
+    function draw(thrDb) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const rms = Math.sqrt(env.reduce((a, e) => a + e * e, 0) / N);
+      const ax = drawAxes(ctx, box, { xr: [0, N], yr: [-30, 12], xlabel: 'time (samples)', ylabel: 'envelope (dB re RMS)' });
+      const pts = env.map((e, n) => [n, dB((e * e) / (rms * rms) + 1e-6)]); line(ctx, ax, pts, C.blue, 1.6);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(thrDb)); ctx.lineTo(ax.x + ax.w, ax.fy(thrDb)); ctx.stroke(); ctx.setLineDash([]);
+      let fades = 0; for (let n = 0; n < N; n++) { const lv = dB((env[n] * env[n]) / (rms * rms) + 1e-6); if (lv < thrDb) { ctx.fillStyle = 'rgba(255,107,107,0.5)'; ctx.fillRect(ax.fx(n), ax.fy(thrDb), Math.max(1, ax.fx(1) - ax.fx(0)), ax.fy(-30) - ax.fy(thrDb)); if (n === 0 || dB((env[n - 1] * env[n - 1]) / (rms * rms) + 1e-6) >= thrDb) fades++; } }
+      ctx.fillStyle = C.orange; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('fade threshold ' + thrDb + ' dB', ax.x + 8, ax.fy(thrDb) - 6);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif';
+      ctx.fillText('two Gaussian quadratures -> Rayleigh envelope; ' + fades + ' deep fade' + (fades === 1 ? '' : 's') + ' below threshold', ax.x + 8, ax.y + 16);
+    }
+    draw(-10);
+    slider(card.controls, { label: 'fade threshold', min: -25, max: 0, step: 1, value: -10, fmt: v => v + ' dB' }, v => draw(v));
+  };
+
+  // AWGN: BPSK/QPSK constellation scatter with noise cloud, measured vs theoretical BER
+  T.awgnScatter = function (host, spec) {
+    const card = makeCard(host, spec, 400, 380);
+    let ord = 2;
+    function draw(ebno) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 - 30, S = R / 1.6;
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.fillText('I', cx + R, cy - 6); ctx.textAlign = 'left'; ctx.fillText('Q', cx + 6, cy - R + 6);
+      // symbols (unit energy per symbol). For QPSK each axis carries one bit at Eb.
+      const pts = ord === 2 ? [[1, 0], [-1, 0]] : [[1, 1], [-1, 1], [-1, -1], [1, -1]].map(p => [p[0] / Math.SQRT2, p[1] / Math.SQRT2]);
+      // per-bit noise sigma: with Eb/N0 = g, sigma_per_dim = sqrt(1/(2g)) on the per-bit-normalized axis
+      const g = lin(ebno);
+      const sigma = ord === 2 ? Math.sqrt(1 / (2 * g)) : Math.sqrt(1 / (2 * g)) / Math.SQRT2;
+      // draw noisy samples and count bit errors
+      let bits = 0, errs = 0;
+      ctx.fillStyle = 'rgba(77,171,247,0.5)';
+      for (let k = 0; k < 700; k++) {
+        const p = pts[k % pts.length];
+        const rx = p[0] + sigma * gauss(), ry = p[1] + sigma * gauss();
+        ctx.fillRect(cx + rx * S, cy - ry * S, 2, 2);
+        if (ord === 2) { bits++; if ((rx >= 0) !== (p[0] >= 0)) errs++; }
+        else { bits += 2; if ((rx >= 0) !== (p[0] >= 0)) errs++; if ((ry >= 0) !== (p[1] >= 0)) errs++; }
+      }
+      pts.forEach(p => { ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(cx + p[0] * S, cy - p[1] * S, 4, 0, TAU); ctx.fill(); });
+      const theo = Q(Math.sqrt(2 * g)), meas = errs / bits;
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText((ord === 2 ? 'BPSK' : 'QPSK') + ' @ Eb/N0 = ' + ebno + ' dB', 12, 18);
+      ctx.fillText('measured BER = ' + (meas > 0 ? meas.toExponential(1) : '0'), 12, 36);
+      ctx.fillText('theory Q(sqrt(2Eb/N0)) = ' + theo.toExponential(1), 12, 54);
+    }
+    draw(6);
+    chooser(card.controls, [{ v: 2, l: 'BPSK' }, { v: 4, l: 'QPSK' }], 2, v => { ord = v; draw(curEb); });
+    let curEb = 6;
+    slider(card.controls, { label: 'Eb/N0', min: -2, max: 12, step: 1, value: 6, fmt: v => v + ' dB' }, v => { curEb = v; draw(v); });
+  };
+
+  // AWGN: flat white PSD vs a coloured (1/f-ish) reference
+  T.awgnPsd = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    function draw(n0db) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, 1], yr: [-40, 10], xlabel: 'normalized frequency', ylabel: 'PSD (dB/Hz)' });
+      // white: flat line at N0/2 (here n0db), with small random ripple to look measured
+      const white = []; for (let f = 0; f <= 1; f += 0.005) white.push([f, n0db + 1.2 * gauss()]); line(ctx, ax, white, C.blue, 1.4);
+      ctx.strokeStyle = C.teal; ctx.setLineDash([5, 4]); line(ctx, ax, [[0, n0db], [1, n0db]], C.teal, 2); ctx.setLineDash([]);
+      // coloured reference (falls with frequency)
+      const col = []; for (let f = 0.005; f <= 1; f += 0.005) col.push([f, n0db + 8 - 22 * f]); line(ctx, ax, col, C.orange, 2);
+      legend(ctx, box, [{ label: 'white (flat)', color: C.blue }, { label: 'N0/2 level', color: C.teal }, { label: 'coloured', color: C.orange }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('AWGN is "white": equal power at every frequency (flat PSD = N0/2 = ' + n0db + ' dB)', ax.x + 8, ax.y + ax.h - 12);
+    }
+    draw(-15);
+    slider(card.controls, { label: 'N0/2 level', min: -30, max: 0, step: 1, value: -15, fmt: v => v + ' dB' }, v => draw(v));
+  };
+
+  // Trellis diagram: 4-state (K=3) trellis over several steps with a highlighted survivor path
+  T.trelPath = function (host, spec) {
+    const card = makeCard(host, spec, 540, 300);
+    const stages = 7, states = 4, mL = 64, mT = 30;
+    const path = [0, 2, 1, 2, 3, 1, 0];
+    function draw(upto) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const gx = i => mL + i * (w - mL - 30) / (stages - 1);
+      const gy = s => mT + s * (h - mT - 54) / (states - 1);
+      // full trellis butterflies: from state s, next states (s>>1) and (s>>1)|2
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let i = 0; i < stages - 1; i++) for (let s = 0; s < states; s++) {
+        [(s >> 1), ((s >> 1) | 2)].forEach(ns => { if (ns < states) { ctx.beginPath(); ctx.moveTo(gx(i), gy(s)); ctx.lineTo(gx(i + 1), gy(ns)); ctx.stroke(); } });
+      }
+      // survivor path up to current step
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 3; ctx.beginPath();
+      for (let i = 0; i <= upto && i < stages; i++) { const X = gx(i), Y = gy(path[i]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); } ctx.stroke();
+      for (let i = 0; i < stages; i++) for (let s = 0; s < states; s++) {
+        const onPath = (path[i] === s && i <= upto);
+        ctx.fillStyle = onPath ? C.teal : (i === upto + 1 ? C.orange : C.blue);
+        ctx.beginPath(); ctx.arc(gx(i), gy(s), onPath ? 6 : 5, 0, TAU); ctx.fill();
+      }
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+      ['S0 00', 'S1 01', 'S2 10', 'S3 11'].forEach((lbl, s) => ctx.fillText(lbl, 6, gy(s) + 4));
+      ctx.fillStyle = C.dim; ctx.textAlign = 'center'; ctx.font = '10px sans-serif';
+      for (let i = 0; i < stages; i++) ctx.fillText('t' + i, gx(i), h - 28);
+      ctx.fillStyle = C.teal; ctx.font = '12px sans-serif';
+      ctx.fillText('K=3, 4-state trellis - survivor path traced to step ' + (upto + 1) + '/' + stages, w / 2, h - 10);
+    }
+    draw(stages - 1);
+    slider(card.controls, { label: 'time step', min: 0, max: stages - 1, step: 1, value: stages - 1 }, v => draw(Math.round(v)));
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {
+    'normal-distribution': [
+      { type: 'ndPdf', title: 'Gaussian pdf & the k-sigma band', caption: 'Slide mu, sigma and k — the shaded band prints its enclosed probability.', explain: EX('<b>What it shows:</b> the normal (Gaussian) pdf. <b>Try:</b> shifting mu slides the bell, sigma widens it, and the k-sigma band shows the famous 68-95-99.7 rule — the enclosed probability depends only on k, not on mu or sigma.') },
+      { type: 'ndClt', title: 'Central-limit theorem in action', caption: 'Sum more uniforms and watch a bell emerge from flat noise.', explain: EX('<b>What it shows:</b> the CLT — add up N independent uniform variables and their (normalized) sum converges to a Gaussian. <b>Try:</b> N=1 is flat, but by N=3-4 the bell is already unmistakable. This is why thermal noise, made of countless tiny contributions, is Gaussian.') },
+      { type: 'gaussianNoise', title: 'Gaussian samples vs the pdf', caption: 'Drag the noise sigma and watch the histogram track the curve.', explain: EX('Random Gaussian samples (blue) fill the theoretical pdf (orange) — the same distribution that models receiver thermal noise.') }
+    ],
+    'error-function': [
+      { type: 'erfTail', title: 'The Q-function tail area', caption: 'Drag the threshold x — the shaded tail is Q(x) = 0.5*erfc(x/sqrt2).', explain: EX('<b>What it shows:</b> Q(x) is the area under the standard-normal curve to the right of x. <b>Try:</b> slide x outward and the tail (and its probability) shrinks fast. Q and the error function erfc are two names for this same tail integral that governs detection error rates.') },
+      { type: 'erfBer', title: 'BPSK BER from the Q-function', caption: 'Drag Eb/N0 — the operating point reads BER = Q(sqrt(2 Eb/N0)).', explain: EX('<b>What it shows:</b> the error function turns link SNR into a bit-error probability. <b>Try:</b> move the operating point; the classic waterfall Pb = Q(sqrt(2 Eb/N0)) plunges steeply, so a couple of extra dB slash the error rate by orders of magnitude.') },
+      { type: 'berCurve', series: [{ name: 'bpsk' }], title: 'Where erfc shows up', caption: 'Every coherent BER curve is built from Q/erfc.', explain: EX('The BER of essentially every coherent scheme is a Q-function of the SNR — the error function is the workhorse of digital-comm analysis.') }
+    ],
+    'rayleigh-distribution': [
+      { type: 'rayPdf', title: 'Rayleigh pdf, mode & mean', caption: 'Slide sigma — the markers track mode = sigma and mean = sigma*sqrt(pi/2).', explain: EX('<b>What it shows:</b> the Rayleigh pdf of a fading envelope. <b>Try:</b> change sigma; the peak (mode) sits at sigma while the mean is a bit higher at sigma*sqrt(pi/2). This is the amplitude distribution when there is no dominant line-of-sight path.') },
+      { type: 'rayEnv', title: 'Fading envelope vs time', caption: 'Set a fade threshold and count the deep fades below it.', explain: EX('<b>What it shows:</b> two independent Gaussian quadratures (I and Q) combine into a Rayleigh-distributed envelope that fades over time. <b>Try:</b> lower the threshold and the red deep-fade dropouts — where the signal briefly vanishes — become rarer. Diversity and coding exist to ride through exactly these fades.') },
+      { type: 'gaussianNoise', title: 'The Gaussian quadratures behind it', caption: 'Each of I and Q is Gaussian; their magnitude is Rayleigh.', explain: EX('A Rayleigh envelope is the magnitude of two zero-mean Gaussian components — this shows one such Gaussian quadrature.') }
+    ],
+    'awgn': [
+      { type: 'awgnScatter', title: 'Constellation in AWGN', caption: 'Pick BPSK/QPSK and drag Eb/N0 — compare measured vs theoretical BER.', explain: EX('<b>What it shows:</b> ideal symbols (orange) blurred by a Gaussian noise cloud. <b>Try:</b> drop Eb/N0 and the cloud spills across the decision axes, flipping bits; the measured BER tracks the theoretical Q(sqrt(2 Eb/N0)) — the channel that all digital links are benchmarked against.') },
+      { type: 'awgnPsd', title: 'Why it is called "white"', caption: 'The AWGN power spectral density is flat across all frequencies.', explain: EX('<b>What it shows:</b> AWGN has a flat (white) power spectral density at N0/2, in contrast to a coloured noise that emphasises some frequencies. <b>Try:</b> raise the level; the whole flat floor lifts. "White" = equal power everywhere, "additive" = it simply sums with the signal.') },
+      { type: 'gaussianNoise', title: 'Gaussian amplitude statistics', caption: 'AWGN amplitudes follow the bell curve.', explain: EX('The "G" in AWGN — its instantaneous amplitude is Gaussian, matching the theoretical pdf as samples accumulate.') }
+    ],
+    'trellis-diagram': [
+      { type: 'trelPath', title: 'K=3 trellis & survivor path', caption: 'Step through time — the teal survivor path grows across the 4-state trellis.', explain: EX('<b>What it shows:</b> a 4-state (K=3) convolutional-code trellis unrolled over time; each state can go to two next states (a butterfly). <b>Try:</b> step forward and watch the single surviving maximum-likelihood path (teal) extend — the structure the Viterbi decoder walks.') },
+      { type: 'trellis', title: 'Add-compare-select in action', caption: 'Step the decode: one survivor is kept per state.', explain: EX('<b>What it shows:</b> the Viterbi "add-compare-select" step keeps exactly one survivor into every state, so the search stays linear rather than exponential in length.') },
+      { type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'The coding gain it delivers', caption: 'Decoding the trellis buys a left-shift in BER.', explain: EX('Following the best path through the trellis corrects errors, shifting the BER curve left by the coding gain.') }
+    ],
     'vco': [
       { type: 'vcoTune', title: 'VCO tuning curve', caption: 'Slide Kvco — the slope of frequency vs control voltage.', explain: EX('<b>What it shows:</b> a VCO’s output frequency rides on its control voltage, f = f0 + Kvco·V. <b>Try:</b> a bigger Kvco tunes over a wider range but also turns any noise on the control line into more frequency (phase) noise — the core VCO design trade.') },
       { type: 'phaseNoise', title: 'VCO phase noise', caption: 'Real oscillators have a noise skirt.', explain: EX('A VCO is never perfectly pure — its phase noise (Leeson skirt) is what a PLL is built to clean up close-in.') },
