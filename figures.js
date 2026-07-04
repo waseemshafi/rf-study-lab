@@ -1628,9 +1628,150 @@ const FIG = (function () {
     chooser(card.controls, ['FIXED', 'INCR', 'WRAP'].map(t => ({ v: t, l: t })), 'INCR', v => { type = v; draw(); });
   };
 
+  // VCO tuning curve: f_out = f0 + Kvco·Vctrl
+  T.vcoTune = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const f0 = 1000;
+    function draw(kvco) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const ax = drawAxes(ctx, plotBox(w, h), { xr: [-1, 1], yr: [f0 - kvco * 1.15, f0 + kvco * 1.15], xlabel: 'control voltage Vctrl (V)', ylabel: 'output frequency (MHz)' });
+      const pts = []; for (let v = -1; v <= 1; v += 0.02) pts.push([v, f0 + kvco * v]); line(ctx, ax, pts, C.blue, 2.5);
+      const vm = 0.3, fm = f0 + kvco * vm;
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(vm), ax.y + ax.h); ctx.lineTo(ax.fx(vm), ax.fy(fm)); ctx.lineTo(ax.x, ax.fy(fm)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(vm), ax.fy(fm), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('f = f0 + Kvco·V · slope Kvco = ' + kvco + ' MHz/V — steeper tunes wider but amplifies control-line noise', ax.x + 8, ax.y + 16);
+    }
+    draw(50);
+    slider(card.controls, { label: 'Kvco', min: 10, max: 200, step: 10, value: 50, fmt: v => v + ' MHz/V' }, v => draw(v));
+  };
+
+  // NCO: phase accumulator ramp + synthesized sine
+  T.ncoDDS = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const Nbits = 6, M = Math.pow(2, Nbits);
+    function draw(fcw) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 74) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [0, 64], yr: [0, M], xlabel: '', ylabel: 'phase acc' });
+      const ph = []; let acc = 0; for (let n = 0; n < 64; n++) { ph.push([n, acc]); acc = (acc + fcw) % M; } line(ctx, a1, ph, C.teal, 1.6);
+      const b2 = { x: 52, y: 20 + b1.h + 34, w: w - 72, h: (h - 74) / 2 };
+      const a2 = drawAxes(ctx, b2, { xr: [0, 64], yr: [-1.2, 1.2], xlabel: 'clock cycles', ylabel: 'sine out' });
+      const s = []; for (let n = 0; n <= 64; n++) s.push([n, Math.sin(TAU * ((fcw * n) % M) / M)]); line(ctx, a2, s, C.blue, 2);
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('phase ramp wraps every 2^N=' + M + ' · f_out = FCW·f_clk/2^N = ' + fcw + '/' + M + ' = ' + (fcw / M).toFixed(3) + '·f_clk', b1.x + 4, b1.y + 12);
+    }
+    draw(5);
+    slider(card.controls, { label: 'freq word (FCW)', min: 1, max: 31, step: 1, value: 5 }, v => draw(Math.round(v)));
+  };
+
+  // CFO: a spinning QPSK constellation
+  T.cfoSpin = function (host, spec) {
+    const card = makeCard(host, spec, 380, 360);
+    const pts = [[-1, 1], [1, 1], [1, -1], [-1, -1]].map(p => [p[0] / Math.SQRT2, p[1] / Math.SQRT2]);
+    function draw(cfo) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 - 30, S = R / 1.5;
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+      for (let k = 0; k < 64; k++) { const ang = cfo * k * Math.PI / 180, p = pts[k % 4]; const ex = p[0] * Math.cos(ang) - p[1] * Math.sin(ang), ey = p[0] * Math.sin(ang) + p[1] * Math.cos(ang); ctx.fillStyle = 'rgba(77,171,247,0.6)'; ctx.beginPath(); ctx.arc(cx + ex * S, cy - ey * S, 3, 0, TAU); ctx.fill(); }
+      pts.forEach(p => { ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(cx + p[0] * S, cy - p[1] * S, 4, 0, TAU); ctx.fill(); });
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(cfo === 0 ? 'no CFO — the points stay put' : 'CFO rotates each symbol by 2π·Δf·t', 12, 20);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.fillText('phase drift ' + cfo + '° per symbol → a spinning constellation', 12, 38);
+    }
+    draw(15);
+    slider(card.controls, { label: 'CFO', min: 0, max: 60, step: 2, value: 15, fmt: v => v + '°/sym' }, v => draw(v));
+  };
+
+  // DLL: a delay line aligning a clock edge to a reference
+  T.dllAlign = function (host, spec) {
+    const card = makeCard(host, spec, 540, 250);
+    function draw(delay) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const x0 = 60, x1 = w - 16, T = 80;
+      function clk(y, shift, color, lbl) {
+        ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(lbl, 8, y + 4);
+        ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.beginPath();
+        for (let x = x0; x < x1 - T; x += T) { const a = x + shift, hi = y - 16, lo = y + 16; ctx.moveTo(a, lo); ctx.lineTo(a, hi); ctx.lineTo(a + T / 2, hi); ctx.lineTo(a + T / 2, lo); ctx.lineTo(a + T, lo); }
+        ctx.stroke();
+      }
+      clk(70, 0, C.blue, 'ref clk'); clk(150, delay, C.teal, 'delayed');
+      const aligned = (delay % T) < 5 || (delay % T) > T - 5;
+      ctx.strokeStyle = aligned ? C.teal : C.orange; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x0 + delay, 46); ctx.lineTo(x0 + delay, 170); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('a DLL adjusts a DELAY LINE (not a VCO) until the edge lines up' + (aligned ? ' — LOCKED' : ''), 20, 22);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.fillText('delay = ' + delay.toFixed(0) + ' · a pure delay → first-order loop, so no jitter accumulation (unlike a PLL)', 20, h - 10);
+    }
+    draw(30);
+    slider(card.controls, { label: 'delay', min: 0, max: 80, step: 2, value: 30 }, v => draw(v));
+  };
+
+  // LDPC Tanner (bipartite) graph
+  T.tannerGraph = function (host, spec) {
+    const { ctx, w, h } = makeCard(host, spec, 520, 300);
+    const nV = 6, nC = 3, vY = h - 62, cY = 62;
+    const vx = i => 55 + i * (w - 110) / (nV - 1), cx = i => 120 + i * (w - 240) / (nC - 1);
+    const edges = [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1], [3, 1], [4, 1], [2, 1], [0, 2], [4, 2], [5, 2], [3, 2]];
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1.3; edges.forEach(e => { ctx.beginPath(); ctx.moveTo(vx(e[0]), vY - 14); ctx.lineTo(cx(e[1]), cY + 14); ctx.stroke(); });
+    for (let i = 0; i < nV; i++) { ctx.fillStyle = C.box; ctx.strokeStyle = C.blue; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(vx(i), vY, 14, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('v' + i, vx(i), vY + 4); }
+    for (let i = 0; i < nC; i++) { ctx.fillStyle = C.box; ctx.strokeStyle = C.orange; ctx.lineWidth = 2; ctx.fillRect(cx(i) - 15, cY - 15, 30, 30); ctx.strokeRect(cx(i) - 15, cY - 15, 30, 30); ctx.fillStyle = C.text; ctx.fillText('+', cx(i), cY + 5); }
+    ctx.fillStyle = C.blue; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('variable nodes = code bits', 18, vY + 34);
+    ctx.fillStyle = C.orange; ctx.fillText('check nodes = parity equations', 18, cY - 24);
+    ctx.fillStyle = C.dim; ctx.textAlign = 'center'; ctx.fillText('sparse edges → belief-propagation messages flow until every parity check is satisfied', w / 2, h - 8);
+  };
+
+  // Turbo encoder block diagram
+  T.turboEncoder = function (host, spec) {
+    const { ctx, w, h } = makeCard(host, spec, 540, 240);
+    const box = (x, y, bw, bh, lbl, col) => { ctx.fillStyle = C.box; ctx.strokeStyle = col; ctx.lineWidth = 1.7; ctx.fillRect(x, y, bw, bh); ctx.strokeRect(x, y, bw, bh); ctx.fillStyle = C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(lbl, x + bw / 2, y + bh / 2 + 4); };
+    const inx = 34, iny = h / 2;
+    ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('input', 8, iny + 4);
+    ctx.fillStyle = C.blue; ctx.beginPath(); ctx.arc(inx, iny, 4, 0, TAU); ctx.fill();
+    ctx.strokeStyle = C.dim; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(inx, iny); ctx.lineTo(w - 24, iny - 78); ctx.stroke();
+    ctx.fillStyle = C.teal; ctx.textAlign = 'right'; ctx.fillText('systematic (data)', w - 24, iny - 82);
+    box(190, iny - 74, 96, 30, 'RSC encoder 1', C.blue);
+    ctx.beginPath(); ctx.moveTo(inx, iny); ctx.lineTo(190, iny - 59); ctx.stroke(); ctx.beginPath(); ctx.moveTo(286, iny - 59); ctx.lineTo(w - 24, iny - 34); ctx.stroke();
+    ctx.fillStyle = C.blue; ctx.fillText('parity 1', w - 24, iny - 30);
+    box(150, iny + 34, 84, 30, 'Interleaver π', C.purple); box(270, iny + 34, 96, 30, 'RSC encoder 2', C.blue);
+    ctx.strokeStyle = C.dim; ctx.beginPath(); ctx.moveTo(inx, iny); ctx.lineTo(150, iny + 49); ctx.stroke(); ctx.beginPath(); ctx.moveTo(234, iny + 49); ctx.lineTo(270, iny + 49); ctx.stroke(); ctx.beginPath(); ctx.moveTo(366, iny + 49); ctx.lineTo(w - 24, iny + 74); ctx.stroke();
+    ctx.fillStyle = C.blue; ctx.fillText('parity 2', w - 24, iny + 78);
+    ctx.fillStyle = C.dim; ctx.textAlign = 'center'; ctx.font = '11px sans-serif'; ctx.fillText('two recursive encoders (one on interleaved bits) → rate-1/3: systematic + parity 1 + parity 2', w / 2, h - 8);
+  };
+
   /* ---- topic → figure specs map ---- */
   const EX = s => s; // helper for readability
   const map = {
+    'vco': [
+      { type: 'vcoTune', title: 'VCO tuning curve', caption: 'Slide Kvco — the slope of frequency vs control voltage.', explain: EX('<b>What it shows:</b> a VCO’s output frequency rides on its control voltage, f = f0 + Kvco·V. <b>Try:</b> a bigger Kvco tunes over a wider range but also turns any noise on the control line into more frequency (phase) noise — the core VCO design trade.') },
+      { type: 'phaseNoise', title: 'VCO phase noise', caption: 'Real oscillators have a noise skirt.', explain: EX('A VCO is never perfectly pure — its phase noise (Leeson skirt) is what a PLL is built to clean up close-in.') },
+      { type: 'pllStep', title: 'The VCO inside a loop', caption: 'A PLL steers the VCO to lock.', explain: EX('The VCO is the actuator of a PLL; the loop drives its control voltage so its phase tracks the reference.') }
+    ],
+    'nco': [
+      { type: 'ncoDDS', title: 'NCO phase accumulator', caption: 'Change the frequency word (FCW) and watch the tone.', explain: EX('<b>What it shows:</b> an NCO adds a frequency word to a phase accumulator each clock, then looks up the sine. <b>Try:</b> bigger FCW = steeper ramp = higher output frequency, f_out = FCW·f_clk/2^N. It is the all-digital cousin of the VCO.') },
+      { type: 'fftDemo', title: 'Output spectrum', caption: 'An NCO makes a clean spectral tone.', explain: EX('The NCO output is a tone whose frequency is set purely by a number — the basis of direct digital synthesis (DDS).') },
+      { type: 'sincImages', title: 'Feeding a DAC', caption: 'The NCO usually drives a DAC (sinc & images).', explain: EX('An NCO+DAC is a DDS; the DAC’s zero-order hold then imposes the sinc droop and images.') }
+    ],
+    'cfo': [
+      { type: 'cfoSpin', title: 'CFO spins the constellation', caption: 'Increase the offset — the points rotate faster.', explain: EX('<b>What it shows:</b> a carrier-frequency mismatch rotates every symbol by 2π·Δf·t, smearing the constellation into a spiral. <b>Try:</b> raise the CFO and the points spin — left uncorrected it destroys the link (and breaks OFDM orthogonality).') },
+      { type: 'fllPull', title: 'Correcting the offset', caption: 'A frequency loop pulls the offset to zero.', explain: EX('An FLL (or pilot-based estimator) measures the CFO and de-rotates it back to zero before detection.') },
+      { type: 'berCurve', title: 'Uncorrected CFO costs SNR', caption: 'Residual CFO raises the error rate.', explain: EX('Even a small leftover CFO rotates points across decision boundaries, shifting you up the BER curve.') }
+    ],
+    'dll': [
+      { type: 'dllAlign', title: 'DLL delay alignment', caption: 'Slide the delay until the edges line up (lock).', explain: EX('<b>What it shows:</b> a DLL tunes a delay line so its output clock edge aligns with a reference. <b>Try:</b> adjust the delay to alignment. Because a delay is a pure gain (no integrator), a DLL is first-order — unconditionally stable and it does not accumulate jitter like a PLL.') },
+      { type: 'pllStep', title: 'Contrast: a PLL is 2nd-order', caption: 'The PLL uses a VCO and can ring.', explain: EX('A PLL’s VCO integrates phase (2nd-order, can overshoot/ring); a DLL’s delay line does not — the key DLL-vs-PLL difference.') },
+      { type: 'phaseNoise', title: 'Lower jitter accumulation', caption: 'DLLs don’t accumulate phase noise.', explain: EX('Because a DLL doesn’t integrate, it doesn’t build up phase noise over time the way a free-running VCO/PLL can.') }
+    ],
+    'turbo-codes': [
+      { type: 'turboEncoder', title: 'Turbo encoder structure', caption: 'Two RSC encoders and an interleaver.', explain: EX('<b>What it shows:</b> a turbo code sends the data plus two parity streams — one from an encoder on the original bits, one from an encoder on interleaved bits. The interleaver is the secret sauce that makes the two views nearly independent, enabling powerful iterative decoding.') },
+      { type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Near-Shannon waterfall', caption: 'A steep cliff close to the limit.', explain: EX('Iterative (turbo) decoding produces a very steep BER waterfall within a fraction of a dB of the Shannon limit — its historic breakthrough.') },
+      { type: 'trellis', title: 'Its component codes', caption: 'Each RSC is decoded on a trellis.', explain: EX('Each constituent convolutional code is decoded (softly, BCJR/MAP) on a trellis; the two decoders swap extrinsic info each iteration.') }
+    ],
+    'ldpc': [
+      { type: 'tannerGraph', title: 'LDPC Tanner graph', caption: 'Sparse links between bits and parity checks.', explain: EX('<b>What it shows:</b> an LDPC code is defined by a sparse parity-check matrix, drawn here as a bipartite graph — code bits (circles) wired to parity checks (squares). <b>Belief propagation</b> passes messages along these edges until every check is satisfied. Sparsity is what makes decoding feasible near capacity.') },
+      { type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Near-capacity performance', caption: 'A steep waterfall like turbo codes.', explain: EX('LDPC codes rival turbo codes, getting within a fraction of a dB of Shannon with a low error floor.') },
+      { type: 'capacity', title: 'Approaching the Shannon limit', caption: 'LDPC gets close to this ceiling.', explain: EX('Well-designed irregular LDPC codes operate remarkably close to the Shannon capacity bound.') }
+    ],
     'rs232': [
       { type: 'serialFrame', title: 'RS-232 async frame (8N1)', caption: 'Change the byte and watch the start/data/stop bits.', explain: EX('<b>What it shows:</b> RS-232 has no clock wire — it frames each byte with a start bit and stop bit so the receiver can find the byte. <b>Try:</b> change the data byte; bits go out LSB-first between the orange start/stop bits. 10 bits carry 8 data bits → 80% efficient.') },
       { type: 'lengthVsRate', title: 'Speed vs cable length', caption: 'Faster signalling means shorter usable cable.', explain: EX('<b>What it shows:</b> RS-232 is single-ended and short-range; like all wired links, going faster shortens the reach. <b>Try:</b> slide the rate — RS-232 tops out around 15 m at modest speeds.') },
