@@ -25,6 +25,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # Re-assert Actions-based Pages on every run. Fixes the persistent
+          # "Deployment failed, try again later" when the Pages build-type
+          # drifts out of sync with the workflow.
+          enablement: true
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -32,3 +37,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # Ride out transient GitHub Pages backend hiccups instead of
+          # failing the whole run on the first error.
+          timeout: 600000
+          error_count: 15
