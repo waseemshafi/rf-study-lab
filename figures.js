@@ -401,6 +401,51 @@ const FIG = (function () {
     slider(card.controls, { label: 'input SNR', min: -6, max: 12, step: 1, value: 3, fmt: v => v + ' dB' }, draw);
   };
 
+  // Optimal binary detection: two conditional Gaussians, movable threshold, shaded error tails
+  T.decisionRegions = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    let ebn0 = 6, gam = 0;             // Eb/N0 (dB) and decision threshold
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const mu = 1;                    // signals at +/-1 (antipodal, d = 2)
+      const sig = 1 / Math.sqrt(2 * lin(ebn0));   // so d/2sigma = sqrt(2 Eb/N0)
+      const lo = -3.5, hi = 3.5;
+      const pk = 1 / (sig * Math.sqrt(TAU));
+      const ax = drawAxes(ctx, box, { xr: [lo, hi], yr: [0, pk * 1.15], xlabel: 'decision statistic r', ylabel: 'likelihood p(r | s)' });
+      const pdf = (x, m) => Math.exp(-((x - m) * (x - m)) / (2 * sig * sig)) / (sig * Math.sqrt(TAU));
+      // shade error tails (red): s0 pdf right of threshold, s1 pdf left of threshold
+      ctx.save(); ctx.beginPath(); ctx.rect(ax.x, ax.y, ax.w, ax.h); ctx.clip();
+      ctx.fillStyle = 'rgba(255,107,107,0.38)';
+      ctx.beginPath(); ctx.moveTo(ax.fx(gam), ax.fy(0));
+      for (let x = gam; x <= hi; x += 0.02) ctx.lineTo(ax.fx(x), ax.fy(pdf(x, -mu)));
+      ctx.lineTo(ax.fx(hi), ax.fy(0)); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(ax.fx(lo), ax.fy(0));
+      for (let x = lo; x <= gam; x += 0.02) ctx.lineTo(ax.fx(x), ax.fy(pdf(x, mu)));
+      ctx.lineTo(ax.fx(gam), ax.fy(0)); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      // the two conditional densities
+      const p0 = [], p1 = [];
+      for (let x = lo; x <= hi; x += 0.02) { p0.push([x, pdf(x, -mu)]); p1.push([x, pdf(x, mu)]); }
+      line(ctx, ax, p0, C.blue, 2.4);
+      line(ctx, ax, p1, C.orange, 2.4);
+      // threshold line
+      ctx.strokeStyle = C.purple; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(ax.fx(gam), ax.y); ctx.lineTo(ax.fx(gam), ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      // Pe (equal priors): 0.5[Q((mu-gam)/sig) + Q((gam+mu)/sig)]
+      const pe = 0.5 * (Q((mu - gam) / sig) + Q((gam + mu) / sig));
+      const peOpt = Q(mu / sig);
+      legend(ctx, box, [{ label: 'p(r | s0)', color: C.blue }, { label: 'p(r | s1)', color: C.orange }, { label: 'threshold', color: C.purple }]);
+      ctx.fillStyle = C.text; ctx.textAlign = 'left'; ctx.font = '12px sans-serif';
+      ctx.fillText('Eb/N0 = ' + ebn0 + ' dB,  threshold = ' + gam.toFixed(2) + '  ->  P(e) = ' + pe.toExponential(2), ax.x + 8, ax.y + 16);
+      ctx.fillStyle = (Math.abs(gam) < 1e-6) ? C.teal : C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('optimal (equal priors) is threshold = 0:  P(e) = Q(sqrt(2 Eb/N0)) = ' + peOpt.toExponential(2), ax.x + 8, ax.y + 34);
+    }
+    draw();
+    slider(card.controls, { label: 'Eb/N0', min: 0, max: 12, step: 1, value: 6, fmt: v => v + ' dB' }, v => { ebn0 = v; draw(); });
+    slider(card.controls, { label: 'threshold', min: -1.5, max: 1.5, step: 0.05, value: 0, fmt: v => v.toFixed(2) }, v => { gam = v; draw(); });
+  };
+
   // PLL phase-step error response for different damping
   T.pllStep = function (host, spec) {
     const card = makeCard(host, spec, 520, 300);
@@ -2554,6 +2599,11 @@ const FIG = (function () {
     ],
     'dbpsk': [{ type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'DBPSK vs coherent BPSK', caption: 'The horizontal gap between the curves is the ~1 dB penalty.', explain: EX('<b>What it shows:</b> differential BPSK (orange) sits about 1 dB right of coherent BPSK (teal). <b>Why:</b> each decision reuses the previous noisy symbol as its reference, so noise counts twice — the price you pay for needing no carrier-phase recovery.') }],
     'matched-filter': [{ type: 'matchedFilter', title: 'Matched filter output', caption: 'Lower the input SNR and watch the correlator still find the peak.', explain: EX('<b>What it shows:</b> a noisy pulse (grey) turned into a clean triangle peaking at t=T (orange) by correlating against the known shape (teal). <b>Try:</b> even at negative SNR the peak survives — the matched filter delivers the maximum possible SNR = 2E/N₀ at the sampling instant.') }],
+    'optimal-receiver': [
+      { type: 'decisionRegions', title: 'Optimal decision & error tails', caption: 'Move the threshold — the shaded overlap is the error probability; it is smallest at 0.', explain: EX('<b>What it shows:</b> the two conditional densities p(r|s₀) and p(r|s₁); the red shaded tails past the threshold are P(e). <b>Try:</b> slide the threshold away from 0 and P(e) grows — for equal priors the midpoint is optimal, giving Q(√(2Eb/N0)). Raise Eb/N0 to pull the humps apart and watch the error shrink.') },
+      { type: 'constellation', order: 4, snr: 12, title: 'Signal space & decision regions (QPSK)', caption: 'Each received dot is decoded to the nearest signal point — the min-distance rule.', explain: EX('<b>What it shows:</b> the sufficient statistic as a point in signal space; the optimal receiver picks the nearest of the four ideal points (the quadrants are the decision regions). <b>Try:</b> lower the SNR until clouds cross the axes — those crossings are exactly the symbol errors the union bound counts.') },
+      { type: 'erfBer', title: 'Optimal BER vs Eb/N0', caption: 'The best achievable antipodal error rate, Q(√(2Eb/N0)).', explain: EX('<b>What it shows:</b> the minimum error probability any receiver can reach for antipodal signalling in AWGN. <b>Try:</b> drag the marker — this is the same Q-function the pairwise/union bound is built from, now read directly against Eb/N0.') }
+    ],
     'evm': [{ type: 'constellation', order: 16, snr: 22, title: '16-QAM constellation & EVM', caption: 'Drop the SNR and watch tightly-packed points start colliding.', explain: EX('<b>What it shows:</b> EVM is the RMS distance of each received dot from its ideal 16-QAM location. <b>Try:</b> lower SNR (worse EVM) and the clouds merge — dense constellations have tiny spacing, so they demand very low EVM (high SNR) to stay error-free.') }],
     'pll': [{ type: 'pllStep', title: 'PLL phase-step response vs damping', caption: 'Sweep the damping ζ from ringy to sluggish.', explain: EX('<b>What it shows:</b> how the loop’s phase error settles after a disturbance. <b>Try:</b> ζ≈0.707 (the classic choice) settles fast with barely any overshoot; low ζ rings for a long time, high ζ crawls — the core loop-filter design trade-off.') }],
     'fll': [{ type: 'fllPull', title: 'FLL frequency pull-in', caption: 'Crank up the initial offset — the FLL still drags it to zero.', explain: EX('<b>What it shows:</b> a frequency-locked loop capturing a large starting frequency error. <b>Try:</b> set a huge offset (e.g. 200 kHz) — a PLL would slip and never lock, but the FLL still converges, which is why receivers acquire with an FLL first, then hand over to a PLL.') }],

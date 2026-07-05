@@ -44,7 +44,7 @@ const CONTENT = {
     'comm-basics', 'shannon', 'source-coding', 'bandwidth', 'noise', 'psd', 'noise-floor', 'noise-figure', 'phase-noise',
     'normal-distribution', 'error-function', 'rayleigh-distribution', 'awgn',
     'fourier-transform', 'fft', 'sinc-function', 'frequency-spectrum', 'laplace-transform', 'z-transform', 'convolution', 'correlation', 'fir-filters', 'iir-filters', 'nyquist-sampling', 'aliasing',
-    'am', 'fm', 'bpsk', 'qpsk', 'dbpsk', 'pulse-shaping', 'rrc-filter', 'eye-diagram', 'matched-filter', 'ber', 'eb-no', 'evm',
+    'am', 'fm', 'bpsk', 'qpsk', 'dbpsk', 'pulse-shaping', 'rrc-filter', 'eye-diagram', 'matched-filter', 'optimal-receiver', 'ber', 'eb-no', 'evm',
     'vco', 'nco', 'pll', 'fll', 'dll', 'cfo', 'early-late-correlator', 'costas-loop',
     'dsss', 'frequency-hopping', 'processing-gain', 'jamming-margin', 'pn-codes', 'gold-code', 'channel-coding', 'fec', 'convolutional-codes', 'viterbi', 'trellis-diagram', 'turbo-codes', 'ldpc',
     'filters', 'lpf', 'hpf', 'bpf', 'notch-filter', 'filter-design',
