@@ -78,6 +78,9 @@
 <script src="dummies-extra5.js"></script>
 <script src="dummies-extra6.js"></script>
 <script src="dummies-optimal-receiver.js"></script>
+<script src="dummies-dsss-acquisition.js"></script>
+<script src="dummies-dsss-tracking.js"></script>
+<script src="dummies-dsss-data-extraction.js"></script>
 <!-- Topic content, one file per category -->
 <script src="topics/fundamentals.js"></script>
 <script src="topics/signals.js"></script>
@@ -119,6 +122,9 @@
 <script src="topics/superheterodyne.js"></script>
 <script src="topics/zero-if.js"></script>
 <script src="topics/optimal-receiver.js"></script>
+<script src="topics/dsss-acquisition.js"></script>
+<script src="topics/dsss-tracking.js"></script>
+<script src="topics/dsss-data-extraction.js"></script>
 <!-- Upgraded from-scratch derivations (override equation derivations) -->
 <script src="derivations/fundamentals.js"></script>
 <script src="derivations/signals-systems.js"></script>
@@ -149,12 +155,38 @@
 <script src="code/extra5.js"></script>
 <script src="code/extra6.js"></script>
 <script src="code/optimal-receiver.js"></script>
+<script src="code/dsss-acquisition.js"></script>
+<script src="code/dsss-tracking.js"></script>
+<script src="code/dsss-data-extraction.js"></script>
 <script src="app.js"></script>
 <script>
   // Register the service worker for offline use (relative path → works under any GitHub Pages subpath).
+  // Auto-update: when a new SW version is installed (content changed → CACHE bumped), reload ONCE so
+  // the page immediately picks up the fresh JS/CSS instead of serving stale cached copies.
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('sw.js').catch(function (e) { console.warn('SW registration failed', e); });
+      navigator.serviceWorker.register('sw.js').then(function (reg) {
+        // Ask the browser to check for an updated sw.js on every load.
+        reg.update();
+        reg.addEventListener('updatefound', function () {
+          var nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', function () {
+            // A new worker finished installing AND an old one already controls the page → it's an update.
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              window.location.reload();
+            }
+          });
+        });
+      }).catch(function (e) { console.warn('SW registration failed', e); });
+
+      // Fallback: if the controlling worker changes under us, reload once to stay in sync.
+      var refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
     });
   }
 </script>

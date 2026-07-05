@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v21';
+const CACHE = 'rfstudy-v23';
 
 const ASSETS = [
   './',
@@ -16,6 +16,9 @@ const ASSETS = [
   'dummies-extra5.js',
   'dummies-extra6.js',
   'dummies-optimal-receiver.js',
+  'dummies-dsss-acquisition.js',
+  'dummies-dsss-tracking.js',
+  'dummies-dsss-data-extraction.js',
   'figures.js',
   'figures-extra.js',
   'manifest.webmanifest',
@@ -59,6 +62,9 @@ const ASSETS = [
   'topics/superheterodyne.js',
   'topics/zero-if.js',
   'topics/optimal-receiver.js',
+  'topics/dsss-acquisition.js',
+  'topics/dsss-tracking.js',
+  'topics/dsss-data-extraction.js',
   'derivations/fundamentals.js',
   'derivations/signals-systems.js',
   'derivations/modulation-detection.js',
@@ -84,6 +90,9 @@ const ASSETS = [
   'code/extra5.js',
   'code/extra6.js',
   'code/optimal-receiver.js',
+  'code/dsss-acquisition.js',
+  'code/dsss-tracking.js',
+  'code/dsss-data-extraction.js',
   'vendor/mathjax/tex-svg.js',
   'icons/icon-192.png',
   'icons/icon-512.png',

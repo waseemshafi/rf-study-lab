@@ -446,6 +446,61 @@ const FIG = (function () {
     slider(card.controls, { label: 'threshold', min: -1.5, max: 1.5, step: 0.05, value: 0, fmt: v => v.toFixed(2) }, v => { gam = v; draw(); });
   };
 
+  // DSSS acquisition: correlation vs code-phase hypothesis — a peak rising out of noise past a threshold
+  T.acqSearch = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const n = 5, L = (1 << n) - 1, truePhase = 12;
+    function draw(snrdB) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const snr = lin(snrdB);
+      const sigma = L / Math.sqrt(2 * snr);           // correlator-output noise std vs ideal peak L
+      const vals = []; for (let s = 0; s < L; s++) vals.push((s === truePhase ? L : -1) + sigma * gauss());
+      const Vt = 0.5 * L;                              // detection threshold at half the ideal peak
+      const ax = drawAxes(ctx, box, { xr: [0, L], yr: [-Math.max(6, L * 0.35), L * 1.25], xlabel: 'code-phase hypothesis (chips)', ylabel: '|correlation|' });
+      ctx.strokeStyle = C.red; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(Vt)); ctx.lineTo(ax.x + ax.w, ax.fy(Vt)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.red; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('threshold Vt', ax.x + 8, ax.fy(Vt) - 4);
+      vals.forEach((v, s) => { const on = (s === truePhase); ctx.strokeStyle = on ? C.orange : C.blue; ctx.lineWidth = on ? 3 : 1.5; ctx.beginPath(); ctx.moveTo(ax.fx(s), ax.fy(0)); ctx.lineTo(ax.fx(s), ax.fy(v)); ctx.stroke(); });
+      const detected = vals[truePhase] > Vt && vals[truePhase] === Math.max.apply(null, vals);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif';
+      ctx.fillText('SNR ' + snrdB + ' dB  →  ' + (detected ? 'ACQUIRED at chip ' + truePhase : 'MISSED — peak buried in noise'), ax.x + 8, ax.y + 16);
+    }
+    draw(6);
+    slider(card.controls, { label: 'post-integration SNR', min: -3, max: 18, step: 1, value: 6, fmt: v => v + ' dB' }, draw);
+  };
+
+  // DSSS data extraction: despreading collapses the signal narrowband and spreads a jammer thin
+  T.despreadCollapse = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    let gp = 18, view = 'after';
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [-1, 1], yr: [-42, 32], xlabel: 'normalized frequency', ylabel: 'PSD (dB)' });
+      const nbW = 0.06, spW = Math.min(0.95, nbW * lin(gp));
+      ctx.strokeStyle = C.dim; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(0)); ctx.lineTo(ax.x + ax.w, ax.fy(0)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('noise floor', ax.x + 4, ax.fy(0) - 4);
+      if (view === 'before') {
+        const spTop = -gp;
+        ctx.fillStyle = 'rgba(77,171,247,0.4)'; ctx.fillRect(ax.fx(-spW), ax.fy(spTop), ax.fx(spW) - ax.fx(-spW), ax.fy(-42) - ax.fy(spTop));
+        ctx.fillStyle = 'rgba(255,107,107,0.6)'; ctx.fillRect(ax.fx(0.30) - 3, ax.fy(15), 6, ax.fy(-42) - ax.fy(15));
+        ctx.fillStyle = C.blue; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('signal spread (below noise)', ax.fx(0), ax.fy(spTop) - 6);
+        ctx.fillStyle = C.red; ctx.fillText('CW jammer', ax.fx(0.30) + 34, ax.fy(15));
+        ctx.fillStyle = C.text; ctx.textAlign = 'left'; ctx.fillText('BEFORE despread: signal hidden under noise; jammer dominates', ax.x + 8, ax.y + 16);
+      } else {
+        const sigTop = gp, jTop = 15 - gp;
+        ctx.fillStyle = 'rgba(255,107,107,0.35)'; ctx.fillRect(ax.fx(-spW), ax.fy(jTop), ax.fx(spW) - ax.fx(-spW), ax.fy(-42) - ax.fy(jTop));
+        ctx.fillStyle = 'rgba(99,230,190,0.55)'; ctx.fillRect(ax.fx(-nbW), ax.fy(sigTop), ax.fx(nbW) - ax.fx(-nbW), ax.fy(-42) - ax.fy(sigTop));
+        ctx.fillStyle = C.teal; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('data recovered (+' + gp + ' dB)', ax.fx(0), ax.fy(sigTop) - 6);
+        ctx.fillStyle = C.red; ctx.fillText('jammer spread thin', ax.fx(0.5), ax.fy(jTop) - 6);
+        ctx.fillStyle = C.text; ctx.textAlign = 'left'; ctx.fillText('AFTER despread: signal collapses up, jammer spreads down by Gp = ' + gp + ' dB', ax.x + 8, ax.y + 16);
+      }
+    }
+    draw();
+    chooser(card.controls, [{ v: 'before', l: 'Before despread' }, { v: 'after', l: 'After despread' }], 'after', v => { view = v; draw(); });
+    slider(card.controls, { label: 'processing gain', min: 6, max: 30, step: 1, value: 18, fmt: v => v + ' dB' }, v => { gp = v; draw(); });
+  };
+
   // PLL phase-step error response for different damping
   T.pllStep = function (host, spec) {
     const card = makeCard(host, spec, 520, 300);
@@ -2612,6 +2667,21 @@ const FIG = (function () {
     'frequency-hopping': [{ type: 'hopping', title: 'Frequency-hop pattern', caption: 'Change the channel count and watch the jammer’s hit-rate fall.', explain: EX('<b>What it shows:</b> the carrier hopping pseudo-randomly across channels over time; the red channel is jammed. <b>Try:</b> more channels means the jammer catches a smaller fraction of dwells — and forward error correction repairs those few, so the link survives.') }],
     'pn-codes': [{ type: 'autocorr', title: 'm-sequence autocorrelation', caption: 'Change the register length and see the period 2ⁿ−1 and the sharp peak.', explain: EX('<b>What it shows:</b> the two-valued autocorrelation of an LFSR m-sequence — a tall spike of height L at zero shift, and −1 everywhere else. <b>Try:</b> more stages → a longer code with a sharper, more selective peak, which is what lets a receiver nail code timing to a fraction of a chip.') }],
     'gold-code': [{ type: 'crosscorr', title: 'Gold-code cross-correlation', caption: 'Slide across shifts — every value is one of just three small numbers.', explain: EX('<b>What it shows:</b> the cross-correlation between two <i>different</i> Gold codes. <b>Try:</b> every bar is −1, −9 or 7 (tiny vs the peak of 31) — this bounded three-valued property is why 30+ GPS satellites can share one frequency without drowning each other out.') }],
+    'dsss-acquisition': [
+      { type: 'acqSearch', title: 'Serial-search acquisition', caption: 'Raise the SNR until the correlation peak clears the detection threshold.', explain: EX('<b>What it shows:</b> the despread correlation at every code-phase hypothesis; the true phase (orange) should tower over the rest. <b>Try:</b> lower the SNR and the peak sinks into the noise below the red threshold (a miss); more dwell/integration lifts it back over → acquisition.') },
+      { type: 'autocorr', title: 'Why the peak is sharp', caption: 'The PN autocorrelation is one tall spike — the feature acquisition hunts for.', explain: EX('<b>What it shows:</b> an m-sequence correlates to a peak of height L at exactly zero code offset and −1 everywhere else. <b>Try:</b> more LFSR stages → a longer code and an even sharper, more unambiguous peak, so the search can localise code phase to a fraction of a chip.') },
+      { type: 'spread', title: 'The search space is wideband', caption: 'The signal is spread under the noise — acquisition must find it blind.', explain: EX('<b>What it shows:</b> before despreading the signal PSD sits below the noise floor. <b>Try:</b> raise the processing gain — the wider the spread, the more code-phase cells to search, which is exactly why acquisition is the slow, expensive stage.') }
+    ],
+    'dsss-tracking': [
+      { type: 'earlyLate', title: 'Early−Late code discriminator', caption: 'Drag the timing error — the E−L S-curve drives it back to zero.', explain: EX('<b>What it shows:</b> Early and Late correlators straddle the code-correlation triangle at ±d/2 chip. <b>Try:</b> off-alignment makes Early≠Late, so (E−L) is non-zero and the DLL nudges the code NCO back to ε=0. This S-curve is the heart of code tracking.') },
+      { type: 'costasScurve', title: 'Parallel carrier tracking (Costas)', caption: 'Tracking runs a code loop AND a carrier loop at once.', explain: EX('<b>What it shows:</b> the Costas carrier-error I·Q ∝ sin(2Δφ), independent of the data bit. <b>Try:</b> it locks at 0° and 180° (the ambiguity resolved downstream) while the DLL separately holds code phase — both loops must stay locked to demodulate.') },
+      { type: 'dllAlign', title: 'Locking the local code clock', caption: 'Slide the delay — tracking aligns the replica clock to the incoming code.', explain: EX('<b>What it shows:</b> the code NCO shifting the local replica until its clock edges line up with the received code. <b>Try:</b> the loop continuously trims this delay as Doppler stretches the code, keeping the prompt correlator sitting on the peak for data demod.') }
+    ],
+    'dsss-data-extraction': [
+      { type: 'despreadCollapse', title: 'Despreading collapses the spectrum', caption: 'Flip Before/After: the signal springs up narrowband while the jammer spreads thin.', explain: EX('<b>What it shows:</b> multiplying by the aligned code collapses the wideband signal back into a tall narrowband spike (+Gp) and simultaneously spreads any jammer down by Gp. <b>Try:</b> raise the processing gain to widen the margin — this inversion is the whole payoff of DSSS.') },
+      { type: 'berCurve', series: [{ name: 'bpsk' }], title: 'Post-despread BER = plain BPSK', caption: 'Over AWGN, DSSS gives the SAME BER curve as narrowband BPSK.', explain: EX('<b>What it shows:</b> after despreading, bit decisions follow Q(√(2Eb/N0)) — identical to un-spread BPSK. <b>Key point:</b> processing gain buys interference/LPI resistance, NOT AWGN gain, so the curve does not move.') },
+      { type: 'constellation', order: 2, snr: 12, title: 'Recovered BPSK symbols', caption: 'After despread + carrier lock, bits are read off a clean BPSK constellation.', explain: EX('<b>What it shows:</b> the prompt correlator output as a 2-point BPSK constellation. <b>Try:</b> drop the SNR and the clouds bleed across zero → bit errors, exactly what the BER curve predicts.') }
+    ],
     'fec': [{ type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Coding gain', caption: 'The left-shift of the curve is the coding gain, in dB.', explain: EX('<b>What it shows:</b> adding forward error correction moves the BER curve to the left. <b>Try:</b> at a target BER, the horizontal gap (~4.5 dB here) is the coding gain — dB you can spend on more range, a smaller antenna, or lower transmit power.') }],
     'viterbi': [{ type: 'trellis', title: 'Viterbi trellis & survivor path', caption: 'Step through the decode to watch the survivor path grow.', explain: EX('<b>What it shows:</b> the trellis of a convolutional code; the orange node is the stage being processed, the teal path is the surviving maximum-likelihood sequence. <b>Try:</b> step forward — at each stage “add–compare–select” keeps only one path into every state, which is how Viterbi avoids an exponential search.') }],
     'sdr': [{ type: 'iqDemod', title: 'I/Q: one complex sample = amplitude + phase', caption: 'Drag phase and amplitude — read off I and Q.', explain: EX('<b>What it shows:</b> an SDR represents the signal as a complex number I + jQ. <b>Try:</b> spin the phasor: I = A·cosφ and Q = A·sinφ change together, yet the pair always encodes the full amplitude <i>and</i> phase. That is why quadrature (I/Q) sampling can represent any modulation at baseband.') }],
