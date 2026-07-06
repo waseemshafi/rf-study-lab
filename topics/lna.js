@@ -127,6 +127,15 @@ CONTENT.topics.push(
 <li><b>Stability and isolation:</b> design for $k>1,\,|\Delta|<1$ (unconditional stability); reverse isolation $S_{12}$ prevents LO re-radiation and load-pulling of the input match — the cascode is the standard fix.</li>
 <li><b>Two vocabularies for the same noise:</b> $T_e=(F-1)T_0$ links noise figure and noise temperature; temperature is the natural unit for cold-antenna (satellite/radio-astronomy) links.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Low-noise_amplifier" target="_blank" rel="noopener">Wikipedia — Low-noise amplifier</a> — concise canonical overview of LNA purpose, noise figure, device choices (JFET/HEMT) and the applications (GPS, radio astronomy) that make first-stage noise decisive.</li>
+<li><a href="https://www.microwaves101.com/encyclopedias/low-noise-amplifiers" target="_blank" rel="noopener">Microwaves101 — Low-noise amplifiers</a> — RF-hardware view of real MMIC LNAs, explaining how series (inductive) feedback makes the best-gain and lowest-noise input matches coincide.</li>
+<li><a href="https://web.ece.ucsb.edu/~long/ece145a/LNAdesign.pdf" target="_blank" rel="noopener">UCSB ECE145A (J. Long) — Design of Low Noise Amplifiers</a> — full university lecture notes deriving noise-parameter matching (Fmin, Rn, Gamma_opt), inductive source degeneration, stability and linearity trade-offs.</li>
+<li><a href="https://www.qsl.net/va3iul/LNA%20design.pdf" target="_blank" rel="noopener">Iulian Rosu (VA3IUL) — LNA Design</a> — thorough practical tutorial walking through noise/power matching, cascode and degeneration topologies, stability and biasing with worked design steps.</li>
+</ul>`
       }
     ],
     keyPoints: [

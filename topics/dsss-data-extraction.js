@@ -98,6 +98,15 @@ CONTENT.topics.push(
           <li><strong>The no-free-lunch rule:</strong> in pure AWGN, $E_b/N_0=(C/N_0)/R_b$ and $\mathrm{BER}=Q(\sqrt{2E_b/N_0})$ — identical to plain BPSK; processing gain buys jam/interference/LPI margin, not AWGN gain.</li>
           <li><strong>The payoff:</strong> jamming margin $M_j=G_p-(E_b/N_0)_{req}-L_{sys}$ quantifies how much stronger a jammer can be and still lose, and RAKE combining applies the same despread-and-dump primitive per multipath finger.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Direct-sequence_spread_spectrum" target="_blank" rel="noopener">Wikipedia — Direct-sequence spread spectrum</a> — canonical overview that frames despreading as a correlation of the received signal with the aligned code and states the SNR-by-spreading-factor result.</li>
+<li><a href="https://www.dspguide.com/ch7/3.htm" target="_blank" rel="noopener">The Scientist and Engineer's Guide to DSP (Smith) — Correlation as optimal detection</a> — clearest first-principles treatment of why correlation / matched filtering is the optimal way to pull a known waveform out of noise, exactly the integrate-and-dump statistic used here.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/CDMA_FDMA_Techniques" target="_blank" rel="noopener">ESA Navipedia — CDMA/FDMA Techniques</a> — authoritative GNSS reference on PRN-code correlation and despreading in real receivers, tying the primitive to GPS-style data recovery below the noise floor.</li>
+<li><a href="https://www.qsl.net/n9zia/AN9633.pdf" target="_blank" rel="noopener">Intersil AN9633 — Processing Gain for DSSS Communication Systems</a> — vendor application note that works the processing-gain and jamming-margin budget in engineering dB terms, matching this topic's anti-jam payoff.</li>
+</ul>`
       }
     ],
     keyPoints: [

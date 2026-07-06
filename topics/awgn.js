@@ -162,6 +162,15 @@ CONTENT.topics.push(
 <li><b>The kTB link:</b> $N_0=kT$, so $-174$ dBm/Hz at 290 K and $N=kTB$ (e.g. $-114$ dBm in 1 MHz); with receiver noise $N=FkTB$.</li>
 <li><b>The headline results:</b> capacity $C=B\log_2(1+S/N)$ and BPSK/QPSK BER $Q(\sqrt{2E_b/N_0})$ both live on the AWGN channel.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Additive_white_Gaussian_noise" target="_blank" rel="noopener">Wikipedia — Additive white Gaussian noise</a> — the canonical reference tying the three properties together and deriving the channel capacity and BER context in one place.</li>
+<li><a href="https://web.mit.edu/6.441/spring05/lectures/6441Lecture18.pdf" target="_blank" rel="noopener">MIT 6.441 — The AWGN channel and its capacity (Lecture 18)</a> — a rigorous information-theory lecture that derives $C=B\log_2(1+S/N)$ from differential entropy, exactly the argument used above.</li>
+<li><a href="https://courses.grainger.illinois.edu/ece361/sp2011/Newlectures/Lecture03.pdf" target="_blank" rel="noopener">Illinois ECE 361 — Matched Filters (Lecture 3)</a> — a clean, worked derivation of why the matched filter is optimal in AWGN and how it maximises output SNR.</li>
+<li><a href="https://www.dspguide.com/ch2/6.htm" target="_blank" rel="noopener">Smith, DSP Guide Ch. 2 — Statistics, probability and noise</a> — Steven Smith's textbook chapter on Gaussian noise, the Central Limit Theorem and how normal-amplitude noise arises, from the signal-processing side.</li>
+</ul>`
       }
     ],
     keyPoints: [

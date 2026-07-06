@@ -163,6 +163,15 @@ CONTENT.topics.push(
 <li><b>Time domain:</b> an RC step response is $V(1-e^{-t/RC})$ with $\tau=1/(2\pi f_c)$, giving the rule $t_r\approx 0.35/f_{3\mathrm{dB}}$ — bandwidth and edge speed are two views of one thing.</li>
 <li><b>Why it matters:</b> anti-aliasing before an ADC (aliasing is irreversible), reconstruction after a DAC, plus smoothing, band-limiting, and post-mixer baseband recovery.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Low-pass_filter" target="_blank" rel="noopener">Wikipedia — Low-pass filter</a> — the canonical reference covering the RC/RL/active realizations, transfer function, order, and time-constant relations in one place.</li>
+<li><a href="https://www.dspguide.com/ch3/4.htm" target="_blank" rel="noopener">The Scientist and Engineer's Guide to DSP (Steven Smith) — Analog Filters for Data Conversion</a> — a clear, worked comparison of Butterworth, Chebyshev, and Bessel families and how each trades roll-off against step-response fidelity.</li>
+<li><a href="https://www.ti.com/lit/pdf/sloa049" target="_blank" rel="noopener">Texas Instruments SLOA049 — Active Low-Pass Filter Design</a> — a rigorous application report deriving Sallen-Key and multiple-feedback stages and building high-order Butterworth/Chebyshev/Bessel responses from op-amp cells.</li>
+<li><a href="https://www.ni.com/en/shop/data-acquisition/measurement-fundamentals/analog-fundamentals/anti-aliasing-filters-and-their-usage-explained.html" target="_blank" rel="noopener">National Instruments — Anti-Aliasing Filters and Their Usage Explained</a> — a practical treatment of why a low-pass must precede the sampler, the transition-band problem, and how oversampling relaxes the analog filter.</li>
+</ul>`
       }
     ],
     keyPoints: [

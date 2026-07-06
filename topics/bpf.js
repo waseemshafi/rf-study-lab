@@ -151,6 +151,15 @@ CONTENT.topics.push(
 <li><b>The insertion-loss trade:</b> sharper (higher $Q_L$) filters cost more insertion loss for a given resonator $Q_u$ — you buy selectivity with resonator quality.</li>
 <li><b>The receiver roles:</b> RF preselector for image rejection, high-$Q$ IF filter for channel definition, and channel-select — and why sharp selectivity lives at a fixed low IF.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Band-pass_filter" target="_blank" rel="noopener">Wikipedia — Band-pass filter</a> — the canonical overview: bandwidth as fH−fL, the Q factor / narrow-band vs wide-band distinction, half-power points and shape factor, plus a broad survey of applications.</li>
+<li><a href="https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/11:_Active_Filters/11.07:_Band-Pass_Filter_Realizations" target="_blank" rel="noopener">LibreTexts (Fiore) — Band-Pass Filter Realizations</a> — a full textbook chapter deriving f0, Q=f0/BW and the geometric-mean centre, then working multiple-feedback and state-variable realisations with worked design examples.</li>
+<li><a href="https://www.microwaves101.com/encyclopedias/filters" target="_blank" rel="noopener">Microwaves101 — Filters encyclopedia</a> — an RF-engineer's reference covering filter terminology, Butterworth/Chebyshev/Bessel/elliptic responses, quality factor, insertion loss and coupled-resonator/cavity construction for real hardware.</li>
+<li><a href="https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-15-part-2/" target="_blank" rel="noopener">MIT OCW 6.002 — Second-Order Systems (Lecture 15)</a> — MIT lecture with video, notes and a resonant-LC demonstration, deriving the second-order RLC response, poles, resonance and Q from first principles.</li>
+</ul>`
       }
     ],
     keyPoints: [

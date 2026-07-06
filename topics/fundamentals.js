@@ -76,6 +76,15 @@ $$ C = B\log_2\!\left(1+\frac{S}{N}\right) \quad \text{bits/s} $$
 <li><strong>The hard ceiling.</strong> $C = B\log_2(1+S/N)$ bounds error-free rate; more bandwidth helps linearly, more power only logarithmically, and $E_b/N_0$ can never fall below $-1.59$ dB.</li>
 <li><strong>Why it all connects.</strong> Bandwidth, power, and complexity are the three currencies you spend, and the capacity limit is the exchange rate — knowing it tells you which lever to pull for a given link.</li>
 </ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Shannon%E2%80%93Hartley_theorem" target="_blank" rel="noopener">Wikipedia — Shannon–Hartley theorem</a> — the canonical derivation of $C = B\log_2(1+S/N)$ with the bandwidth-limited and power-limited regimes worked through.</li>
+<li><a href="https://en.wikipedia.org/wiki/Channel_capacity" target="_blank" rel="noopener">Wikipedia — Channel capacity</a> — the broader information-theoretic view: capacity as the supremum of mutual information, plus AWGN, fading, and water-filling channels.</li>
+<li><a href="https://web.stanford.edu/class/engr76/lectures/lecture19.pdf" target="_blank" rel="noopener">Stanford ENGR 76 — Lecture 19: the Shannon limit</a> — lecture notes building capacity from mutual information and the channel coding theorem for the binary symmetric channel.</li>
+<li><a href="https://www.tutorialspoint.com/digital_communication/digital_communication_information_theory.htm" target="_blank" rel="noopener">Tutorialspoint — Information Theory</a> — a step-by-step tutorial on entropy, mutual information, and channel capacity in bits per channel use.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -293,6 +302,14 @@ $$ N_{dBm} = -174 + 10\log_{10}(B_{Hz}) $$
 <li><strong>The factor-of-two discipline.</strong> One-sided $N_0 = kT$ versus two-sided $N_0/2$ both integrate to $N_0 B$ — mixing them up is a 3 dB error.</li>
 <li><strong>Other noise types and their place.</strong> Shot noise $2qI_{DC}B$ where DC current crosses junctions; flicker $1/f$ near DC and in oscillators; thermal dominates the RF background.</li>
 <li><strong>How to fight it.</strong> Narrow $B$, lower NF, add gain/coding, or cool the front end — every uncontrolled dB of noise is a dB of lost range or rate.</li>
+</ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Johnson%E2%80%93Nyquist_noise" target="_blank" rel="noopener">Wikipedia — Johnson–Nyquist noise</a> — full treatment of $\overline{v_n^2}=4kTRB$ and the $kTB$ available power, including quantum roll-off and the Einstein–Johnson–Nyquist history.</li>
+<li><a href="https://www.electronics-notes.com/articles/basic_concepts/electronic-rf-noise/thermal-noise-calculations-calculator-formulas.php" target="_blank" rel="noopener">Electronics Notes — Thermal noise calculations</a> — practical kTB worked examples, the –174 dBm/Hz reference, and a bandwidth table for real radio systems.</li>
+<li><a href="https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Microwave_and_RF_Design_IV%3A_Modules_(Steer)/04%3A_Noise_Distortion_and_Dynamic_Range/4.02%3A_Noise" target="_blank" rel="noopener">LibreTexts (Steer) — Noise</a> — a textbook module deriving thermal, shot, and flicker noise from their physical mechanisms with RF-design context.</li>
 </ul>`
     }
   ],
@@ -517,6 +534,15 @@ $$ S_y(f) = |H(f)|^2\, S_x(f) $$
 <li><strong>Digital signal spectra.</strong> Random NRZ has a $\mathrm{sinc}^2$ PSD with nulls at multiples of the bit rate, explaining why raw data is wideband and why pulse shaping is needed.</li>
 <li><strong>Estimation in practice.</strong> The raw periodogram is too noisy; Welch/Bartlett averaging trades resolution for variance, and any instrument reading must be normalized to 1 Hz (mind the RBW) before comparing.</li>
 </ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Spectral_density" target="_blank" rel="noopener">Wikipedia — Spectral density</a> — energy vs power spectral density, the definition via a windowed limit, and units, with worked signal examples.</li>
+<li><a href="https://en.wikipedia.org/wiki/Wiener%E2%80%93Khinchin_theorem" target="_blank" rel="noopener">Wikipedia — Wiener–Khinchin theorem</a> — the PSD–autocorrelation Fourier-pair result in both continuous and discrete time, with proofs and history.</li>
+<li><a href="https://ocw.mit.edu/courses/6-011-introduction-to-communication-control-and-signal-processing-spring-2010/8075041184d566103ce7c3f69afc5e75_MIT6_011S10_chap10.pdf" target="_blank" rel="noopener">MIT OpenCourseWare 6.011 — Power Spectral Density (Chapter 10)</a> — a full textbook chapter developing PSD of WSS processes, filtering by $|H(f)|^2$, and white noise.</li>
+<li><a href="https://en.wikipedia.org/wiki/Spectral_density_estimation" target="_blank" rel="noopener">Wikipedia — Spectral density estimation</a> — the practical side: periodogram, Bartlett, Welch, and parametric estimators with their variance/resolution trade-offs.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -739,6 +765,14 @@ $$ T_{sys} = T_A + T_e $$
 <li><strong>Instrument and digital floors.</strong> DANL scales with RBW (normalize to 1 Hz); in ADCs, quantization gives $6.02N+1.76$ dB, oversampling adds $10\log_{10}(\mathrm{OSR})$, and jitter dominates at high IF.</li>
 <li><strong>Floor vs SFDR.</strong> The floor bounds weak-signal detection; SFDR bounds strong-interferer tolerance — together they set the usable dynamic range.</li>
 </ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Noise_floor" target="_blank" rel="noopener">Wikipedia — Noise floor</a> — what the floor sums together, how it limits the smallest detectable signal, and why spread-spectrum signals can sit beneath it.</li>
+<li><a href="https://markimicrowave.com/technical-resources/application-notes/noise-figure-receiver-sensitivity-guide/" target="_blank" rel="noopener">Marki Microwave — Noise Figure and Receiver Sensitivity</a> — an application note tying the –174 dBm/Hz floor, bandwidth, and NF into the sensitivity equation with an FAQ of common misconceptions.</li>
+<li><a href="https://www.qsl.net/va3iul/Noise/Understanding%20Noise%20Figure.pdf" target="_blank" rel="noopener">Iulian Rosu (VA3IUL) — Understanding Noise Figure</a> — a detailed RF note deriving the kTB floor and the $S_{min} = -174 + 10\log_{10}B + NF + \mathrm{SNR}$ sensitivity relation.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -943,6 +977,15 @@ $$ T_e = \frac{T_h - Y\,T_c}{Y - 1} $$
 <li><strong>The governing design rule.</strong> Put the LNA first and minimize everything before it — this single principle explains tower-top amplifiers and cryogenic front-ends.</li>
 <li><strong>Measuring it.</strong> The Y-factor method turns a hot/cold power ratio into $T_e$ and hence NF; mismatch and instrument noise are the main error sources.</li>
 </ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Noise_figure" target="_blank" rel="noopener">Wikipedia — Noise figure</a> — noise factor vs figure, the $F = 1 + T_e/T_0$ link, and the cascaded (Friis) result with worked reasoning.</li>
+<li><a href="https://en.wikipedia.org/wiki/Friis_formulas_for_noise" target="_blank" rel="noopener">Wikipedia — Friis formulas for noise</a> — the cascade formula in both noise-factor and noise-temperature form, with the derivation and the LNA-first consequence.</li>
+<li><a href="https://www.qsl.net/va3iul/Noise/Understanding%20Noise%20Figure.pdf" target="_blank" rel="noopener">Iulian Rosu (VA3IUL) — Understanding Noise Figure</a> — a thorough RF note on noise factor, Friis cascading, passive-loss NF, and the Y-factor measurement method.</li>
+<li><a href="https://markimicrowave.com/technical-resources/application-notes/noise-figure-receiver-sensitivity-guide/" target="_blank" rel="noopener">Marki Microwave — Noise Figure and Receiver Sensitivity</a> — application note covering Friis cascading, why front-end loss dominates, and amplify-vs-filter-first architecture trade-offs.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -1141,6 +1184,14 @@ $$ \phi_{rms} = \sqrt{2\int_{f_1}^{f_2}\mathcal{L}(f)\,df}\ \ (\text{rad}), \qqu
 <li><strong>Time-domain equivalent.</strong> Integrate to $\phi_{rms} = \sqrt{2\int\mathcal{L}\,df}$, then $t_{jitter} = \phi_{rms}/(2\pi f_0)$; a good spot value can still hide bad integrated jitter.</li>
 <li><strong>Why systems care.</strong> Reciprocal mixing raises the floor near blockers, EVM $\approx\phi_{rms}$ caps modulation order, and OFDM suffers common phase error plus intercarrier interference.</li>
 <li><strong>Scaling and control.</strong> Multiplication degrades and division improves phase noise by $20\log_{10}N$; mitigate with high $Q$, high $P_s$, low flicker, and an optimized PLL loop bandwidth.</li>
+</ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Phase_noise" target="_blank" rel="noopener">Wikipedia — Phase noise</a> — the $\mathcal{L}(f)$ dBc/Hz definition, phase-to-jitter conversion, the –20 dBc/decade Leeson region, and measurement methods.</li>
+<li><a href="https://www.electronics-notes.com/articles/basic_concepts/electronic-rf-noise/phase-noise-jitter-what-is.php" target="_blank" rel="noopener">Electronics Notes — Phase noise and jitter</a> — an accessible tutorial linking frequency-domain phase-noise skirts to time-domain jitter and their impact on link error rate.</li>
+<li><a href="https://people.engr.tamu.edu/spalermo/ecen620/lecture16_ee620_vco_pn.pdf" target="_blank" rel="noopener">Texas A&M ECEN 620 — VCO Phase Noise (Lecture 16)</a> — graduate lecture notes deriving Leeson's model, the $1/f^3$–$1/f^2$ slope regions, and the role of loaded $Q$.</li>
 </ul>`
     }
   ],

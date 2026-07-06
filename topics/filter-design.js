@@ -154,6 +154,15 @@ CONTENT.topics.push(
 <li><b>Transformation and scaling:</b> the $s$-substitutions LP-LP/HP/BP/BS (BP and BS double the order) and the element scaling $L=(k_m/k_f)L_p$, $C=C_p/(k_m k_f)$.</li>
 <li><b>Digital design:</b> FIR by windowing / Parks-McClellan (linear phase, many taps) versus IIR by the bilinear transform $s=\tfrac{2}{T}\tfrac{z-1}{z+1}$ with pre-warping (few coefficients, nonlinear phase), and the flatness-vs-steepness-vs-phase-vs-cost trade running through it all.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Filter_design" target="_blank" rel="noopener">Wikipedia — Filter design</a> — a solid canonical overview of the spec-to-realization flow, approximation families, and both analog and digital methods with links out to each subtopic.</li>
+<li><a href="https://www.dspguide.com/ch20.htm" target="_blank" rel="noopener">The Scientist and Engineer's Guide to DSP, Ch. 20 — Chebyshev Filters</a> — Steven Smith's free textbook chapter deriving recursive (IIR) Chebyshev design from analog prototypes, with clear pole-placement and stability discussion.</li>
+<li><a href="https://www.mathworks.com/help/signal/ug/iir-filter-design.html" target="_blank" rel="noopener">MathWorks — IIR Filter Design</a> — authoritative reference documentation comparing Butterworth, Chebyshev I/II, elliptic and Bessel, with order estimation and the bilinear transform shown in worked code.</li>
+<li><a href="https://my.ece.utah.edu/~ece3500/Fall2014/notes/class19.html" target="_blank" rel="noopener">University of Utah ECE 3500 — Analog Filter Design</a> — university lecture notes walking through normalized low-pass prototypes, pole-zero placement, and the frequency transformations to HP/BP/BS.</li>
+</ul>`
       }
     ],
     keyPoints: [

@@ -161,6 +161,15 @@ CONTENT.topics.push(
 <li><b>Attack vs decay:</b> fast attack protects against clipping; slow decay avoids pumping on modulation — the fast-attack / slow-decay asymmetry.</li>
 <li><b>ADC loading:</b> AGC sets the RMS level several dB below full-scale (crest-factor backoff) to maximise ENOB without clipping high-PAPR peaks — turning nominal ADC bits into usable bits.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Automatic_gain_control" target="_blank" rel="noopener">Wikipedia — Automatic gain control</a> — a solid canonical overview of the AGC feedback loop, its history, time constants, and applications across radio, radar, and audio.</li>
+<li><a href="https://www.electronics-notes.com/articles/radio/superheterodyne-receiver/agc-automatic-gain-control.php" target="_blank" rel="noopener">Electronics Notes — Superhet Radio AGC</a> — a receiver-focused tutorial on where the AGC voltage is derived, how it drives RF/IF gain, and how attack/decay time constants differ for AM, SSB, CW and FM.</li>
+<li><a href="https://www.mathworks.com/help/simrf/ug/implement-automatic-gain-control-for-rf-receiver.html" target="_blank" rel="noopener">MathWorks — Implement Automatic Gain Control for RF Receiver</a> — a worked RF Blockset example combining a fast peak detector and a slow average-power feedback loop, showing AGC behaviour under weak signals and strong blockers.</li>
+<li><a href="https://www.qsl.net/va3iul/Files/Automatic_Gain_Control.pdf" target="_blank" rel="noopener">Iulian Rosu (VA3IUL) — Automatic Gain Control (AGC) in Receivers (PDF)</a> — an in-depth application-note-style treatment of AGC loop design, log-domain gain control, detectors, and dynamic-range handling in real receivers.</li>
+</ul>`
       }
     ],
     keyPoints: [

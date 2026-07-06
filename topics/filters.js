@@ -156,6 +156,15 @@ CONTENT.topics.push(
 <li><b>The four families:</b> Butterworth (maximally flat), Chebyshev I/II (ripple for a steeper skirt), elliptic (steepest, ripple both bands), Bessel (linear phase, gentlest) — and where each wins.</li>
 <li><b>The realizations:</b> passive vs active analog and FIR vs IIR digital all implement the <i>same</i> approximation theory; frequency and phase requirements pick the technology.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Filter_(signal_processing)" target="_blank" rel="noopener">Wikipedia — Filter (signal processing)</a> — a solid canonical overview tying together passband/stopband terminology, poles and zeros, and the four approximation families in one place.</li>
+<li><a href="https://www.mathworks.com/help/signal/ug/iir-filter-design.html" target="_blank" rel="noopener">MathWorks — IIR Filter Design</a> — authoritative vendor documentation contrasting Butterworth, Chebyshev I/II, elliptic and Bessel with the exact response trade-offs and design functions.</li>
+<li><a href="https://www.dspguide.com/ch14.htm" target="_blank" rel="noopener">The Scientist and Engineer's Guide to DSP, Ch. 14 (Steven W. Smith)</a> — a free, intuition-first textbook chapter on filter basics, step vs frequency response, and filter classification.</li>
+<li><a href="https://www.ele.uri.edu/courses/ele314/handouts/YS06_Classicfilters.pdf" target="_blank" rel="noopener">University of Rhode Island ELE 314 — Classic Filters (lecture notes)</a> — a rigorous 31-page course handout deriving the Butterworth, Chebyshev, elliptic and Bessel approximations from first principles.</li>
+</ul>`
       }
     ],
     keyPoints: [

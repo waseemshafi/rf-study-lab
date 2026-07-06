@@ -118,6 +118,15 @@ CONTENT.topics.push(
 <li><strong>The carrier partnership:</strong> a parallel FLL+Costas/PLL provides the phase reference, and carrier aiding scales carrier Doppler into the code NCO so the DLL can run narrow-band and low-jitter under high dynamics.</li>
 <li><strong>The jitter law:</strong> $\sigma\approx\sqrt{B_L d/(2\,C/N_0)}$ (plus a squaring-loss bracket when non-coherent); narrow $d$, high $C/N_0$, and narrow $B_L$ all cut jitter, and lock detectors guard against cycle slips and loss of lock.</li>
 </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://gssc.esa.int/navipedia/index.php/Delay_Lock_Loop_(DLL)" target="_blank" rel="noopener">ESA Navipedia — Delay Lock Loop (DLL)</a> — authoritative GNSS reference deriving the early/late correlators, the coherent, non-coherent, dot-product and normalized discriminators, the S-curve, and thermal-noise code jitter across BPSK/BOC modulations.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/Tracking_Loops" target="_blank" rel="noopener">ESA Navipedia — Tracking Loops</a> — ties the DLL together with the PLL/FLL, covering the integrate-and-dump, loop-filter order and bandwidth trade, the code NCO, and carrier aiding of the code loop.</li>
+<li><a href="https://www.mathworks.com/help/satcom/ug/gps-receiver-acquisition-and-tracking-using-ca-code.html" target="_blank" rel="noopener">MathWorks — GPS Receiver Acquisition and Tracking Using C/A-Code</a> — a runnable MATLAB example that builds a full FLL+PLL+DLL receiver on GPS C/A code, showing the acquisition handover and code/carrier tracking in working code.</li>
+<li><a href="https://www.wasyresearch.com/gnss-signal-tracking-the-need-for-both-pll-and-dll-tracking/" target="_blank" rel="noopener">Wasy Research — GNSS Signal Tracking: The Need for Both PLL and DLL</a> — a tutorial with correlator-output plots showing exactly how DLL-only or PLL-only tracking degrades, motivating the code-carrier partnership.</li>
+</ul>`
       }
     ],
     keyPoints: [

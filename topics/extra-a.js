@@ -131,6 +131,15 @@ CONTENT.topics.push(
         <li><b>Source and channel coding are separable opposites:</b> compress to $H$, then protect up to $C$; reliable transmission needs $H\le C$.</li>
         <li><b>Why it matters:</b> from the 56k modem plateau to LTE's adaptive QAM and Voyager's near-limit FEC, every real link is engineered against this single ceiling.</li>
       </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Shannon%E2%80%93Hartley_theorem" target="_blank" rel="noopener">Wikipedia — Shannon–Hartley theorem</a> — the canonical derivation of $C=B\log_2(1+S/N)$ with the power- and bandwidth-limited regimes worked through.</li>
+<li><a href="https://ocw.mit.edu/courses/6-441-information-theory-spring-2010/pages/lecture-notes/" target="_blank" rel="noopener">MIT OCW 6.441 — Information Theory lecture notes</a> — a full graduate course building entropy, mutual information, and the channel coding theorem from scratch.</li>
+<li><a href="https://math.mit.edu/~goemans/18310S15/noisy-coding-notes.pdf" target="_blank" rel="noopener">MIT 18.310 — Shannon's Noisy Coding Theorem (PDF)</a> — a tight, self-contained proof of achievability and the converse via random coding and typical sets.</li>
+<li><a href="https://en.wikipedia.org/wiki/Noisy-channel_coding_theorem" target="_blank" rel="noopener">Wikipedia — Noisy-channel coding theorem</a> — the sharp $R<C$ vs $R>C$ threshold, proof sketches, and how modern LDPC codes approach the bound.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -397,6 +406,15 @@ CONTENT.topics.push(
         <li><b>Ideal codeword length is $\ell_i=-\log_2 p_i$:</b> frequent symbols deserve short codes (the Morse-code insight made rigorous).</li>
         <li><b>Why it matters:</b> every gzip transfer, photo, and streamed song ends in an entropy coder, so this theory runs billions of times a second worldwide.</li>
       </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Huffman_coding" target="_blank" rel="noopener">Wikipedia — Huffman coding</a> — the optimal prefix-code algorithm, its $H\le\bar{L}<H+1$ bound, variations, and use inside JPEG/MP3/ZIP.</li>
+<li><a href="https://stanforddatacompressionclass.github.io/notes/lossless_iid/huffman.html" target="_blank" rel="noopener">Stanford EE274 — Huffman coding notes</a> — a rigorous, proof-driven treatment of optimality with practical decoding-speed considerations.</li>
+<li><a href="https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Introductory_Electrical_Engineering/Electrical_Engineering_(Johnson)/06:_Information_Communication/6.22:_Compression_and_the_Huffman_Code" target="_blank" rel="noopener">LibreTexts — Compression and the Huffman Code</a> — a worked four-symbol example hitting the $1.75$-bit entropy floor, tied directly to the source-coding theorem.</li>
+<li><a href="https://ocw.mit.edu/courses/6-441-information-theory-spring-2010/pages/lecture-notes/" target="_blank" rel="noopener">MIT OCW 6.441 — Data compression &amp; Kraft inequality</a> — lecture notes deriving the compression limit, Kraft inequality, and optimal-code theory.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -637,6 +655,15 @@ CONTENT.topics.push(
         <li><b>Time–bandwidth duality</b> means you cannot be sharp in both domains: a short pulse always has a wide spectrum, and a brick-wall filter always has a long impulse response.</li>
         <li><b>Why it matters:</b> the sinc lives inside every DAC reconstruction filter, every root-raised-cosine transmit pulse, and every window you apply to fight FFT leakage.</li>
       </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Sinc_function" target="_blank" rel="noopener">Wikipedia — Sinc function</a> — the definitive reference for the normalized/unnormalized sinc, its zeros, side lobes, and role as the ideal low-pass response.</li>
+<li><a href="https://www.dspguide.com/ch11/2.htm" target="_blank" rel="noopener">DSP Guide (Steven Smith) — Ch.11, the rect–sinc pair</a> — an intuitive account of why a rectangular window in one domain gives a sinc in the other, and why that hurts spectral resolution.</li>
+<li><a href="https://www.dsprelated.com/freebooks/mdft/Introduction_Sampling.html" target="_blank" rel="noopener">Julius Smith — Introduction to Sampling</a> — shows weighted, shifted sincs summing to reconstruct a bandlimited signal, i.e. Whittaker–Shannon interpolation in action.</li>
+<li><a href="https://www.mathworks.com/help/signal/ref/sinc.html" target="_blank" rel="noopener">MathWorks — sinc documentation</a> — the definition, a runnable ideal-bandlimited-interpolation example, and numerical notes on evaluating sinc.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -900,6 +927,15 @@ CONTENT.topics.push(
         <li><b>Deterministic pulses use the Fourier transform; noise uses the PSD</b> (Wiener–Khinchin), and a live analyzer estimates a PSD whose noise floor scales with RBW.</li>
         <li><b>Why it matters:</b> regulators, EMC labs, and every SDR waterfall read exactly these amplitude/phase and power spectra to police channels, hunt spurs, and diagnose distortion.</li>
       </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Frequency_domain" target="_blank" rel="noopener">Wikipedia — Frequency domain</a> — the canonical overview of magnitude/phase spectra and the Fourier, Laplace, and Z transforms that produce them.</li>
+<li><a href="https://www.keysight.com/us/en/assets/7018-06714/application-notes/5952-0292.pdf" target="_blank" rel="noopener">Keysight — Spectrum Analysis Basics (App Note 150, PDF)</a> — the classic vendor primer on how a swept superheterodyne analyzer measures amplitude vs frequency and how RBW sets resolution and noise floor.</li>
+<li><a href="https://www.tek.com/en/documents/primer/fundamentals-real-time-spectrum-analysis" target="_blank" rel="noopener">Tektronix — Fundamentals of Real-Time Spectrum Analysis</a> — a deep primer connecting time, frequency, and spectrogram views for dynamic and transient signals.</li>
+<li><a href="https://www.comm.utoronto.ca/~frank/notes/wk.pdf" target="_blank" rel="noopener">Kschischang (U. Toronto) — The Wiener–Khinchin Theorem (PDF)</a> — a concise derivation of why the PSD of a random signal is the Fourier transform of its autocorrelation.</li>
+</ul>`
     }
   ],
   keyPoints: [

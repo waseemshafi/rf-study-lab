@@ -165,6 +165,15 @@ $$ \underbrace{L(u \mid \mathbf{y})}_{\text{a posteriori}} = \underbrace{L_c \, 
 <li><b>The loop and its behaviour.</b> Two decoders trade extrinsic LLRs through $\Pi/\Pi^{-1}$ for 6–10 iterations; the BER shows a near-Shannon <b>waterfall</b> then an <b>error floor</b>, with EXIT charts predicting the convergence threshold.</li>
 <li><b>Cost and legacy.</b> Latency/complexity from many forward–backward passes; deployed in UMTS, LTE, CCSDS, DVB-RCS, WiMAX, and largely superseded by LDPC/Polar in 5G-NR — but the "turbo principle" outlives the code.</li>
 </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Turbo_code" target="_blank" rel="noopener">Wikipedia — Turbo code</a> — a thorough canonical overview: RSC constituents, the interleaver, iterative soft-decision decoding, the Bayesian/belief-propagation view, and the deployment history across 3G/4G and deep space.</li>
+<li><a href="https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/resources/lecture-20-turbo-ldpc-and-ra-codes/" target="_blank" rel="noopener">MIT OCW 6.451 — Lecture 20: Turbo, LDPC, and RA Codes</a> — Forney's graduate lecture notes and video that place turbo codes in the unified "codes on graphs" / sum-product framework.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/parallel-concatenated-convolutional-coding-turbo-codes.html" target="_blank" rel="noopener">MathWorks — Parallel Concatenated Convolutional Coding: Turbo Codes</a> — a hands-on treatment with the LTE (TS 36.212) encoder, APP/iterative decoding, and BER-vs-iteration and block-length simulations.</li>
+<li><a href="https://complextoreal.com/wp-content/uploads/2013/01/turbo1.pdf" target="_blank" rel="noopener">Charan Langton (Complex to Real) — Turbo Coding and MAP Decoding (PDF)</a> — a patient, worked-through tutorial building the BCJR/MAP algorithm and the extrinsic-information loop step by step.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -492,6 +501,15 @@ $$ L_{i\to j}\approx\left(\prod_{j'\ne j}\operatorname{sign}L_{j'\to i}\right)\c
 <li><b>Design and limits.</b> Irregular degree distributions ($\lambda,\rho$), tuned by density evolution, push the threshold to within hundredths of a dB of capacity; the error floor comes mainly from <b>trapping/absorbing sets</b>, not just $d_{min}$.</li>
 <li><b>Rate, encoding, deployment.</b> $R=1-m/n$; sparse $\mathbf H$ makes encoding awkward, fixed by quasi-cyclic/IRA structure; deployed in Wi-Fi, 5G-NR data, DVB-S2, and 10GBASE-T, chosen over turbo for parallelism and low floor.</li>
 </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Low-density_parity-check_code" target="_blank" rel="noopener">Wikipedia — Low-density parity-check code</a> — a comprehensive reference: sparse H and the Tanner graph, belief-propagation decoding, regular vs irregular construction, and deployment across DVB-S2, Wi-Fi, 5G-NR, and 10GBASE-T.</li>
+<li><a href="https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/resources/lecture-20-turbo-ldpc-and-ra-codes/" target="_blank" rel="noopener">MIT OCW 6.451 — Lecture 20: Turbo, LDPC, and RA Codes</a> — Forney's lecture notes deriving the sum-product / min-sum algorithm on Tanner graphs and analysing LDPC performance under iterative decoding.</li>
+<li><a href="https://errorcorrectionzoo.org/c/ldpc" target="_blank" rel="noopener">Error Correction Zoo — LDPC codes</a> — a rigorously cited scholarly entry (Gallager 1962 through recent work) covering formal definitions, decoders, thresholds, code families, and cousins in a structured taxonomy.</li>
+<li><a href="https://www.mathworks.com/help/wireless-hdl/ref/nrldpcdecoder.html" target="_blank" rel="noopener">MathWorks — NR LDPC Decoder (5G TS 38.212)</a> — engineering documentation of layered belief propagation with normalized/offset min-sum, early termination, and the variable-node/check-node message updates in practice.</li>
+</ul>`
     }
   ],
   keyPoints: [

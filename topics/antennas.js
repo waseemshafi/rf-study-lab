@@ -104,6 +104,15 @@ CONTENT.topics.push(
           <li><strong>Polarization loss:</strong> $\mathrm{PLF}=\cos^2\psi$ — including the fixed $-3$ dB for linear-to-circular and total rejection for opposite-sense circular.</li>
           <li><strong>Efficiency and aperture:</strong> $\eta_{rad}=R_r/(R_r+R_L)$ links directivity to gain, and $A_e=G\lambda^2/(4\pi)$ turns a receive antenna's gain into a capture area for the link budget.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Antenna_(radio)" target="_blank" rel="noopener">Wikipedia — Antenna (radio)</a> — the canonical broad reference: radiation, patterns, impedance, polarization, reciprocity, effective area and bandwidth in one place.</li>
+<li><a href="https://www.antenna-theory.com/basics/main.php" target="_blank" rel="noopener">antenna-theory.com — Antenna Basics</a> — an accessible, self-contained course on why antennas radiate plus near/far field, directivity, efficiency and effective aperture.</li>
+<li><a href="https://www.antenna-theory.com/basics/impedance.php" target="_blank" rel="noopener">antenna-theory.com — Antenna Impedance & Matching</a> — a focused walkthrough of input impedance, conjugate matching, mismatch loss and VSWR.</li>
+<li><a href="https://en.wikipedia.org/wiki/Dipole_antenna" target="_blank" rel="noopener">Wikipedia — Dipole antenna</a> — deep treatment of the half-wave dipole: the 73+j42.5 ohm impedance, radiation resistance derivation, and the 0.47-lambda resonance trim.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -366,6 +375,14 @@ CONTENT.topics.push(
           <li><strong>Gain-beamwidth link:</strong> $G\approx26000/(\theta_{az}\theta_{el})$ ties high gain to narrow beams and tight pointing.</li>
           <li><strong>System context:</strong> gain enters transmit budgets through $\mathrm{EIRP}=P_t+G_t-L_{feed}$ and receive budgets through $G/T$.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Antenna_gain" target="_blank" rel="noopener">Wikipedia — Antenna gain</a> — rigorous definitions of gain, directivity, dBi/dBd, realized gain and partial gain, with the efficiency and mismatch factors spelled out.</li>
+<li><a href="https://www.antenna-theory.com/basics/gain.php" target="_blank" rel="noopener">antenna-theory.com — Antenna Gain</a> — intuitive tutorial tying gain to directivity and efficiency, with worked dBi/dBd conversions and when high gain helps or hurts.</li>
+<li><a href="https://en.wikipedia.org/wiki/Aperture_(antenna)" target="_blank" rel="noopener">Wikipedia — Aperture (antenna)</a> — derives effective area, the $A_e=G\lambda^2/4\pi$ link and aperture efficiency for dishes and horns from first principles.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -622,6 +639,14 @@ CONTENT.topics.push(
           <li><strong>Pointing:</strong> boresight loss $\approx12(\theta_e/\theta_{HPBW})^2$ dB, so narrow beams demand accurate tracking.</li>
           <li><strong>Arrays:</strong> $N$ elements narrow the beam $\propto1/(Nd)$ and scan-broaden as $1/\cos\theta_0$ off boresight.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Beamwidth" target="_blank" rel="noopener">Wikipedia — Beamwidth</a> — defines HPBW/FWHM and the family of beam-width metrics, with the array formulas for computing beamwidth from aperture size.</li>
+<li><a href="https://www.radartutorial.eu/06.antennas/an08.en.html" target="_blank" rel="noopener">Radartutorial — Beamwidth</a> — a clear radar-oriented treatment of the 3 dB beamwidth, the 0.707 field-amplitude point, side lobes and beam-shape loss.</li>
+<li><a href="https://www.skyradar.com/blog/understanding-half-power-beam-width-hpbw-and-first-null-beam-width-fnbw" target="_blank" rel="noopener">SkyRadar — HPBW and FNBW</a> — walks through the $70\lambda/D$ HPBW rule and the first-null beamwidth that sets angular resolution.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -900,6 +925,14 @@ CONTENT.topics.push(
           <li><strong>Small magnetic (loop/ferrite):</strong> figure-eight pattern with sharp nulls for direction finding.</li>
           <li><strong>The overarching lesson:</strong> every choice trades gain, bandwidth, pattern, polarization, size and steering against cost — there is no universal antenna.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://www.antenna-theory.com/antennas/main.php" target="_blank" rel="noopener">antenna-theory.com — Types of Antennas</a> — a structured catalogue (wire, travelling-wave, reflector, microstrip, log-periodic, aperture) with a dedicated page per family.</li>
+<li><a href="https://en.wikipedia.org/wiki/Antenna_types" target="_blank" rel="noopener">Wikipedia — Antenna types</a> — classifies antennas by operating principle (simple, composite, array, aperture, travelling-wave) with links to each in-depth article.</li>
+<li><a href="https://www.rfwireless-world.com/Terminology/Types-of-Antenna.html" target="_blank" rel="noopener">RF Wireless World — Types of Antenna</a> — concise engineering rundown of horn, parabolic, helical, patch, Yagi, phased-array and log-periodic types with specs and applications.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -1195,6 +1228,14 @@ CONTENT.topics.push(
           <li><strong>Plane-wave picture:</strong> $\vec E\perp\vec H\perp\hat k$, in phase, $E=\eta H$, with power flow $\vec S=\vec E\times\vec H$ — the local form of every antenna's far field.</li>
           <li><strong>Media and boundaries:</strong> $v=c/n$, $\lambda_m=\lambda_0/n$, $\eta=\eta_0/\sqrt{\varepsilon_r}$; tangential $\vec E$ is continuous and vanishes at a perfect conductor.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Maxwell%27s_equations" target="_blank" rel="noopener">Wikipedia — Maxwell's equations</a> — the four laws in integral and differential form, displacement current, and the derivation of the electromagnetic wave equation at speed $c$.</li>
+<li><a href="https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/pages/part-ii-electromagnetic-waves/lecture-12/" target="_blank" rel="noopener">MIT OCW 8.03 Lecture 12 — Maxwell's Equations & EM Waves</a> — video, transcript and notes deriving the wave equation and showing its speed equals the speed of light.</li>
+<li><a href="https://web.mit.edu/8.02t/www/802TEAL3D/visualizations/coursenotes/modules/guide13.pdf" target="_blank" rel="noopener">MIT 8.02 Course Notes, Chapter 13 (PDF)</a> — textbook-style chapter on displacement current, Gauss's law for magnetism, plane EM waves and the Poynting vector.</li>
+</ul>`
       }
     ],
     keyPoints: [

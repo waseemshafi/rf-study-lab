@@ -144,6 +144,15 @@ CONTENT.topics.push({
 <li><b>Image and the IF's job:</b> the image sits $2f_{IF}$ from the wanted signal and must be killed by the <i>pre-mixer</i> RF filter; a higher IF makes that easier. The IF filter itself cannot separate image from signal.</li>
 <li><b>Classic IFs and dual-conversion:</b> 455 kHz (AM), 10.7 MHz (FM), 21.4 MHz, 70/140 MHz; and why the unresolved trade drives receivers to convert to a high IF first (kill image) then a low IF (get selectivity).</li>
 </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Superheterodyne_receiver" target="_blank" rel="noopener">Wikipedia — Superheterodyne receiver</a> — the canonical overview: fixed-IF principle, the IF strip, classic IF values, image response and multiple-conversion designs in one thorough article.</li>
+<li><a href="https://www.electronics-notes.com/articles/radio/superheterodyne-receiver/image.php" target="_blank" rel="noopener">Electronics Notes — Superheterodyne receiver image response</a> — a focused, worked explanation of why the image sits 2·IF from the wanted signal and how the IF choice sets image-rejection difficulty.</li>
+<li><a href="https://www.site.uottawa.ca/~sloyka/elg3175/Lec_9_ELG3175.pdf" target="_blank" rel="noopener">University of Ottawa ELG3175 — Superheterodyne receiver (Lecture 9 PDF)</a> — university lecture notes deriving the mixer relation, IF selection and image rejection with the underlying math.</li>
+<li><a href="https://www.mathworks.com/help/rf/ug/superheterodyne-receiver-using-rf-budget-analyzer-app.html" target="_blank" rel="noopener">MathWorks — Superheterodyne receiver using RF Budget Analyzer</a> — a hands-on design example building the full RF/mixer/IF cascade and computing gain, noise figure, SNR and IP3 stage by stage.</li>
+</ul>`
     }
   ],
   keyPoints: [

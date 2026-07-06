@@ -104,6 +104,15 @@ CONTENT.topics.push(
 <li><strong>The master metric:</strong> $E[T_{acq}]=\dfrac{(2-P_d)(1+KP_{fa})}{2P_d}qT_d$, with worst case $qT_d$; verification (two-dwell) slashes the false-alarm cost.</li>
 <li><strong>The trade:</strong> longer dwell buys sensitivity and finer Doppler bins but enlarges $q$ and slows the search — sensitivity versus speed is the fundamental tension.</li>
 </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Direct-sequence_spread_spectrum" target="_blank" rel="noopener">Wikipedia — Direct-sequence spread spectrum</a> — the canonical overview of DSSS: chips, spreading/despreading, processing gain, and the GNSS/CDMA applications that make acquisition necessary.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/Baseband_Processing" target="_blank" rel="noopener">ESA Navipedia — Baseband Processing</a> — an authoritative GNSS-receiver reference on the two-dimensional code-delay/Doppler cold search, correlation, and coherent vs non-coherent integration versus detection probability.</li>
+<li><a href="https://gnss-sdr.org/docs/sp-blocks/acquisition/" target="_blank" rel="noopener">GNSS-SDR — Acquisition block documentation</a> — a concrete open-source implementation of Parallel Code Phase Search (FFT circular correlation) with a CFAR/GLRT detector and configurable dwell and false-alarm settings.</li>
+<li><a href="https://www.mathworks.com/help/satcom/ug/gps-receiver-acquisition-and-tracking-using-ca-code.html" target="_blank" rel="noopener">MathWorks — GPS Receiver Acquisition and Tracking Using C/A-Code</a> — a fully worked MATLAB example that FFT-acquires coarse code phase and Doppler across visible satellites, then hands off to FLL/PLL/DLL tracking.</li>
+</ul>`
       }
     ],
     keyPoints: [

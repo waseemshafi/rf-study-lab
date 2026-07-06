@@ -193,6 +193,15 @@ CONTENT.topics.push(
           <li><strong>Decoding choices.</strong> Viterbi finds the best sequence (add–compare–select, ~2 dB from soft over hard decisions); BCJR gives per-bit soft outputs and lives on inside Turbo codes.</li>
           <li><strong>Practical levers.</strong> Puncturing trades $d_{free}$ for higher rate from one mother code; traceback $\approx 5K$–$6K$ enables streaming; catastrophic generators (shared factors) must be avoided.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Convolutional_code" target="_blank" rel="noopener">Wikipedia — Convolutional code</a> — canonical overview of encoders, generator polynomials, trellis representation, free distance, and Viterbi/BCJR decoding with historical context.</li>
+<li><a href="https://ocw.mit.edu/courses/6-02-introduction-to-eecs-ii-digital-communication-systems-fall-2012/effb4e0089fd355258e96dd8277bbc2b_MIT6_02F12_chap08.pdf" target="_blank" rel="noopener">MIT OCW 6.02 — Viterbi Decoding of Convolutional Codes (Chapter 8)</a> — a rigorous full-chapter walk-through of the trellis and the add–compare–select Viterbi algorithm, hard and soft decisions worked in detail.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/convolutional-codes.html" target="_blank" rel="noopener">MathWorks — Convolutional Codes (Communications Toolbox)</a> — practitioner-oriented reference tying polynomial/octal generators to trellis structures, puncturing, and working convenc/vitdec code examples.</li>
+<li><a href="https://linas.org/mirrors/home.netcom.com/2002.09.18/~chip.f/viterbi/tutorial.html" target="_blank" rel="noopener">Chip Fleming — A Tutorial on Convolutional Coding with Viterbi Decoding</a> — a classic end-to-end tutorial building encoder, noisy channel, symbol quantization, and the Viterbi decoder step by step.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -513,6 +522,15 @@ Codeword $=11\ 10\ 00\ 01\ 01\ 11$ (12 coded bits).</p>
           <li><strong>Shannon's ceiling.</strong> Reliable communication is possible iff $R<C=B\log_2(1+\mathrm{SNR})$, with an absolute floor of $E_b/N_0\ge \ln 2\approx-1.59$ dB that modern codes approach within a fraction of a dB.</li>
           <li><strong>Strategies and tools.</strong> FEC (no feedback), ARQ (detect + retransmit), HARQ (both), and interleaving to scatter bursts into the random errors codes are designed for.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Forward_error_correction" target="_blank" rel="noopener">Wikipedia — Forward error correction</a> — broad canonical survey of block vs convolutional codes, code rate, interleaving, ARQ/HARQ, and the FEC code families.</li>
+<li><a href="https://math.mit.edu/~goemans/18310S15/noisy-coding-notes.pdf" target="_blank" rel="noopener">MIT 18.310 — Shannon's Noisy Coding Theorem (lecture notes)</a> — a careful proof-level treatment of channel capacity and why reliable communication is possible exactly when the rate is below capacity.</li>
+<li><a href="https://web.stanford.edu/class/engr76/lectures/lecture19.pdf" target="_blank" rel="noopener">Stanford ENGR 76 — The Shannon Limit (Lecture 19)</a> — accessible lecture notes deriving the binary-symmetric-channel capacity and the fundamental limit on reliable-communication rate.</li>
+<li><a href="https://users.ece.cmu.edu/~koopman/des_s99/coding/" target="_blank" rel="noopener">CMU 18-849 — Coding for Error Detection and Correction</a> — a concise engineering overview of parity, checksums, CRC, Hamming/linear block codes, and convolutional codes with their real-world applications.</li>
+</ul>`
       }
     ],
     keyPoints: [

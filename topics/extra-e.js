@@ -170,6 +170,15 @@ CONTENT.topics.push(
 <li><strong>The compounding trap.</strong> One-sided vs two-sided, and baseband vs RF, are each a factor of 2 — muddle both and you are off by 4×. Resolve both before trusting any bandwidth figure.</li>
 </ul>
 <div class="callout tip">If you internalize one habit: whenever someone says "the bandwidth is X," ask <em>which</em> bandwidth and whether it is one-sided/two-sided, baseband/RF. Getting the definition right is more than half of every bandwidth problem.</div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Bandwidth_(signal_processing)" target="_blank" rel="noopener">Wikipedia — Bandwidth (signal processing)</a> — canonical overview that lays out and contrasts the −3 dB, null-to-null, occupied, and noise-equivalent definitions in one place.</li>
+<li><a href="https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-02-introduction-to-eecs-ii-digital-communication-systems-fall-2012/lecture-videos/lecture-11-lti-channel-and-intersymbol-interference/" target="_blank" rel="noopener">MIT OCW 6.02 — LTI Channels and Intersymbol Interference</a> — university lecture connecting channel bandwidth to symbol rate, ISI, and the Nyquist limit.</li>
+<li><a href="https://resources.pcb.cadence.com/blog/2020-equivalent-noise-bandwidth-its-applications-and-how-is-it-calculated" target="_blank" rel="noopener">Cadence — Equivalent Noise Bandwidth</a> — focused derivation of the brick-wall noise-equivalent bandwidth and why it, not −3 dB, belongs in noise-power calculations.</li>
+<li><a href="https://www.keysight.com/used/us/en/knowledge/formulas/bandwith-formula" target="_blank" rel="noopener">Keysight — Bandwidth Formula guide</a> — vendor engineering reference tying the bandwidth definitions to instrument measurement (RBW, occupied-bandwidth function).</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -479,6 +488,15 @@ CONTENT.topics.push(
 <li><strong>Why it matters.</strong> Narrow spacing ($d\approx0.1$ chip) sharpens the S-curve and rejects multipath but shrinks pull-in, leaning on good acquisition and carrier aiding. In GPS the Prompt code phase becomes the pseudorange, so DLL jitter and multipath bias directly limit position accuracy.</li>
 </ul>
 <div class="callout tip">One line to keep: you cannot track the top of a hill by its height — you track it by the <em>difference in height a step to each side</em>. That difference is the S-curve, and wrapping it in a loop (the DLL) is a PLL measuring timing instead of phase.</div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://gssc.esa.int/navipedia/index.php/Delay_Lock_Loop_(DLL)" target="_blank" rel="noopener">ESA Navipedia — Delay Lock Loop (DLL)</a> — authoritative GNSS reference on the early/prompt/late correlators, the early-minus-late discriminator, and the S-curve.</li>
+<li><a href="https://www.mathworks.com/help/satcom/ug/gps-receiver-acquisition-and-tracking-using-ca-code.html" target="_blank" rel="noopener">MathWorks — GPS Receiver Acquisition and Tracking Using C/A-Code</a> — worked software-receiver example implementing the early-late DLL and carrier loops end to end.</li>
+<li><a href="https://ocw.tudelft.nl/wp-content/uploads/Readings_lecture_3_-_GPS_receiver_Architecture_and_Measurements_01.pdf" target="_blank" rel="noopener">TU Delft OCW — GPS Receiver Architecture and Measurements</a> — lecture notes situating the code tracking loop within a full receiver and deriving the pseudorange.</li>
+<li><a href="https://en.wikipedia.org/wiki/Matched_filter" target="_blank" rel="noopener">Wikipedia — Matched filter</a> — the correlation/matched-filter foundation the prompt correlator implements and the early-late gate tracks.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -774,6 +792,15 @@ CONTENT.topics.push(
 <li><strong>Polarization as a resource.</strong> Orthogonal polarizations double capacity (frequency reuse, limited by XPD ≈ 25–35 dB), and dual-polarized antennas give MIMO streams and diversity in one aperture. Rain depolarization is the main threat to XPD at high frequencies.</li>
 </ul>
 <div class="callout tip">One line to keep: an antenna captures only the component of $\vec E$ aligned with its own polarization. Match it and you lose nothing; mismatch by $\psi$ and you lose $\cos^2\psi$; go orthogonal and you lose everything — which is precisely why the same orthogonality that <em>hurts</em> a mismatched link is <em>exploited</em> for frequency reuse.</div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Polarization_(waves)" target="_blank" rel="noopener">Wikipedia — Polarization (waves)</a> — thorough treatment of linear, circular, and elliptical states, handedness, and the polarization ellipse.</li>
+<li><a href="https://www.antenna-theory.com/basics/polarization.php" target="_blank" rel="noopener">Antenna-Theory.com — Polarization of Waves</a> — clear tutorial deriving axial ratio and the polarization loss factor from the two orthogonal field components.</li>
+<li><a href="https://resources.system-analysis.cadence.com/blog/msa2021-the-polarization-loss-factor-in-antenna-communication" target="_blank" rel="noopener">Cadence — The Polarization Loss Factor in Antenna Communication</a> — focused article on PLF, mismatch penalties, and the fixed 3 dB circular-to-linear loss.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/Ionospheric_Delay" target="_blank" rel="noopener">ESA Navipedia — Ionospheric Delay</a> — GNSS reference on the ionosphere's frequency-squared effects, the backdrop to Faraday rotation and why space links use circular polarization.</li>
+</ul>`
       }
     ],
     keyPoints: [

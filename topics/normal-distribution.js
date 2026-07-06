@@ -147,6 +147,15 @@ CONTENT.topics.push(
 <li><b>The Central Limit Theorem:</b> sums of many independent finite-variance effects become Gaussian — the reason thermal noise is Gaussian — and its two rules: variances add ($\sqrt{\sigma_1^2+\sigma_2^2}$), and averaging cuts noise as $\sigma/\sqrt n$.</li>
 <li><b>Why it matters at a receiver:</b> AWGN samples are $N(0,N_0/2)$, decision variables are Gaussian, and every BER is a Q-function of an SNR; linear systems keep noise Gaussian, but a narrowband envelope goes Rayleigh.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Normal_distribution" target="_blank" rel="noopener">Wikipedia — Normal distribution</a> — the canonical reference: PDF/CDF, moments, standardization, the CLT link, and operations on normal variables, all with derivations.</li>
+<li><a href="https://seeing-theory.brown.edu/probability-distributions/index.html" target="_blank" rel="noopener">Brown University — Seeing Theory: Probability Distributions</a> — interactive visual course where you drag parameters and watch the sample-mean distribution converge to a Gaussian, building CLT intuition directly.</li>
+<li><a href="https://pysdr.org/content/noise.html" target="_blank" rel="noopener">PySDR — Noise and Random Variables</a> — connects Gaussian noise, the CLT, and AWGN to real SDR/DSP practice with Python examples and I/Q noise handling.</li>
+<li><a href="https://cioffi-group.stanford.edu/ee379a/Lectures/L2.pdf" target="_blank" rel="noopener">Stanford EE379a (Cioffi) — Lecture 2: The AWGN Channel</a> — graduate lecture notes deriving the Gaussian-noise decision problem and the Q-function BER expressions used at a receiver.</li>
+</ul>`
       }
     ],
     keyPoints: [

@@ -174,6 +174,15 @@ CONTENT.topics.push(
         <li><strong>Why AM lost ground.</strong> The envelope carries the data, so AM needs a linear PA and suffers a threshold effect and selective-fading distortion — exactly the weaknesses that constant-envelope FM was built to cure.</li>
       </ul>
       <div class="callout tip">If you remember only one thing: in AM the <em>information is in the amplitude</em>. Every strength (dumb detector) and every weakness (wasted carrier power, linear-PA requirement, fading sensitivity) follows directly from that single fact.</div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Amplitude_modulation" target="_blank" rel="noopener">Wikipedia — Amplitude modulation</a> — canonical reference with the full math, spectrum, power budget, and the DSB/SSB/VSB variant family in one place.</li>
+<li><a href="https://web.stanford.edu/class/ee179/lectures/notes05.pdf" target="_blank" rel="noopener">Stanford EE179 — Channels, Power Spectrum, and AM Modulation (lecture notes PDF)</a> — rigorous university treatment of AM signals, spectra, and power from a signals-and-systems viewpoint.</li>
+<li><a href="https://www.tutorialspoint.com/analog_communication/analog_communication_amplitude_modulation.htm" target="_blank" rel="noopener">TutorialsPoint — Analog Communication: Amplitude Modulation</a> — step-by-step derivation of the modulation index, sidebands, and the 1.5×-carrier power result with worked numbers.</li>
+<li><a href="https://en.wikipedia.org/wiki/Single-sideband_modulation" target="_blank" rel="noopener">Wikipedia — Single-sideband modulation</a> — deep dive on the bandwidth-halving SSB variant, its filter/phasing generation methods, and coherent demodulation.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -506,6 +515,15 @@ CONTENT.topics.push(
         <li><strong>The grand bargain.</strong> Output SNR $\approx3\beta^3$: doubling bandwidth buys ~9 dB — an analog form of Shannon's bandwidth-for-power trade — but only above the ~10 dB FM threshold, below which clicks make the output collapse.</li>
       </ul>
       <div class="callout tip">The single sentence to keep: FM <em>spends bandwidth to buy noise immunity</em>. Deviation sets $\Delta f$, the ratio $\Delta f/f_m$ sets $\beta$, and $\beta$ sets both the bandwidth (Carson) and the SNR gain ($\sim3\beta^3$) — until the threshold stops the trade.</div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Frequency_modulation" target="_blank" rel="noopener">Wikipedia — Frequency modulation</a> — canonical reference covering instantaneous frequency, the Bessel-function spectrum, modulation index, and constant-envelope properties.</li>
+<li><a href="https://www.tutorialspoint.com/analog_communication/analog_communication_angle_modulation.htm" target="_blank" rel="noopener">TutorialsPoint — Analog Communication: Angle Modulation</a> — worked derivation of FM/PM, frequency deviation, and the NBFM vs WBFM distinction with formulas.</li>
+<li><a href="https://www.electronics-notes.com/articles/radio/modulation/frequency-modulation-fm.php" target="_blank" rel="noopener">Electronics Notes — Frequency Modulation, FM</a> — engineering-oriented tutorial on FM sidebands, deviation ratio, and practical broadcast/receiver considerations.</li>
+<li><a href="https://en.wikipedia.org/wiki/Carson_bandwidth_rule" target="_blank" rel="noopener">Wikipedia — Carson bandwidth rule</a> — focused treatment of the $B\approx2(\Delta f+f_m)$ approximation that sets practical FM bandwidth.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -849,6 +867,14 @@ CONTENT.topics.push(
         <li><strong>Variants shape the envelope, not the BER.</strong> OQPSK (delay Q by $T_s/2$, phase steps $\le\pm90°$) and $\pi/4$-QPSK (rotate $45°$ per symbol, steps $\le\pm135°$, differential-detectable) avoid the origin-crossing $180°$ jumps of plain QPSK, lowering PAPR so the PA can run efficiently.</li>
       </ul>
       <div class="callout tip">One sentence to remember: QPSK = <em>two BPSKs in quadrature</em>. That single idea gives the I/Q receiver, the BPSK-equal BER, the doubled spectral efficiency, and — via origin crossings — the PAPR story behind OQPSK and $\pi/4$-QPSK.</div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Phase-shift_keying" target="_blank" rel="noopener">Wikipedia — Phase-shift keying</a> — thorough reference on QPSK, its constellation and Gray mapping, OQPSK/$\pi/4$-QPSK variants, and BER analysis.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/qpsk-transmitter-and-receiver.html" target="_blank" rel="noopener">MathWorks — QPSK Transmitter and Receiver</a> — end-to-end worked implementation covering pulse shaping, carrier and timing recovery, and a full I/Q receiver chain.</li>
+<li><a href="https://www.gaussianwaves.com/2010/10/qpsk-modulation-and-demodulation-2/" target="_blank" rel="noopener">GaussianWaves — QPSK modulation and demodulation</a> — math-first tutorial with the $s(t)=A\cos[2\pi f_c t+\theta_n]$ derivation, constellation transitions, and AWGN simulation.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -1166,6 +1192,15 @@ CONTENT.topics.push(
         <li><strong>Practical realities.</strong> Implemented as an oversampled, truncated linear-phase FIR (constant group delay $NT$ per filter, $2NT$ end-to-end). Both ends must use the <em>same</em> $\beta$, and the shaped pulse rings between symbols, raising PAPR versus an unshaped signal.</li>
       </ul>
       <div class="callout tip">One line to keep: <em>square-root the Nyquist filter, put a copy at each end</em> — the product is zero-ISI and each end is the other's matched filter. And never forget: a single RRC alone is not zero-ISI.</div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Root-raised-cosine_filter" target="_blank" rel="noopener">Wikipedia — Root-raised-cosine filter</a> — canonical article with the RRC impulse/frequency response and why the square-root split gives a matched, Nyquist cascade.</li>
+<li><a href="https://en.wikipedia.org/wiki/Nyquist_ISI_criterion" target="_blank" rel="noopener">Wikipedia — Nyquist ISI criterion</a> — the underlying zero-ISI condition that the RC cascade satisfies, explaining why a lone RRC pulse is not ISI-free.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/raised-cosine-filtering.html" target="_blank" rel="noopener">MathWorks — Raised Cosine Filtering</a> — practical guide showing the ISI-rejection of matched Tx/Rx RRC pairs with FIR design, roll-off, and group-delay details.</li>
+<li><a href="https://www.gaussianwaves.com/2018/10/square-root-raised-cosine-pulse-shaping/" target="_blank" rel="noopener">GaussianWaves — Square-root raised-cosine pulse shaping</a> — math-and-code walkthrough of SRRC filter generation, truncation, and eye-diagram verification.</li>
+</ul>`
     }
   ],
   keyPoints: [

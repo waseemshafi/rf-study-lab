@@ -162,6 +162,15 @@ CONTENT.topics.push(
 <li><b>Clipping:</b> symmetric hard clipping (square wave) contains only odd harmonics falling as $1/n$; asymmetric clipping adds even harmonics.</li>
 <li><b>Why it matters:</b> harmonics cause spurious emissions and receiver desense and are removed with output/harmonic low-pass filtering — and the same $a_3$ term is exactly what leads into two-tone intermod and the third-order intercept.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Total_harmonic_distortion" target="_blank" rel="noopener">Wikipedia — Total harmonic distortion</a> — the canonical reference on the THD definition, the THDF vs THDR variants, THD+N, and measurement methods.</li>
+<li><a href="https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Microwave_and_RF_Design_IV:_Modules_(Steer)/04:_Noise_Distortion_and_Dynamic_Range/4.05:_Nonlinear_Distortion" target="_blank" rel="noopener">Engineering LibreTexts (Steer) — 4.5 Nonlinear Distortion</a> — a full RF textbook chapter deriving harmonics from a power/Taylor series and tying them to gain compression (P1dB) and IP3.</li>
+<li><a href="https://www.ti.com/lit/pdf/sboa580" target="_blank" rel="noopener">Texas Instruments SBOA580 — How to Measure Total Harmonic Distortion of an Op-Amp</a> — a vendor application note showing how THD is actually measured on real hardware and where the harmonic tail comes from.</li>
+<li><a href="https://rahsoft.com/2024/02/24/introduction-to-harmonics-in-rf-systems/" target="_blank" rel="noopener">Rahsoft — Introduction to Harmonics in RF Systems</a> — an RF-focused walk-through of how nonlinear stages (PAs, mixers, VCOs) generate 2f/3f harmonics and how they are measured on a spectrum analyzer.</li>
+</ul>`
       }
     ],
     keyPoints: [

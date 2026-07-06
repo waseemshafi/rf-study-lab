@@ -125,7 +125,16 @@ $$ \tfrac{N}{2}\log_2 N \text{ complex multiplies}, \qquad N\log_2 N \text{ comp
 <li><b>Bit-reversal</b> reorders the data once; frequency resolution $\Delta f=1/T_{\text{record}}$ depends on record length, and zero-padding only interpolates the display.</li>
 <li><b>Non-integer cycles cause leakage;</b> windows (Hann, Hamming, Blackman) trade a wider main lobe for lower side lobes.</li>
 <li><b>Why it matters:</b> every spectrum display, OFDM modem, and fast-convolution filter in modern comms rests on this single algorithm.</li>
-</ul></div>` }
+</ul></div>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform" target="_blank" rel="noopener">Wikipedia — Fast Fourier transform</a> — the canonical survey of FFT algorithms, complexity, Cooley–Tukey and mixed-radix variants, and applications.</li>
+<li><a href="https://www.dspguide.com/ch12.htm" target="_blank" rel="noopener">DSP Guide (Steven Smith) — Ch. 12: The Fast Fourier Transform</a> — an intuitive, code-level walkthrough of how the FFT actually works, with speed and precision comparisons.</li>
+<li><a href="https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/resources/lecture-3-divide-conquer-fft/" target="_blank" rel="noopener">MIT OCW 6.046J — Lecture 3: Divide &amp; Conquer, FFT</a> — Demaine's rigorous derivation of the FFT as a divide-and-conquer algorithm, with video, notes, and transcript.</li>
+<li><a href="https://www.mathworks.com/help/matlab/ref/fft.html" target="_blank" rel="noopener">MathWorks — fft function reference</a> — practical usage, zero-padding, windowing and worked spectral-analysis examples backed by the FFTW library.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`The FFT computes the <i>exact same</i> DFT as the direct sum — it is an efficient algorithm, not an approximation.`,
@@ -361,7 +370,16 @@ $$ N \approx \frac{-10\log_{10}(\delta_p\,\delta_s)-13}{14.6\,\Delta f/f_s}+1, $
 <li><b>Two main design routes:</b> windowed-sinc (truncate the ideal sinc and taper) and Parks–McClellan (optimal equiripple, shortest filter for a spec).</li>
 <li><b>The cost is length:</b> sharper transitions or deeper stopbands need more taps ($N\propto1/\Delta f$), meaning more MACs and more latency than a comparable IIR.</li>
 <li><b>Why it matters:</b> pulse shaping, matched filtering, and channelizers use FIR precisely because phase fidelity — not raw efficiency — is what they cannot compromise.</li>
-</ul></div>` }
+</ul></div>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Finite_impulse_response" target="_blank" rel="noopener">Wikipedia — Finite impulse response</a> — a thorough reference on FIR structure, linear phase, and the window, least-squares and Parks–McClellan design routes.</li>
+<li><a href="https://www.dspguide.com/ch16.htm" target="_blank" rel="noopener">DSP Guide (Steven Smith) — Ch. 16: Windowed-Sinc Filters</a> — the definitive practical treatment of designing FIR filters by truncating and tapering the ideal sinc.</li>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/FIR_Digital_Filters.html" target="_blank" rel="noopener">Stanford CCRMA — Julius Smith, FIR Digital Filters</a> — a rigorous online-textbook chapter on transversal/tapped-delay-line FIR structure, convergence and transfer functions.</li>
+<li><a href="https://www.mathworks.com/help/signal/ug/fir-filter-design.html" target="_blank" rel="noopener">MathWorks — FIR Filter Design</a> — an authoritative guide to the four linear-phase types and windowing, least-squares and equiripple design with worked code.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`FIR output is a finite weighted sum of past inputs: $y[n]=\sum_{k=0}^{N-1}b_k\,x[n-k]$ — pure convolution, no feedback.`,
@@ -604,7 +622,16 @@ $$ H(z)=\prod_i \frac{b_{0i}+b_{1i}z^{-1}+b_{2i}z^{-2}}{1+a_{1i}z^{-1}+a_{2i}z^{
 <li><b>The price is nonlinear phase</b> (frequency-dependent group delay) and the risk that coefficient quantization moves a pole outside the circle.</li>
 <li><b>Design by analog prototype:</b> pick Butterworth/Chebyshev/elliptic/Bessel, pre-warp, apply the bilinear transform, and realize as a robust biquad cascade.</li>
 <li><b>Why it matters:</b> audio EQ, anti-alias filtering, notch/hum removal, and control compensators use IIR whenever compute and latency are tight and magnitude — not phase — is what counts.</li>
-</ul></div>` }
+</ul></div>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Infinite_impulse_response" target="_blank" rel="noopener">Wikipedia — Infinite impulse response</a> — a solid reference on IIR transfer functions, pole-based stability, and the impulse-invariance and bilinear-transform design methods.</li>
+<li><a href="https://www.dspguide.com/ch19.htm" target="_blank" rel="noopener">DSP Guide (Steven Smith) — Ch. 19: Recursive Filters</a> — an intuitive account of single-pole and narrow-band recursive filters, phase response and integer implementation.</li>
+<li><a href="https://ccrma.stanford.edu/~jos/fp/" target="_blank" rel="noopener">Stanford CCRMA — Julius Smith, Introduction to Digital Filters</a> — a full online textbook covering recursive filter realizations, pole-zero analysis and the bilinear transform with frequency warping.</li>
+<li><a href="https://www.mathworks.com/help/signal/ug/iir-filter-design.html" target="_blank" rel="noopener">MathWorks — IIR Filter Design</a> — an authoritative walkthrough of Butterworth, Chebyshev, elliptic and Bessel prototypes and their digital realization.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`IIR output uses feedback: $y[n]=\sum_k b_k x[n-k]-\sum_{k\ge1} a_k y[n-k]$ — past outputs re-enter the computation.`,

@@ -149,6 +149,15 @@ CONTENT.topics.push(
 <li><b>Types and conversion gain:</b> passive diode rings show $\approx6$–$7$ dB conversion loss but high linearity; active Gilbert cells give conversion gain at higher noise; double-balanced topologies give port isolation by symmetry.</li>
 <li><b>Real-world limits:</b> LO leakage/self-mixing DC offsets, spurious products $|m f_{LO}\pm n f_{RF}|$, mixer noise adding to NF, and IIP3 setting large-signal handling.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Frequency_mixer" target="_blank" rel="noopener">Wikipedia — Frequency mixer</a> — the canonical overview of sum/difference products, single- and double-balanced diode-ring topologies, conversion loss and spurious terms, with links out to every sub-topic.</li>
+<li><a href="https://markimicrowave.com/technical-resources/white-papers/mixer-basics-primer/" target="_blank" rel="noopener">Marki Microwave — Mixer Basics Primer</a> — an authoritative vendor tutorial that rigorously defines conversion loss, L-R/L-I/R-I isolation, single- and two-tone intermodulation spurs, 1 dB compression and IP3 with real device data.</li>
+<li><a href="https://www.minicircuits.com/app/AN00-009.pdf" target="_blank" rel="noopener">Mini-Circuits AN00-009 — Understanding Mixers, Terms Defined and Measuring Performance</a> — a concise application note fixing signal-naming conventions and the measurement methods for conversion gain/loss and two-tone third-order intermodulation.</li>
+<li><a href="https://www.electronics-notes.com/articles/radio/rf-mixer/gilbert-cell-rf-mixer.php" target="_blank" rel="noopener">Electronics Notes — Gilbert cell RF mixer</a> — a focused explanation of the active double-balanced Gilbert cell: its symmetry-based port cancellation, switching vs analogue modes, and why it dominates RFIC implementations.</li>
+</ul>`
       }
     ],
     keyPoints: [

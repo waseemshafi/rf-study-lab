@@ -158,6 +158,15 @@ CONTENT.topics.push({
         <li><b>The comms link:</b> BPSK/QPSK BER $=Q(\sqrt{2E_b/N_0})=\tfrac12\operatorname{erfc}(\sqrt{E_b/N_0})$, and inverting via $Q^{-1}$ turns a BER target into a required $E_b/N_0$.</li>
         <li><b>Why erfc is kept separate:</b> it is computed directly to avoid catastrophic cancellation in the far tail where $\operatorname{erf}(x)\to1$.</li>
       </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Q-function" target="_blank" rel="noopener">Wikipedia — Q-function</a> — the canonical reference: definition, the $Q(x)=\tfrac12\operatorname{erfc}(x/\sqrt2)$ link, Craig's finite-limit integral, Chernoff bounds, tabulated values and the inverse.</li>
+<li><a href="https://dlmf.nist.gov/7.2" target="_blank" rel="noopener">NIST DLMF §7.2 — Error Functions</a> — the authoritative definitions of erf and erfc with rigorous properties, part of the official Digital Library of Mathematical Functions.</li>
+<li><a href="https://www.comm.utoronto.ca/~frank/notes/erfc.pdf" target="_blank" rel="noopener">Univ. of Toronto (Kschischang) — The Complementary Error Function</a> — a compact lecture note deriving tight upper/lower bounds and asymptotics for erfc, exactly the tail estimates used in BER work.</li>
+<li><a href="https://www.gaussianwaves.com/2012/07/intuitive-derivation-of-performance-of-an-optimum-bpsk-receiver-in-awgn-channel/" target="_blank" rel="noopener">GaussianWaves — BPSK BER in AWGN</a> — a step-by-step derivation of $P_b=Q(\sqrt{2E_b/N_0})=\tfrac12\operatorname{erfc}(\sqrt{E_b/N_0})$ showing how the Q-function drops out of the matched-filter decision.</li>
+</ul>`
     }
   ],
   keyPoints: [

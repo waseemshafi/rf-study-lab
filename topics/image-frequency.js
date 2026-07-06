@@ -149,6 +149,15 @@ CONTENT.topics.push(
 <li><b>Quantifying it:</b> IRR in dB equals the preselector attenuation at $f_{im}$, or for a mixer is set by I/Q amplitude and phase mismatch; ~1% and ~1° gives roughly 40 dB.</li>
 <li><b>The design coupling:</b> the image links the IF plan and the preselector — you cannot choose them independently.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Image_response" target="_blank" rel="noopener">Wikipedia — Image response</a> — canonical overview of the image-response rejection ratio (IMRR), the LO-mirror geometry, and the filter-vs-mismatch formulas that set it.</li>
+<li><a href="https://rfessentials.com/resources/rf-glossary/image-frequency/" target="_blank" rel="noopener">RF Essentials — Image Frequency</a> — thorough tutorial with high-/low-side injection formulas, a worked GHz example, a preselector filter-technology comparison table, and the high-IF vs low-IF dual-conversion trade.</li>
+<li><a href="https://people.engr.tamu.edu/s-sanchez/665%20Lect%202-Receiver-Topologies%202009.pdf" target="_blank" rel="noopener">Texas A&M EE (Sánchez-Sinencio) — Receiver Topologies lecture notes</a> — graduate RFIC lecture PDF deriving superheterodyne, image-reject (Hartley/Weaver) and low-IF architectures and their image behaviour.</li>
+<li><a href="https://arxiv.org/abs/2508.16735" target="_blank" rel="noopener">arXiv 2508.16735 — S-Band Image-Rejecting Dual-Conversion Superheterodyne RF Chain</a> — practical paper on designing a dual-conversion RF chain with image rejection and spurious-signal management, tying the IF plan to real filter and mixer choices.</li>
+</ul>`
       }
     ],
     keyPoints: [
