@@ -48,6 +48,15 @@ CONTENT.topics.push(
           <li><strong>The cellular fix:</strong> RSRP (pure power) plus RSRQ/SINR (quality) beats a single conflated RSSI.</li>
           <li><strong>Ranging caution:</strong> shadowing, multipath, unknown $n$, and calibration drift make RSSI distance estimates unreliable — use time-of-flight (UWB, FTM) for metric accuracy, and always state the reference plane and bandwidth.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Received_signal_strength_indicator" target="_blank" rel="noopener">Wikipedia — Received signal strength indicator</a> — the canonical overview covering the 802.11 arbitrary-unit definition, vendor scaling, RCPI, and RSSI-based localisation.</li>
+<li><a href="https://study-ccnp.com/received-signal-strength-indication-rssi-explained/" target="_blank" rel="noopener">Study-CCNP — RSSI Explained</a> — walks through dBm, receiver sensitivity thresholds, and SNR-as-difference-from-noise-floor with worked signal-quality examples.</li>
+<li><a href="https://www.eseye.com/resources/iot-explained/understanding-signal-quality-rssi-rsrp-and-rsrq/" target="_blank" rel="noopener">Eseye — Understanding Signal Quality: RSSI, RSRP and RSRQ</a> — contrasts the conflated RSSI with the cleaner cellular RSRP/RSRQ metrics and their dBm ranges, with a when-to-use comparison table.</li>
+<li><a href="https://poynting.tech/articles/antenna-faq/signal-strength-measure-rsrp-rsrq-and-sinr-reference-for-lte-cheat-sheet/" target="_blank" rel="noopener">Poynting — RSRP, RSRQ and SINR Reference Cheat Sheet</a> — a compact LTE/5G reference defining RSRP, RSRQ, SINR and RSSI side by side with practical benchmark values.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -199,6 +208,15 @@ CONTENT.topics.push(
           <li><strong>Two random layers:</strong> slow log-normal shadowing (tens of metres, handled with a fade margin $Q^{-1}(1-p)\sigma$) and fast Rayleigh/Rician multipath (sub-wavelength, handled with diversity/OFDM/coding, not raw margin).</li>
           <li><strong>Engineering models:</strong> Okumura-Hata (150-1500 MHz) and COST-231 (1500-2000 MHz) fit measured macrocell loss; FSPL is always your first sanity check.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Free-space_path_loss" target="_blank" rel="noopener">Wikipedia — Free-space path loss</a> — canonical treatment of the inverse-square law, the dB master formula with unit constants, and the aperture-shrinkage explanation of frequency dependence.</li>
+<li><a href="https://phys.libretexts.org/Bookshelves/Electricity_and_Magnetism/Electromagnetics_II_(Ellingson)/10:_Antennas/10.14:_Friis_Transmission_Equation" target="_blank" rel="noopener">LibreTexts (Ellingson, Electromagnetics II) — Friis Transmission Equation</a> — a full textbook derivation from spherical spreading and effective aperture, with a worked link example.</li>
+<li><a href="https://span.ece.utah.edu/uploads/lecture05.pdf" target="_blank" rel="noopener">University of Utah SPAN — Free Space & Large-Scale Path Loss (lecture 5)</a> — graduate lecture notes moving from Friis to the log-distance model, path-loss exponent, and log-normal shadowing.</li>
+<li><a href="https://www.rfwireless-world.com/Terminology/Okumura-Hata-Model-basics.html" target="_blank" rel="noopener">RF Wireless World — Okumura-Hata Model & COST-231 Extension</a> — the empirical macrocell formulas with height/frequency/distance terms and correction factors for urban, suburban, and rural environments.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -351,6 +369,15 @@ CONTENT.topics.push(
           <li><strong>The three levers:</strong> Tx power (regulatory/battery limited), antenna gain (passive, helps both ends, but narrows the beam), and coding/lower modulation (trades data rate) — Shannon $C=B\log_2(1+\mathrm{SNR})$ frames the ultimate limit.</li>
           <li><strong>Why it is the master skill:</strong> the link budget is both the design tool and the debugging tool — when a real link underperforms, you re-derive it line by line to find the missing dB.</li>
         </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://s.campbellsci.com/documents/us/technical-papers/link-budget.pdf" target="_blank" rel="noopener">Campbell Scientific — The Link Budget and Fade Margin (App Note 3RF-F)</a> — a concise, worked application note building received power, sensitivity, and fade margin term by term for a real telemetry link.</li>
+<li><a href="https://www.mathworks.com/help/satcom/gs/satellite-link-budget.html" target="_blank" rel="noopener">MathWorks — Satellite Link Budget</a> — enumerates all eleven gain/loss terms (EIRP, FSPL, polarisation, pointing, G/T, rain fade) and derives the C/N0 and margin equations with code.</li>
+<li><a href="https://www.qorvo.com/design-hub/blog/designing-efficient-satellite-links-a-review-of-the-link-budget-analysis" target="_blank" rel="noopener">Qorvo — Designing Efficient Satellite Links: Link Budget Analysis</a> — vendor deep dive on EIRP, the G/T figure of merit, path-loss-driven SNR, and modern coding/beamforming trade-offs.</li>
+<li><a href="https://www.cdt21.com/design_guide/link-budget/" target="_blank" rel="noopener">Circuit Design, Inc. — Link Budget (RF Design Guide)</a> — a clean walkthrough of the gain/loss ledger and why margin above receive sensitivity is needed for fading.</li>
+</ul>`
       }
     ],
     keyPoints: [

@@ -149,6 +149,15 @@ CONTENT.topics.push(
 <li><b>The digital notch:</b> a biquad with conjugate zeros on the unit circle at $e^{\pm j\omega_0}$ (setting the null) and poles at radius $r<1$ (setting the width), with $\mathrm{BW}\approx(1-r)f_s/\pi$; adaptive notches track a moving interferer.</li>
 <li><b>Where it is used:</b> $50/60$ Hz hum, single-tone jammer excision, carrier/LO-leakage suppression and specific-spur removal — surgically deleting one frequency while sparing the rest.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Band-stop_filter" target="_blank" rel="noopener">Wikipedia — Band-stop filter</a> — canonical overview linking the notch to its band-pass complement, with transfer-function forms and applications across audio, RF wave traps and optics.</li>
+<li><a href="https://pages.hmc.edu/ruye/e84/lectures/ActiveFilters_sub/node2.html" target="_blank" rel="noopener">Harvey Mudd College E84 — The Twin-T notch filter</a> — university lecture notes deriving the twin-T transfer function, its $Q=0.25$ passive limit and the positive-feedback active variant that sharpens the null.</li>
+<li><a href="https://www.mathworks.com/discovery/notch-filter.html" target="_blank" rel="noopener">MathWorks — Notch filter (design overview)</a> — vendor reference on designing digital notch filters (FIR vs IIR trade-offs, 50/60 Hz power-line removal) with concrete MATLAB design workflows.</li>
+<li><a href="https://www.dsprelated.com/showarticle/935.php" target="_blank" rel="noopener">DSPRelated — Harmonic Notch Filter</a> — deep DSP walkthrough building cascaded-biquad notches at a fundamental and its harmonics, including coefficient math and C implementation for ECG/EEG line-noise removal.</li>
+</ul>`
       }
     ],
     keyPoints: [

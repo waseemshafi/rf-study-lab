@@ -114,6 +114,15 @@ CONTENT.topics.push(
 <li><strong>Noise behaviour:</strong> low-pass to reference phase noise, high-pass to VCO phase noise, crossing near $\omega_n$; thermal jitter $\sigma_\phi^2=B_LN_0/C$; cycle slips near a quarter-cycle of error.</li>
 <li><strong>The synthesizer relation:</strong> $f_{out}=(N/R)f_{ref}$ with channel spacing $f_{ref}/R$, and why loop bandwidth scales as $1/\sqrt N$.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Phase-locked_loop" target="_blank" rel="noopener">Wikipedia — Phase-locked loop</a> — the canonical overview: phase detector, loop filter, VCO, damping/natural-frequency design, and every major application in one article.</li>
+<li><a href="https://liquidsdr.org/doc/tutorial-pll/" target="_blank" rel="noopener">liquid-dsp — PLL tutorial</a> — a hands-on derivation of the second-order integrating loop filter ($\omega_n$, $\zeta$, loop gain $K$) worked all the way to executable C code.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/Phase_Lock_Loop_(PLL)" target="_blank" rel="noopener">ESA Navipedia — Phase Lock Loop (PLL)</a> — the PLL as a GNSS carrier-tracking loop, including Costas-type discriminators, thermal-noise jitter, and the bandwidth/integration-time trade-off.</li>
+<li><a href="https://www.electronics-notes.com/articles/radio/frequency-synthesizer/pll-indirect-synthesizer.php" target="_blank" rel="noopener">Electronics Notes — PLL frequency synthesizer</a> — a focused treatment of the divide-by-N indirect synthesizer, channel spacing, and fractional-N tuning.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -387,6 +396,15 @@ CONTENT.topics.push(
 <li><strong>Order and steady state:</strong> because the discriminator already measures frequency, an FLL is one integration lower than a same-named PLL; a first-order FLL zeroes a frequency step, a second-order FLL zeroes a Doppler ramp.</li>
 <li><strong>The division of labour:</strong> a wide FLL acquires and survives dynamics, then a narrow PLL/Costas refines and demodulates — blended in the FLL-assisted-PLL, both steering one NCO/VCO.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://gssc.esa.int/navipedia/index.php/Frequency_Lock_Loop_(FLL)" target="_blank" rel="noopener">ESA Navipedia — Frequency Lock Loop (FLL)</a> — the authoritative GNSS reference on FLL operation, the cross/dot and atan2 discriminators, and how integration time trades pull-in range against noise.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/Tracking_Loops" target="_blank" rel="noopener">ESA Navipedia — Tracking Loops</a> — situates the FLL alongside the PLL and DLL, with the receiver design trade-offs and FLL-assisted-PLL carrier-aiding architecture.</li>
+<li><a href="https://gnss-sdr.org/docs/sp-blocks/tracking/" target="_blank" rel="noopener">GNSS-SDR — Tracking blocks</a> — an open-source implementation reference giving the exact FLL/PLL discriminator formulas and lock detectors used in a real software receiver.</li>
+<li><a href="https://www.mathworks.com/help/satcom/ug/gps-receiver-acquisition-and-tracking-using-ca-code.html" target="_blank" rel="noopener">MathWorks — GPS receiver acquisition and tracking</a> — a full worked example driving FLL (4-quadrant atan2), PLL, and DLL together, with discriminator and convergence plots.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -643,6 +661,14 @@ CONTENT.topics.push(
 <li><strong>The link to PLL theory:</strong> near lock $e\approx A^2\phi$, so the loop is a standard second-order PLL and every $\omega_n$, $\zeta$, $B_L$, $t_s$ relation carries over.</li>
 <li><strong>The noise penalty:</strong> squaring loss $S_L\ge1$ degrades the effective loop SNR ($\sigma_\phi^2=S_LB_L/[2(C/N_0)]$), minimised by using matched (integrate-and-dump) arm filters.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Costas_loop" target="_blank" rel="noopener">Wikipedia — Costas loop</a> — the canonical article: classical I/Q implementation, the $\sin(2\phi)$ error and its doubled sensitivity, and QPSK variants.</li>
+<li><a href="https://wirelesspi.com/costas-loop-for-carrier-phase-synchronization/" target="_blank" rel="noopener">Wireless Pi — Costas loop for carrier phase synchronization</a> — an in-depth tutorial deriving the BPSK and QPSK error signals and linking the Costas loop to the maximum-likelihood synchronizer.</li>
+<li><a href="https://www.mathworks.com/help/comm/ref/comm.carriersynchronizer-system-object.html" target="_blank" rel="noopener">MathWorks — comm.CarrierSynchronizer</a> — a production PLL/Costas-based carrier synchronizer with the phase detector, loop filter, and DDS/NCO math for BPSK, QPSK, and higher-order schemes.</li>
+</ul>`
       }
     ],
     keyPoints: [

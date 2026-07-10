@@ -167,6 +167,15 @@ CONTENT.topics.push(
         <li><strong>Where it fails:</strong> against interference correlated with your code (a repeater/follower jammer), $G_p$ evaporates — hence fast hopping and code security.</li>
         <li><strong>How to budget it:</strong> pick $G_p$ from the anti-jam or multi-access requirement, realise it with a chip rate (+3 dB per doubling), and pay the cost in bandwidth, sample rate, and acquisition time.</li>
       </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Direct-sequence_spread_spectrum" target="_blank" rel="noopener">Wikipedia — Direct-sequence spread spectrum</a> — canonical overview of DSSS, the spreading factor, and how despreading raises SNR by the processing gain.</li>
+<li><a href="http://www.sss-mag.com/pdf/pgpap.pdf" target="_blank" rel="noopener">Fakatselis — Processing Gain in Spread Spectrum Signals (PDF)</a> — a focused technical paper deriving processing gain and its relation to jamming margin and required Eb/N0.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/Generic_Receiver_Description" target="_blank" rel="noopener">ESA Navipedia — Generic Receiver Description</a> — shows the correlation/despreading chain of a real GNSS receiver where processing gain recovers below-noise signals.</li>
+<li><a href="https://rfessentials.com/rf-knowledge-base/how-do-i-calculate-the-processing-gain-of-a-spread-spectrum-communication-system/" target="_blank" rel="noopener">RF Essentials — Processing Gain Calculation</a> — the chip-rate/bit-rate formula worked through IS-95, WCDMA, and GPS C/A examples.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -421,6 +430,15 @@ CONTENT.topics.push(
         <li><strong>Levers to widen margin:</strong> more $G_p$ (bandwidth), FEC coding gain (throughput), antenna nulling (often the biggest win), and interleaving+hopping against partial-band/pulsed/follower jammers.</li>
         <li><strong>The caveat:</strong> raw $M_j$ assumes an uncorrelated broadband jammer; smart jammers force you to restore effective margin with coding, nulling, and fast hopping.</li>
       </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Spread_spectrum" target="_blank" rel="noopener">Wikipedia — Spread spectrum</a> — how processing gain converts into resistance to narrowband jamming and interference, the basis of jamming margin.</li>
+<li><a href="https://en.wikipedia.org/wiki/Frequency-hopping_spread_spectrum" target="_blank" rel="noopener">Wikipedia — Frequency-hopping spread spectrum</a> — the FHSS anti-jam mechanism and why partial-band and follower jammers behave differently.</li>
+<li><a href="https://www.rfwireless-world.com/terminology/cdma/processing-gain-vs-spreading-gain-cdma" target="_blank" rel="noopener">RF Wireless World — Processing Gain vs Spreading Gain</a> — the SNR-in/SNR-out view of processing gain that the jamming-margin equation subtracts required SNR and losses from.</li>
+<li><a href="https://resources.system-analysis.cadence.com/blog/msa2022-the-advantages-of-the-spread-spectrum-technique" target="_blank" rel="noopener">Cadence — Advantages of the Spread Spectrum Technique</a> — a design-oriented walkthrough of how spreading buys jamming and interference immunity.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -687,6 +705,15 @@ CONTENT.topics.push(
         <li><strong>Sign convention:</strong> more negative dBm = more sensitive = hears weaker signals.</li>
         <li><strong>Why it matters:</strong> $S_{min}$ is the receive anchor of the link budget — 10 dB better sensitivity buys 10 dB more path loss and roughly triples free-space range.</li>
       </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Minimum_detectable_signal" target="_blank" rel="noopener">Wikipedia — Minimum detectable signal</a> — defines MDS, the noise floor, and how sensitivity adds the required SNR on top, with worked numbers.</li>
+<li><a href="https://www.qsl.net/va3iul/Noise/Understanding%20Noise%20Figure.pdf" target="_blank" rel="noopener">Keysight/Agilent — Understanding Noise Figure (PDF)</a> — the classic application note on noise figure, kTB, and Friis cascading that set the noise floor.</li>
+<li><a href="https://markimicrowave.com/technical-resources/application-notes/noise-figure-receiver-sensitivity-guide/" target="_blank" rel="noopener">Marki Microwave — Noise Figure and Receiver Sensitivity</a> — a practical RF front-end guide linking noise figure, LNA placement, and sensitivity.</li>
+<li><a href="https://3roam.com/receiver-sensitivity-calculator/" target="_blank" rel="noopener">3roam — Receiver Sensitivity Calculator</a> — the −174 + 10logB + NF + SNR formula with GSM and Bluetooth worked examples.</li>
+</ul>`
     }
   ],
   keyPoints: [

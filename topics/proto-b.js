@@ -195,6 +195,15 @@ CONTENT.topics.push(
           <li><b>No safety net.</b> No ACK, no flow control, no error detection; integrity rests on short controlled layout, conservative clocking, and any app-layer read-back or CRC.</li>
           <li><b>Short reach, real speed ceiling.</b> Single-ended and unterminated (on-board only); at high $f_{SCLK}$ the MISO round-trip, not the shift register, caps the read rate. Variants (3-wire, Dual/Quad/QSPI) trade duplex or pins for pins or throughput.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Serial_Peripheral_Interface" target="_blank" rel="noopener">Wikipedia — Serial Peripheral Interface</a> — the canonical reference: full signal definitions, all four CPOL/CPHA modes with timing diagrams, topologies, and the Dual/Quad/QSPI variants in one place.</li>
+<li><a href="https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all" target="_blank" rel="noopener">SparkFun — Serial Peripheral Interface (SPI)</a> — a hands-on tutorial that builds intuition from the shift-register ring up through multi-peripheral wiring (per-CS vs daisy-chain) and practical speed/distance limits.</li>
+<li><a href="https://www.totalphase.com/blog/2024/07/understanding-spi-clock-signals-polarity-phase-clock-edges-spi-modes/" target="_blank" rel="noopener">Total Phase — Understanding SPI Clock Signals: Polarity, Phase and Modes</a> — a focused deep dive on exactly how CPOL and CPHA pick the sample/shift edges, with clear waveforms for avoiding bit-slip.</li>
+<li><a href="https://academy.nordicsemi.com/courses/nrf-connect-sdk-intermediate/lessons/lesson-5-serial-peripheral-interface-spi/topic/serial-peripheral-interface-spi/" target="_blank" rel="noopener">Nordic Developer Academy — SPI</a> — a vendor lesson tying the protocol to real silicon (SPIM/EasyDMA, GPIO-managed chip select), useful for the master/peripheral implementation view.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -529,6 +538,14 @@ CONTENT.topics.push(
           <li><b>Three profiles, one family.</b> AXI4 (full bursts), AXI4-Lite (single-beat registers), AXI4-Stream (address-less data flow); ACE adds cache coherency. Peak $BW = W_{bytes}\times f_{clk}$.</li>
           <li><b>On-chip only, no CRC.</b> The die is a controlled environment, so the only status is the 2-bit RRESP/BRESP; integrity for safety-critical use comes from ECC and higher-layer extensions, not the base handshake.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Advanced_eXtensible_Interface" target="_blank" rel="noopener">Wikipedia — Advanced eXtensible Interface</a> — a compact map of the whole family: the five channels, xVALID/xREADY handshake, burst types (FIXED/INCR/WRAP), and the AXI4-Lite/AXI4-Stream/ACE variants.</li>
+<li><a href="https://archive.alvb.in/bsc/TCC/correlatos/amba_axi4.pdf" target="_blank" rel="noopener">ARM — AMBA AXI and ACE Protocol Specification (PDF)</a> — the authoritative source itself: exact channel signals, handshake dependency rules, ordering/ID model, and burst/transfer definitions.</li>
+<li><a href="https://sistenix.com/amba.html" target="_blank" rel="noopener">Sistenix — The AMBA AXI Handshake Explained</a> — a focused walkthrough of the VALID/READY handshake with the three timing cases (VALID-first, READY-first, simultaneous), the crux of AXI backpressure.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -897,6 +914,14 @@ CONTENT.topics.push(
           <li><b>Physical fault tolerance.</b> Shielded twisted pair, transformer-coupled for isolation and common-mode rejection, and <em>dual-redundant</em> Bus A/B so a failed message retries on the alternate.</li>
           <li><b>Determinism by construction.</b> Fixed word timing + a sole initiator + a pre-planned minor/major frame schedule make worst-case latency bounded and computable — why a 1 Mbps bus still flies safely after 40+ years, and the reason to keep bus load well below 100%.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/MIL-STD-1553" target="_blank" rel="noopener">Wikipedia — MIL-STD-1553</a> — a solid canonical overview: bus controller/remote terminal roles, Manchester-coded word formats, the three word types, and dual/triple-redundant bus wiring.</li>
+<li><a href="https://www.milstd1553.com/resources-2/desginers-guide/" target="_blank" rel="noopener">DDC — MIL-STD-1553 Designer's Guide</a> — the classic industry handbook (Data Device Corporation), with a paragraph-by-paragraph interpretation of the standard plus real hardware and bus-controller design guidance.</li>
+<li><a href="https://www.aim-online.com/wp-content/uploads/2019/01/aim-ovw1553-u.pdf" target="_blank" rel="noopener">AIM — MIL-STD-1553 Tutorial (PDF)</a> — a thorough vendor tutorial covering coupling (direct vs transformer), message/word structure, mode codes, and error handling in depth.</li>
+</ul>`
       }
     ],
     keyPoints: [

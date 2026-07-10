@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v24';
+const CACHE = 'rfstudy-v25';
 
 const ASSETS = [
   './',

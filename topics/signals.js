@@ -128,7 +128,16 @@ CONTENT.topics.push(
 <li><strong>Energy is conserved:</strong> Parseval says total energy is the same in either domain, and $|X(f)|^2$ is the energy spectral density.</li>
 <li><strong>Symmetry:</strong> real signals have Hermitian spectra, so the negative-frequency half is redundant.</li>
 <li><strong>From theory to computation:</strong> the DFT samples this on $N$ points with resolution $\Delta f=f_s/N$ (set by record length), the FFT computes it in $O(N\log N)$, and windowing tames leakage.</li>
-</ul>` }
+</ul>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Fourier_transform" target="_blank" rel="noopener">Wikipedia — Fourier transform</a> — the canonical reference: definitions, full property tables, common pairs, and links to the DFT/FFT and distributions.</li>
+<li><a href="https://ocw.mit.edu/courses/res-6-007-signals-and-systems-spring-2011/resources/lecture-8-continuous-time-fourier-transform/" target="_blank" rel="noopener">MIT OCW RES.6-007 — Lecture 8: Continuous-Time Fourier Transform</a> — Oppenheim's derivation of the analysis/synthesis equations with video and lecture notes.</li>
+<li><a href="https://www.dspguide.com/ch8.htm" target="_blank" rel="noopener">Steven W. Smith, DSP Guide — Ch. 8: The Discrete Fourier Transform</a> — intuitive, worked treatment of how the FT becomes the computable DFT.</li>
+<li><a href="https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-20-applications-of-fourier-transforms/" target="_blank" rel="noopener">MIT OCW 6.003 — Lecture 20: Applications of Fourier Transforms</a> — concrete applications (noise removal, diffraction, crystallography) that ground the theory.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`FT: $X(f)=\int x(t)e^{-j2\pi ft}dt$; inverse reconstructs $x(t)$ from its spectrum.`,
@@ -345,7 +354,16 @@ CONTENT.topics.push(
 <li><strong>Stability is geometry:</strong> a causal system is BIBO stable iff every pole lies strictly in the left half-plane (equivalently, the ROC includes the $j\omega$-axis).</li>
 <li><strong>Systems become algebra:</strong> $H(s)=Y/X=\mathcal{L}\{h\}$, cascades multiply, feedback gives $G/(1+GF)$, and the derivative rule injects initial conditions to solve ODEs directly.</li>
 <li><strong>Fourier is a slice:</strong> evaluating $H(s)$ on $s=j\omega$ recovers the frequency response — valid only when the system is stable.</li>
-</ul>` }
+</ul>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Laplace_transform" target="_blank" rel="noopener">Wikipedia — Laplace transform</a> — definitions (unilateral/bilateral), transform tables, ROC, and the link to the Fourier transform.</li>
+<li><a href="https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Signal_Processing_and_Modeling/Signals_and_Systems_(Baraniuk_et_al.)/11:_Laplace_Transform_and_Continuous_Time_System_Design/11.06:_Region_of_Convergence_for_the_Laplace_Transform" target="_blank" rel="noopener">LibreTexts (Baraniuk) — Region of Convergence for the Laplace Transform</a> — careful treatment of why the ROC is part of the answer and how it encodes causality/stability.</li>
+<li><a href="https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Signal_Processing_and_Modeling/Signals_and_Systems_(Baraniuk_et_al.)/11:_Laplace_Transform_and_Continuous_Time_System_Design/11.05:_Poles_and_Zeros_in_the_S-Plane" target="_blank" rel="noopener">LibreTexts (Baraniuk) — Poles and Zeros in the S-Plane</a> — pole-zero maps and how their placement governs system behaviour.</li>
+<li><a href="https://web.mit.edu/16.unified/www/archives%202007-2008/signals/Lect14witheqs.pdf" target="_blank" rel="noopener">MIT 16.06 Unified — Lecture 14: Properties of Laplace Transforms (PDF)</a> — a compact lecture on the operational properties used to solve ODEs.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`$X(s)=\int_{0^-}^\infty x(t)e^{-st}dt$ with $s=\sigma+j\omega$; the ROC is part of the answer.`,
@@ -566,7 +584,16 @@ CONTENT.topics.push(
 <li><strong>The DTFT is a slice:</strong> evaluating $X(z)$ on the unit circle gives the frequency response, and because the axis is a circle, digital spectra are periodic in $f_s$.</li>
 <li><strong>Filters from difference equations:</strong> the delay rule turns a recursion into $H(z)=\frac{\sum b_m z^{-m}}{\sum a_k z^{-k}}$; FIR (no feedback) is always stable and can be linear phase, IIR (feedback) is efficient but must be checked.</li>
 <li><strong>The ROC is part of the answer:</strong> one $X(z)$ can be a causal or anti-causal sequence — the ROC decides which.</li>
-</ul>` }
+</ul>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Z-transform" target="_blank" rel="noopener">Wikipedia — Z-transform</a> — definition, ROC, properties, and the mapping between the s-plane and z-plane.</li>
+<li><a href="https://www.dspguide.com/ch33.htm" target="_blank" rel="noopener">Steven W. Smith, DSP Guide — Ch. 33: The z-Transform</a> — an application-first chapter connecting the z-transform to recursive (IIR) filter design.</li>
+<li><a href="https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Signal_Processing_and_Modeling/Signals_and_Systems_(Baraniuk_et_al.)/12:_Z-Transform_and_Discrete_Time_System_Design/12.06:_Region_of_Convergence_for_the_Z-Transform" target="_blank" rel="noopener">LibreTexts (Baraniuk) — Region of Convergence for the Z-Transform</a> — how the ROC ring determines causality and stability for discrete-time systems.</li>
+<li><a href="https://technobyte.org/roc-properties-z-transform-stability-causality/" target="_blank" rel="noopener">Technobyte — ROC, Stability and Causality of the z-Transform</a> — a worked tutorial linking pole locations inside the unit circle to stability.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`$X(z)=\sum_n x[n]z^{-n}$; the ROC is an annulus and must be specified.`,
@@ -776,7 +803,16 @@ CONTENT.topics.push(
 <li><strong>The dual:</strong> multiplication in time is convolution in frequency, which is exactly why modulation shifts spectra and windowing smears them.</li>
 <li><strong>Algebraic structure:</strong> convolution is commutative, associative, and distributive, with $\delta$ as its identity, so cascaded filters merge into $h_{eq}=h_1*h_2$.</li>
 <li><strong>Doing it fast:</strong> FFT-based convolution costs $O(N\log N)$ versus direct $O(N^2)$ — but the DFT gives circular convolution, so zero-pad to $N_x+N_h-1$ for the linear result.</li>
-</ul>` }
+</ul>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://www.dspguide.com/ch6/2.htm" target="_blank" rel="noopener">Steven W. Smith, DSP Guide — Ch. 6: Convolution</a> — the clearest intuitive derivation of the input-side and output-side views of convolution.</li>
+<li><a href="https://www.dsprelated.com/foundations/lti-systems.php" target="_blank" rel="noopener">DSPRelated — LTI Systems: Linearity, Time-Invariance, and the Impulse Response</a> — why linearity plus time-invariance forces the output to be a convolution.</li>
+<li><a href="https://www.dspguide.com/ch7.htm" target="_blank" rel="noopener">Steven W. Smith, DSP Guide — Ch. 7: Properties of Convolution</a> — commutativity/associativity, cascade and parallel systems, and correlation.</li>
+<li><a href="https://en.wikipedia.org/wiki/Convolution" target="_blank" rel="noopener">Wikipedia — Convolution</a> — the general mathematical operation, the convolution theorem, and circular vs. linear convolution.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`Continuous: $y(t)=\int x(\tau)h(t-\tau)d\tau$; discrete: $y[n]=\sum_k x[k]h[n-k]$.`,
@@ -976,7 +1012,16 @@ CONTENT.topics.push(
 <li><strong>Matched filtering:</strong> $h(t)=s^*(T-t)$ maximises output SNR at $2E/N_0$ (shape-independent); its output <em>is</em> the cross-correlation with the template.</li>
 <li><strong>Timing and ranging:</strong> the peak lag of a cross-correlation gives time delay — radar range, GPS code phase, frame sync.</li>
 <li><strong>Wiener–Khinchin:</strong> the PSD is the Fourier Transform of the autocorrelation, and $R_{xx}(0)=\int S_x(f)df$ is the total power.</li>
-</ul>` }
+</ul>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Cross-correlation" target="_blank" rel="noopener">Wikipedia — Cross-correlation</a> — definitions, the relation to convolution, normalization, and lag interpretation.</li>
+<li><a href="https://en.wikipedia.org/wiki/Autocorrelation" target="_blank" rel="noopener">Wikipedia — Autocorrelation</a> — properties, the zero-lag maximum, and the Wiener–Khinchin link to the PSD.</li>
+<li><a href="https://users.ece.utexas.edu/~bevans/courses/realtime/lectures/14_Matched_Filtering/" target="_blank" rel="noopener">UT Austin ECE 445S — Lecture 14: Matched Filtering</a> — derives the matched filter as correlation and its SNR-maximizing property.</li>
+<li><a href="https://www.mathworks.com/help/matlab/ref/xcorr.html" target="_blank" rel="noopener">MathWorks — xcorr documentation</a> — practical computation of cross- and auto-correlation with normalization options and examples.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`Cross-correlation $R_{xy}(\tau)=\int x^*(t)y(t+\tau)dt$ measures similarity vs lag.`,
@@ -1170,7 +1215,15 @@ CONTENT.topics.push(
 <li><strong>Perfect reconstruction:</strong> ideal recovery is sinc interpolation — each sinc is 1 at its sample and 0 at all others, so it threads exactly through the samples.</li>
 <li><strong>Why strictly greater:</strong> two samples per cycle are needed to fix amplitude and phase; at exactly $2B$ a sinusoid can vanish on its zero crossings.</li>
 <li><strong>Practice:</strong> oversample to relax the anti-alias filter, use bandpass sampling to digitize high-carrier bands near $2B$, and remember aliasing is irreversible — prevent it before the ADC.</li>
-</ul>` }
+</ul>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem" target="_blank" rel="noopener">Wikipedia — Nyquist–Shannon sampling theorem</a> — the theorem statement, proof sketch, Whittaker–Shannon interpolation, and bandpass sampling.</li>
+<li><a href="https://ocw.mit.edu/courses/res-6-007-signals-and-systems-spring-2011/resources/lecture-16-sampling/" target="_blank" rel="noopener">MIT OCW RES.6-007 — Lecture 16: Sampling</a> — Oppenheim's frequency-domain derivation via spectral replication and reconstruction.</li>
+<li><a href="https://www.dspguide.com/ch3/2.htm" target="_blank" rel="noopener">Steven W. Smith, DSP Guide — Ch. 3: The Sampling Theorem</a> — a hands-on explanation with clear pictures of proper and improper sampling.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`Sampling theorem: bandlimited to $B$ $\Rightarrow$ sample at $f_s>2B$ for lossless capture.`,
@@ -1368,7 +1421,16 @@ CONTENT.topics.push(
 <li><strong>The cure is prevention:</strong> an analog anti-alias low-pass filter <em>before</em> the ADC removes above-Nyquist energy — no post-processing can undo a fold.</li>
 <li><strong>Everyday and digital forms:</strong> the wagon-wheel effect is visible temporal aliasing; downsampling and DAC imaging are its digital and output-side duals.</li>
 <li><strong>Used on purpose:</strong> bandpass sampling deliberately folds a pre-filtered band down to baseband — aliasing as a downconverter.</li>
-</ul>` }
+</ul>` },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Aliasing" target="_blank" rel="noopener">Wikipedia — Aliasing</a> — the general phenomenon across audio, images, and video, including folding and anti-aliasing.</li>
+<li><a href="https://ptolemy.berkeley.edu/eecs20/week13/aliasing.html" target="_blank" rel="noopener">UC Berkeley EECS 20N — Aliasing</a> — a course treatment showing how distinct frequencies produce identical samples.</li>
+<li><a href="https://www.dspguide.com/ch3/2.htm" target="_blank" rel="noopener">Steven W. Smith, DSP Guide — Ch. 3: Proper and Improper Sampling</a> — visual demonstration of how above-Nyquist tones masquerade as lower ones.</li>
+<li><a href="https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem" target="_blank" rel="noopener">Wikipedia — Nyquist–Shannon sampling theorem</a> — the condition that prevents aliasing and the Nyquist-zone folding it induces when violated.</li>
+</ul>`
+    }
   ],
   keyPoints: [
     String.raw`Aliasing = high frequencies ($>f_s/2$) folding back to appear as lower frequencies after sampling.`,

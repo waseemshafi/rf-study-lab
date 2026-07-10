@@ -148,6 +148,15 @@ CONTENT.topics.push(
 <li><b>Real-world impairments:</b> pushing (supply→frequency) and pulling (load→frequency), fixed by clean regulation and buffering; and how switched-cap coarse banks keep $K_{vco}$ small for a clean, stable loop.</li>
 <li><b>The loop role:</b> a PLL high-pass filters VCO noise and low-pass filters reference noise, and the VCO enables frequency multiplication ($f_{out}=Nf_{ref}$) that a DLL cannot.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Voltage-controlled_oscillator" target="_blank" rel="noopener">Wikipedia — Voltage-controlled oscillator</a> — solid canonical overview of tuning law, LC/crystal/relaxation topologies, phase-domain modeling, and key specs (tuning range, phase noise, Q).</li>
+<li><a href="https://people.engr.tamu.edu/spalermo/ecen620/lecture16_ee620_vco_pn.pdf" target="_blank" rel="noopener">Texas A&amp;M ECEN620 Lecture 16 — VCO Phase Noise</a> — graduate lecture notes deriving Leeson's model and the Hajimiri ISF theory from first principles, the deepest treatment of the $1/f^3$/$1/f^2$ skirts.</li>
+<li><a href="https://people.engr.tamu.edu/spalermo/ecen620/lecture10_ee620_vcos.pdf" target="_blank" rel="noopener">Texas A&amp;M ECEN620 Lecture 10 — Voltage-Controlled Oscillators</a> — companion lecture on LC-tank and ring-oscillator design, varactor tuning, $K_{vco}$, and switched-capacitor coarse banks.</li>
+<li><a href="https://www.mwrf.com/active-components/how-vco-tuning-bw-affects-phase-noise" target="_blank" rel="noopener">Microwaves &amp; RF — How VCO Tuning BW Affects Phase Noise</a> — practical article quantifying the tuning-range vs phase-noise tradeoff with measured commercial GaAs VCO data.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -448,6 +457,14 @@ CONTENT.topics.push(
 <li><b>Spur mitigation and sine computation:</b> phase dithering trades spurs for noise; quarter-wave symmetry and CORDIC reduce memory/logic cost.</li>
 <li><b>Why the NCO beats the VCO for agility:</b> exact linearity, sub-Hz resolution, instantaneous phase-continuous switching, and perfect repeatability — making it the LO in DDC/DUC, the derotator for CFO, and the oscillator in digital PLLs.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Direct_digital_synthesis" target="_blank" rel="noopener">Wikipedia — Direct digital synthesis</a> — canonical overview of the NCO/DAC/reference architecture, truncation spurs, Nyquist images, and why DDS phase noise beats a PLL close-in.</li>
+<li><a href="https://www.digikey.com/en/articles/basics-of-direct-digital-synthesis" target="_blank" rel="noopener">DigiKey — Basics of Direct Digital Synthesis</a> — clear applications-engineering walkthrough of the phase accumulator, phase-to-amplitude LUT, DAC, SFDR figures, and reconstruction filtering.</li>
+<li><a href="https://john-gentile.com/kb/dsp/NCO_DDS.html" target="_blank" rel="noopener">John Gentile DSP KB — NCO / DDS</a> — in-depth notes deriving SFDR ($6.02P$) and quantization SQNR ($6.02M+1.76$ dB), plus quarter-wave LUT, phase dithering, and Taylor-series spur correction with Python.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -731,6 +748,15 @@ CONTENT.topics.push(
 <li><b>Estimation:</b> pilots, Schmidl-Cox preamble halves, and Moose CP autocorrelation all reduce to $\hat{\Delta f}=\frac{1}{2\pi DT_s}\angle\sum r[n]r^*[n+D]$, with $\pm\pi$ wrap setting the range-vs-resolution trade.</li>
 <li><b>Correction:</b> derotate by $e^{-j2\pi\hat{\Delta f}t}$ from an NCO, with an FLL acquiring frequency and a Costas/PLL tracking residual phase — carrier synchronisation is the VCO/NCO idea run in reverse.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Orthogonal_frequency-division_multiplexing" target="_blank" rel="noopener">Wikipedia — Orthogonal frequency-division multiplexing</a> — why OFDM is acutely sensitive to CFO (loss of subcarrier orthogonality → ICI) and how preamble/pilot synchronization such as the Schmidl-Cox two-halves method corrects it.</li>
+<li><a href="http://comlab.ecs.syr.edu/files/papers/spl_april2002.pdf" target="_blank" rel="noopener">Syracuse ComLab — ML Estimation of OFDM Carrier Frequency Offset</a> — rigorous maximum-likelihood derivation of the autocorrelation estimator and its Cramer-Rao bound.</li>
+<li><a href="https://dspillustrations.com/pages/posts/misc/schmidlcox-synchronization-for-ofdm.html" target="_blank" rel="noopener">DSP Illustrations — The Schmidl &amp; Cox Technique for OFDM</a> — worked tutorial with Python, preamble construction, and metric plots that make the timing/frequency metric concrete.</li>
+<li><a href="https://www.informit.com/articles/article.aspx?p=2832588&seqNum=4" target="_blank" rel="noopener">InformIT (Heath) — CFO Correction in Frequency-Selective Channels</a> — textbook chapter connecting Moose/Schmidl-Cox to the 802.11a STF/LTF coarse-then-fine two-step correction.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -1024,6 +1050,15 @@ CONTENT.topics.push(
 <li><b>The applications:</b> clock de-skew, DDR DQS centering (a 90° shift), and multiphase generation where a tap at fraction $k/M$ gives $\phi_k=k\cdot360^\circ/M$.</li>
 <li><b>The limitations:</b> finite delay range (band-limited operation) and harmonic/false lock at $nT$, mitigated by start-up biasing and lock detectors — plus the distinct early-late code-tracking DLL cousin.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Delay-locked_loop" target="_blank" rel="noopener">Wikipedia — Delay-locked loop</a> — canonical overview of the delay-line-vs-VCO distinction, why a DLL is first-order and unconditionally stable, and DRAM/de-skew applications.</li>
+<li><a href="https://resources.pcb.cadence.com/blog/2020-pll-vs-dll-for-clock-synchronization-and-skew-compensation" target="_blank" rel="noopener">Cadence — PLL vs. DLL for Clock Synchronization and Skew Compensation</a> — practical comparison of when to choose a DLL (deskew, low jitter) versus a PLL (frequency synthesis).</li>
+<li><a href="https://web.stanford.edu/class/archive/ee/ee371/ee371.1066/lectures/Old/Older/lect_15_1up.pdf" target="_blank" rel="noopener">Stanford EE371 Lecture 15 — Clock Recovery (DLL/PLL)</a> — VLSI-course lecture notes analyzing the delay line, charge-pump loop dynamics, and jitter-accumulation differences.</li>
+<li><a href="https://www2.eecs.berkeley.edu/Pubs/TechRpts/2025/Archive/EECS-2025-86.pdf" target="_blank" rel="noopener">UC Berkeley EECS — Delay-Locked Loops for Multiphase Clock Generation</a> — a full technical report on multiphase DLL design, tap generation, and duty-cycle correction.</li>
+</ul>`
       }
     ],
     keyPoints: [

@@ -139,6 +139,15 @@ CONTENT.topics.push(
 <li><b>P1dB link and cascade:</b> $\text{IIP3}\approx\text{P1dB}+9.6$ dB (rule 10-15 dB); and $1/\text{IIP3}_{tot}=1/\text{IIP3}_1+G_1/\text{IIP3}_2+\cdots$ (linear), so the last high-gain stage often dominates.</li>
 <li><b>Dynamic range:</b> $\text{SFDR}=\tfrac23(\text{IIP3}-N)$ ties the linearity top to the noise floor bottom, and the $2/3$ factor is exactly the slope-3 IM3 penalty.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Third-order_intercept_point" target="_blank" rel="noopener">Wikipedia — Third-order intercept point</a> — the canonical reference, with the power-series derivation, the slope-1/slope-3 construction, and the IIP3/OIP3 definitions.</li>
+<li><a href="https://pages.hmc.edu/mspencer/e157/fa24/slides/20.pdf" target="_blank" rel="noopener">Harvey Mudd E157 — Lecture 20: Linearity and Distortion</a> — university course slides deriving IM3, the two-tone test and intercept extrapolation from a cubic nonlinearity.</li>
+<li><a href="https://coppermountaintech.com/wp-content/uploads/2022/04/Third-Order-Intercept.pdf" target="_blank" rel="noopener">Copper Mountain Technologies — Third Order Intercept</a> — a practical application note on measuring TOI with a two-tone setup and reading IIP3/OIP3 off the spectrum.</li>
+<li><a href="https://www.qorvo.com/design-hub/blog/the-importance-of-input-linearity-for-optimizing-rf-receiver-designs" target="_blank" rel="noopener">Qorvo — The Importance of Input Linearity for RF Receiver Designs</a> — connects IIP3 to cascade linearity, the gain-vs-linearity trade, and $\text{SFDR}=\tfrac23(\text{IIP3}-N)$ at the system level.</li>
+</ul>`
       }
     ],
     keyPoints: [

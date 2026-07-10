@@ -165,6 +165,15 @@ CONTENT.topics.push(
 <li><b>The phase lead:</b> $\angle H=90^\circ-\arctan(\omega/\omega_c)$, giving $+90^\circ$ at DC, $+45^\circ$ at $f_c$, and $0^\circ$ deep in the passband — always leading, opposite to the LPF.</li>
 <li><b>Active vs passive and higher order:</b> op-amp (Sallen–Key/MFB) HPFs add gain, a load-independent cutoff, and steeper $+40n$ dB/decade skirts, and the HPF is the complement of the LPF about a shared $f_c$.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/High-pass_filter" target="_blank" rel="noopener">Wikipedia — High-pass filter</a> — the canonical overview: first-order RC realization, the $f_c=1/(2\pi RC)$ derivation, higher-order and active designs, and discrete-time implementations.</li>
+<li><a href="https://www.electrical4u.com/high-pass-filter/" target="_blank" rel="noopener">Electrical4U — High Pass Filter: Circuit, Transfer Function &amp; Bode Plot</a> — a thorough walkthrough of the transfer function $T(s)=s/(s+1/RC)$, the +20 dB/decade skirt, the $90^\circ-\arctan(\omega RC)$ phase, and Butterworth/Chebyshev/Bessel active variants.</li>
+<li><a href="https://ocw.mit.edu/courses/6-071j-introduction-to-electronics-signals-and-measurement-spring-2006/21e9fbf2dd2229133864f1baac0b6335_12_filters.pdf" target="_blank" rel="noopener">MIT OCW 6.071J — Frequency response: Passive Filters (lecture notes PDF)</a> — university lecture notes deriving passive RC high-pass and low-pass responses, cutoff, and Bode asymptotes from first principles.</li>
+<li><a href="https://ocw.mit.edu/courses/res-6-007-signals-and-systems-spring-2011/resources/lecture-12-filtering/" target="_blank" rel="noopener">MIT OCW RES.6-007 — Lecture 12: Filtering (Oppenheim)</a> — Alan Oppenheim's Signals and Systems lecture placing RC high-pass filters in the wider frequency-selective-filtering and Fourier framework, with full video, transcript and notes.</li>
+</ul>`
       }
     ],
     keyPoints: [

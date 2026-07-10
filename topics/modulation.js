@@ -107,6 +107,14 @@ CONTENT.topics.push(
 <li><strong>The context:</strong> QPSK matches BPSK's BER at twice the spectral efficiency; unshaped BPSK is constant-envelope and PA-friendly, while RRC shaping trims bandwidth to $R_b(1+\alpha)$.</li>
 <li><strong>The engineering takeaway:</strong> choose BPSK when link margin is scarce and robustness matters more than throughput.</li>
 </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Phase-shift_keying" target="_blank" rel="noopener">Wikipedia — Phase-shift keying (BPSK)</a> — canonical reference with the signal model, constellation, and the exact $Q(\sqrt{2E_b/N_0})$ AWGN BER derivation.</li>
+<li><a href="https://www.gaussianwaves.com/2010/04/bpsk-modulation-and-demodulation-2/" target="_blank" rel="noopener">GaussianWaves — BPSK modulation and demodulation</a> — worked tutorial with basis functions, a correlation-type coherent receiver, and runnable MATLAB/Python simulation code.</li>
+<li><a href="https://www.southampton.ac.uk/~sqc/ELEC3203/MODEM-L6.pdf" target="_blank" rel="noopener">Univ. of Southampton ELEC3203 — Digital Modulation (Lecture 6)</a> — university lecture notes tying BPSK/QPSK to matched-filter reception and error probability over AWGN.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -382,6 +390,14 @@ CONTENT.topics.push(
 <li><strong>The cost:</strong> a closed-form BER of $\tfrac12 e^{-E_b/N_0}$, about 1 dB worse than coherent BPSK because the phase reference is a noisy symbol, plus error propagation over symbol pairs.</li>
 <li><strong>The blind spot:</strong> a <em>frequency</em> offset rotates the decision by $2\pi\Delta f T_s$ and does NOT cancel, so coarse AFC is still required (keep $|\Delta f|T_s<0.01$).</li>
 <li><strong>The choice:</strong> prefer DBPSK for frequency-hopping, fast-fading, or low-cost radios; prefer coherent BPSK when a stable reference is available and every dB counts.</li>
+</ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Differential_coding" target="_blank" rel="noopener">Wikipedia — Differential coding</a> — explains why differential encoding is applied and how it cancels the $180^\circ$ phase ambiguity in PSK systems.</li>
+<li><a href="https://www.gaussianwaves.com/2017/11/coherent-detection-of-differentially-encoded-bpsk-debpsk/" target="_blank" rel="noopener">GaussianWaves — Coherent detection of differentially encoded BPSK (DEBPSK)</a> — full derivation of the differential encode/decode rule with the error-doubling BER and simulation.</li>
+<li><a href="https://dsplog.com/2007/09/30/coherent-demodulation-of-dbpsk/" target="_blank" rel="noopener">dspLog — Coherent demodulation of DBPSK</a> — step-by-step differential encoding/decoding with a theory-vs-simulation BER comparison.</li>
 </ul>`
       }
     ],
@@ -668,6 +684,15 @@ CONTENT.topics.push(
 <li><strong>The link to shaping:</strong> splitting a raised cosine into RRC at both ends achieves matched reception <em>and</em> zero ISI simultaneously — the reason RRC appears in nearly every modem.</li>
 <li><strong>The extensions:</strong> whiten-then-match for colored noise, a RAKE (bank of matched filters) for multipath, and PN-code correlation for spread-spectrum processing gain $10\log_{10}N$.</li>
 <li><strong>Why it minimizes BER:</strong> maximizing decision-instant SNR directly minimizes the Gaussian error probability.</li>
+</ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Matched_filter" target="_blank" rel="noopener">Wikipedia — Matched filter</a> — canonical treatment with the SNR-maximization proof, frequency-domain form, and applications in radar and comms.</li>
+<li><a href="https://cioffi-group.stanford.edu/ee379a/Lectures/L2.pdf" target="_blank" rel="noopener">Stanford EE379 (Cioffi) — The AWGN Channel (Lecture 2)</a> — graduate lecture notes deriving optimal detection, the matched filter, and the sufficient statistic.</li>
+<li><a href="https://www.dspguide.com/ch7/3.htm" target="_blank" rel="noopener">Smith, DSP Guide — Correlation (Ch. 7)</a> — intuitive explanation of correlation as the optimal detector of a known waveform buried in noise.</li>
+<li><a href="https://www.mathworks.com/help/signal/ref/rcosdesign.html" target="_blank" rel="noopener">MathWorks — rcosdesign (RRC/matched pulse-shaping)</a> — documents splitting a raised cosine into square-root RRC filters at TX and RX to achieve matched, ISI-free reception.</li>
 </ul>`
       }
     ],
@@ -967,6 +992,14 @@ CONTENT.topics.push(
 <li><strong>The order hierarchy:</strong> each step up in constellation density roughly halves the tolerable EVM, which is why 256-QAM demands ~2% where QPSK tolerates ~17.5%.</li>
 <li><strong>The fingerprints:</strong> round cloud = noise, ellipse = gain imbalance, sheared grid = quadrature error, off-center = LO leakage, tangential smear = phase noise, warped outer points = PA compression.</li>
 <li><strong>The measurement caveats:</strong> analyzers remove allowed impairments first, and instrument noise adds in power ($\mathrm{EVM}_{\text{true}}^2\approx\mathrm{EVM}_{\text{meas}}^2-\mathrm{EVM}_{\text{inst}}^2$).</li>
+</ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Error_vector_magnitude" target="_blank" rel="noopener">Wikipedia — Error vector magnitude</a> — precise definition, peak-vs-RMS normalization, and the $\mathrm{EVM}=1/\sqrt{\mathrm{SNR}}$ relationship.</li>
+<li><a href="https://cdn.rohde-schwarz.com/am/us/downloads_1/common_library_1/brochures_and_datasheets_1/Whitepaper_Understanding_EVM.pdf" target="_blank" rel="noopener">Rohde &amp; Schwarz — Understanding EVM (white paper)</a> — in-depth vendor educational note on how impairments (I/Q imbalance, phase noise, PA compression) map to EVM signatures.</li>
+<li><a href="https://www.mathworks.com/help/comm/ref/comm.evm-system-object.html" target="_blank" rel="noopener">MathWorks — comm.EVM System object</a> — documents the RMS/peak/percentile EVM algorithm and the three normalization references used in measurement.</li>
 </ul>`
       }
     ],

@@ -163,6 +163,15 @@ CONTENT.topics.push(
 <li><b>The central trade and its fix:</b> image rejection wants a HIGH IF while selectivity wants a LOW IF, resolved by DUAL conversion — a high first IF to kill the image, a low second IF for selectivity.</li>
 <li><b>Gain/noise budgeting:</b> LNA first so Friis divides later-stage noise; bulk gain at the IF; AGC to tame dynamic range — versus zero-IF, which trades the image away for DC-offset and I&mdash;Q impairments.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Superheterodyne_receiver" target="_blank" rel="noopener">Wikipedia — Superheterodyne receiver</a> — the canonical deep reference: Armstrong history, single/double conversion, image and spurious responses, LO phase noise, with 99+ sourced references.</li>
+<li><a href="https://www.site.uottawa.ca/~sloyka/elg3175/Lec_9_ELG3175.pdf" target="_blank" rel="noopener">University of Ottawa ELG3175 — Lecture 9: Superheterodyne receiver</a> — university lecture notes deriving mixing, IF choice, image rejection and IF selectivity from first principles.</li>
+<li><a href="https://www.electronics-notes.com/articles/radio/superheterodyne-receiver/image.php" target="_blank" rel="noopener">Electronics Notes — Superheterodyne image response</a> — focused treatment of the image frequency (LO±IF), why a high IF eases rejection, and typical image-rejection specifications.</li>
+<li><a href="https://www.keysight.com/us/en/assets/7018-06714/application-notes/5952-0292.pdf" target="_blank" rel="noopener">Keysight — Spectrum Analysis Basics (AN 150)</a> — industry application note showing the swept-tuned superheterodyne in a real instrument: mixer, tunable LO, IF filter and resolution bandwidth.</li>
+</ul>`
       }
     ],
     keyPoints: [

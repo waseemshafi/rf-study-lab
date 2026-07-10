@@ -167,6 +167,15 @@ CONTENT.topics.push(
 <li><strong>Traceback.</strong> Walking the stored survivor pointers back from the best terminal node recovers the maximum-likelihood bits; a depth of $\approx 5K$ enables streaming.</li>
 <li><strong>Why it matters.</strong> Viterbi, BCJR/MAP, and SOVA all run on this same lattice; termination/tail bits close it, and puncturing reuses it across rates.</li>
 </ul></div>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Convolutional_code" target="_blank" rel="noopener">Wikipedia — Convolutional code</a> — canonical overview whose trellis-diagram section shows the encoder as a finite state machine unrolled into a lattice, with the Viterbi and BCJR decoders that sweep it.</li>
+<li><a href="https://ocw.mit.edu/courses/6-02-introduction-to-eecs-ii-digital-communication-systems-fall-2012/f398fa4a366439301b3d17e45e028952_MIT6_02F12_lec07.pdf" target="_blank" rel="noopener">MIT OCW 6.02 — Lecture 7: Viterbi decoding</a> — worked lecture slides that build the (7,5) trellis step by step and walk branch metrics, path metrics, and add-compare-select on concrete numbers.</li>
+<li><a href="https://en.wikipedia.org/wiki/BCJR_algorithm" target="_blank" rel="noopener">Wikipedia — BCJR algorithm</a> — the forward-backward MAP decoder that runs on the identical trellis, deriving the per-bit soft outputs (and Max-Log-MAP variants) that iterative turbo/LDPC decoders need.</li>
+<li><a href="https://www.mathworks.com/help/comm/ref/comm.viterbidecoder-system-object.html" target="_blank" rel="noopener">MathWorks — comm.ViterbiDecoder</a> — vendor reference tying the abstract trellis to a real decoder: trellis structures via poly2trellis, traceback depth, hard/soft/unquantized metrics, and continuous/truncated/terminated termination.</li>
+</ul>`
     }
   ],
   keyPoints: [

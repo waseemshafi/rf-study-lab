@@ -192,6 +192,15 @@ CONTENT.topics.push(
 <li><strong>Topology is point-to-point, full-duplex.</strong> Exactly two devices; connecting two DTEs needs a null-modem crossover, and flow control is RTS/CTS (hardware) or XON/XOFF (software).</li>
 <li><strong>Know when to leave it.</strong> For distance, noise immunity, or many nodes, step up to the differential standards (RS-422/485) or to LVDS/USB/Ethernet for speed.</li>
 </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/RS-232" target="_blank" rel="noopener">Wikipedia — RS-232</a> — the canonical reference: full voltage tables, pinouts (DB-25/DE-9), signal definitions, cable limits, and history in one thorough article.</li>
+<li><a href="https://www.electronics-notes.com/articles/connectivity/serial-data-communications/rs232-v24-basics-tutorial.php" target="_blank" rel="noopener">Electronics Notes — RS-232 / V.24 Serial Interface</a> — a clear tutorial tying the EIA/TIA levels to the ITU-T V.24/V.28 world and async UART framing.</li>
+<li><a href="https://www.ti.com/lit/an/slla607/slla607.pdf" target="_blank" rel="noopener">TI SLLA607 — RS-232 Glossary and Selection Guide</a> — a vendor app note that defines every term (slew, driver/receiver limits) and maps the standard onto real transceiver ICs.</li>
+<li><a href="https://circuitdigest.com/article/rs232-serial-communication-protocol-basics-specifications" target="_blank" rel="noopener">CircuitDigest — RS-232 Protocol: Basics, Specifications &amp; Pinout</a> — a hands-on walkthrough of framing, handshaking, DB-9 wiring, and null-modem cabling with worked examples.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -451,6 +460,15 @@ $$L_{\max} = \frac{C_{\max}}{C'}.$$
 <li><strong>Long lines are transmission lines.</strong> Terminate the far (receiving) end with $R_T \approx Z_0$ (100–120 Ω) whenever the cable is electrically long, and add fail-safe bias so an open/cut link idles at a valid mark.</li>
 <li><strong>It is a drop-in electrical upgrade from RS-232.</strong> Same async UART framing; swap only the transceiver and use twisted pair to gain distance and noise immunity — no software change.</li>
 <li><strong>When you need many talkers, move to RS-485.</strong> RS-422's single always-on driver cannot arbitrate a shared bus; RS-485 adds the tristate driver that does.</li>
+</ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/RS-422" target="_blank" rel="noopener">Wikipedia — RS-422</a> — a solid canonical overview of TIA/EIA-422 balanced signaling, the ±2 V driver / ±200 mV receiver limits, the 10-receiver rule, and rate-vs-length curves.</li>
+<li><a href="https://www.electronics-notes.com/articles/connectivity/serial-data-communications/rs422-basics-tutorial.php" target="_blank" rel="noopener">Electronics Notes — Introduction to RS-422</a> — an accessible tutorial explaining why differential transmission buys distance and noise immunity over RS-232.</li>
+<li><a href="https://www.ti.com/lit/pdf/slla070" target="_blank" rel="noopener">TI SLLA070 — RS-422 and RS-485 Standards Overview and System Configurations</a> — an authoritative app note on failsafe, termination, grounding, and multidrop topologies for both standards.</li>
+<li><a href="https://www.lammertbies.nl/comm/info/rs-422" target="_blank" rel="noopener">Lammert Bies — RS-422 Specifications and In-Depth Tutorial</a> — a detailed engineer's reference covering the electrical spec, multidrop wiring, and comparison tables.</li>
 </ul>`
       }
     ],
@@ -748,6 +766,15 @@ $$t_{pd} = \frac{L}{v} = \frac{L\sqrt{\varepsilon_r}}{c}.$$
 <li><strong>RS-485 is only the electrical layer.</strong> Addressing and arbitration come from a higher protocol (Modbus RTU, PROFIBUS, DMX512, BACnet MS/TP) carried as ordinary async UART frames.</li>
 <li><strong>Wider common mode, same rate–length envelope.</strong> The $-7$ to $+12$ V range tolerates big plant ground offsets; reach still runs 10 Mbps @ ~12 m down to 100 kbps @ ~1200 m, extended by repeaters.</li>
 </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/RS-485" target="_blank" rel="noopener">Wikipedia — RS-485</a> — the canonical article on TIA-485 multipoint signaling: A/B thresholds, unit loads, bus vs star topology, biasing, and the protocols layered on top.</li>
+<li><a href="https://www.electronics-notes.com/articles/connectivity/serial-data-communications/rs485-introduction-basics.php" target="_blank" rel="noopener">Electronics Notes — Introduction to RS-485</a> — a clear primer on half-duplex multidrop networking, node counts, and contention handling.</li>
+<li><a href="https://www.ti.com/lit/pdf/snla049" target="_blank" rel="noopener">TI AN-1057 (SNLA049) — Ten Ways to Bulletproof RS-485 Interfaces</a> — a classic app note on termination, fail-safe bias, grounding, and transient protection for robust buses.</li>
+<li><a href="https://www.renesas.com/en/document/apn/rs-485-design-guide-application-note" target="_blank" rel="noopener">Renesas — RS-485 Design Guide Application Note</a> — a vendor design guide covering transceiver selection, stub lengths, biasing networks, and real-world layout.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -1023,6 +1050,15 @@ $$t_{\text{turn}} \ge 2\,t_{pd} + t_{\text{driver}}.$$
 <li><strong>Termination is exact and mandatory.</strong> One 100 Ω resistor right at the receiver both matches $Z_0$ (zero reflection) and creates the voltage — 120 Ω would mismatch and reflect.</li>
 <li><strong>Real links add a SerDes.</strong> LVDS is only the electrical layer; a serializer/deserializer with a forwarded clock (FPD-Link, Camera Link) or embedded clock + 8b/10b carries the actual data, and pairs must be length-matched to hold skew to picoseconds.</li>
 <li><strong>The family scales.</strong> M-LVDS/Bus-LVDS add multipoint backplanes; SLVS drops the swing further for mobile/MIPI lanes — same current-steered differential idea, rescaled.</li>
+</ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Low-voltage_differential_signaling" target="_blank" rel="noopener">Wikipedia — Low-voltage differential signaling</a> — the canonical overview of TIA/EIA-644: the 3.5 mA current-mode driver, 350 mV swing, termination, and the M-LVDS/SLVS variants.</li>
+<li><a href="https://www.ti.com/lit/ug/snla187/snla187.pdf" target="_blank" rel="noopener">TI SNLA187 — LVDS Owner's Manual (4th ed.)</a> — the definitive design reference: SerDes architectures, termination, jitter, layout rules, and signal conditioning.</li>
+<li><a href="https://www.ti.com/lit/an/snla165a/snla165a.pdf" target="_blank" rel="noopener">TI SNLA165 — An Overview of LVDS Technology</a> — a concise app note deriving the current-steered signal and explaining why it delivers gigabits at milliwatts with low EMI.</li>
+<li><a href="https://www.testworld.com/wp-content/uploads/Low-Voltage-Differential-Signaling-LVDS.pdf" target="_blank" rel="noopener">Agilent App Note 1382-6 — Low-Voltage Differential Signaling</a> — a measurement-oriented deep dive into DC balance, Bus-LVDS, EMI, and eye-diagram/jitter characterization.</li>
 </ul>`
       }
     ],

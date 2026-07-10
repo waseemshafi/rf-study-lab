@@ -93,6 +93,15 @@ CONTENT.topics.push(
           <li><b>Digital front end:</b> DDC (NCO mix to DC + decimate) and DUC (interpolate + NCO up) reshape rate and channel; decimating to bandwidth buys oversampling processing gain.</li>
           <li><b>System budget:</b> AGC fills the ADC without clipping, and throughput $f_s\times\text{bits}\times2\times\text{channels}$ often bottlenecks the host link, forcing on-chip decimation.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://pysdr.org/content/sampling.html" target="_blank" rel="noopener">PySDR — IQ Sampling</a> — a full, worked textbook chapter on complex/quadrature sampling, negative frequencies, and the complex-baseband model with plots and code.</li>
+<li><a href="https://en.wikipedia.org/wiki/Software-defined_radio" target="_blank" rel="noopener">Wikipedia — Software-defined radio</a> — the canonical overview of SDR history, receiver/transmitter architectures, and the digitize-near-the-antenna principle.</li>
+<li><a href="https://www.electronics-notes.com/articles/radio/sdr-software-defined-radio-receiver/sdr-hardware-architecture.php" target="_blank" rel="noopener">Electronics Notes — SDR Hardware Architecture</a> — a focused treatment of where the analog/digital boundary sits and the RF front-end trade-offs it forces.</li>
+<li><a href="https://www.mathworks.com/discovery/sdr.html" target="_blank" rel="noopener">MathWorks — Software-Defined Radio</a> — vendor overview tying SDR front ends to FPGA/SoC processing and standards (5G, LTE, WLAN) with hands-on examples.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -391,6 +400,15 @@ CONTENT.topics.push(
           <li><b>Undersampling:</b> deliberately aliasing a bandpass signal to baseband needs only $f_s>2B$, not $2f_{high}$ - but punishes jitter because $f_{in}$ is high.</li>
           <li><b>Architecture map:</b> flash (fast/low-res), pipeline (SDR sweet spot), SAR (low-power precision), $\Sigma\Delta$ (highest resolution) - pick by the speed/resolution/power corner you need.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Analog-to-digital_converter" target="_blank" rel="noopener">Wikipedia — Analog-to-digital converter</a> — canonical survey of sampling, quantization, resolution metrics, and every major ADC architecture.</li>
+<li><a href="https://www.dspguide.com/ch3/1.htm" target="_blank" rel="noopener">Smith — DSP Guide, Ch. 3: ADC and DAC</a> — Steven Smith's clear, intuition-first chapter on sampling theory, quantization noise, and dithering.</li>
+<li><a href="https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-22-sampling-and-quantization/" target="_blank" rel="noopener">MIT OCW 6.003 — Lecture 22: Sampling and Quantization</a> — university lecture notes/video deriving the sampling theorem and quantization from first principles.</li>
+<li><a href="https://en.wikipedia.org/wiki/Effective_number_of_bits" target="_blank" rel="noopener">Wikipedia — Effective number of bits (ENOB)</a> — the SINAD/ENOB relationship and why real resolution falls below the nominal bit count.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -651,6 +669,15 @@ CONTENT.topics.push(
           <li><b>Same noise ceiling as the ADC:</b> quantization SNR is $6.02N+1.76$ dB; real performance is set by DNL/INL, glitch energy, settling, and jitter (worse at high output frequency).</li>
           <li><b>You can now compute droop</b> at any fraction $\alpha=f/f_s$ and locate every image - the two questions every transmit-filter design turns on.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Digital-to-analog_converter" target="_blank" rel="noopener">Wikipedia — Digital-to-analog converter</a> — canonical overview of DAC operation, architectures, and reconstruction/image behavior.</li>
+<li><a href="https://www.dsprelated.com/showarticle/1627.php" target="_blank" rel="noopener">DSPRelated — DAC Zero-Order Hold Models</a> — Neil Robertson's derivation of the ZOH sinc response, droop, and spectral images with worked plots.</li>
+<li><a href="https://en.wikipedia.org/wiki/Reconstruction_filter" target="_blank" rel="noopener">Wikipedia — Reconstruction filter</a> — why the DAC output needs an anti-imaging lowpass and how the ideal sinc filter relates to practical designs.</li>
+<li><a href="https://www.mathworks.com/help/dsp/ug/overview-of-multirate-filters.html" target="_blank" rel="noopener">MathWorks — Overview of Multirate Filters</a> — interpolation and anti-imaging filtering that push DAC images away and ease reconstruction.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -911,6 +938,14 @@ CONTENT.topics.push(
           <li><b>Where it fits:</b> it powers the ADALM-PLUTO and USRP B200/B210, the reference platforms for GNU Radio/UHD/MATLAB; AD9364 is the 1x1 variant, AD9363 the cost/range-reduced one.</li>
           <li><b>Bring-up recipe:</b> set LO, set sample rate/filter, program FIR/decimation, run calibrations, configure AGC/ENSM, stream - a sequence you can now follow end to end.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://wiki.analog.com/resources/eval/user-guides/ad-fmcomms2-ebz/ad9361" target="_blank" rel="noopener">Analog Devices Wiki — AD9361/AD9364/AD9363</a> — the authoritative engineering wiki for the part: register maps, calibration, filter design, and driver notes.</li>
+<li><a href="https://en.wikipedia.org/wiki/Direct_conversion_receiver" target="_blank" rel="noopener">Wikipedia — Direct-conversion receiver</a> — the zero-IF architecture the AD9361 implements, including DC offset, LO leakage, and IQ-imbalance impairments.</li>
+<li><a href="https://wiki.analog.com/university/tools/pluto/users" target="_blank" rel="noopener">Analog Devices Wiki — ADALM-PLUTO User Guide</a> — hands-on documentation for the AD936x-based PlutoSDR: bring-up, sample rates, and GNU Radio/MATLAB use.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -1178,6 +1213,15 @@ CONTENT.topics.push(
           <li><b>Why arrays love it:</b> shared clocking + digital NCOs + MTS give deterministic phase coherence, and on-die FPGA beamforming realizes $10\log_{10}N$ dB array gain - transformative for 5G massive-MIMO, radar, and EW.</li>
           <li><b>When to choose it:</b> RFSoC wins on channel count and instantaneous bandwidth; AD9361-class parts still win on size/power/cost for one or two channels - they are complementary, not competitors.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://docs.amd.com/r/en-US/pg269-rf-data-converter/Introduction" target="_blank" rel="noopener">AMD/Xilinx PG269 — RF Data Converter Product Guide</a> — the definitive reference for the RFSoC RF-ADC/RF-DAC tiles: DDC/DUC, NCO mixers, clocking, and multi-tile synchronization.</li>
+<li><a href="https://en.wikipedia.org/wiki/Digital_down_converter" target="_blank" rel="noopener">Wikipedia — Digital down converter</a> — the NCO-mix-and-decimate core that hardened RFSoC DDCs implement to tame GSPS data rates.</li>
+<li><a href="https://arxiv.org/pdf/1911.09180" target="_blank" rel="noopener">arXiv — Digital Beamforming Array Receiver on Xilinx RFSoC</a> — a peer-reviewed system paper showing direct-conversion, wideband beamforming built directly on RFSoC.</li>
+<li><a href="https://en.wikipedia.org/wiki/System_on_a_chip" target="_blank" rel="noopener">Wikipedia — System on a chip</a> — background on the SoC integration philosophy that turns the data converter into an on-die peripheral.</li>
+</ul>`
       }
     ],
     keyPoints: [

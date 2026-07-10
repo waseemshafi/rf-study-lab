@@ -157,6 +157,15 @@ CONTENT.topics.push(
 <li><b>Rician and the K-factor:</b> adding a LOS component gives the Rician distribution; Rayleigh is the $K\to0$ (no-LOS, worst-case) limit and fading vanishes as $K\to\infty$.</li>
 <li><b>Why it matters:</b> deep fades force a fade margin ($P_{out}=1-e^{-r_{th}^2/2\sigma^2}$), and diversity beats the expensive margin by making outage fall as the $L$-th power of the branch count.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Rayleigh_distribution" target="_blank" rel="noopener">Wikipedia — Rayleigh distribution</a> — the canonical reference for the PDF, CDF, moments, and its origin as the magnitude of a 2-D Gaussian vector, with all the closed-form statistics collected in one place.</li>
+<li><a href="https://web.stanford.edu/class/archive/ee/ee359/ee359.1062/lecture5.pdf" target="_blank" rel="noopener">Stanford EE359 (Goldsmith) — Lecture 5: Narrowband Fading &amp; Envelope Distributions</a> — graduate lecture notes deriving the Rayleigh and Rician envelope/power distributions directly from the narrowband multipath model.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/fading-channels.html" target="_blank" rel="noopener">MathWorks — Fading Channels</a> — vendor documentation that turns the theory into simulation: Rayleigh/Rician channel objects, Doppler spectra, path gains, and worked BER examples.</li>
+<li><a href="https://ma-mimo.ellintech.se/2020/03/02/rician-fading-a-channel-model-often-misunderstood/" target="_blank" rel="noopener">Wireless Future — Rician Fading: A Channel Model Often Misunderstood</a> — an expert deep dive on how the LOS K-factor extends Rayleigh into Rician and the subtleties practitioners routinely get wrong.</li>
+</ul>`
       }
     ],
     keyPoints: [

@@ -89,6 +89,15 @@ CONTENT.topics.push(
           <li><strong>CDMA and its cost:</strong> distinct codes let many users overlap, limited by cross-correlation, the near-far problem (needs power control), and cured/enhanced by RAKE combining and long codes.</li>
           <li><strong>GPS is the extreme case:</strong> a 1023-chip code recovers a signal 20–30 dB below the noise floor — pure correlation gain.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Direct-sequence_spread_spectrum" target="_blank" rel="noopener">Wikipedia — Direct-sequence spread spectrum</a> — canonical overview of chips, spreading, processing gain, and DSSS applications from GPS to Wi-Fi.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/Generic_Receiver_Description" target="_blank" rel="noopener">ESA Navipedia — Generic Receiver Description</a> — how a real spread-spectrum (GNSS) receiver acquires, correlates, and tracks a PRN-coded signal below the noise floor.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/spreading-sequences.html" target="_blank" rel="noopener">MathWorks — Spreading Sequences for DSSS</a> — worked treatment of PN, orthogonal, Gold and Kasami spreading with runnable BER models.</li>
+<li><a href="https://www.gaussianwaves.com/2010/09/spread-spectrum-communications-intro/" target="_blank" rel="noopener">GaussianWaves — Spread Spectrum Communications intro</a> — clear derivation of the spreading/despreading idea with correlation plots and code examples.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -356,6 +365,14 @@ CONTENT.topics.push(
           <li><strong>The real threats are partial-band and follower jamming;</strong> FEC + interleaving handles the former, and short dwells (fast hopping) outrun the latter.</li>
           <li><strong>Practical wins:</strong> looser (hop-timing) synchronization, mild near-far behavior, and adaptive hopping (AFH) for coexistence — at the cost of non-coherent detection and synthesizer settling overhead.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Frequency-hopping_spread_spectrum" target="_blank" rel="noopener">Wikipedia — Frequency-hopping spread spectrum</a> — canonical reference on hop sets, dwell time, anti-jam properties, and the history from Lamarr/Antheil to Bluetooth.</li>
+<li><a href="https://www.rohde-schwarz.com/us/knowledge-center/technology-fundamentals/hopper-signals/hopper-signals_256050.html" target="_blank" rel="noopener">Rohde &amp; Schwarz — Fundamentals of hopper signals</a> — vendor deep dive on hop duration, hop bandwidth, and how FH signals appear in the time-frequency plane.</li>
+<li><a href="https://www.gaussianwaves.com/2010/09/spread-spectrum-communications-intro/" target="_blank" rel="noopener">GaussianWaves — Spread Spectrum Communications intro</a> — situates FHSS against DSSS with the underlying spreading theory and code choices.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -606,6 +623,15 @@ CONTENT.topics.push(
           <li><strong>Counting and sizing:</strong> there are $\phi(2^n-1)/n$ distinct m-sequences, and a target period needs $n\ge\lceil\log_2(L_{req}+1)\rceil$ stages.</li>
           <li><strong>The catch:</strong> mutual cross-correlation is large and unbounded, so raw m-sequences are poor CDMA address codes — motivating Gold and Kasami families.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Maximum_length_sequence" target="_blank" rel="noopener">Wikipedia — Maximum length sequence</a> — LFSR generation, Golomb's randomness postulates, and the two-valued autocorrelation that defines m-sequences.</li>
+<li><a href="https://en.wikipedia.org/wiki/Pseudorandom_noise" target="_blank" rel="noopener">Wikipedia — Pseudorandom noise</a> — broader family view relating PN codes to m-sequences, Gold, Kasami and Barker codes and their uses.</li>
+<li><a href="https://www.gaussianwaves.com/2018/09/maximum-length-sequences-m-sequences/" target="_blank" rel="noopener">GaussianWaves — Maximum-length sequence (m-sequence) generator</a> — Galois vs Fibonacci LFSR implementation with primitive-polynomial tables and correlation analysis.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/GNSS_signal" target="_blank" rel="noopener">ESA Navipedia — GNSS signal</a> — how PRN ranging codes function inside a real navigation signal alongside carrier and data.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -825,6 +851,15 @@ CONTENT.topics.push(
           <li><strong>Bigger is cleaner:</strong> normalized cross-correlation $t(n)/L\sim\sqrt{2/L}$ shrinks with length, so longer codes serve more users with less mutual interference.</li>
           <li><strong>GPS is the flagship:</strong> a length-1023 ($n=10$) Gold code with $t=65$ gives each satellite a distinct PRN sharing one L1 carrier.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Gold_code" target="_blank" rel="noopener">Wikipedia — Gold code</a> — construction from preferred m-sequence pairs, the three-valued cross-correlation bound, and the length-1023 GPS C/A example.</li>
+<li><a href="https://www.gaussianwaves.com/2015/06/gold-code-generator/" target="_blank" rel="noopener">GaussianWaves — Gold code generator using LFSRs</a> — preferred-pair selection, LFSR schematics, and autocorrelation/cross-correlation plots for a worked length-127 code.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/spreading-sequences.html" target="_blank" rel="noopener">MathWorks — Spreading Sequences (Gold &amp; Kasami)</a> — Gold sequences in context with orthogonal and PN codes plus runnable multi-user BER models.</li>
+<li><a href="https://gssc.esa.int/navipedia/index.php/GNSS_signal" target="_blank" rel="noopener">ESA Navipedia — GNSS signal</a> — how Gold-coded PRN sequences let every GPS satellite share one L1 carrier via CDMA.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -1048,6 +1083,15 @@ CONTENT.topics.push(
           <li><strong>Two force-multipliers:</strong> interleaving turns bursts into scattered errors, and soft-decision decoding adds about 2 dB over hard decisions.</li>
           <li><strong>Concatenation</strong> (outer RS + interleaver + inner convolutional) combines burst and random-error strength — the classic deep-space and broadcast scheme.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Forward_error_correction" target="_blank" rel="noopener">Wikipedia — Forward error correction</a> — the code-family map (block, convolutional, LDPC, turbo), coding gain, and where each is used.</li>
+<li><a href="https://en.wikipedia.org/wiki/Convolutional_code" target="_blank" rel="noopener">Wikipedia — Convolutional code</a> — rate, constraint length, and soft-decision decoding, with real deep-space/GSM parameters.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/error-detection-and-correction.html" target="_blank" rel="noopener">MathWorks — Error Detection and Correction</a> — hands-on coverage of block, Reed-Solomon, LDPC and convolutional coding with runnable examples.</li>
+<li><a href="https://ocw.mit.edu/courses/6-02-introduction-to-eecs-ii-digital-communication-systems-fall-2012/effb4e0089fd355258e96dd8277bbc2b_MIT6_02F12_chap08.pdf" target="_blank" rel="noopener">MIT 6.02 — Viterbi Decoding of Convolutional Codes (Ch. 8)</a> — a rigorous chapter tying minimum distance and coding gain to a concrete decoder.</li>
+</ul>`
       }
     ],
     keyPoints: [
@@ -1286,6 +1330,15 @@ CONTENT.topics.push(
           <li><strong>Optimality and cost:</strong> Viterbi is MLSE-optimal; complexity is $\mathcal{O}(N\,2^{K-1})$ — linear in length, exponential in $K$ — which caps practical $K$ around 7–9.</li>
           <li><strong>Soft decision adds ~2 dB</strong>, and the related BCJR/MAP algorithm supplies the soft outputs used inside Turbo decoders.</li>
         </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Viterbi_algorithm" target="_blank" rel="noopener">Wikipedia — Viterbi algorithm</a> — the dynamic-programming formulation, pseudocode, and worked trellis example of maximum-likelihood sequence decoding.</li>
+<li><a href="https://ocw.mit.edu/courses/6-02-introduction-to-eecs-ii-digital-communication-systems-fall-2012/effb4e0089fd355258e96dd8277bbc2b_MIT6_02F12_chap08.pdf" target="_blank" rel="noopener">MIT 6.02 — Viterbi Decoding of Convolutional Codes (Ch. 8)</a> — branch/path metrics, add-compare-select, hard vs soft decisions, and traceback, step by step.</li>
+<li><a href="https://web.mit.edu/6.02/www/f2010/handouts/lectures/L9.pdf" target="_blank" rel="noopener">MIT 6.02 — Lecture 9: Viterbi decoding</a> — the lecture-slide companion walking through the trellis and ACS recursion.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/convolutional-codes.html" target="_blank" rel="noopener">MathWorks — Convolutional Codes &amp; Viterbi decoding</a> — trellis/polynomial descriptions with vitdec examples for hard- and soft-decision decoding.</li>
+</ul>`
       }
     ],
     keyPoints: [

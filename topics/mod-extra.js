@@ -164,6 +164,15 @@ CONTENT.topics.push(
         <li><strong>The practical costs:</strong> FIR truncation and oversampling introduce tiny residual ISI, and shaping raises PAPR, forcing PA back-off.</li>
         <li><strong>The efficiency:</strong> $\eta\approx\log_2 M/(1+\beta)$ bits/s/Hz ties shaping choices directly to throughput.</li>
       </ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Raised-cosine_filter" target="_blank" rel="noopener">Wikipedia — Raised-cosine filter</a> — the canonical reference deriving the RC/RRC frequency and impulse responses, roll-off, and the zero-ISI property.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/raised-cosine-filtering.html" target="_blank" rel="noopener">MathWorks — Raised Cosine Filtering</a> — worked documentation showing how splitting the filter into Tx/Rx square-root RRC halves yields minimum ISI, with runnable code.</li>
+<li><a href="https://web.stanford.edu/class/ee179/lectures/notes15.pdf" target="_blank" rel="noopener">Stanford EE179 — Lecture 15: Line Codes and Pulse Shaping</a> — university lecture notes tying line coding to the Nyquist criterion and raised-cosine shaping.</li>
+<li><a href="https://arxiv.org/abs/0912.0758" target="_blank" rel="noopener">Chattopadhyay &amp; Sanyal (arXiv) — RC vs RRC pulse-shaping for QPSK/OQPSK</a> — a quantitative comparison of RC and RRC filters across roll-off, EVM and bandwidth efficiency.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -401,6 +410,15 @@ CONTENT.topics.push(
         <li><strong>The failure mode:</strong> a fully closed eye means no threshold works — equalisation or better shaping is needed.</li>
         <li><strong>The connections:</strong> the eye is the time-domain twin of the constellation (closing eye ↔ high EVM), and sweeping the sample point traces the BER bathtub whose flat bottom is the usable timing margin.</li>
       </ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Eye_pattern" target="_blank" rel="noopener">Wikipedia — Eye pattern</a> — canonical overview of how the eye is built by overlaying symbol periods and what its openings, crossings and mask reveal.</li>
+<li><a href="https://www.tek.com/en/documents/application-note/anatomy-eye-diagram" target="_blank" rel="noopener">Tektronix — Anatomy of an Eye Diagram</a> — vendor application note detailing triggering methods, eye slicing, BER contours and mask testing.</li>
+<li><a href="https://www.tek.com/en/documents/primer/stressed-eye-primer" target="_blank" rel="noopener">Tektronix — Stressed Eye Primer</a> — connects eye closure from jitter, ISI and crosstalk to receiver BER and jitter-tolerance testing.</li>
+<li><a href="https://www.digikey.com/en/maker/tutorials/2024/what-is-an-eye-diagram-in-electronics-and-what-is-it-used-for" target="_blank" rel="noopener">DigiKey — What Is an Eye Diagram in Electronics</a> — an approachable tutorial mapping eye height/width to noise and timing margin with the measurement setup.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -672,6 +690,15 @@ CONTENT.topics.push(
         <li><strong>Coding gain:</strong> FEC shifts the curve left by several dB, buying the same BER for effectively free transmit power at the cost of rate.</li>
         <li><strong>Measuring it:</strong> low BERs need enormous bit counts ($N\approx-\ln(1-CL)/\text{BER}$, or ~100 error events to measure), which is why EVM ($\text{SNR}\approx1/\text{EVM}^2$) is used as a fast proxy.</li>
       </ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Bit_error_rate" target="_blank" rel="noopener">Wikipedia — Bit error rate</a> — canonical reference on the BER definition, channel models, BERT test patterns and the factors that degrade it.</li>
+<li><a href="https://www.gaussianwaves.com/2012/07/intuitive-derivation-of-performance-of-an-optimum-bpsk-receiver-in-awgn-channel/" target="_blank" rel="noopener">GaussianWaves — BPSK BER derivation in AWGN</a> — a step-by-step derivation of $P_b=Q(\sqrt{2E_b/N_0})$ from the matched-filter decision statistics.</li>
+<li><a href="https://dsplog.com/2008/06/05/16qam-bit-error-gray-mapping/" target="_blank" rel="noopener">dsplog — 16-QAM BER with Gray mapping</a> — full derivation of the higher-order QAM BER formula plus a simulation confirming it.</li>
+<li><a href="https://www.mathworks.com/help/comm/ug/analyze-performance-with-bit-error-rate-analysis-app.html" target="_blank" rel="noopener">MathWorks — Bit Error Rate Analysis App (BERTool)</a> — documentation for generating theoretical and Monte-Carlo waterfall curves with confidence intervals.</li>
+</ul>`
     }
   ],
   keyPoints: [
@@ -939,6 +966,15 @@ CONTENT.topics.push(
         <li><strong>The two regimes:</strong> power-limited ($\eta<1$, spread + code toward the floor) versus bandwidth-limited ($\eta>1$, high-order QAM at high $E_b/N_0$).</li>
         <li><strong>The design use:</strong> received $E_b/N_0=P_{rx}/(kT_{sys}R_b)$ meets the modulation's requirement with a link margin that coding gain widens for free.</li>
       </ul>`
+    },
+    {
+      h: String.raw`Further reading`,
+      html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Eb/N0" target="_blank" rel="noopener">Wikipedia — Eb/N0</a> — canonical reference defining energy-per-bit to noise density, its relation to SNR and Es/N0, and the Shannon limit.</li>
+<li><a href="https://www.gaussianwaves.com/2019/11/shannons-limit-on-power-efficiency/" target="_blank" rel="noopener">GaussianWaves — Shannon's limit on power efficiency</a> — derives the ultimate $-1.59$ dB $E_b/N_0$ floor and the spectral-efficiency vs power trade.</li>
+<li><a href="https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/b286123989945cef13e5a9aa20e56a18_chap4.pdf" target="_blank" rel="noopener">MIT OCW 6.451 — Ch. 4: The gap to the Shannon limit</a> — rigorous lecture notes on uncoded performance versus the Shannon bound on the $E_b/N_0$ axis.</li>
+<li><a href="https://www.gaussianwaves.com/2011/05/ebn0-vs-ber-for-bpsk-over-rayleigh-channel-and-awgn-channel-2/" target="_blank" rel="noopener">GaussianWaves — Eb/N0 vs BER for BPSK (AWGN &amp; Rayleigh)</a> — shows how $E_b/N_0$ maps to the BER waterfall and how fading shifts the required value.</li>
+</ul>`
     }
   ],
   keyPoints: [

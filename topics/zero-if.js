@@ -158,6 +158,15 @@ CONTENT.topics.push(
 <li><b>I/Q imbalance and IRR:</b> gain $\varepsilon$ and phase $\phi$ mismatch limit image rejection to $\text{IRR}\approx(\varepsilon^2+\phi^2)/4$, raising EVM and capping modulation order; fixed by DSP I/Q calibration.</li>
 <li><b>Flicker, LO leakage, even-order:</b> 1/f noise sits on the signal at DC (chopping helps), the on-channel LO can radiate (isolation helps), and IP2 products fall at DC (balanced/high-IP2 design helps) — all filtered out in a superhet but in-band here.</li>
 </ul></div>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Direct-conversion_receiver" target="_blank" rel="noopener">Wikipedia — Direct-conversion receiver</a> — the canonical overview of the homodyne/zero-IF architecture, its history, principle of operation and DC-offset/leakage drawbacks.</li>
+<li><a href="https://wirelesspi.com/direct-conversion-zero-if-receiver/" target="_blank" rel="noopener">Wireless Pi — Direct Conversion (Zero-IF) Receiver</a> — a thorough tutorial with clear math on why complex I/Q mixing is required, plus LO self-mixing DC offset and I/Q-imbalance constellation effects.</li>
+<li><a href="http://www.seas.ucla.edu/brweb/teaching/ee215c_notes3.pdf" target="_blank" rel="noopener">Razavi (UCLA EE215C) — Transceiver Architectures lecture notes</a> — graduate RFIC notes from the author of the seminal direct-conversion paper, deriving the impairments (DC offset, I/Q mismatch, flicker, IP2) from circuit principles.</li>
+<li><a href="https://www.ti.com/lit/pdf/snaa329" target="_blank" rel="noopener">Texas Instruments SNAA329 — Direct-Conversion Receiver with LMX8410L I/Q Demodulator</a> — a vendor application note showing a real wideband zero-IF I/Q receiver chain and the practical calibration of its impairments.</li>
+</ul>`
       }
     ],
     keyPoints: [

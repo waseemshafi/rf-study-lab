@@ -84,6 +84,15 @@ CONTENT.topics.push(
 <li><strong>The error rule:</strong> pairwise error is $Q(d_{ij}/2\sigma)$; the union bound and $N_{\min}Q(d_{\min}/2\sigma)$ predict $P(e)$, so design maximizes $d_{\min}$.</li>
 <li><strong>The connection:</strong> for binary signalling the optimal receiver is exactly the matched filter, and antipodal beats orthogonal by 3 dB purely because of distance.</li>
 </ul>`
+      },
+      {
+        h: String.raw`Further reading`,
+        html: String.raw`<ul class="further-reading">
+<li><a href="https://en.wikipedia.org/wiki/Matched_filter" target="_blank" rel="noopener">Wikipedia — Matched filter</a> — canonical article deriving the SNR-maximizing filter two ways and tying it to maximum-likelihood detection in Gaussian noise.</li>
+<li><a href="https://ocw.mit.edu/courses/6-450-principles-of-digital-communications-i-fall-2006/1e8d60eb6c0a68cc48e81af039fd4af6_book_6.pdf" target="_blank" rel="noopener">MIT OCW 6.450 — Channels, modulation, and demodulation (Gallager)</a> — graduate chapter building the correlator/matched-filter front end and MAP/ML detection from signal-space first principles.</li>
+<li><a href="https://cioffi-group.stanford.edu/ee379a/Lectures/L2.pdf" target="_blank" rel="noopener">Stanford EE379A (Cioffi) — Lecture 2: The AWGN channel</a> — rigorous notes on optimal (MAP/ML) detection, minimum-distance decision regions, and error probability on the vector AWGN channel.</li>
+<li><a href="http://barry.ece.gatech.edu/ee6057/lectures/lec5.html" target="_blank" rel="noopener">Georgia Tech ECE6057 — Lecture 5: signal space and the minimum-distance receiver</a> — concise walkthrough of projecting the waveform onto signal space and reducing detection to a Voronoi minimum-distance decision.</li>
+</ul>`
       }
     ],
     keyPoints: [
