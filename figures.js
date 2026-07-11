@@ -501,6 +501,193 @@ const FIG = (function () {
     slider(card.controls, { label: 'processing gain', min: 6, max: 30, step: 1, value: 18, fmt: v => v + ' dB' }, v => { gp = v; draw(); });
   };
 
+  // Carrier-loop phase jitter: sigma_phi = sqrt(1/(2*rho_L)) vs C/N0, with optional squaring loss
+  T.loopJitter = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    let bl = 10, mode = 'costas';
+    const Tpre = 0.001; // 1 ms predetection integration for the squaring-loss bracket
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [25, 50], yr: [0, 35], xlabel: 'C/N0 (dB-Hz)', ylabel: 'phase jitter sigma (deg)' });
+      function sig(cn0dBHz, squaring) {
+        const cn0 = lin(cn0dBHz);
+        const rho = cn0 / bl;
+        const loss = squaring ? (1 + 1 / (2 * Tpre * cn0)) : 1;
+        return Math.sqrt(loss / (2 * rho)) * 180 / Math.PI;
+      }
+      // 15-deg rule-of-thumb slip-danger line
+      ctx.strokeStyle = C.red; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(15)); ctx.lineTo(ax.x + ax.w, ax.fy(15)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.red; ctx.font = '10px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('~15 deg: cycle-slip danger', ax.x + 6, ax.fy(15) - 4);
+      const p1 = [], p2 = [];
+      for (let d = 25; d <= 50; d += 0.25) { p1.push([d, Math.min(35, sig(d, false))]); p2.push([d, Math.min(35, sig(d, true))]); }
+      line(ctx, ax, p1, C.blue, 2.2);
+      line(ctx, ax, p2, C.orange, 2.2);
+      legend(ctx, box, [{ label: 'pure PLL (pilot)', color: C.blue }, { label: 'Costas / squaring', color: C.orange }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif';
+      const at35 = mode === 'costas' ? sig(35, true) : sig(35, false);
+      ctx.fillText('BL = ' + bl + ' Hz  ->  at 35 dB-Hz: sigma = ' + at35.toFixed(1) + ' deg  (rho_L = C/N0 / BL)', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('sigma^2 = L / (2 rho_L); squaring loss L = 1 + 1/(2 T C/N0), T = 1 ms', ax.x + 8, ax.y + 34);
+    }
+    draw();
+    slider(card.controls, { label: 'loop bandwidth BL', min: 1, max: 50, step: 1, value: 10, fmt: v => v + ' Hz' }, v => { bl = v; draw(); });
+    chooser(card.controls, [{ v: 'costas', l: 'Costas/squaring' }, { v: 'pll', l: 'pure PLL' }], 'costas', v => { mode = v; draw(); });
+  };
+
+  // Sliding-correlator (STDCC) time dilation: replica clocked at f - delta_f stretches the CIR by k = f/delta_f
+  T.slideDilate = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const fchip = 10e6; // 10 Mcps sounder
+    const taps = [[0, 1], [0.4, 0.65], [0.9, 0.4], [1.6, 0.22]]; // multipath: delay (us), amplitude
+    function draw(dfk) {
+      const df = dfk * 1e3; // slider in kHz
+      const k = fchip / df;
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 84) / 2 };
+      const b2 = { x: 52, y: b1.y + b1.h + 34, w: w - 72, h: (h - 84) / 2 };
+      const a1 = drawAxes(ctx, b1, { xr: [0, 2], yr: [0, 1.15], xlabel: 'real delay (microseconds)', ylabel: '|h|' });
+      taps.forEach(t => { ctx.strokeStyle = C.blue; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(a1.fx(t[0]), a1.fy(0)); ctx.lineTo(a1.fx(t[0]), a1.fy(t[1])); ctx.stroke(); });
+      const a2 = drawAxes(ctx, b2, { xr: [0, 2 * k / 1000], yr: [0, 1.15], xlabel: 'observed (dilated) time (milliseconds)', ylabel: '|h|' });
+      taps.forEach(t => { ctx.strokeStyle = C.orange; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(a2.fx(t[0] * k / 1000), a2.fy(0)); ctx.lineTo(a2.fx(t[0] * k / 1000), a2.fy(t[1])); ctx.stroke(); });
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('slide factor k = f/df = ' + (fchip / 1e6).toFixed(0) + ' MHz / ' + dfk + ' kHz = ' + Math.round(k).toLocaleString('en-US'), a1.x + 8, a1.y + 14);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('a microsecond channel becomes milliseconds: a slow ADC captures a wideband response', a2.x + 8, a2.y + 14);
+    }
+    draw(5);
+    slider(card.controls, { label: 'clock offset df', min: 1, max: 50, step: 1, value: 5, fmt: v => v + ' kHz' }, draw);
+  };
+
+  // Tau-dither loop: ONE correlator toggled early/late by a dither square wave; sync detection recovers E-L
+  T.tauDither = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const d = 1.0, R = x => Math.max(0, 1 - Math.abs(x));
+    function draw(eps) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 84) / 2 };
+      const b2 = { x: 52, y: b1.y + b1.h + 34, w: w - 72, h: (h - 84) / 2 };
+      const E = R(eps - d / 2), L = R(eps + d / 2), err = E - L;
+      // top: dithered correlator output over time (two-level waveform at the dither rate)
+      const a1 = drawAxes(ctx, b1, { xr: [0, 8], yr: [0, 1.15], xlabel: 'time (dither half-periods)', ylabel: 'corr out' });
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 2.2; ctx.beginPath();
+      for (let s = 0; s < 8; s++) {
+        const lv = (s % 2 === 0) ? E : L;
+        ctx.moveTo(a1.fx(s), a1.fy(lv)); ctx.lineTo(a1.fx(s + 1), a1.fy(lv));
+        if (s < 7) { const nx = (s + 1) % 2 === 0 ? E : L; ctx.lineTo(a1.fx(s + 1), a1.fy(nx)); }
+      }
+      ctx.stroke();
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('single correlator alternates: early -> R(eps-d/2) = ' + E.toFixed(2) + ', late -> R(eps+d/2) = ' + L.toFixed(2), a1.x + 6, a1.y + 12);
+      // bottom: recovered S-curve with marker
+      const a2 = drawAxes(ctx, b2, { xr: [-1.5, 1.5], yr: [-1.1, 1.1], xlabel: 'code error eps (chips)', ylabel: 'detected E - L' });
+      const pts = []; for (let x = -1.5; x <= 1.5; x += 0.02) pts.push([x, R(x - d / 2) - R(x + d / 2)]);
+      line(ctx, a2, pts, C.purple, 2.2);
+      ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(a2.x, a2.fy(0)); ctx.lineTo(a2.x + a2.w, a2.fy(0)); ctx.stroke();
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(a2.fx(eps), a2.fy(err), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif';
+      ctx.fillText('sync-detected error = ' + err.toFixed(2) + (Math.abs(eps) < 0.02 ? '  (locked)' : (err > 0 ? '  -> advance code' : '  -> retard code')), a2.x + 8, a2.y + 12);
+    }
+    draw(0.4);
+    slider(card.controls, { label: 'code error eps', min: -1.5, max: 1.5, step: 0.05, value: 0.4, fmt: v => v.toFixed(2) + ' chip' }, draw);
+  };
+
+  // DLL thermal code-tracking jitter vs C/N0 for wide vs narrow early-late spacing
+  T.dllJitter = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const Tpre = 0.02, chipM = 293; // 20 ms predetection, GPS C/A chip ~293 m
+    function draw(bl) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [25, 50], yr: [0, 0.12], xlabel: 'C/N0 (dB-Hz)', ylabel: 'code jitter sigma (chips)' });
+      function sig(cn0dBHz, d) {
+        const cn0 = lin(cn0dBHz);
+        return Math.sqrt((bl * d / (2 * cn0)) * (1 + 1 / ((2 - d) * Tpre * cn0)));
+      }
+      const p1 = [], p2 = [];
+      for (let x = 25; x <= 50; x += 0.25) { p1.push([x, Math.min(0.12, sig(x, 1.0))]); p2.push([x, Math.min(0.12, sig(x, 0.1))]); }
+      line(ctx, ax, p1, C.blue, 2.2);
+      line(ctx, ax, p2, C.teal, 2.2);
+      legend(ctx, box, [{ label: 'wide d = 1.0 chip', color: C.blue }, { label: 'narrow d = 0.1 chip', color: C.teal }]);
+      const s35w = sig(35, 1.0), s35n = sig(35, 0.1);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('BL = ' + bl + ' Hz  ->  at 35 dB-Hz: ' + s35w.toFixed(3) + ' vs ' + s35n.toFixed(3) + ' chip', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('on GPS C/A (' + chipM + ' m/chip): ' + (s35w * chipM).toFixed(1) + ' m vs ' + (s35n * chipM).toFixed(1) + ' m  (narrow correlator wins)', ax.x + 8, ax.y + 34);
+    }
+    draw(2);
+    slider(card.controls, { label: 'loop bandwidth BL', min: 0.5, max: 10, step: 0.5, value: 2, fmt: v => v + ' Hz' }, draw);
+  };
+
+  // Split-bit / DTTL: half-bit integrals straddling a data transition give a timing S-curve
+  T.dttl = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    function draw(eps) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b1 = { x: 52, y: 16, w: w - 72, h: (h - 84) / 2 };
+      const b2 = { x: 52, y: b1.y + b1.h + 34, w: w - 72, h: (h - 84) / 2 };
+      // top: NRZ +1 -> -1 transition at t=0; mid-phase window [-T/2, T/2] shifted by eps*T
+      const a1 = drawAxes(ctx, b1, { xr: [-1, 1], yr: [-1.4, 1.4], xlabel: 'time (bit periods, transition at 0)', ylabel: 's(t)' });
+      ctx.save(); ctx.beginPath(); ctx.rect(a1.x, a1.y, a1.w, a1.h); ctx.clip();
+      // shaded half-integration windows
+      ctx.fillStyle = 'rgba(255,169,77,0.25)';
+      ctx.fillRect(a1.fx(-0.5 + eps), a1.y, a1.fx(0 + eps) - a1.fx(-0.5 + eps), a1.h);
+      ctx.fillStyle = 'rgba(177,151,252,0.25)';
+      ctx.fillRect(a1.fx(0 + eps), a1.y, a1.fx(0.5 + eps) - a1.fx(0 + eps), a1.h);
+      ctx.restore();
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2.4; ctx.beginPath();
+      ctx.moveTo(a1.fx(-1), a1.fy(1)); ctx.lineTo(a1.fx(0), a1.fy(1)); ctx.lineTo(a1.fx(0), a1.fy(-1)); ctx.lineTo(a1.fx(1), a1.fy(-1)); ctx.stroke();
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('half-windows straddle the boundary; offset eps shifts them off the transition', a1.x + 6, a1.y + 12);
+      // discriminator for an ideal transition: e(eps) = -2*eps for |eps|<0.5 (normalized), gated on transitions
+      const a2 = drawAxes(ctx, b2, { xr: [-0.5, 0.5], yr: [-1.1, 1.1], xlabel: 'timing offset eps (bit periods)', ylabel: 'timing error e' });
+      const pts = []; for (let x = -0.5; x <= 0.5; x += 0.01) pts.push([x, Math.max(-1, Math.min(1, -2 * x))]);
+      line(ctx, a2, pts, C.teal, 2.2);
+      ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(a2.x, a2.fy(0)); ctx.lineTo(a2.x + a2.w, a2.fy(0)); ctx.stroke();
+      const e = Math.max(-1, Math.min(1, -2 * eps));
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(a2.fx(eps), a2.fy(e), 4, 0, TAU); ctx.fill();
+      ctx.fillStyle = C.text; ctx.font = '11px sans-serif';
+      ctx.fillText('e = ' + e.toFixed(2) + '  (only when a data transition occurs; ~half of random bits)', a2.x + 8, a2.y + 12);
+    }
+    draw(0.15);
+    slider(card.controls, { label: 'timing offset eps', min: -0.5, max: 0.5, step: 0.01, value: 0.15, fmt: v => v.toFixed(2) + ' Tb' }, draw);
+  };
+
+  // Ranging ruler: chip rate + code length -> range resolution (c*Tc) and unambiguous range (c*N*Tc) on a log axis
+  T.rangeRuler = function (host, spec) {
+    const card = makeCard(host, spec, 520, 300);
+    const cLight = 3e8;
+    let rc = 1.023, nStages = 10; // Mcps, LFSR stages -> N = 2^n - 1
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const N = Math.pow(2, nStages) - 1;
+      const Tc = 1 / (rc * 1e6);
+      const res = cLight * Tc;          // metres
+      const unamb = cLight * N * Tc;    // metres
+      const ax = drawAxes(ctx, box, { xr: [0, 9], yr: [0, 1], xlabel: 'log10( distance in metres )', ylabel: '' });
+      // reference decade ticks with labels
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      [['1 m', 0], ['1 km', 3], ['1000 km', 6], ['10^9 m', 9]].forEach(t => ctx.fillText(t[0], ax.fx(t[1]), ax.fy(0) + 26));
+      // markers
+      function mark(valM, color, label, yy) {
+        const x = ax.fx(Math.max(0, Math.min(9, Math.log10(valM))));
+        ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x, ax.fy(0)); ctx.lineTo(x, ax.fy(0.62)); ctx.stroke();
+        ctx.fillStyle = color; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(label, x, ax.fy(yy));
+      }
+      mark(res, C.orange, 'resolution c*Tc = ' + (res < 1000 ? res.toFixed(0) + ' m' : (res / 1000).toFixed(1) + ' km'), 0.72);
+      mark(unamb, C.teal, 'unambiguous c*N*Tc = ' + (unamb / 1000).toFixed(0) + ' km', 0.88);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('Rc = ' + rc.toFixed(3) + ' Mcps, N = 2^' + nStages + '-1 = ' + N.toLocaleString('en-US') + ' chips', ax.x + 8, ax.y + 14);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('faster chips -> finer resolution; longer code -> longer unambiguous range (GPS C/A: 1.023 Mcps, N=1023)', ax.x + 8, ax.y + 32);
+    }
+    draw();
+    slider(card.controls, { label: 'chip rate Rc', min: 0.1, max: 20, step: 0.1, value: 1.023, fmt: v => v.toFixed(1) + ' Mcps' }, v => { rc = v; draw(); });
+    slider(card.controls, { label: 'LFSR stages n', min: 7, max: 20, step: 1, value: 10, fmt: v => v + ' (N=' + (Math.pow(2, v) - 1).toLocaleString('en-US') + ')' }, v => { nStages = Math.round(v); draw(); });
+  };
+
   // PLL phase-step error response for different damping
   T.pllStep = function (host, spec) {
     const card = makeCard(host, spec, 520, 300);
@@ -2681,6 +2868,46 @@ const FIG = (function () {
       { type: 'despreadCollapse', title: 'Despreading collapses the spectrum', caption: 'Flip Before/After: the signal springs up narrowband while the jammer spreads thin.', explain: EX('<b>What it shows:</b> multiplying by the aligned code collapses the wideband signal back into a tall narrowband spike (+Gp) and simultaneously spreads any jammer down by Gp. <b>Try:</b> raise the processing gain to widen the margin — this inversion is the whole payoff of DSSS.') },
       { type: 'berCurve', series: [{ name: 'bpsk' }], title: 'Post-despread BER = plain BPSK', caption: 'Over AWGN, DSSS gives the SAME BER curve as narrowband BPSK.', explain: EX('<b>What it shows:</b> after despreading, bit decisions follow Q(√(2Eb/N0)) — identical to un-spread BPSK. <b>Key point:</b> processing gain buys interference/LPI resistance, NOT AWGN gain, so the curve does not move.') },
       { type: 'constellation', order: 2, snr: 12, title: 'Recovered BPSK symbols', caption: 'After despread + carrier lock, bits are read off a clean BPSK constellation.', explain: EX('<b>What it shows:</b> the prompt correlator output as a 2-point BPSK constellation. <b>Try:</b> drop the SNR and the clouds bleed across zero → bit errors, exactly what the BER curve predicts.') }
+    ],
+    'bpsk-vs-dbpsk': [
+      { type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'BPSK vs DBPSK BER', caption: 'The horizontal gap between the curves is the ~1 dB differential-detection penalty.', explain: EX('<b>What it shows:</b> coherent BPSK Q(√(2Eb/N0)) (teal) against DBPSK ½e^(−Eb/N0) (orange). <b>Try:</b> at any target BER the curves sit ~0.8–1 dB apart — the exact price DBPSK pays for skipping carrier recovery.') },
+      { type: 'constellation', order: 2, snr: 10, title: 'The antipodal constellation both share', caption: 'Same two points — the schemes differ in how the phase reference is obtained.', explain: EX('<b>What it shows:</b> ±√Eb with live noise. BPSK compares each symbol to an absolute recovered carrier; DBPSK compares it to the PREVIOUS symbol. <b>Try:</b> lower the SNR — DBPSK suffers doubly because its reference is noisy too.') },
+      { type: 'costasScurve', title: 'What DBPSK avoids: carrier recovery', caption: 'BPSK needs this loop (and its 180° ambiguity); DBPSK does not.', explain: EX('<b>What it shows:</b> the Costas-loop error BPSK relies on for a coherent reference — with stable lock points at 0° AND 180°. <b>Why it matters:</b> that ambiguity is exactly why practical BPSK ends up differentially encoded anyway, and why DBPSK is attractive.') }
+    ],
+    'synchronization': [
+      { type: 'loopJitter', title: 'Phase jitter vs C/N0 and loop bandwidth', caption: 'Every sync loop obeys the same law: jitter ∝ √(BL/C/N0).', explain: EX('<b>What it shows:</b> the tracking-loop phase jitter σ² = L/(2ρ_L) with ρ_L = C/N0/BL, with and without squaring loss. <b>Try:</b> widen BL — jitter grows; drop C/N0 toward 25 dB-Hz and the loop approaches the ~15° cycle-slip danger zone.') },
+      { type: 'pllStep', title: 'Closed-loop tracking dynamics', caption: 'The archetypal feedback synchronizer: error detector → loop filter → NCO.', explain: EX('<b>What it shows:</b> how a tracking loop settles after a disturbance for different damping. <b>Why it matters:</b> carrier, timing, and code loops all share this second-order behaviour — the bandwidth/damping choice is the universal sync trade-off.') },
+      { type: 'earlyLate', title: 'Symbol/code timing discriminator', caption: 'The timing member of the sync hierarchy: an S-curve drives the clock to the peak.', explain: EX('<b>What it shows:</b> the early−late timing error detector used at the symbol-timing (and code-tracking) stage of the sync chain. <b>Try:</b> drag the error — the S-curve always pushes the sampling instant back to the correlation peak.') }
+    ],
+    'sliding-correlator': [
+      { type: 'acqSearch', title: 'The slide in action: correlation vs code phase', caption: 'The peak only appears when the sliding replica aligns within one chip.', explain: EX('<b>What it shows:</b> correlator output at each code-phase hypothesis as the replica slides — flat noise until alignment, then the towering PN peak. <b>Try:</b> lower the SNR and watch the peak sink toward the threshold: that is why dwell time matters.') },
+      { type: 'slideDilate', title: 'STDCC channel sounder: time dilation', caption: 'Clock the replica slightly slow and the impulse response stretches by k = f/Δf.', explain: EX('<b>What it shows:</b> a microsecond multipath profile (top) observed on a millisecond axis (bottom) because the replica slides at Δf. <b>Try:</b> reduce Δf — the slide factor k grows, slowing the sweep but letting an ordinary ADC capture a 10 MHz-wide channel.') },
+      { type: 'autocorr', title: 'Why sliding finds a unique peak', caption: 'The m-sequence autocorrelation is one spike — no false alignments.', explain: EX('<b>What it shows:</b> the two-valued PN autocorrelation the slide sweeps across. <b>Try:</b> longer codes make the peak more selective — and make a full serial search proportionally slower, the sliding correlator’s fundamental trade.') }
+    ],
+    'tau-dither-tracking': [
+      { type: 'tauDither', title: 'One correlator, dithered early/late', caption: 'Drag the code error — the dither-demodulated output is the same E−L S-curve.', explain: EX('<b>What it shows:</b> the single correlator toggling between early and late positions (top) and the synchronously-detected error (bottom). <b>Try:</b> at ε=0 the two levels are equal and the error vanishes — one arm does the work of two, with no gain-imbalance bias.') },
+      { type: 'earlyLate', title: 'The two-arm DLL it replaces', caption: 'Compare: a full DLL measures E and L simultaneously with separate correlators.', explain: EX('<b>What it shows:</b> the classic early/prompt/late arrangement on the correlation triangle. <b>Why it matters:</b> the tau-dither loop trades this parallel measurement (lower jitter) for time-shared hardware (no arm mismatch, half the correlators).') },
+      { type: 'dllAlign', title: 'What the loop controls: the code clock', caption: 'The recovered error steers the local PN generator’s chipping rate.', explain: EX('<b>What it shows:</b> the code NCO trimming the local replica until its edges align with the incoming code. <b>Try:</b> the dithered discriminator (previous figure) is what generates the correction this alignment consumes.') }
+    ],
+    'delay-lock-tracking': [
+      { type: 'earlyLate', title: 'Early−Late discriminator & S-curve', caption: 'Drag the code error — E−L on the correlation triangle drives it to zero.', explain: EX('<b>What it shows:</b> Early and Late correlators straddling the PN autocorrelation triangle at ±d/2, and the resulting S-curve. <b>Try:</b> off-lock, E≠L and the sign of E−L tells the loop which way to slew the code NCO.') },
+      { type: 'dllJitter', title: 'Tracking jitter: wide vs narrow correlator', caption: 'Narrowing d from 1.0 to 0.1 chip cuts thermal jitter ~√10.', explain: EX('<b>What it shows:</b> the non-coherent DLL jitter formula σ = √(BL·d/(2C/N0)·(1+1/((2−d)T·C/N0))) for wide and narrow spacing, in chips and GPS metres. <b>Try:</b> raise BL — jitter grows with √BL; the narrow correlator wins everywhere (at the cost of pull-in range).') },
+      { type: 'dllAlign', title: 'Closing the loop: the code NCO', caption: 'The filtered discriminator output adjusts the local chipping rate.', explain: EX('<b>What it shows:</b> the local code clock being slewed into alignment with the received code — the actuator the DLL S-curve commands. <b>Why it matters:</b> once aligned, the prompt correlator sits on the peak and feeds clean despread data out.') }
+    ],
+    'coherent-carrier-tracking': [
+      { type: 'costasScurve', title: 'Costas-loop phase detector', caption: 'Error ∝ sin(2Δφ): data-independent, but stable at both 0° and 180°.', explain: EX('<b>What it shows:</b> the I·Q phase-error curve that lets a Costas loop track a SUPPRESSED carrier straight through the ±1 data. <b>Try:</b> note the two zero crossings — the famous 180° ambiguity that differential encoding or a unique word must resolve.') },
+      { type: 'loopJitter', title: 'Phase jitter & squaring loss', caption: 'The Costas/squaring penalty grows exactly where you need help — at low C/N0.', explain: EX('<b>What it shows:</b> tracked-phase jitter σ = √(L/(2ρ_L)) versus C/N0, for a pure PLL and for a Costas/squaring loop with loss L = 1+1/(2T·C/N0). <b>Try:</b> at high C/N0 the curves merge; at low C/N0 the squaring loss visibly separates them.') },
+      { type: 'constellation', order: 2, snr: 14, title: 'Why coherence pays: a clean reference', caption: 'With the carrier tracked, decisions use the true I axis — worth ~1 dB over DBPSK.', explain: EX('<b>What it shows:</b> the BPSK constellation as the coherent demodulator sees it once the recovered carrier de-rotates it. <b>Try:</b> residual phase error would rotate the clouds toward the decision boundary — each degree of jitter eats into the noise margin.') }
+    ],
+    'split-bit-tracking': [
+      { type: 'dttl', title: 'Split-bit timing discriminator', caption: 'Slide the timing offset — unequal half-bit integrals reveal the error.', explain: EX('<b>What it shows:</b> the two half-symbol integration windows straddling a data transition (top) and the resulting linear S-curve e ≈ −2ε (bottom). <b>Try:</b> at ε=0 the halves cancel exactly; the error only exists when a transition occurs, which is why transition density matters.') },
+      { type: 'eyeDiagram', title: 'What timing recovery protects', caption: 'The eye opening is widest at the instant the DTTL locks to.', explain: EX('<b>What it shows:</b> overlaid symbol traces — the eye. <b>Why it matters:</b> the split-bit loop exists to hold the sampler at the maximum eye opening; drift toward the crossings is exactly what its S-curve punishes.') },
+      { type: 'earlyLate', title: 'Cousin technique: the early-late gate', caption: 'Both are timing-error detectors; the DTTL gates on data transitions instead.', explain: EX('<b>What it shows:</b> the early-late gate’s S-curve on the correlation peak. <b>Compare:</b> the DTTL replaces the two offset gates with two half-bit integrals plus transition detection — same feedback idea, different error detector.') }
+    ],
+    'ranging': [
+      { type: 'rangeRuler', title: 'Resolution vs unambiguous range', caption: 'Chip rate sets the fine end; code length sets how far before it repeats.', explain: EX('<b>What it shows:</b> the two rulers every PN-ranging design balances — resolution c·Tc and unambiguous range c·N·Tc on a log distance axis. <b>Try:</b> GPS C/A (1.023 Mcps, N=1023) gives ~293 m chips over ~300 km; crank the chip rate for centimetre-class fine ranging.') },
+      { type: 'acqSearch', title: 'Delay measured at the correlation peak', caption: 'The peak’s code-phase position IS the propagation delay — hence the range.', explain: EX('<b>What it shows:</b> the correlation search whose winning cell measures τ to a fraction of a chip; multiply by c for range. <b>Try:</b> at low SNR the peak wobbles — that wobble, scaled by the chip length, is exactly the range jitter.') },
+      { type: 'autocorr', title: 'The code that acts as a tape measure', caption: 'A sharp, single-peaked autocorrelation makes an unambiguous ruler.', explain: EX('<b>What it shows:</b> the m-sequence autocorrelation used as the ranging waveform. <b>Try:</b> longer codes push the repeat (ambiguity) further out — the same trade the resolution/unambiguous-range ruler displays.') }
     ],
     'fec': [{ type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Coding gain', caption: 'The left-shift of the curve is the coding gain, in dB.', explain: EX('<b>What it shows:</b> adding forward error correction moves the BER curve to the left. <b>Try:</b> at a target BER, the horizontal gap (~4.5 dB here) is the coding gain — dB you can spend on more range, a smaller antenna, or lower transmit power.') }],
     'viterbi': [{ type: 'trellis', title: 'Viterbi trellis & survivor path', caption: 'Step through the decode to watch the survivor path grow.', explain: EX('<b>What it shows:</b> the trellis of a convolutional code; the orange node is the stage being processed, the teal path is the surviving maximum-likelihood sequence. <b>Try:</b> step forward — at each stage “add–compare–select” keeps only one path into every state, which is how Viterbi avoids an exponential search.') }],
