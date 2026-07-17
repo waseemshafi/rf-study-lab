@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v32';
+const CACHE = 'rfstudy-v33';
 
 const ASSETS = [
   './',
@@ -27,6 +27,7 @@ const ASSETS = [
   'dummies-split-bit-tracking.js',
   'dummies-ranging.js',
   'dummies-synchronization.js',
+  'dummies-dsss-receiver-design.js',
   'figures.js',
   'figures-extra.js',
   'manifest.webmanifest',
@@ -81,6 +82,7 @@ const ASSETS = [
   'topics/split-bit-tracking.js',
   'topics/ranging.js',
   'topics/synchronization-overview.js',
+  'topics/dsss-receiver-design.js',
   'derivations/fundamentals.js',
   'derivations/signals-systems.js',
   'derivations/modulation-detection.js',
@@ -117,6 +119,7 @@ const ASSETS = [
   'code/split-bit-tracking.js',
   'code/ranging.js',
   'code/synchronization-overview.js',
+  'code/dsss-receiver-design.js',
   'vendor/mathjax/tex-svg.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
