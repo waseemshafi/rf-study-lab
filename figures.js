@@ -469,6 +469,54 @@ const FIG = (function () {
     slider(card.controls, { label: 'post-integration SNR', min: -3, max: 18, step: 1, value: 6, fmt: v => v + ' dB' }, draw);
   };
 
+  // FFT bins: slide a tone between bin centres to expose leakage and scalloping loss; window chooser
+  T.fftBins = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const N = 64;
+    let k0 = 10, win = 'rect';
+    const winVal = n => (win === 'hann' ? 0.5 - 0.5 * Math.cos(TAU * n / N) : 1);
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      // windowed complex (analytic) tone at k0 bins — no negative-frequency image, so the
+      // measured scalloping matches the textbook Dirichlet value exactly. Direct DFT (N=64).
+      const xr = [], xi = []; let wsum = 0;
+      for (let n = 0; n < N; n++) {
+        const wv = winVal(n), p = TAU * k0 * n / N;
+        wsum += wv; xr.push(wv * Math.cos(p)); xi.push(wv * Math.sin(p));
+      }
+      const mags = [];
+      for (let k = 0; k <= N / 2; k++) {
+        let re = 0, im = 0;
+        for (let n = 0; n < N; n++) {
+          const a = TAU * k * n / N, ca = Math.cos(a), sa = Math.sin(a);
+          re += xr[n] * ca + xi[n] * sa;
+          im += xi[n] * ca - xr[n] * sa;
+        }
+        mags.push(Math.sqrt(re * re + im * im));
+      }
+      const ref = wsum;                           // on-bin peak for this window
+      const dB = m => 20 * Math.log10(Math.max(m, 1e-9) / ref);
+      const ax = drawAxes(ctx, box, { xr: [0, N / 2], yr: [-60, 6], xlabel: 'bin index k', ylabel: 'magnitude (dB, rel. on-bin)' });
+      let pk = 0; for (let k = 0; k < mags.length; k++) if (mags[k] > mags[pk]) pk = k;
+      mags.forEach((m, k) => {
+        ctx.strokeStyle = (k === pk) ? C.orange : C.blue; ctx.lineWidth = (k === pk) ? 3 : 1.6;
+        ctx.beginPath(); ctx.moveTo(ax.fx(k), ax.fy(-60)); ctx.lineTo(ax.fx(k), ax.fy(Math.max(-60, dB(m)))); ctx.stroke();
+      });
+      const loss = -dB(mags[pk]);
+      const frac = Math.abs(k0 - Math.round(k0));
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('tone at k0 = ' + k0.toFixed(2) + ' bins  ->  peak bin ' + pk + ',  scalloping loss ' + loss.toFixed(2) + ' dB', ax.x + 8, ax.y + 16);
+      ctx.fillStyle = (frac < 0.01) ? C.teal : C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText(frac < 0.01
+        ? 'ON-BIN: an integer number of cycles fits the record -> all energy in one bin, neighbours null'
+        : 'OFF-BIN: energy leaks across every bin (worst case at half-bin: 3.92 dB for rectangular)', ax.x + 8, ax.y + 34);
+    }
+    draw();
+    slider(card.controls, { label: 'tone frequency', min: 8, max: 12, step: 0.05, value: 10, fmt: v => v.toFixed(2) + ' bins' }, v => { k0 = v; draw(); });
+    chooser(card.controls, [{ v: 'rect', l: 'Rectangular' }, { v: 'hann', l: 'Hann window' }], 'rect', v => { win = v; draw(); });
+  };
+
   // DSSS data extraction: despreading collapses the signal narrowband and spreads a jammer thin
   T.despreadCollapse = function (host, spec) {
     const card = makeCard(host, spec, 520, 300);
@@ -2878,6 +2926,11 @@ const FIG = (function () {
       { type: 'ncoDDS', title: 'Carrier/code NCO (DDS)', caption: 'A phase accumulator + frequency word synthesizes the mixing and code clocks digitally.', explain: EX('<b>What it shows:</b> the numerically-controlled oscillator at the heart of the digital receiver — f_out = FCW·fs/2ᴮ with resolution fs/2ᴮ. <b>Why it matters:</b> the same DDS generates the downconversion tone and, as a code NCO, the fractional-chip timing that steers early/prompt/late — no analog clock is tuned.') },
       { type: 'fftDemo', title: 'FFT-based parallel correlation', caption: 'One FFT/IFFT evaluates every code phase at once — O(N log N) vs serial O(N²).', explain: EX('<b>What it shows:</b> the FFT that turns acquisition from a phase-by-phase search into a single circular correlation. <b>Why it matters:</b> for an N-chip code this is an N/log₂N speedup — the reason software (GNSS-SDR) and FPGA acquirers use FFT correlation.') },
       { type: 'quantize', title: 'Fixed-point & ADC quantization', caption: 'Bit-width sets the quantization noise floor (≈6.02b + 1.76 dB) and jammer headroom.', explain: EX('<b>What it shows:</b> how finite ADC/datapath word length quantizes the signal. <b>Why it matters:</b> every bit adds ~6 dB of dynamic range — you size the ADC and the integrate-and-dump accumulator (which grows ⌈log₂N⌉ bits) so a strong jammer never clips before despreading removes it.') }
+    ],
+    'fft-bin': [
+      { type: 'fftBins', title: 'On-bin vs off-bin: leakage & scalloping', caption: 'Slide the tone between bin centres — watch the energy smear and the peak sag.', explain: EX('<b>What it shows:</b> the spectrum of a tone at k₀ bins. <b>Try:</b> at an integer k₀ every neighbour nulls out (on-bin, no leakage); slide to a half-bin offset and the energy leaks everywhere while the peak drops ~3.92 dB — the scalloping loss. Switch to the Hann window: sidelobes collapse and scalloping falls to ~1.4 dB, but the main lobe widens.') },
+      { type: 'fftDemo', title: 'The FFT that produces the bins', caption: 'Each FFT output IS one bin, spaced Δf = fs/N apart.', explain: EX('<b>What it shows:</b> the transform whose N outputs are the bins. <b>Remember:</b> bin spacing Δf = fs/N = 1/T — resolution is bought with observation TIME, not sample rate, which is why doubling N (at fixed fs) halves the bin width.') },
+      { type: 'sincFunction', title: 'Why leakage looks the way it does', caption: 'Truncating to N samples convolves the spectrum with a sinc-like kernel.', explain: EX('<b>What it shows:</b> the sinc whose sidelobes (only ≈ −13 dB for a rectangular window) are exactly the leakage skirts you see around an off-bin tone. <b>Why it matters:</b> windows trade a wider main lobe for far lower sidelobes — that is the whole leakage-vs-resolution bargain.') }
     ],
     'bpsk-vs-dbpsk': [
       { type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'BPSK vs DBPSK BER', caption: 'The horizontal gap between the curves is the ~1 dB differential-detection penalty.', explain: EX('<b>What it shows:</b> coherent BPSK Q(√(2Eb/N0)) (teal) against DBPSK ½e^(−Eb/N0) (orange). <b>Try:</b> at any target BER the curves sit ~0.8–1 dB apart — the exact price DBPSK pays for skipping carrier recovery.') },
