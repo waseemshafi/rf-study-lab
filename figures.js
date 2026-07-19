@@ -517,6 +517,57 @@ const FIG = (function () {
     chooser(card.controls, [{ v: 'rect', l: 'Rectangular' }, { v: 'hann', l: 'Hann window' }], 'rect', v => { win = v; draw(); });
   };
 
+  // ISI: overlapping raised-cosine symbol pulses; on-time sampling gives exactly zero ISI,
+  // a timing offset makes the neighbours contribute. Sliders: roll-off alpha and timing offset.
+  T.isiPulses = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const syms = [1, -1, 1, 1, -1], K = 2;      // a_k for k = -2..2
+    let alpha = 0.35, eps = 0;
+    const sinc = x => (Math.abs(x) < 1e-9 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
+    function rc(t) {                            // raised cosine, T = 1
+      if (alpha <= 0) return sinc(t);
+      const u = 2 * alpha * t, d = 1 - u * u;
+      if (Math.abs(d) < 1e-7) return (Math.PI / 4) * sinc(1 / (2 * alpha));   // 0/0 limit
+      return sinc(t) * Math.cos(Math.PI * alpha * t) / d;
+    }
+    const at = ts => { let s = 0; for (let j = 0; j < syms.length; j++) s += syms[j] * rc(ts - (j - K)); return s; };
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [-3, 3], yr: [-1.7, 2.0], xlabel: 'time (symbol periods T)', ylabel: 'amplitude' });
+      // faint individual symbol pulses
+      for (let i = 0; i < syms.length; i++) {
+        const k = i - K, pts = [];
+        for (let t = -3; t <= 3; t += 0.02) pts.push([t, syms[i] * rc(t - k)]);
+        line(ctx, ax, pts, 'rgba(154,167,181,0.45)', 1);
+      }
+      // composite waveform
+      const comp = []; for (let t = -3; t <= 3; t += 0.02) comp.push([t, at(t)]);
+      line(ctx, ax, comp, C.blue, 2.4);
+      // sample instants at k + eps
+      for (let i = 0; i < syms.length; i++) {
+        const k = i - K, ts = k + eps;
+        ctx.fillStyle = (k === 0) ? C.orange : C.teal;
+        ctx.beginPath(); ctx.arc(ax.fx(ts), ax.fy(at(ts)), (k === 0) ? 5 : 3.5, 0, TAU); ctx.fill();
+      }
+      // decompose the centre sample into wanted + ISI
+      const wanted = syms[K] * rc(eps);
+      let isi = 0; for (let j = 0; j < syms.length; j++) if (j !== K) isi += syms[j] * rc(eps - (j - K));
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(ax.fx(eps), ax.fy(-1.7)); ctx.lineTo(ax.fx(eps), ax.fy(wanted + isi)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('centre sample ' + (wanted + isi).toFixed(3) + '  =  wanted ' + wanted.toFixed(3) + '  +  ISI ' + (isi >= 0 ? '+' : '') + isi.toFixed(3), ax.x + 8, ax.y + 16);
+      ctx.fillStyle = (Math.abs(eps) < 1e-6) ? C.teal : C.red; ctx.font = '11px sans-serif';
+      ctx.fillText(Math.abs(eps) < 1e-6
+        ? 'On-time: every neighbouring pulse crosses zero here -> ISI = 0 exactly (Nyquist criterion)'
+        : 'Timing offset ' + eps.toFixed(2) + 'T: neighbours no longer null -> ISI appears, the eye closes',
+        ax.x + 8, ax.y + 34);
+    }
+    draw();
+    slider(card.controls, { label: 'roll-off alpha', min: 0.05, max: 1, step: 0.05, value: 0.35, fmt: v => v.toFixed(2) }, v => { alpha = v; draw(); });
+    slider(card.controls, { label: 'timing offset', min: -0.5, max: 0.5, step: 0.01, value: 0, fmt: v => v.toFixed(2) + ' T' }, v => { eps = v; draw(); });
+  };
+
   // DSSS data extraction: despreading collapses the signal narrowband and spreads a jammer thin
   T.despreadCollapse = function (host, spec) {
     const card = makeCard(host, spec, 520, 300);
@@ -2931,6 +2982,11 @@ const FIG = (function () {
       { type: 'fftBins', title: 'On-bin vs off-bin: leakage & scalloping', caption: 'Slide the tone between bin centres — watch the energy smear and the peak sag.', explain: EX('<b>What it shows:</b> the spectrum of a tone at k₀ bins. <b>Try:</b> at an integer k₀ every neighbour nulls out (on-bin, no leakage); slide to a half-bin offset and the energy leaks everywhere while the peak drops ~3.92 dB — the scalloping loss. Switch to the Hann window: sidelobes collapse and scalloping falls to ~1.4 dB, but the main lobe widens.') },
       { type: 'fftDemo', title: 'The FFT that produces the bins', caption: 'Each FFT output IS one bin, spaced Δf = fs/N apart.', explain: EX('<b>What it shows:</b> the transform whose N outputs are the bins. <b>Remember:</b> bin spacing Δf = fs/N = 1/T — resolution is bought with observation TIME, not sample rate, which is why doubling N (at fixed fs) halves the bin width.') },
       { type: 'sincFunction', title: 'Why leakage looks the way it does', caption: 'Truncating to N samples convolves the spectrum with a sinc-like kernel.', explain: EX('<b>What it shows:</b> the sinc whose sidelobes (only ≈ −13 dB for a rectangular window) are exactly the leakage skirts you see around an off-bin tone. <b>Why it matters:</b> windows trade a wider main lobe for far lower sidelobes — that is the whole leakage-vs-resolution bargain.') }
+    ],
+    'intersymbol-interference': [
+      { type: 'isiPulses', title: 'Where ISI comes from — and why it vanishes on-time', caption: 'Slide the timing offset: on-time the neighbours null out; off-time they contaminate the sample.', explain: EX('<b>What it shows:</b> five overlapping raised-cosine symbol pulses (grey) and their sum (blue), sampled at the marked instants. <b>Try:</b> at offset 0 every neighbour crosses zero at the centre sample, so ISI is exactly 0 — that IS the Nyquist criterion. Nudge the offset and ISI appears; raise the roll-off α and the same offset hurts less, which is what excess bandwidth buys you.') },
+      { type: 'eyeDiagram', title: 'ISI seen as eye closure', caption: 'Every overlaid trace is a symbol; ISI is what closes the eye.', explain: EX('<b>What it shows:</b> the eye diagram — the practical instrument for measuring ISI. <b>Why it matters:</b> the vertical opening is your noise margin and the horizontal opening your timing margin; peak distortion D shrinks both, which is exactly the penalty the equations quantify.') },
+      { type: 'raisedCosine', title: 'The Nyquist pulse that fixes it', caption: 'Roll-off α trades excess bandwidth for gentler tails and timing tolerance.', explain: EX('<b>What it shows:</b> the raised-cosine family whose zero crossings sit at every nT. <b>Try:</b> α→0 approaches the minimum Nyquist bandwidth Rs/2 but with slowly-decaying 1/t tails (brutally timing-sensitive); larger α costs bandwidth (1+α)Rs/2 and buys robustness.') }
     ],
     'bpsk-vs-dbpsk': [
       { type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'BPSK vs DBPSK BER', caption: 'The horizontal gap between the curves is the ~1 dB differential-detection penalty.', explain: EX('<b>What it shows:</b> coherent BPSK Q(√(2Eb/N0)) (teal) against DBPSK ½e^(−Eb/N0) (orange). <b>Try:</b> at any target BER the curves sit ~0.8–1 dB apart — the exact price DBPSK pays for skipping carrier recovery.') },
