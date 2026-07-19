@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v36';
+const CACHE = 'rfstudy-v38';
 
 const ASSETS = [
   './',
@@ -164,7 +164,29 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Everything else → cache-first, fall back to network and cache the result.
+  // App code/content (our own .js and .css) → NETWORK-FIRST.
+  // These change on every content update, and a cache-first policy here was silently serving a
+  // stale figures.js / topic file, so new topics appeared without their interactive figures.
+  // Network-first guarantees fresh content whenever online; the cache is still written on every
+  // success and used as the fallback, so offline/PWA use is unaffected.
+  const isAppCode = /\.(js|css)$/i.test(url.pathname) && !url.pathname.includes('/vendor/');
+  if (isAppCode) {
+    // NOTE: a plain fetch(req) is NOT enough — the browser's own HTTP cache will happily answer it
+    // with the stale file, which is what kept serving an out-of-date figures.js. cache:'reload'
+    // forces a real network round-trip (and refreshes the HTTP cache too).
+    event.respondWith(
+      fetch(new Request(req.url, { cache: 'reload', credentials: 'same-origin' })).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy));   // keyed on the original request
+        }
+        return res;
+      }).catch(() => caches.match(req))     // offline → last known good copy
+    );
+    return;
+  }
+
+  // Everything else (bundled MathJax, icons, manifest) → cache-first; these are effectively immutable.
   event.respondWith(
     caches.match(req).then(cached => cached || fetch(req).then(res => {
       if (res && res.status === 200 && res.type === 'basic') {
