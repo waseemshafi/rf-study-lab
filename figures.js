@@ -2141,18 +2141,18 @@ const FIG = (function () {
         ctx.fillText(on ? '1' : '0', vx(i), vY + 4);
         ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.fillText('v' + i, vx(i), vY + 28);
       }
-      // labels + syndrome readout
-      ctx.textAlign = 'left'; ctx.font = '10px sans-serif';
-      ctx.fillStyle = C.teal; ctx.fillText('check nodes = parity equations', cx(0) - 16, cY - 34);
-      ctx.fillStyle = C.blue; ctx.fillText('variable nodes = received bits', vx(0) - 2, vY + 44);
+      // status readout (top band, kept short so nothing collides)
       const synd = (fail[2] ? 4 : 0) + (fail[1] ? 2 : 0) + (fail[0] ? 1 : 0);
       const sbits = (fail[2] ? '1' : '0') + (fail[1] ? '1' : '0') + (fail[0] ? '1' : '0');
-      ctx.fillStyle = C.text; ctx.font = '12px sans-serif';
-      ctx.fillText('syndrome s = ' + sbits + '  (= ' + synd + ')', 12, 18);
+      ctx.textAlign = 'left'; ctx.fillStyle = C.text; ctx.font = '12px sans-serif';
+      ctx.fillText('syndrome s = ' + sbits + ' (= ' + synd + ')', 12, 16);
       ctx.fillStyle = (errCol === 0) ? C.teal : C.orange; ctx.font = '11px sans-serif';
       ctx.fillText(errCol === 0
-        ? 'no error: all checks satisfied (s = 000) -> valid codeword'
-        : 'nonzero syndrome ' + synd + ' points straight at the errored bit v' + errV + ' (column ' + errCol + ')', 12, 34);
+        ? 'no error: all checks satisfied → valid codeword'
+        : 'syndrome ' + synd + ' → error located at bit v' + errV + ' (column ' + errCol + ')', 12, 32);
+      // one legend line at the very bottom, clear of every node and label
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('circles = variable nodes (bits)     squares = check nodes (parity = XOR of neighbours)', w / 2, h - 7);
     }
     draw();
     slider(card.controls, { label: 'bit in error', min: 0, max: 7, step: 1, value: 3, fmt: v => (v === 0 ? 'none' : 'v' + (v - 1)) }, v => { errCol = Math.round(v); draw(); });
