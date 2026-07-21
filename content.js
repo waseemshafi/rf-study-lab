@@ -41,7 +41,7 @@ const CONTENT = {
   ],
   // Canonical display order (nav sorts by this within each category).
   topicOrder: [
-    'comm-basics', 'shannon', 'source-coding', 'bandwidth', 'noise', 'psd', 'noise-floor', 'noise-figure', 'phase-noise',
+    'comm-basics', 'information-theory', 'shannon', 'source-coding', 'bandwidth', 'noise', 'psd', 'noise-floor', 'noise-figure', 'phase-noise',
     'normal-distribution', 'error-function', 'rayleigh-distribution', 'awgn',
     'fourier-transform', 'fft', 'fft-bin', 'sinc-function', 'frequency-spectrum', 'laplace-transform', 'z-transform', 'convolution', 'correlation', 'fir-filters', 'iir-filters', 'nyquist-sampling', 'aliasing',
     'am', 'fm', 'bpsk', 'qpsk', 'dbpsk', 'bpsk-vs-dbpsk', 'intersymbol-interference', 'pulse-shaping', 'rrc-filter', 'eye-diagram', 'matched-filter', 'optimal-receiver', 'ber', 'eb-no', 'evm',

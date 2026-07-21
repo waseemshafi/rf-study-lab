@@ -2199,6 +2199,36 @@ const FIG = (function () {
     slider(card.controls, { label: 'channel erasure ε', min: 0.1, max: 0.9, step: 0.05, value: 0.5, fmt: v => v.toFixed(2) }, v => { eps = v; draw(); });
   };
 
+  // Binary entropy function H(p) with a movable p, plus BSC capacity 1-H(p)
+  T.binaryEntropy = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const Hb = p => (p <= 0 || p >= 1) ? 0 : -p * Math.log2(p) - (1 - p) * Math.log2(1 - p);
+    function draw(p) {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, 1], yr: [0, 1.05], xlabel: 'probability p', ylabel: 'bits' });
+      // H(p) curve
+      const hp = []; for (let x = 0; x <= 1.0001; x += 0.01) hp.push([x, Hb(x)]);
+      line(ctx, ax, hp, C.blue, 2.4);
+      // BSC capacity 1 - H(p)
+      const cp = []; for (let x = 0; x <= 1.0001; x += 0.01) cp.push([x, 1 - Hb(x)]);
+      line(ctx, ax, cp, C.teal, 2);
+      // max-entropy marker at p=0.5
+      ctx.strokeStyle = C.grid; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(0.5), ax.y); ctx.lineTo(ax.fx(0.5), ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      // operating point on H(p)
+      const y = Hb(p);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(p), ax.fy(0)); ctx.lineTo(ax.fx(p), ax.fy(y)); ctx.lineTo(ax.x, ax.fy(y)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(ax.fx(p), ax.fy(y), 4, 0, TAU); ctx.fill();
+      legend(ctx, box, [{ label: 'H(p) entropy', color: C.blue }, { label: 'BSC capacity 1−H(p)', color: C.teal }]);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('p = ' + p.toFixed(2) + '  →  H(p) = ' + y.toFixed(3) + ' bits,  BSC capacity = ' + (1 - y).toFixed(3), ax.x + 8, ax.y + 15);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('max uncertainty at p = 0.5 (1 bit); a certain outcome (p = 0 or 1) carries no information', ax.x + 8, ax.y + 33);
+    }
+    draw(0.11);
+    slider(card.controls, { label: 'probability p', min: 0, max: 1, step: 0.01, value: 0.11, fmt: v => v.toFixed(2) }, draw);
+  };
+
   // Turbo encoder block diagram
   T.turboEncoder = function (host, spec) {
     const { ctx, w, h } = makeCard(host, spec, 540, 240);
@@ -3089,6 +3119,11 @@ const FIG = (function () {
     'polar-codes': [
       { type: 'polarize', title: 'Channel polarization — where the code comes from', caption: 'Grow the block length: the synthetic-channel capacities snap toward 0 (frozen) or 1 (info).', explain: EX('<b>What it shows:</b> Arıkan’s recursion turns N copies of a channel into N synthetic channels whose capacities polarize. <b>Try:</b> increase N and the sorted-capacity curve sharpens into a step; the near-noiseless channels (right of the line) carry information bits, the rest are frozen. The mean stays at 1−ε — polarization conserves capacity, it just redistributes it.') },
       { type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Why CA-SCL wins at short blocks', caption: 'The CRC-aided list decoder pulls the curve well left of uncoded.', explain: EX('<b>What it shows:</b> the coding-gain shift. <b>Why it matters:</b> plain SC decoding is only mediocre at practical lengths; an SC-List of L paths plus a CRC to pick the survivor (CA-SCL) is what makes polar codes competitive — exactly why 5G NR uses them for its short, critical control channels.') }
+    ],
+    'information-theory': [
+      { type: 'binaryEntropy', title: 'Entropy: the measure of uncertainty', caption: 'Slide p — H(p) peaks at 1 bit when the coin is fair, and vanishes when the outcome is certain.', explain: EX('<b>What it shows:</b> the binary entropy H(p) = −p·log₂p − (1−p)·log₂(1−p) (blue) and the BSC capacity 1−H(p) (teal). <b>Try:</b> at p=0.5 uncertainty is maximal (1 bit) and the noisy channel carries nothing; push p toward 0 or 1 and the outcome becomes predictable — no information — while the channel becomes reliable again.') },
+      { type: 'capacity', title: 'Channel capacity C = max I(X;Y)', caption: 'For the AWGN channel this is Shannon’s C = B·log₂(1+SNR).', explain: EX('<b>What it shows:</b> the ceiling on reliable rate. <b>Why it matters:</b> capacity is the maximum of the mutual information over input distributions; the noisy-channel coding theorem says any rate below C is achievable with arbitrarily low error, and nothing above C is — the promise every FEC scheme chases.') },
+      { type: 'entropyCoding', title: 'The source-coding limit', caption: 'You cannot losslessly compress below H bits per symbol on average.', explain: EX('<b>What it shows:</b> assigning shorter codewords to likelier symbols. <b>Why it matters:</b> entropy H(X) is the hard floor on average bits/symbol for lossless compression — the other half of Shannon’s framework, the flip side of channel capacity.') }
     ],
     'bpsk-vs-dbpsk': [
       { type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'BPSK vs DBPSK BER', caption: 'The horizontal gap between the curves is the ~1 dB differential-detection penalty.', explain: EX('<b>What it shows:</b> coherent BPSK Q(√(2Eb/N0)) (teal) against DBPSK ½e^(−Eb/N0) (orange). <b>Try:</b> at any target BER the curves sit ~0.8–1 dB apart — the exact price DBPSK pays for skipping carrier recovery.') },
