@@ -2106,6 +2106,58 @@ const FIG = (function () {
     ctx.fillStyle = C.dim; ctx.textAlign = 'center'; ctx.fillText('sparse edges → belief-propagation messages flow until every parity check is satisfied', w / 2, h - 8);
   };
 
+  // Interactive Tanner graph: (7,4) Hamming code. Slide the errored bit -> unsatisfied checks
+  // light up red, the syndrome reads the error position (columns = binary 1..7).
+  T.tannerDecode = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    const checks = [[0, 2, 4, 6], [1, 2, 5, 6], [3, 4, 5, 6]];   // c0..c2 neighbour lists (H rows)
+    let errCol = 3;                                              // 0 = no error, 1..7 = flip that bit
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const errV = errCol - 1;                                  // -1 when no error
+      const fail = checks.map(nb => nb.indexOf(errV) >= 0);
+      const vY = h - 74, cY = 66;
+      const vx = i => 42 + i * (w - 84) / 6;
+      const cx = i => 130 + i * (w - 260) / 2;
+      // edges
+      for (let i = 0; i < 3; i++) for (const v of checks[i]) {
+        ctx.strokeStyle = fail[i] ? C.red : C.grid; ctx.lineWidth = fail[i] ? 2 : 1.2;
+        ctx.beginPath(); ctx.moveTo(vx(v), vY - 13); ctx.lineTo(cx(i), cY + 15); ctx.stroke();
+      }
+      // check nodes (squares)
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = C.box; ctx.strokeStyle = fail[i] ? C.red : C.teal; ctx.lineWidth = 2.2;
+        ctx.fillRect(cx(i) - 16, cY - 16, 32, 32); ctx.strokeRect(cx(i) - 16, cY - 16, 32, 32);
+        ctx.fillStyle = fail[i] ? C.red : C.teal; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(fail[i] ? '1' : '0', cx(i), cY + 5);
+        ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.fillText('c' + i, cx(i), cY - 22);
+      }
+      // variable nodes (circles)
+      for (let i = 0; i < 7; i++) {
+        const on = (i === errV);
+        ctx.fillStyle = C.box; ctx.strokeStyle = on ? C.red : C.blue; ctx.lineWidth = on ? 3 : 2;
+        ctx.beginPath(); ctx.arc(vx(i), vY, 13, 0, TAU); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = on ? C.red : C.text; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(on ? '1' : '0', vx(i), vY + 4);
+        ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.fillText('v' + i, vx(i), vY + 28);
+      }
+      // labels + syndrome readout
+      ctx.textAlign = 'left'; ctx.font = '10px sans-serif';
+      ctx.fillStyle = C.teal; ctx.fillText('check nodes = parity equations', cx(0) - 16, cY - 34);
+      ctx.fillStyle = C.blue; ctx.fillText('variable nodes = received bits', vx(0) - 2, vY + 44);
+      const synd = (fail[2] ? 4 : 0) + (fail[1] ? 2 : 0) + (fail[0] ? 1 : 0);
+      const sbits = (fail[2] ? '1' : '0') + (fail[1] ? '1' : '0') + (fail[0] ? '1' : '0');
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif';
+      ctx.fillText('syndrome s = ' + sbits + '  (= ' + synd + ')', 12, 18);
+      ctx.fillStyle = (errCol === 0) ? C.teal : C.orange; ctx.font = '11px sans-serif';
+      ctx.fillText(errCol === 0
+        ? 'no error: all checks satisfied (s = 000) -> valid codeword'
+        : 'nonzero syndrome ' + synd + ' points straight at the errored bit v' + errV + ' (column ' + errCol + ')', 12, 34);
+    }
+    draw();
+    slider(card.controls, { label: 'bit in error', min: 0, max: 7, step: 1, value: 3, fmt: v => (v === 0 ? 'none' : 'v' + (v - 1)) }, v => { errCol = Math.round(v); draw(); });
+  };
+
   // Turbo encoder block diagram
   T.turboEncoder = function (host, spec) {
     const { ctx, w, h } = makeCard(host, spec, 540, 240);
@@ -2987,6 +3039,11 @@ const FIG = (function () {
       { type: 'isiPulses', title: 'Where ISI comes from — and why it vanishes on-time', caption: 'Slide the timing offset: on-time the neighbours null out; off-time they contaminate the sample.', explain: EX('<b>What it shows:</b> five overlapping raised-cosine symbol pulses (grey) and their sum (blue), sampled at the marked instants. <b>Try:</b> at offset 0 every neighbour crosses zero at the centre sample, so ISI is exactly 0 — that IS the Nyquist criterion. Nudge the offset and ISI appears; raise the roll-off α and the same offset hurts less, which is what excess bandwidth buys you.') },
       { type: 'eyeDiagram', title: 'ISI seen as eye closure', caption: 'Every overlaid trace is a symbol; ISI is what closes the eye.', explain: EX('<b>What it shows:</b> the eye diagram — the practical instrument for measuring ISI. <b>Why it matters:</b> the vertical opening is your noise margin and the horizontal opening your timing margin; peak distortion D shrinks both, which is exactly the penalty the equations quantify.') },
       { type: 'raisedCosine', title: 'The Nyquist pulse that fixes it', caption: 'Roll-off α trades excess bandwidth for gentler tails and timing tolerance.', explain: EX('<b>What it shows:</b> the raised-cosine family whose zero crossings sit at every nT. <b>Try:</b> α→0 approaches the minimum Nyquist bandwidth Rs/2 but with slowly-decaying 1/t tails (brutally timing-sensitive); larger α costs bandwidth (1+α)Rs/2 and buys robustness.') }
+    ],
+    'tanner-graph': [
+      { type: 'tannerDecode', title: 'Decoding on the graph — slide the errored bit', caption: 'Flip any bit of a (7,4) Hamming word and watch the parity checks fail and the syndrome locate it.', explain: EX('<b>What it shows:</b> the bipartite Tanner graph — variable (bit) nodes below, check (parity) nodes above, an edge wherever H has a 1. <b>Try:</b> move the error to any bit: exactly the checks touching it turn red, and the 3-bit syndrome reads out the error’s column number. That is message passing at its simplest — each check just reports whether its neighbours XOR to zero.') },
+      { type: 'tannerGraph', title: 'The structure a parity-check matrix draws', caption: 'Every 1 in H is an edge; sparse H (LDPC) → few edges → cheap decoding.', explain: EX('<b>What it shows:</b> the general variable↔check wiring. <b>Why it matters:</b> the graph IS the code — belief-propagation messages flow along these edges until every parity check is satisfied, and keeping it sparse (low-density) is exactly what makes near-capacity LDPC decoding affordable.') },
+      { type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Why it is worth it: coding gain', caption: 'Iterative message passing on the graph buys several dB of coding gain.', explain: EX('<b>What it shows:</b> the BER curve shifting left once the graph is decoded. <b>Why it matters:</b> LDPC/turbo codes decoded by message passing on their Tanner graph come within a fraction of a dB of the Shannon limit — the payoff for all this graph machinery.') }
     ],
     'bpsk-vs-dbpsk': [
       { type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'BPSK vs DBPSK BER', caption: 'The horizontal gap between the curves is the ~1 dB differential-detection penalty.', explain: EX('<b>What it shows:</b> coherent BPSK Q(√(2Eb/N0)) (teal) against DBPSK ½e^(−Eb/N0) (orange). <b>Try:</b> at any target BER the curves sit ~0.8–1 dB apart — the exact price DBPSK pays for skipping carrier recovery.') },
