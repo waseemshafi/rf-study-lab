@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v40';
+const CACHE = 'rfstudy-v41';
 
 const ASSETS = [
   './',
@@ -32,6 +32,7 @@ const ASSETS = [
   'dummies-fft-bin.js',
   'dummies-intersymbol-interference.js',
   'dummies-tanner-graph.js',
+  'dummies-polar-codes.js',
   'figures.js',
   'figures-extra.js',
   'manifest.webmanifest',
@@ -91,6 +92,7 @@ const ASSETS = [
   'topics/fft-bin.js',
   'topics/intersymbol-interference.js',
   'topics/tanner-graph.js',
+  'topics/polar-codes.js',
   'derivations/fundamentals.js',
   'derivations/signals-systems.js',
   'derivations/modulation-detection.js',
@@ -132,6 +134,7 @@ const ASSETS = [
   'code/fft-bin.js',
   'code/intersymbol-interference.js',
   'code/tanner-graph.js',
+  'code/polar-codes.js',
   'vendor/mathjax/tex-svg.js',
   'icons/icon-192.png',
   'icons/icon-512.png',

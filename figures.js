@@ -2158,6 +2158,47 @@ const FIG = (function () {
     slider(card.controls, { label: 'bit in error', min: 0, max: 7, step: 1, value: 3, fmt: v => (v === 0 ? 'none' : 'v' + (v - 1)) }, v => { errCol = Math.round(v); draw(); });
   };
 
+  // Channel polarization (Arikan) for a BEC: sorted synthetic-channel capacities snap toward a 0/1 step.
+  T.polarize = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    let n = 4, eps = 0.5;
+    function caps() {                                  // BEC recursion: Z- = 2z-z^2, Z+ = z^2
+      let z = [eps];
+      for (let l = 0; l < n; l++) { const nx = []; for (const q of z) { nx.push(2 * q - q * q); nx.push(q * q); } z = nx; }
+      return z.map(q => 1 - q).sort((a, b) => a - b);   // capacities, ascending
+    }
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const c = caps(), N = c.length;
+      const ax = drawAxes(ctx, box, { xr: [0, 1], yr: [0, 1], xlabel: 'synthetic channels (sorted by reliability)', ylabel: 'capacity  I(W_N)' });
+      // shaded "good channel" region (capacity > 0.5)
+      ctx.strokeStyle = C.grid; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(0.5)); ctx.lineTo(ax.x + ax.w, ax.fy(0.5)); ctx.stroke(); ctx.setLineDash([]);
+      // step plot of sorted capacities
+      const pts = []; for (let i = 0; i < N; i++) { const x = (i + 0.5) / N; pts.push([x, c[i]]); }
+      // draw as filled steps
+      ctx.fillStyle = 'rgba(77,171,247,0.25)';
+      ctx.beginPath(); ctx.moveTo(ax.fx(0), ax.fy(0));
+      for (let i = 0; i < N; i++) { const x0 = i / N, x1 = (i + 1) / N; ctx.lineTo(ax.fx(x0), ax.fy(c[i])); ctx.lineTo(ax.fx(x1), ax.fy(c[i])); }
+      ctx.lineTo(ax.fx(1), ax.fy(0)); ctx.closePath(); ctx.fill();
+      line(ctx, ax, pts, C.blue, 2.2);
+      const good = c.filter(v => v > 0.5).length;
+      const mean = c.reduce((a, b) => a + b, 0) / N;
+      // mark the info/frozen split
+      const xs = ax.fx(1 - good / N);
+      ctx.strokeStyle = C.orange; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(xs, ax.y); ctx.lineTo(xs, ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('frozen', ax.x + 6, ax.fy(0.5) + 22); ctx.fillStyle = C.teal; ctx.fillText('info bits →', xs + 4, ax.fy(0.5) - 8);
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif';
+      ctx.fillText('N = 2^' + n + ' = ' + N + ',  channel I(W) = 1−ε = ' + (1 - eps).toFixed(2), ax.x + 8, ax.y + 15);
+      ctx.fillStyle = C.teal; ctx.font = '11px sans-serif';
+      ctx.fillText(good + ' of ' + N + ' channels are near-noiseless (mean capacity ' + mean.toFixed(3) + ' = 1−ε — conserved)', ax.x + 8, ax.y + 33);
+    }
+    draw();
+    slider(card.controls, { label: 'block length', min: 1, max: 9, step: 1, value: 4, fmt: v => 'N = ' + (1 << v) }, v => { n = Math.round(v); draw(); });
+    slider(card.controls, { label: 'channel erasure ε', min: 0.1, max: 0.9, step: 0.05, value: 0.5, fmt: v => v.toFixed(2) }, v => { eps = v; draw(); });
+  };
+
   // Turbo encoder block diagram
   T.turboEncoder = function (host, spec) {
     const { ctx, w, h } = makeCard(host, spec, 540, 240);
@@ -3044,6 +3085,10 @@ const FIG = (function () {
       { type: 'tannerDecode', title: 'Decoding on the graph — slide the errored bit', caption: 'Flip any bit of a (7,4) Hamming word and watch the parity checks fail and the syndrome locate it.', explain: EX('<b>What it shows:</b> the bipartite Tanner graph — variable (bit) nodes below, check (parity) nodes above, an edge wherever H has a 1. <b>Try:</b> move the error to any bit: exactly the checks touching it turn red, and the 3-bit syndrome reads out the error’s column number. That is message passing at its simplest — each check just reports whether its neighbours XOR to zero.') },
       { type: 'tannerGraph', title: 'The structure a parity-check matrix draws', caption: 'Every 1 in H is an edge; sparse H (LDPC) → few edges → cheap decoding.', explain: EX('<b>What it shows:</b> the general variable↔check wiring. <b>Why it matters:</b> the graph IS the code — belief-propagation messages flow along these edges until every parity check is satisfied, and keeping it sparse (low-density) is exactly what makes near-capacity LDPC decoding affordable.') },
       { type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Why it is worth it: coding gain', caption: 'Iterative message passing on the graph buys several dB of coding gain.', explain: EX('<b>What it shows:</b> the BER curve shifting left once the graph is decoded. <b>Why it matters:</b> LDPC/turbo codes decoded by message passing on their Tanner graph come within a fraction of a dB of the Shannon limit — the payoff for all this graph machinery.') }
+    ],
+    'polar-codes': [
+      { type: 'polarize', title: 'Channel polarization — where the code comes from', caption: 'Grow the block length: the synthetic-channel capacities snap toward 0 (frozen) or 1 (info).', explain: EX('<b>What it shows:</b> Arıkan’s recursion turns N copies of a channel into N synthetic channels whose capacities polarize. <b>Try:</b> increase N and the sorted-capacity curve sharpens into a step; the near-noiseless channels (right of the line) carry information bits, the rest are frozen. The mean stays at 1−ε — polarization conserves capacity, it just redistributes it.') },
+      { type: 'berCurve', series: [{ name: 'bpsk' }, { name: 'coded' }], title: 'Why CA-SCL wins at short blocks', caption: 'The CRC-aided list decoder pulls the curve well left of uncoded.', explain: EX('<b>What it shows:</b> the coding-gain shift. <b>Why it matters:</b> plain SC decoding is only mediocre at practical lengths; an SC-List of L paths plus a CRC to pick the survivor (CA-SCL) is what makes polar codes competitive — exactly why 5G NR uses them for its short, critical control channels.') }
     ],
     'bpsk-vs-dbpsk': [
       { type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'BPSK vs DBPSK BER', caption: 'The horizontal gap between the curves is the ~1 dB differential-detection penalty.', explain: EX('<b>What it shows:</b> coherent BPSK Q(√(2Eb/N0)) (teal) against DBPSK ½e^(−Eb/N0) (orange). <b>Try:</b> at any target BER the curves sit ~0.8–1 dB apart — the exact price DBPSK pays for skipping carrier recovery.') },
