@@ -2229,6 +2229,30 @@ const FIG = (function () {
     slider(card.controls, { label: 'probability p', min: 0, max: 1, step: 0.01, value: 0.11, fmt: v => v.toFixed(2) }, draw);
   };
 
+  // Polar decoder families: illustrative BER trend for SC / SCL(L) / CA-SCL vs Eb/N0, list-size slider
+  T.polarDecoders = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    let Lv = 8;
+    const gainSCL = L => 3.5 + 1.2 * (1 - 1 / L);          // stylized coding gain (dB): grows, saturates
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = plotBox(w, h);
+      const ax = drawAxes(ctx, box, { xr: [0, 8], yr: [1e-6, 0.5], logy: true, xlabel: 'Eb/N0 (dB)', ylabel: 'BER (illustrative)', ytickfmt: t => t.toExponential(0).replace('e-0', 'e-') });
+      function curve(gainDB, color, wd) { const pts = []; for (let d = 0; d <= 8; d += 0.2) pts.push([d, Math.max(Q(Math.sqrt(2 * lin(d + gainDB))), 1e-7)]); line(ctx, ax, pts, color, wd); }
+      curve(0, C.dim, 1.8);                                 // uncoded BPSK
+      curve(gainSCL(Lv), C.blue, 2.2);                      // SCL(L)
+      curve(gainSCL(Lv) + (Lv > 1 ? 0.8 : 0), C.teal, 2.6); // CA-SCL(L)  (CRC needs a list, so L>1)
+      legend(ctx, box, [{ label: 'uncoded', color: C.dim }, { label: 'SCL (L=' + Lv + ')', color: C.blue }, { label: 'CA-SCL', color: C.teal }]);
+      ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+      ctx.fillStyle = C.text; ctx.font = '12px sans-serif';
+      ctx.fillText('list size L = ' + Lv + (Lv === 1 ? '  (plain SC)' : ''), ax.x + 8, ax.y + 15);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('illustrative trend, not exact', ax.x + 8, ax.y + 33);
+    }
+    draw();
+    slider(card.controls, { label: 'list size L', min: 0, max: 5, step: 1, value: 3, fmt: v => 'L = ' + (1 << v) }, v => { Lv = 1 << Math.round(v); draw(); });
+  };
+
   // Turbo encoder block diagram
   T.turboEncoder = function (host, spec) {
     const { ctx, w, h } = makeCard(host, spec, 540, 240);
@@ -3124,6 +3148,11 @@ const FIG = (function () {
       { type: 'binaryEntropy', title: 'Entropy: the measure of uncertainty', caption: 'Slide p — H(p) peaks at 1 bit when the coin is fair, and vanishes when the outcome is certain.', explain: EX('<b>What it shows:</b> the binary entropy H(p) = −p·log₂p − (1−p)·log₂(1−p) (blue) and the BSC capacity 1−H(p) (teal). <b>Try:</b> at p=0.5 uncertainty is maximal (1 bit) and the noisy channel carries nothing; push p toward 0 or 1 and the outcome becomes predictable — no information — while the channel becomes reliable again.') },
       { type: 'capacity', title: 'Channel capacity C = max I(X;Y)', caption: 'For the AWGN channel this is Shannon’s C = B·log₂(1+SNR).', explain: EX('<b>What it shows:</b> the ceiling on reliable rate. <b>Why it matters:</b> capacity is the maximum of the mutual information over input distributions; the noisy-channel coding theorem says any rate below C is achievable with arbitrarily low error, and nothing above C is — the promise every FEC scheme chases.') },
       { type: 'entropyCoding', title: 'The source-coding limit', caption: 'You cannot losslessly compress below H bits per symbol on average.', explain: EX('<b>What it shows:</b> assigning shorter codewords to likelier symbols. <b>Why it matters:</b> entropy H(X) is the hard floor on average bits/symbol for lossless compression — the other half of Shannon’s framework, the flip side of channel capacity.') }
+    ],
+    'polar-codes-general': [
+      { type: 'polarize', title: 'The engine: channel polarization', caption: 'Grow N and the synthetic-channel capacities split into frozen (0) and info (1).', explain: EX('<b>What it shows:</b> the phenomenon every polar code is built on — combine and split N channels and their capacities polarize. <b>Try:</b> increase N; the curve sharpens into a step and the good channels (right of the line) become the information set, the rest are frozen. Construction (Bhattacharyya / Gaussian-approx / 5G sequence) is just how you rank these channels.') },
+      { type: 'polarDecoders', title: 'The decoder family, at a glance', caption: 'Slide the list size L: SCL improves with L, and the CRC (CA-SCL) adds a further step.', explain: EX('<b>What it shows:</b> an illustrative BER trend for the decoding families. <b>Try:</b> at L=1 you have plain SC; raise L and SCL moves left with diminishing returns; CA-SCL (CRC picks the survivor) sits furthest left. This is the SC → SCL → CA-SCL story that makes polar codes practical — the sibling topic drills into the CA-SCL internals.') },
+      { type: 'capacity', title: 'What it provably reaches', caption: 'Polar codes were the first codes proven to achieve channel capacity.', explain: EX('<b>What it shows:</b> the capacity ceiling. <b>Why it matters:</b> Arıkan’s result is that as N→∞ polar codes achieve the symmetric capacity of any binary-input memoryless channel with O(N log N) encode/decode — the first explicit, low-complexity construction to do so.') }
     ],
     'bpsk-vs-dbpsk': [
       { type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'BPSK vs DBPSK BER', caption: 'The horizontal gap between the curves is the ~1 dB differential-detection penalty.', explain: EX('<b>What it shows:</b> coherent BPSK Q(√(2Eb/N0)) (teal) against DBPSK ½e^(−Eb/N0) (orange). <b>Try:</b> at any target BER the curves sit ~0.8–1 dB apart — the exact price DBPSK pays for skipping carrier recovery.') },

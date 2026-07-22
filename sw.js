@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v42';
+const CACHE = 'rfstudy-v43';
 
 const ASSETS = [
   './',
@@ -34,6 +34,7 @@ const ASSETS = [
   'dummies-tanner-graph.js',
   'dummies-polar-codes.js',
   'dummies-information-theory.js',
+  'dummies-polar-codes-general.js',
   'figures.js',
   'figures-extra.js',
   'manifest.webmanifest',
@@ -95,6 +96,7 @@ const ASSETS = [
   'topics/tanner-graph.js',
   'topics/polar-codes.js',
   'topics/information-theory.js',
+  'topics/polar-codes-general.js',
   'derivations/fundamentals.js',
   'derivations/signals-systems.js',
   'derivations/modulation-detection.js',
@@ -138,6 +140,7 @@ const ASSETS = [
   'code/tanner-graph.js',
   'code/polar-codes.js',
   'code/information-theory.js',
+  'code/polar-codes-general.js',
   'vendor/mathjax/tex-svg.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
