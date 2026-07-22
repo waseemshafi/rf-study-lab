@@ -2253,6 +2253,113 @@ const FIG = (function () {
     slider(card.controls, { label: 'list size L', min: 0, max: 5, step: 1, value: 3, fmt: v => 'L = ' + (1 << v) }, v => { Lv = 1 << Math.round(v); draw(); });
   };
 
+  // 5G NR scalable numerology: slide μ → subcarrier spacing 15·2^μ kHz, slot 1ms/2^μ, frame packing
+  T.numerology = function (host, spec) {
+    const card = makeCard(host, spec, 520, 340);
+    let mu = 0;
+    // 3GPP TS 38.211 numerologies μ = 0..4
+    const bands = [
+      { fr: 'FR1 (sub-6 GHz)', use: 'eMBB data · LTE-compatible' },
+      { fr: 'FR1 (sub-6 GHz)', use: 'common FR1 data carrier' },
+      { fr: 'FR1 & FR2', use: 'optional · URLLC low latency' },
+      { fr: 'FR2 (mmWave)', use: 'mmWave wideband data' },
+      { fr: 'FR2 (mmWave)', use: 'SSB / sync only (not data)' }
+    ];
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const b = bands[mu];
+      const scs = 15 * (1 << mu);          // subcarrier spacing, kHz
+      const slots = 1 << mu;               // slots per 1 ms subframe
+      const slotUs = 1000 / slots;         // slot duration, µs
+      const symUs = slotUs / 14;           // OFDM symbol incl. CP, µs (14 symbols/slot, normal CP)
+      const usefulUs = 1000 / scs;         // useful symbol time 1/Δf, µs (scs in kHz)
+      // header
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = C.text; ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('numerology  μ = ' + mu + '     ·     subcarrier spacing Δf = ' + scs + ' kHz', 16, 22);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('one 1 ms subframe = 2^μ = ' + slots + ' slot' + (slots > 1 ? 's' : '') + ' · 14 OFDM symbols per slot', 16, 40);
+      // timeline bar (1 ms subframe)
+      const bx = 40, bw = w - 40 - 24, by = 60, bh = 42;
+      for (let s = 0; s < slots; s++) {
+        const x0 = bx + bw * s / slots, sw = bw / slots;
+        ctx.fillStyle = (s % 2 === 0) ? 'rgba(77,171,247,0.32)' : 'rgba(99,230,190,0.24)';
+        ctx.fillRect(x0, by, sw, bh);
+        ctx.strokeStyle = C.dim; ctx.lineWidth = 1; ctx.strokeRect(x0, by, sw, bh);
+        if (sw > 46) {                     // draw the 14 OFDM-symbol subdivisions when there is room
+          ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+          for (let k = 1; k < 14; k++) { const xk = x0 + sw * k / 14; ctx.beginPath(); ctx.moveTo(xk, by + 4); ctx.lineTo(xk, by + bh - 4); ctx.stroke(); }
+        }
+      }
+      if (slots <= 4) {                    // per-slot labels only when they fit
+        ctx.fillStyle = C.text; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+        for (let s = 0; s < slots; s++) ctx.fillText('slot ' + s, bx + bw * (s + 0.5) / slots, by + bh / 2 + 3);
+      }
+      // time axis under the bar
+      ctx.strokeStyle = C.dim; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(bx, by + bh + 7); ctx.lineTo(bx + bw, by + bh + 7); ctx.stroke();
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      [0, 250, 500, 750, 1000].forEach(t => { const px = bx + bw * t / 1000; ctx.beginPath(); ctx.moveTo(px, by + bh + 4); ctx.lineTo(px, by + bh + 10); ctx.stroke(); ctx.fillText(t + ' µs', px, by + bh + 13); });
+      // parameter table
+      ctx.textBaseline = 'alphabetic';
+      const rows = [
+        ['subcarrier spacing  Δf = 15·2^μ', scs + ' kHz'],
+        ['slot duration  = 1 ms / 2^μ', (Number.isInteger(slotUs) ? slotUs : slotUs.toFixed(1)) + ' µs'],
+        ['slots per 1 ms subframe', String(slots)],
+        ['OFDM symbol (incl. CP) = slot/14', symUs.toFixed(2) + ' µs'],
+        ['useful symbol  1/Δf', usefulUs.toFixed(2) + ' µs'],
+        ['frequency range', b.fr],
+        ['typical use', b.use]
+      ];
+      const tx = 40, ty = 146, rh = 25;
+      rows.forEach((r, i) => {
+        const y = ty + i * rh;
+        ctx.fillStyle = C.dim; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(r[0], tx, y);
+        ctx.fillStyle = C.teal; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(r[1], w - 24, y);
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tx, y + 7); ctx.lineTo(w - 24, y + 7); ctx.stroke();
+      });
+    }
+    draw();
+    slider(card.controls, { label: 'numerology μ', min: 0, max: 4, step: 1, value: 0, fmt: v => 'μ = ' + v + '  (Δf = ' + (15 * (1 << v)) + ' kHz)' }, v => { mu = Math.round(v); draw(); });
+  };
+
+  // Massive-MIMO beamforming: N-element λ/2 ULA array factor, steerable main beam
+  T.beamSteer = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    let N = 16, th0 = 30;
+    function AFdB(thDeg) {
+      const psi = Math.PI * (Math.sin(thDeg * Math.PI / 180) - Math.sin(th0 * Math.PI / 180)); // d = λ/2
+      const den = Math.sin(psi / 2);
+      const af = (Math.abs(den) < 1e-9) ? 1 : Math.sin(N * psi / 2) / (N * den);
+      return Math.max(20 * Math.log10(Math.abs(af) + 1e-12), -30);
+    }
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = { x: M.left, y: 48, w: w - M.left - M.right, h: h - 48 - M.bottom };
+      const ax = drawAxes(ctx, box, { xr: [-90, 90], yr: [-30, 2], xticks: [-90, -60, -30, 0, 30, 60, 90], xlabel: 'angle θ (deg)', ylabel: 'array response (dB)' });
+      // first-sidelobe reference line (−13.2 dB for a uniform array)
+      ctx.strokeStyle = C.grid; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(-13.2)); ctx.lineTo(ax.x + ax.w, ax.fy(-13.2)); ctx.stroke(); ctx.setLineDash([]);
+      // steering marker
+      ctx.strokeStyle = C.orange; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(ax.fx(th0), ax.y); ctx.lineTo(ax.fx(th0), ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      // array factor
+      const pts = []; for (let t = -90; t <= 90; t += 0.35) pts.push([t, AFdB(t)]); line(ctx, ax, pts, C.blue, 2);
+      // header
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = C.text; ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('N = ' + N + ' elements  ·  beam steered to ' + th0 + '°', 16, 22);
+      const gain = 10 * Math.log10(N), hpbw = 102 / N, hpbwS = 102 / (N * Math.cos(th0 * Math.PI / 180));
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('array gain 10·log10(N) = ' + gain.toFixed(1) + ' dB   ·   HPBW ≈ 102/N = ' + hpbw.toFixed(1) + '° (→ ' + hpbwS.toFixed(1) + '° when steered)', 16, 40);
+      // labels
+      ctx.fillStyle = C.dim; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+      ctx.fillText('first sidelobe ≈ −13.2 dB', ax.x + ax.w - 6, ax.fy(-13.2) - 4);
+      ctx.fillStyle = C.orange; ctx.textAlign = 'center'; ctx.font = '10px sans-serif';
+      ctx.fillText('beam → ' + th0 + '°', ax.fx(th0), ax.y + 11);
+    }
+    draw();
+    slider(card.controls, { label: 'array elements N', min: 2, max: 64, step: 1, value: 16, fmt: v => Math.round(v) + '  (λ/2 spaced)' }, v => { N = Math.round(v); draw(); });
+    slider(card.controls, { label: 'steering angle θ0', min: -60, max: 60, step: 1, value: 30, fmt: v => Math.round(v) + '°' }, v => { th0 = Math.round(v); draw(); });
+  };
+
   // Turbo encoder block diagram
   T.turboEncoder = function (host, spec) {
     const { ctx, w, h } = makeCard(host, spec, 540, 240);
@@ -3153,6 +3260,11 @@ const FIG = (function () {
       { type: 'polarize', title: 'The engine: channel polarization', caption: 'Grow N and the synthetic-channel capacities split into frozen (0) and info (1).', explain: EX('<b>What it shows:</b> the phenomenon every polar code is built on — combine and split N channels and their capacities polarize. <b>Try:</b> increase N; the curve sharpens into a step and the good channels (right of the line) become the information set, the rest are frozen. Construction (Bhattacharyya / Gaussian-approx / 5G sequence) is just how you rank these channels.') },
       { type: 'polarDecoders', title: 'The decoder family, at a glance', caption: 'Slide the list size L: SCL improves with L, and the CRC (CA-SCL) adds a further step.', explain: EX('<b>What it shows:</b> an illustrative BER trend for the decoding families. <b>Try:</b> at L=1 you have plain SC; raise L and SCL moves left with diminishing returns; CA-SCL (CRC picks the survivor) sits furthest left. This is the SC → SCL → CA-SCL story that makes polar codes practical — the sibling topic drills into the CA-SCL internals.') },
       { type: 'capacity', title: 'What it provably reaches', caption: 'Polar codes were the first codes proven to achieve channel capacity.', explain: EX('<b>What it shows:</b> the capacity ceiling. <b>Why it matters:</b> Arıkan’s result is that as N→∞ polar codes achieve the symmetric capacity of any binary-input memoryless channel with O(N log N) encode/decode — the first explicit, low-complexity construction to do so.') }
+    ],
+    '5g': [
+      { type: 'numerology', title: 'Scalable OFDM numerology', caption: 'Slide μ: subcarrier spacing Δf = 15·2^μ kHz and the slot shrinks to 1 ms / 2^μ.', explain: EX('<b>What it shows:</b> the one knob that makes 5G NR flexible — the numerology μ. <b>Try:</b> raise μ and each 1 ms subframe packs 2^μ ever-shorter slots (still 14 OFDM symbols each), so the wider subcarrier spacing at mmWave (FR2) buys shorter slots and lower latency; μ=0 (15 kHz) is the LTE-compatible sub-6 GHz case. This scalable frame structure — one number spanning 15→240 kHz — is the heart of NR’s waveform.') },
+      { type: 'beamSteer', title: 'Massive-MIMO beamforming', caption: 'An N-element λ/2 array steers a narrow beam; more elements → more gain, tighter beam.', explain: EX('<b>What it shows:</b> the array factor of a uniform linear array — the mechanism behind 5G massive MIMO and mmWave beamforming. <b>Try:</b> raise N and the main lobe narrows (HPBW ≈ 102/N°) while the array gain climbs 10·log10(N) dB; sweep the steering angle to point the beam electronically. That directive gain is exactly what overcomes mmWave path loss and lets many users be spatially multiplexed.') },
+      { type: 'capacity', title: 'Spectral efficiency & the Shannon limit', caption: 'Wider bandwidth and higher SNR (via beamforming) both lift the achievable rate.', explain: EX('<b>What it shows:</b> Shannon’s C = B·log₂(1+SNR), the ceiling 5G chases with wide FR2 bandwidth, 256-QAM and MIMO. <b>Why it matters:</b> peak rate scales with bandwidth (up to 400 MHz per FR2 carrier) and with spatial layers (MIMO multiplies capacity by min(Nt,Nr)); every 5G feature — mmWave spectrum, massive MIMO, dense reuse — is a way to push B, SNR, or the layer count in this formula.') }
     ],
     'bpsk-vs-dbpsk': [
       { type: 'berCurve', series: [{ name: 'coh8' }, { name: 'dbpsk' }], title: 'BPSK vs DBPSK BER', caption: 'The horizontal gap between the curves is the ~1 dB differential-detection penalty.', explain: EX('<b>What it shows:</b> coherent BPSK Q(√(2Eb/N0)) (teal) against DBPSK ½e^(−Eb/N0) (orange). <b>Try:</b> at any target BER the curves sit ~0.8–1 dB apart — the exact price DBPSK pays for skipping carrier recovery.') },

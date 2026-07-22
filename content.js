@@ -37,7 +37,8 @@ const CONTENT = {
     'SDR & Data Converters',
     'Interfaces & Protocols',
     'RF Link & Metrics',
-    'Antennas & Electromagnetics'
+    'Antennas & Electromagnetics',
+    'Wireless Systems'
   ],
   // Canonical display order (nav sorts by this within each category).
   topicOrder: [
@@ -52,7 +53,8 @@ const CONTENT = {
     'sdr', 'adc', 'dac', 'ad9361', 'rfsoc',
     'rs232', 'rs422', 'rs485', 'lvds', 'spi', 'axi', 'mil-std-1553',
     'rssi', 'path-loss', 'link-budget', 'sensitivity', 'ranging',
-    'antenna', 'antenna-gain', 'antenna-beamwidth', 'polarization', 'antenna-types', 'maxwell'
+    'antenna', 'antenna-gain', 'antenna-beamwidth', 'polarization', 'antenna-types', 'maxwell',
+    '5g'
   ],
   topics: []
 };
