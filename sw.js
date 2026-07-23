@@ -1,6 +1,6 @@
 /* Service worker: offline app-shell caching.
    Bump CACHE when you change any cached file so clients update. */
-const CACHE = 'rfstudy-v44';
+const CACHE = 'rfstudy-v45';
 
 const ASSETS = [
   './',
@@ -36,6 +36,7 @@ const ASSETS = [
   'dummies-information-theory.js',
   'dummies-polar-codes-general.js',
   'dummies-5g.js',
+  'dummies-short-ldpc.js',
   'figures.js',
   'figures-extra.js',
   'manifest.webmanifest',
@@ -99,6 +100,7 @@ const ASSETS = [
   'topics/information-theory.js',
   'topics/polar-codes-general.js',
   'topics/5g.js',
+  'topics/short-ldpc.js',
   'derivations/fundamentals.js',
   'derivations/signals-systems.js',
   'derivations/modulation-detection.js',
@@ -144,6 +146,7 @@ const ASSETS = [
   'code/information-theory.js',
   'code/polar-codes-general.js',
   'code/5g.js',
+  'code/short-ldpc.js',
   'vendor/mathjax/tex-svg.js',
   'icons/icon-192.png',
   'icons/icon-512.png',

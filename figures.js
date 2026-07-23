@@ -27,6 +27,8 @@ const FIG = (function () {
   }
   const dB = x => 10 * Math.log10(x);
   const lin = d => Math.pow(10, d / 10);
+  // inverse Gaussian Q-function via bisection (Q is monotone-decreasing in x)
+  function Qinv(p) { let lo = -8, hi = 8; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (Q(m) > p) lo = m; else hi = m; } return (lo + hi) / 2; }
 
   /* ---- formatting & ticks ---- */
   function fmt(v) {
@@ -2360,6 +2362,75 @@ const FIG = (function () {
     slider(card.controls, { label: 'steering angle θ0', min: -60, max: 60, step: 1, value: 30, fmt: v => Math.round(v) + '°' }, v => { th0 = Math.round(v); draw(); });
   };
 
+  // Finite-blocklength achievable rate vs blocklength (normal approximation) — the short-packet penalty
+  T.fblRate = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    let snrdB = 0, negLogEps = 3;                       // ε = 10^(-negLogEps)
+    const capf = s => 0.5 * Math.log2(1 + s);           // real-AWGN capacity, bits/use
+    const dispf = s => (s * (s + 2)) / (2 * (1 + s) * (1 + s)) * Math.pow(Math.LOG2E, 2); // dispersion V
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = { x: M.left, y: 46, w: w - M.left - M.right, h: h - 46 - M.bottom };
+      const snr = lin(snrdB), Cap = capf(snr), Vd = dispf(snr), eps = Math.pow(10, -negLogEps), qi = Qinv(eps);
+      const Rstar = n => Math.max(0, Cap - Math.sqrt(Vd / n) * qi + Math.log2(n) / (2 * n));
+      const ax = drawAxes(ctx, box, { xr: [16, 16384], yr: [0, Math.max(0.1, Cap * 1.2)], logx: true, xticks: [16, 64, 256, 1024, 4096, 16384], xlabel: 'blocklength n (channel uses)', ylabel: 'rate R (bits/use)' });
+      // capacity ceiling
+      ctx.strokeStyle = C.orange; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(Cap)); ctx.lineTo(ax.x + ax.w, ax.fy(Cap)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.orange; ctx.font = '10px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText('capacity C = ' + Cap.toFixed(3), ax.x + 6, ax.fy(Cap) - 4);
+      // R*(n) curve
+      const pts = []; for (let e = Math.log10(16); e <= Math.log10(16384) + 1e-9; e += 0.03) { const n = Math.pow(10, e); pts.push([n, Rstar(n)]); }
+      line(ctx, ax, pts, C.blue, 2.4);
+      // short-packet marker at n=128
+      const nM = 128, r128 = Rstar(nM);
+      ctx.strokeStyle = C.grid; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(ax.fx(nM), ax.y); ctx.lineTo(ax.fx(nM), ax.y + ax.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = C.teal; ctx.beginPath(); ctx.arc(ax.fx(nM), ax.fy(r128), 4, 0, TAU); ctx.fill();
+      // header
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = C.text; ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('SNR = ' + snrdB.toFixed(1) + ' dB  ·  target BLER ε = 1e-' + negLogEps, 16, 22);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      const pen = Cap > 0 ? 100 * (1 - r128 / Cap) : 0;
+      ctx.fillText('R*(n) = C − √(V/n)·Q⁻¹(ε) + log₂n/2n   ·   at n=128:  R* = ' + r128.toFixed(3) + '  (' + pen.toFixed(0) + '% below C)', 16, 40);
+    }
+    draw();
+    slider(card.controls, { label: 'channel SNR', min: -6, max: 12, step: 0.5, value: 0, fmt: v => v.toFixed(1) + ' dB' }, v => { snrdB = v; draw(); });
+    slider(card.controls, { label: 'target BLER ε', min: 1, max: 6, step: 1, value: 3, fmt: v => '1e-' + Math.round(v) }, v => { negLogEps = Math.round(v); draw(); });
+  };
+
+  // Short-code BLER: finite-blocklength waterfall + trapping-set error floor, blocklength slider
+  T.blerWaterfall = function (host, spec) {
+    const card = makeCard(host, spec, 520, 320);
+    let n = 128, floorNeg = 4;                          // floor = 10^(-floorNeg)
+    const R = 0.5;
+    const capf = s => 0.5 * Math.log2(1 + s);
+    const dispf = s => (s * (s + 2)) / (2 * (1 + s) * (1 + s)) * Math.pow(Math.LOG2E, 2);
+    function wf(nn, snrdB) { const s = lin(snrdB), Cap = capf(s), Vd = dispf(s); return Q((Cap - R + Math.log2(nn) / (2 * nn)) / Math.sqrt(Vd / nn)); }
+    function draw() {
+      const { ctx, w, h } = card; clearBg(ctx, w, h);
+      const box = { x: M.left, y: 46, w: w - M.left - M.right, h: h - 46 - M.bottom };
+      const floor = Math.pow(10, -floorNeg);
+      const ax = drawAxes(ctx, box, { xr: [-4, 8], yr: [1e-7, 1], logy: true, xlabel: 'channel SNR  Es/N0 (dB)', ylabel: 'BLER', ytickfmt: t => t.toExponential(0).replace('e-0', 'e-').replace('e+0', 'e') });
+      // long-block reference (n = 8192, no floor) — the steeper, lower waterfall long codes enjoy
+      const ref = []; for (let d = -4; d <= 8; d += 0.1) ref.push([d, Math.max(wf(8192, d), 1e-8)]); line(ctx, ax, ref, C.dim, 1.6);
+      // selected short block: waterfall + additive error floor
+      const cur = []; for (let d = -4; d <= 8; d += 0.1) cur.push([d, Math.max(Math.min(1, wf(n, d) + floor), 1e-8)]); line(ctx, ax, cur, C.blue, 2.4);
+      // floor line
+      ctx.strokeStyle = C.red; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(ax.x, ax.fy(floor)); ctx.lineTo(ax.x + ax.w, ax.fy(floor)); ctx.stroke(); ctx.setLineDash([]);
+      legend(ctx, box, [{ label: 'n = ' + n + ' (+floor)', color: C.blue }, { label: 'n = 8192 (ref)', color: C.dim }]);
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = C.text; ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('short block  n = ' + n + ',  rate R = 1/2', 16, 22);
+      ctx.fillStyle = C.dim; ctx.font = '11px sans-serif';
+      ctx.fillText('error floor = 1e-' + floorNeg + '   ·   shorter n → shallower waterfall; trapping sets cap it', 16, 40);
+      ctx.fillStyle = C.red; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+      ctx.fillText('error floor', ax.x + ax.w - 6, ax.fy(floor) - 4);
+    }
+    draw();
+    slider(card.controls, { label: 'blocklength n', min: 5, max: 12, step: 1, value: 7, fmt: v => 'n = ' + (1 << Math.round(v)) }, v => { n = 1 << Math.round(v); draw(); });
+    slider(card.controls, { label: 'error floor', min: 2, max: 7, step: 1, value: 4, fmt: v => '1e-' + Math.round(v) }, v => { floorNeg = Math.round(v); draw(); });
+  };
+
   // Turbo encoder block diagram
   T.turboEncoder = function (host, spec) {
     const { ctx, w, h } = makeCard(host, spec, 540, 240);
@@ -3260,6 +3331,11 @@ const FIG = (function () {
       { type: 'polarize', title: 'The engine: channel polarization', caption: 'Grow N and the synthetic-channel capacities split into frozen (0) and info (1).', explain: EX('<b>What it shows:</b> the phenomenon every polar code is built on — combine and split N channels and their capacities polarize. <b>Try:</b> increase N; the curve sharpens into a step and the good channels (right of the line) become the information set, the rest are frozen. Construction (Bhattacharyya / Gaussian-approx / 5G sequence) is just how you rank these channels.') },
       { type: 'polarDecoders', title: 'The decoder family, at a glance', caption: 'Slide the list size L: SCL improves with L, and the CRC (CA-SCL) adds a further step.', explain: EX('<b>What it shows:</b> an illustrative BER trend for the decoding families. <b>Try:</b> at L=1 you have plain SC; raise L and SCL moves left with diminishing returns; CA-SCL (CRC picks the survivor) sits furthest left. This is the SC → SCL → CA-SCL story that makes polar codes practical — the sibling topic drills into the CA-SCL internals.') },
       { type: 'capacity', title: 'What it provably reaches', caption: 'Polar codes were the first codes proven to achieve channel capacity.', explain: EX('<b>What it shows:</b> the capacity ceiling. <b>Why it matters:</b> Arıkan’s result is that as N→∞ polar codes achieve the symmetric capacity of any binary-input memoryless channel with O(N log N) encode/decode — the first explicit, low-complexity construction to do so.') }
+    ],
+    'short-ldpc': [
+      { type: 'fblRate', title: 'The short-packet penalty (finite-blocklength bound)', caption: 'Slide n: the achievable rate crawls up to capacity only as the block grows — short packets pay √(V/n).', explain: EX('<b>What it shows:</b> the finite-blocklength normal approximation R*(n) = C − √(V/n)·Q⁻¹(ε) + log₂n/2n — the real ceiling for a single short packet, well below the Shannon capacity C. <b>Try:</b> at n≈128 the achievable rate can sit ~40% below C; raise the SNR (larger C and V) or relax the target BLER ε and watch the whole curve move. This gap — not the gap to capacity — is what a short LDPC code is actually judged against.') },
+      { type: 'blerWaterfall', title: 'Waterfall and error floor', caption: 'Shorter blocks give a shallower waterfall; trapping sets add an error floor the curve cannot beat.', explain: EX('<b>What it shows:</b> block-error rate vs SNR for a rate-½ code. <b>Try:</b> shrink n and the waterfall (blue) slews right and flattens — exactly the larger √(V/n) back-off of the finite-blocklength curve — while the long-block reference (grey) stays steep. Then raise the error floor: a handful of low-weight trapping sets / absorbing sets clamps the BLER at high SNR, which is the failure mode that dominates short-LDPC design.') },
+      { type: 'tannerDecode', title: 'Why short cycles hurt: decoding on the graph', caption: 'At short lengths there is no room to grow a cycle-free neighbourhood — small cycles correlate the messages.', explain: EX('<b>What it shows:</b> belief propagation reading a syndrome off a small code’s Tanner graph. <b>Why it matters:</b> BP is only exact on a tree; a short block forces short cycles (low girth) and small trapping sets, so the messages become correlated and the decoder stalls — the reason short codes need girth-maximising (PEG/QC) construction and near-ML decoding, not just a good asymptotic threshold.') }
     ],
     '5g': [
       { type: 'numerology', title: 'Scalable OFDM numerology', caption: 'Slide μ: subcarrier spacing Δf = 15·2^μ kHz and the slot shrinks to 1 ms / 2^μ.', explain: EX('<b>What it shows:</b> the one knob that makes 5G NR flexible — the numerology μ. <b>Try:</b> raise μ and each 1 ms subframe packs 2^μ ever-shorter slots (still 14 OFDM symbols each), so the wider subcarrier spacing at mmWave (FR2) buys shorter slots and lower latency; μ=0 (15 kHz) is the LTE-compatible sub-6 GHz case. This scalable frame structure — one number spanning 15→240 kHz — is the heart of NR’s waveform.') },
